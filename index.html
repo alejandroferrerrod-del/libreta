@@ -411,6 +411,30 @@ svg { display: block; }
 .sc-recorder div { background: var(--surface); border-radius: 16px; padding: 26px 30px; display: flex; flex-direction: column; align-items: center; gap: 10px; box-shadow: 0 20px 60px rgba(0,0,0,.35); }
 .sc-recorder svg { width: 34px; height: 34px; color: var(--accent); }
 .sc-recorder small { color: var(--muted); }
+
+/* Recortar imagen */
+.crop-dialog { width: min(760px, 100%); }
+.crop-stage { height: min(52vh, 440px); display: grid; place-items: center; background: var(--desk); border-radius: 10px; padding: 18px; touch-action: none; }
+.crop-box { position: relative; user-select: none; }
+.crop-box img { display: block; width: 100%; height: 100%; pointer-events: none; }
+.crop-shade { position: absolute; inset: 0; background: rgba(0, 0, 0, .5); pointer-events: none; }
+.crop-rect { position: absolute; border: 1.5px solid #fff; box-shadow: 0 0 0 .5px rgba(0,0,0,.4); cursor: move; }
+.crop-rect i { position: absolute; background: rgba(255,255,255,.45); }
+.crop-rect i:nth-child(1) { left: 33.33%; top: 0; bottom: 0; width: 1px; }
+.crop-rect i:nth-child(2) { left: 66.66%; top: 0; bottom: 0; width: 1px; }
+.crop-rect i:nth-child(3) { top: 33.33%; left: 0; right: 0; height: 1px; }
+.crop-rect i:nth-child(4) { top: 66.66%; left: 0; right: 0; height: 1px; }
+.crop-h { position: absolute; width: 18px; height: 18px; margin: -9px 0 0 -9px; border-radius: 50%; background: #fff; box-shadow: 0 1px 4px rgba(0,0,0,.45); z-index: 1; }
+.crop-h.tl, .crop-h.br { cursor: nwse-resize; } .crop-h.tr, .crop-h.bl { cursor: nesw-resize; }
+.crop-h.t, .crop-h.b { cursor: ns-resize; width: 26px; height: 8px; margin: -4px 0 0 -13px; border-radius: 4px; }
+.crop-h.l, .crop-h.r { cursor: ew-resize; width: 8px; height: 26px; margin: -13px 0 0 -4px; border-radius: 4px; }
+.crop-controls { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: center; }
+.crop-controls .btn svg { width: 17px; height: 17px; vertical-align: -3px; }
+.crop-width { display: flex; align-items: center; gap: 10px; color: var(--muted); font-size: 13px; }
+.crop-width svg:first-child { width: 14px; height: 14px; } .crop-width svg:nth-of-type(2) { width: 22px; height: 22px; }
+.crop-width input { flex: 1; accent-color: var(--accent); }
+.crop-width span { min-width: 170px; text-align: right; }
+.crop-info { font-size: 12.5px; text-align: center; }
 </style>
 <div id="app"></div>
 <script>
@@ -2286,6 +2310,170 @@ const Alarm = {
 };
 
 // =============================================================================
+// Recortar imágenes y elegir su tamaño (como en la app nativa). El recorte es un rectángulo
+// normalizado (0…1) sobre la imagen, así no depende del tamaño con que se muestre.
+// =============================================================================
+const Crop = {
+  full: { x: 0, y: 0, w: 1, h: 1 },
+  minimum: 0.05,
+  aspects: [['free', 'Libre'], ['original', 'Original'], ['1', '1:1'], ['1.3333', '4:3'], ['0.75', '3:4'], ['1.7778', '16:9']],
+
+  ratio(aspect, size) {
+    if (aspect === 'free') return null;
+    if (aspect === 'original') return size.w / Math.max(size.h, 1);
+    return Number(aspect);
+  },
+  /** Proporción en coordenadas normalizadas para una proporción en píxeles. */
+  normalized(ratio, size) { return ratio * size.h / Math.max(size.w, 1); },
+  largest(ratio, size) {
+    if (!ratio) return { ...this.full };
+    const r = this.normalized(ratio, size);
+    const w = r >= 1 ? 1 : r, h = r >= 1 ? 1 / r : 1;
+    return { x: (1 - w) / 2, y: (1 - h) / 2, w, h };
+  },
+  move(rect, dx, dy) {
+    return { ...rect, x: Math.min(Math.max(0, rect.x + dx), 1 - rect.w), y: Math.min(Math.max(0, rect.y + dy), 1 - rect.h) };
+  },
+  /** Arrastrar un tirador ('tl','t','tr','r','br','b','bl','l'). Con proporción fija, el otro lado se ajusta. */
+  resize(rect, handle, dx, dy, ratio, size) {
+    const L = handle.includes('l'), R = handle.includes('r'), T = handle.includes('t'), B = handle.includes('b');
+    let minX = rect.x, maxX = rect.x + rect.w, minY = rect.y, maxY = rect.y + rect.h;
+    if (L) minX = Math.min(Math.max(0, minX + dx), maxX - this.minimum);
+    if (R) maxX = Math.max(Math.min(1, maxX + dx), minX + this.minimum);
+    if (T) minY = Math.min(Math.max(0, minY + dy), maxY - this.minimum);
+    if (B) maxY = Math.max(Math.min(1, maxY + dy), minY + this.minimum);
+    let out = { x: minX, y: minY, w: maxX - minX, h: maxY - minY };
+    if (!ratio) return out;
+    const r = this.normalized(ratio, size);
+    const corner = (L || R) && (T || B);
+    const widthLeads = corner ? Math.abs(dx) >= Math.abs(dy) * r : (L || R);
+    let w = widthLeads ? out.w : out.h * r, h = w / r;
+    const ax = L ? rect.x + rect.w : R ? rect.x : rect.x + rect.w / 2;
+    const ay = T ? rect.y + rect.h : B ? rect.y : rect.y + rect.h / 2;
+    const maxW = L ? ax : R ? 1 - ax : 2 * Math.min(ax, 1 - ax);
+    const maxH = T ? ay : B ? 1 - ay : 2 * Math.min(ay, 1 - ay);
+    const fit = Math.min(1, maxW / Math.max(w, 1e-4), maxH / Math.max(h, 1e-4));
+    w *= fit; h *= fit;
+    out = { x: L ? ax - w : R ? ax : ax - w / 2, y: T ? ay - h : B ? ay : ay - h / 2, w, h };
+    return out;
+  },
+  /** Tras girar la imagen 90° a la izquierda, el recorte sigue sobre la misma zona. */
+  rotatedLeft(rect) { return { x: rect.y, y: 1 - rect.x - rect.w, w: rect.h, h: rect.w }; },
+};
+
+/** Gira una imagen (dataURL) 90° a la izquierda. */
+async function rotateImageLeft(src) {
+  const img = await loadImage(src);
+  const canvas = document.createElement('canvas');
+  canvas.width = img.naturalHeight; canvas.height = img.naturalWidth;
+  const ctx = canvas.getContext('2d');
+  ctx.translate(0, canvas.height);
+  ctx.rotate(-Math.PI / 2);
+  ctx.drawImage(img, 0, 0);
+  return canvas.toDataURL(src.startsWith('data:image/png') ? 'image/png' : 'image/jpeg', 0.9);
+}
+/** Recorta una imagen (dataURL) por un rectángulo normalizado. */
+async function cropImageData(src, rect) {
+  const img = await loadImage(src);
+  const W = img.naturalWidth, H = img.naturalHeight;
+  const sx = Math.round(rect.x * W), sy = Math.round(rect.y * H), sw = Math.max(1, Math.round(rect.w * W)), sh = Math.max(1, Math.round(rect.h * H));
+  const canvas = document.createElement('canvas');
+  canvas.width = sw; canvas.height = sh;
+  canvas.getContext('2d').drawImage(img, sx, sy, sw, sh, 0, 0, sw, sh);
+  return { src: canvas.toDataURL(src.startsWith('data:image/png') ? 'image/png' : 'image/jpeg', 0.9), w: sw, h: sh };
+}
+
+/**
+ * Ventana de recortar (antes de colocar una imagen, o para recortar una ya puesta).
+ * Devuelve { src, w, h, widthFraction } o null si se cancela.
+ */
+function cropImageDialog(src, { replacing = false, inline = false, widthFraction = 0.5, remaining = 0 } = {}) {
+  return new Promise((resolve) => {
+    let working = src, size = { w: 1, h: 1 }, rect = { ...Crop.full }, aspect = 'free', width = widthFraction, done = false;
+    const title = (replacing ? 'Recortar imagen' : 'Insertar imagen') + (remaining ? ` (quedan ${remaining} más)` : '');
+    const scrim = dialog(`<h2>${title}</h2>
+      <div class="crop-stage"><div class="crop-box"><img alt="Imagen para recortar"><div class="crop-shade"></div><div class="crop-rect"><i></i><i></i><i></i><i></i></div>
+        ${['tl', 't', 'tr', 'r', 'br', 'b', 'bl', 'l'].map((h) => `<span class="crop-h ${h}" data-h="${h}"></span>`).join('')}</div></div>
+      <div class="crop-controls">
+        <div class="seg">${Crop.aspects.map(([k, n]) => `<button data-act="aspect" data-v="${k}" aria-pressed="${k === 'free'}">${n}</button>`).join('')}</div>
+        <button class="btn tinted" data-act="rotate">${icon('rotate')} Girar</button>
+        <button class="btn" data-act="reset">Restablecer</button>
+      </div>
+      ${inline ? '' : `<label class="crop-width">${icon('photo')}<input type="range" min="0.1" max="1" step="0.01" value="${width}" aria-label="Ancho en la página">${icon('photo')}<span></span></label>`}
+      <p class="crop-info"></p>
+      <div class="actions"><button class="btn" data-act="cancel">${replacing ? 'Cancelar' : 'No insertar'}</button><button class="btn primary" data-act="ok">${replacing ? 'Recortar' : 'Insertar'}</button></div>`,
+    async (act, b, close) => {
+      if (act === 'cancel') { done = true; close(); resolve(null); }
+      if (act === 'ok') {
+        done = true;
+        const out = rect.x === 0 && rect.y === 0 && rect.w === 1 && rect.h === 1 && working === src
+          ? { src: working, w: size.w, h: size.h } : await cropImageData(working, rect);
+        close();
+        resolve({ ...out, widthFraction: inline ? null : width });
+      }
+      if (act === 'aspect') {
+        aspect = b.dataset.v;
+        b.parentElement.querySelectorAll('button').forEach((x) => x.setAttribute('aria-pressed', x === b));
+        rect = Crop.largest(Crop.ratio(aspect, size), size);
+        draw();
+      }
+      if (act === 'rotate') {
+        working = await rotateImageLeft(working);
+        await setImage();
+        rect = aspect === 'free' ? Crop.rotatedLeft(rect) : Crop.largest(Crop.ratio(aspect, size), size);
+        draw();
+      }
+      if (act === 'reset') {
+        aspect = 'free';
+        scrim.querySelectorAll('[data-act="aspect"]').forEach((x) => x.setAttribute('aria-pressed', x.dataset.v === 'free'));
+        rect = { ...Crop.full };
+        draw();
+      }
+    }, true);
+    scrim.querySelector('.dialog').classList.add('crop-dialog');
+    const box = scrim.querySelector('.crop-box'), img = scrim.querySelector('img'), frame = scrim.querySelector('.crop-rect'), shade = scrim.querySelector('.crop-shade');
+    const info = scrim.querySelector('.crop-info'), slider = scrim.querySelector('.crop-width input'), label = scrim.querySelector('.crop-width span');
+    async function setImage() {
+      const image = await loadImage(working);
+      size = { w: image.naturalWidth, h: image.naturalHeight };
+      img.src = working;
+      const stage = scrim.querySelector('.crop-stage');
+      const scale = Math.min((stage.clientWidth - 36) / size.w, (stage.clientHeight - 36) / size.h, 1.5);
+      box.style.width = `${size.w * scale}px`; box.style.height = `${size.h * scale}px`;
+    }
+    function draw() {
+      const W = box.clientWidth, H = box.clientHeight;
+      const r = { x: rect.x * W, y: rect.y * H, w: rect.w * W, h: rect.h * H };
+      Object.assign(frame.style, { left: `${r.x}px`, top: `${r.y}px`, width: `${r.w}px`, height: `${r.h}px` });
+      shade.style.clipPath = `polygon(evenodd, 0 0, 100% 0, 100% 100%, 0 100%, 0 0, ${r.x}px ${r.y}px, ${r.x}px ${r.y + r.h}px, ${r.x + r.w}px ${r.y + r.h}px, ${r.x + r.w}px ${r.y}px, ${r.x}px ${r.y}px)`;
+      for (const h of scrim.querySelectorAll('.crop-h')) {
+        const k = h.dataset.h;
+        h.style.left = `${k.includes('l') ? r.x : k.includes('r') ? r.x + r.w : r.x + r.w / 2}px`;
+        h.style.top = `${k.includes('t') ? r.y : k.includes('b') ? r.y + r.h : r.y + r.h / 2}px`;
+      }
+      info.textContent = `Recorte: ${Math.round(rect.w * size.w)} × ${Math.round(rect.h * size.h)} píxeles. Arrastra las esquinas o los bordes; arrastra dentro para mover el recorte.`;
+      if (label) label.textContent = `Ancho en la página: ${Math.round(width * 100)} %`;
+    }
+    const drag = (onMove) => (e) => {
+      e.preventDefault();
+      const start = { x: e.clientX, y: e.clientY, rect: { ...rect } };
+      const move = (ev) => { onMove(start, (ev.clientX - start.x) / box.clientWidth, (ev.clientY - start.y) / box.clientHeight); draw(); };
+      const up = () => { removeEventListener('pointermove', move); removeEventListener('pointerup', up); };
+      addEventListener('pointermove', move);
+      addEventListener('pointerup', up);
+    };
+    frame.addEventListener('pointerdown', drag((s, dx, dy) => { rect = Crop.move(s.rect, dx, dy); }));
+    for (const h of scrim.querySelectorAll('.crop-h')) {
+      h.addEventListener('pointerdown', drag((s, dx, dy) => { rect = Crop.resize(s.rect, h.dataset.h, dx, dy, Crop.ratio(aspect, size), size); }));
+    }
+    slider?.addEventListener('input', () => { width = Number(slider.value); draw(); });
+    setImage().then(draw);
+    // Cerrar con Esc o tocando fuera también cuenta como cancelar.
+    new MutationObserver((_, observer) => { if (!document.body.contains(scrim)) { observer.disconnect(); if (!done) resolve(null); } }).observe(document.body, { childList: true });
+  });
+}
+
+// =============================================================================
 // Editor: pestañas, barra lateral, páginas, herramientas y elementos
 // =============================================================================
 const views = new Map();   // pageId -> vistas DOM de la página
@@ -2507,7 +2695,7 @@ function renderEditor() {
     if (!files.length) return;
     e.preventDefault();
     const hit = pageAtPoint(e.clientX, e.clientY);
-    files.forEach((f, i) => insertImageFile(f, hit && { page: hit.page, x: hit.x + i * 24, y: hit.y + i * 24 }));
+    files.forEach((f, i) => insertImageFile(f, hit && { page: hit.page, x: hit.x + i * 24, y: hit.y + i * 24 }, files.length - 1 - i));
   });
   buildPages();
   renderOptions();
@@ -2854,7 +3042,7 @@ function renderOptions() {
       <button class="btn" data-act="link-pick">${item.target ? 'Cambiar destino' : 'Elegir destino'}</button>
       ${item.target ? '<button class="btn" data-act="link-preview">Vista previa</button>' : ''}${itemActions()}`;
   } else if (item && item.type === 'image') {
-    html = `<span class="hint">Imagen: arrástrala o usa el círculo de la esquina para cambiar su tamaño.</span>${itemActions()}`;
+    html = `<button class="btn tinted" data-act="image-crop">${icon('crop')} Recortar…</button><span class="hint">Arrástrala o usa el círculo de la esquina para cambiar su tamaño.</span>${itemActions()}`;
   } else if (S.tool === 'pen') {
     html = `<button class="menu-btn" data-act="pen-kind-menu" aria-haspopup="menu">${icon('pen')}${PEN_KINDS[S.penKind]}${icon('chevronUpDown')}</button>
       <div class="sep"></div>${swatches(PEN_COLORS, S.penColor, 'pen-color')}<div class="sep"></div>
@@ -2944,6 +3132,7 @@ function onOptionsClick(e) {
     case 'inline-image': saveRange(); return pickFile('image/*', (f) => insertImageFile(f));
     case 'text-link': saveRange(); return linkPicker((target) => linkSelection(target));
     case 'default': if (found) { S.textDefault = Object.assign({}, found.item.base); savePrefs(); toast('Los textos nuevos tendrán este estilo'); } break;
+    case 'image-crop': return cropPlacedImage(found);
     case 'link-pick': return linkPicker((target) => editItem(found, (it) => { it.target = target; }));
     case 'link-preview': return showLinkPreview(found.item.target, { item: found.item, page: found.page });
     case 'copy': copySelection(); break;
@@ -3317,7 +3506,7 @@ function richElement(page, item, editable) {
     // Pegar dentro del texto: solo texto plano o imágenes (sin estilos ajenos).
     const files = [...(e.clipboardData?.files || [])].filter((f) => f.type.startsWith('image/'));
     e.preventDefault();
-    if (files.length) { saveRange(); files.forEach((f) => insertImageFile(f)); return; }
+    if (files.length) { saveRange(); files.forEach((f, i) => insertImageFile(f, null, files.length - 1 - i)); return; }
     document.execCommand('insertText', false, e.clipboardData?.getData('text/plain') || '');
   });
   return rich;
@@ -3511,35 +3700,56 @@ function addRichItem(page, props, size = null, base = null) {
   const rich = richFor(page.id, item.id);
   rich?.focus();
 }
-async function insertImageFile(file, at) {
-  try {
-    const img = await readImageFile(file);
-    // ¿Dentro del texto que se estaba escribiendo?
-    if (!at && savedRange && restoreRange()) {
+let imageQueue = Promise.resolve();
+/** Cada imagen pasa por la ventana de recortar antes de colocarse (una detrás de otra si llegan varias). */
+function insertImageFile(file, at, remaining = 0) {
+  imageQueue = imageQueue.then(() => placeImageFile(file, at, remaining)).catch(() => {});
+  return imageQueue;
+}
+async function placeImageFile(file, at, remaining) {
+  let img;
+  try { img = await readImageFile(file); } catch (e) { return toast('No se ha podido leer esa imagen.'); }
+  // ¿Dentro del texto que se estaba escribiendo?
+  const inline = !at && savedRange && S.editing && findItem(S.editing);
+  const range = inline ? savedRange.cloneRange() : null;
+  const edited = await cropImageDialog(img.src, { inline: !!inline, remaining });
+  if (!edited) return;
+  if (inline) {
+    savedRange = range;
+    if (restoreRange()) {
       const found = findItem(S.editing);
       if (found) {
         const before = snapshotPage(found.page);
-        document.execCommand('insertImage', false, img.src);
+        document.execCommand('insertImage', false, edited.src);
         syncRich(found);
         commit(found.page, before);
         return;
       }
     }
-    updateCurrentPage();
-    const page = at?.page || activeNb().pages[currentPageIndex];
-    const scale = Math.min(1, (page.w * 0.6) / img.w, (page.h * 0.45) / img.h);
-    const w = img.w * scale, h = img.h * scale;
-    const desk = $('#desk'), v = views.get(page.id);
-    const cx = at ? at.x : page.w / 2;
-    const cy = at ? at.y : Math.min(page.h - h / 2, Math.max(h / 2, (desk.scrollTop + desk.clientHeight / 2 - v.wrap.offsetTop) / S.zoom));
-    const item = { id: uid(), type: 'image', x: Math.max(0, cx - w / 2), y: Math.max(0, cy - h / 2), w, h, src: img.src, alt: file.name || 'Imagen' };
-    const before = snapshotPage(page);
-    page.items.push(item);
-    commit(page, before);
-    if (INK_TOOLS.includes(S.tool)) setTool('select');
-    renderItems(page);
-    select({ pageId: page.id, itemId: item.id });
-  } catch (e) { toast('No se ha podido leer esa imagen.'); }
+  }
+  updateCurrentPage();
+  const page = at?.page || activeNb().pages[currentPageIndex];
+  const w = Math.min(page.w, page.w * (edited.widthFraction || 0.5)), h = Math.min(page.h, w * edited.h / edited.w);
+  const fw = h * edited.w / edited.h;
+  const desk = $('#desk'), v = views.get(page.id);
+  const cx = at ? at.x : page.w / 2;
+  const cy = at ? at.y : Math.min(page.h - h / 2, Math.max(h / 2, (desk.scrollTop + desk.clientHeight / 2 - v.wrap.offsetTop) / S.zoom));
+  const item = { id: uid(), type: 'image', x: Math.min(page.w - fw, Math.max(0, cx - fw / 2)), y: Math.min(page.h - h, Math.max(0, cy - h / 2)), w: fw, h, src: edited.src, alt: file.name || 'Imagen' };
+  const before = snapshotPage(page);
+  page.items.push(item);
+  commit(page, before);
+  if (INK_TOOLS.includes(S.tool)) setTool('select');
+  renderItems(page);
+  select({ pageId: page.id, itemId: item.id });
+}
+/** Recortar una imagen ya colocada: conserva el ancho en la página y la esquina superior izquierda. */
+async function cropPlacedImage(found) {
+  if (!found) return;
+  const edited = await cropImageDialog(found.item.src, { replacing: true });
+  if (!edited) return;
+  const fresh = findItem({ pageId: found.page.id, itemId: found.item.id });
+  editItem(fresh, (it) => { it.src = edited.src; it.h = it.w * edited.h / edited.w; });
+  if (fresh) select({ pageId: fresh.page.id, itemId: fresh.item.id });
 }
 function reorderItem(found, where) {
   if (!found) return;
@@ -3869,7 +4079,7 @@ document.addEventListener('paste', (e) => {
   e.preventDefault();
   // Si lo último copiado es nuestro, se pega eso; si no, la imagen o el texto de otra app.
   if (S.clipboard && !files.length && (!text || text === S.clipboard.text)) { pasteInternal(); return; }
-  if (files.length) { files.forEach((f) => insertImageFile(f)); return; }
+  if (files.length) { files.forEach((f, i) => insertImageFile(f, null, files.length - 1 - i)); return; }
   if (text.trim()) pasteText(text);
 });
 
