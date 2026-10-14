@@ -393,6 +393,24 @@ svg { display: block; }
 .pomo-banner .ico { color: var(--pc); }
 .pomo-banner .ico svg { width: 26px; height: 26px; }
 .pomo-banner small { display: block; color: var(--muted); }
+
+/* ---------- Atajos de teclado ---------- */
+.shortcuts-dialog { width: min(640px, 100%); max-height: min(760px, 100%); }
+.sc-list { overflow: auto; margin: 0 -22px; padding: 0 22px; }
+.sc-help { font-size: 13px; }
+.sc-list h3 { font-size: 12px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); margin: 18px 0 6px; font-weight: 600; }
+.sc-row { display: flex; align-items: center; gap: 10px; padding: 7px 0; border-bottom: 1px solid var(--hairline); font-size: 14px; }
+.sc-row > span:first-child { flex: 1; }
+.sc-keys { display: flex; gap: 6px; align-items: center; }
+.sc-key { border: 0; background: var(--fill); border-radius: 6px; padding: 4px 10px; font: 500 13px var(--font); font-variant-numeric: tabular-nums; min-width: 34px; }
+.sc-key:hover { background: var(--fill-strong); }
+.sc-add, .sc-reset { width: 26px; height: 26px; border: 0; background: transparent; border-radius: 6px; display: grid; place-items: center; color: var(--muted); padding: 0; }
+.sc-add svg, .sc-reset svg { width: 15px; height: 15px; }
+.sc-add:hover, .sc-reset:hover { background: var(--fill); color: var(--ink); }
+.sc-recorder { position: fixed; inset: 0; z-index: 95; background: rgba(0,0,0,.35); display: grid; place-items: center; }
+.sc-recorder div { background: var(--surface); border-radius: 16px; padding: 26px 30px; display: flex; flex-direction: column; align-items: center; gap: 10px; box-shadow: 0 20px 60px rgba(0,0,0,.35); }
+.sc-recorder svg { width: 34px; height: 34px; color: var(--accent); }
+.sc-recorder small { color: var(--muted); }
 </style>
 <div id="app"></div>
 <script>
@@ -1495,7 +1513,8 @@ function newMenu(anchor) {
     <button data-act="ap:system">${mark('system')} Automática</button>
     <button data-act="ap:light">${mark('light')} Clara</button>
     <button data-act="ap:dark">${mark('dark')} Oscura</button>
-    <hr><button data-act="save">${icon('download')} Guardar copia de seguridad</button>
+    <hr><button data-act="shortcuts">${icon('keyboard')} Atajos de teclado…</button>
+    <button data-act="save">${icon('download')} Guardar copia de seguridad</button>
     <button data-act="load">${icon('upload')} Recuperar copia…</button>
     ${window.libretaInstall ? `<hr><button data-act="install">${icon('fileDown')} Instalar Libreta en este ordenador</button>` : ''}`, (act) => {
     if (act === 'new') newNotebookDialog();
@@ -1503,6 +1522,7 @@ function newMenu(anchor) {
     if (act.startsWith('ap:')) setAppearance(act.slice(3));
     if (act === 'save') saveBackup();
     if (act === 'load') loadBackup();
+    if (act === 'shortcuts') shortcutsDialog();
     if (act === 'install') window.libretaInstall?.();
   });
 }
@@ -2699,11 +2719,13 @@ function pageMenu(anchor) {
     <button data-act="zoom-in">${icon('plus')} Acercar</button><button data-act="zoom-out">${icon('minus')} Alejar</button><button data-act="zoom-fit">${icon('pages')} Ajustar al ancho</button>
     <hr><button data-act="pomo-visible">${mark(Pomo.visible)} Mostrar el temporizador en la barra</button>
     <button data-act="hold">${mark(S.holdToSnap)} Mantener quieto al final: forma perfecta o recta</button>
+    <button data-act="shortcuts">${icon('keyboard')} Atajos de teclado…</button>
     <hr><div class="label">Apariencia</div>
     ${[['system', 'Automática'], ['light', 'Clara'], ['dark', 'Oscura']].map(([k, n]) => `<button data-act="ap:${k}">${mark(currentAppearance() === k)} ${n}</button>`).join('')}
     <hr><button data-act="clear">${icon('trash')} Borrar el contenido de esta página…</button>
     <button data-act="delete" ${nb.pages.length < 2 ? 'disabled' : ''}>${icon('trash')} Eliminar esta página…</button>`, (act) => {
     const [kind, value] = act.split(':');
+    if (act === 'shortcuts') return shortcutsDialog();
     if (act === 'pomo-visible') { Pomo.visible = !Pomo.visible; return Pomo.changed(); }
     if (act === 'hold') { S.holdToSnap = !S.holdToSnap; savePrefs(); return toast(S.holdToSnap ? 'Mantener quieto al final de un trazo lo convierte en forma o recta' : 'Los trazos quedan siempre tal como los dibujas'); }
     if (act === 'zoom-in') return setZoom(S.zoom * 1.2);
@@ -3883,22 +3905,258 @@ const undo = () => restore(S.undo, S.redo);
 const redo = () => restore(S.redo, S.undo);
 
 // ---------- Teclado ----------
+// El resto de atajos (herramientas, pestañas, deshacer, buscar…) están en shortcuts.js y se pueden cambiar.
 document.addEventListener('keydown', (e) => {
-  if (S.view !== 'editor') return;
-  const mod = e.ctrlKey || e.metaKey, key = e.key.toLowerCase();
-  if (mod && key === 'f') { e.preventDefault(); return openSearchPanel(); }
+  if (S.view !== 'editor' || e.defaultPrevented) return;
   if (typingInField()) {
     if (e.key === 'Escape' && document.activeElement.isContentEditable) document.activeElement.blur();
     return;
   }
-  if (mod && key === 'z') { e.preventDefault(); return e.shiftKey ? redo() : undo(); }
-  if (mod && key === 'y') { e.preventDefault(); return redo(); }
   if ((e.key === 'Delete' || e.key === 'Backspace') && (S.selected || S.lasso)) { e.preventDefault(); return deleteSelection(); }
-  if (e.key === 'Escape') { closePopover(); previewEl?.remove(); $('.search-panel')?.remove(); clearLasso(); return select(null); }
-  if (mod || e.altKey) return;
-  const tool = TOOLS.find((t) => t[2] === key);
-  if (tool) setTool(tool[0]);
+  if (e.key === 'Escape') { closePopover(); previewEl?.remove(); $('.search-panel')?.remove(); $('#pomo-panel')?.remove(); clearLasso(); return select(null); }
 });
+
+// =============================================================================
+// Atajos de teclado personalizables (como en la app nativa).
+// «mod» es ⌘ en el Mac y Ctrl en Windows. Las combinaciones que el navegador se reserva (cerrar
+// pestaña, nueva ventana, recargar…) no se pueden usar; por eso las pestañas de Libreta van con Alt.
+// =============================================================================
+const IS_MAC = /Mac|iPhone|iPad/.test(navigator.platform) || /Mac OS/.test(navigator.userAgent);
+
+const SHORTCUT_GROUPS = ['Herramientas', 'Pestañas', 'Edición', 'Texto', 'Páginas', 'Otros'];
+const K = (key, o = {}) => ({ key, mod: !!o.mod, shift: !!o.shift, alt: !!o.alt, ctrl: !!o.ctrl });
+/** [id, grupo, título, dónde funciona, teclas de serie] */
+const SHORTCUT_ACTIONS = [
+  ['toolPen', 'Herramientas', 'Bolígrafo', 'editor', [K('p')]],
+  ['toolHighlighter', 'Herramientas', 'Subrayador', 'editor', [K('h')]],
+  ['toolEraser', 'Herramientas', 'Goma', 'editor', [K('e')]],
+  ['toolLasso', 'Herramientas', 'Lazo', 'editor', [K('l')]],
+  ['toolText', 'Herramientas', 'Texto', 'editor', [K('t')]],
+  ['toolSticky', 'Herramientas', 'Post-it', 'editor', [K('n')]],
+  ['toolComment', 'Herramientas', 'Comentario', 'editor', [K('c')]],
+  ['toolLink', 'Herramientas', 'Enlace', 'editor', [K('k')]],
+  ['toolSelect', 'Herramientas', 'Seleccionar', 'editor', [K('v')]],
+  ['insertImage', 'Herramientas', 'Insertar imagen', 'editor', [K('i', { alt: true })]],
+  ['closeTab', 'Pestañas', 'Cerrar pestaña', 'editor', [K('w', { alt: true })]],
+  ['nextTab', 'Pestañas', 'Pestaña siguiente', 'editor', [K('right', { alt: true })]],
+  ['previousTab', 'Pestañas', 'Pestaña anterior', 'editor', [K('left', { alt: true })]],
+  ...[1, 2, 3, 4, 5, 6, 7, 8].map((n) => [`tab${n}`, 'Pestañas', `Pestaña ${n}`, 'editor', [K(String(n), { alt: true })]]),
+  ['lastTab', 'Pestañas', 'Última pestaña', 'editor', [K('9', { alt: true })]],
+  ['backToLibrary', 'Pestañas', 'Volver a la biblioteca', 'editor', [K('l', { alt: true })]],
+  ['undo', 'Edición', 'Deshacer', 'editor', [K('z', { mod: true })]],
+  ['redo', 'Edición', 'Rehacer', 'editor', [K('z', { mod: true, shift: true }), K('y', { mod: true })]],
+  ['find', 'Edición', 'Buscar', 'both', [K('f', { mod: true })]],
+  ['bold', 'Texto', 'Negrita', 'editor', [K('b', { mod: true })]],
+  ['italic', 'Texto', 'Cursiva', 'editor', [K('i', { mod: true })]],
+  ['underline', 'Texto', 'Subrayado', 'editor', [K('u', { mod: true })]],
+  ['strikethrough', 'Texto', 'Tachado', 'editor', [K('x', { mod: true, shift: true })]],
+  ['biggerText', 'Texto', 'Letra más grande', 'editor', [K('+', { mod: true }), K('=', { mod: true })]],
+  ['smallerText', 'Texto', 'Letra más pequeña', 'editor', [K('-', { mod: true })]],
+  ['newPage', 'Páginas', 'Añadir página', 'editor', [K('p', { alt: true })]],
+  ['nextPage', 'Páginas', 'Página siguiente', 'editor', [K('right', { mod: true })]],
+  ['previousPage', 'Páginas', 'Página anterior', 'editor', [K('left', { mod: true })]],
+  ['pagesOverview', 'Páginas', 'Ver todas las páginas', 'editor', [K('p', { mod: true, shift: true })]],
+  ['bookmark', 'Páginas', 'Marcador de la página', 'editor', [K('d', { mod: true })]],
+  ['share', 'Páginas', 'Compartir', 'editor', [K('s', { mod: true, shift: true })]],
+  ['toggleSidebar', 'Páginas', 'Mostrar u ocultar la barra lateral', 'editor', [K('s', { mod: true, alt: true })]],
+  ['timer', 'Otros', 'Temporizador de estudio', 'editor', [K('t', { alt: true })]],
+  ['newNotebook', 'Otros', 'Nueva libreta', 'library', [K('n', { alt: true })]],
+  ['shortcutsSettings', 'Otros', 'Atajos de teclado', 'both', [K('?')]],
+];
+const SHORTCUT_BY_ID = Object.fromEntries(SHORTCUT_ACTIONS.map((a) => [a[0], { id: a[0], group: a[1], title: a[2], where: a[3], defaults: a[4] }]));
+
+const Shortcuts = {
+  map: {},
+  recording: false,
+
+  load() {
+    try { this.map = JSON.parse(localStorage.getItem('libreta-shortcuts') || '{}'); } catch (e) { this.map = {}; }
+  },
+  save() { try { localStorage.setItem('libreta-shortcuts', JSON.stringify(this.map)); } catch (e) { /* sin guardar */ } },
+  bindings(id) { return this.map[id] || SHORTCUT_BY_ID[id].defaults; },
+  same: (a, b) => a.key === b.key && a.mod === b.mod && a.shift === b.shift && a.alt === b.alt && a.ctrl === b.ctrl,
+  owner(binding) { return SHORTCUT_ACTIONS.map((a) => a[0]).find((id) => this.bindings(id).some((b) => this.same(b, binding))); },
+  /** Pone una combinación (en lugar de `old`, o añadida). Si otra acción la tenía, se le quita y se devuelve. */
+  assign(binding, id, old) {
+    const owner = this.owner(binding);
+    if (owner && owner !== id) this.map[owner] = this.bindings(owner).filter((b) => !this.same(b, binding));
+    const list = [...this.bindings(id)];
+    const index = old ? list.findIndex((b) => this.same(b, old)) : -1;
+    if (index >= 0) list[index] = binding; else if (!list.some((b) => this.same(b, binding))) list.push(binding);
+    this.map[id] = list;
+    this.save();
+    return owner && owner !== id ? owner : null;
+  },
+  remove(binding, id) { this.map[id] = this.bindings(id).filter((b) => !this.same(b, binding)); this.save(); },
+  reset(id) {
+    for (const b of SHORTCUT_BY_ID[id].defaults) {
+      const owner = this.owner(b);
+      if (owner && owner !== id) this.map[owner] = this.bindings(owner).filter((x) => !this.same(x, b));
+    }
+    delete this.map[id];
+    this.save();
+  },
+  resetAll() { this.map = {}; this.save(); },
+  isDefault(id) { return JSON.stringify(this.bindings(id)) === JSON.stringify(SHORTCUT_BY_ID[id].defaults); },
+
+  /** «⌥W» en el Mac; «Alt+W» en Windows. */
+  display(b) {
+    const names = { left: '←', right: '→', up: '↑', down: '↓', tab: '⇥', enter: '↩', escape: 'Esc', ' ': 'Espacio', backspace: '⌫', delete: 'Supr' };
+    const key = names[b.key] || b.key.toUpperCase();
+    if (IS_MAC) return `${b.ctrl ? '⌃' : ''}${b.alt ? '⌥' : ''}${b.shift ? '⇧' : ''}${b.mod ? '⌘' : ''}${key}`;
+    return [b.mod && 'Ctrl', b.alt && 'Alt', b.shift && 'Mayús', key].filter(Boolean).join('+');
+  },
+  /** La combinación de una pulsación (con Alt se mira la tecla física: en el Mac, ⌥1 escribe «¡»). */
+  fromEvent(e) {
+    let key;
+    if (/^Key[A-Z]$/.test(e.code) && (e.altKey || e.metaKey || e.ctrlKey)) key = e.code.slice(3).toLowerCase();
+    else if (/^Digit\d$/.test(e.code) && (e.altKey || e.metaKey || e.ctrlKey)) key = e.code.slice(5);
+    else key = { arrowleft: 'left', arrowright: 'right', arrowup: 'up', arrowdown: 'down' }[e.key.toLowerCase()] || e.key.toLowerCase();
+    if (['shift', 'control', 'alt', 'meta', 'capslock', 'dead'].includes(key)) return null;
+    // «?» y «+» ya llevan Mayús en el teclado: no cuenta como modificador.
+    const shift = ['?', '+', '!', '¡', '¿'].includes(key) ? false : e.shiftKey;
+    return { key, mod: IS_MAC ? e.metaKey : e.ctrlKey, shift, alt: e.altKey, ctrl: IS_MAC ? e.ctrlKey : false };
+  },
+  /** Combinaciones que el navegador no deja usar. */
+  isReserved(b) {
+    if (b.mod && !b.alt && ['w', 't', 'n', 'q', 'r', 'l', 'tab'].includes(b.key)) return true;
+    if (b.mod && /^[1-9]$/.test(b.key) && !b.alt) return true;
+    if (b.mod && b.shift && ['n', 't', 'r', 'i', 'j', 'c', 'w', 'q', 'delete'].includes(b.key)) return true;
+    if (!IS_MAC && b.ctrl) return true;
+    return ['f5', 'f11', 'f12'].includes(b.key);
+  },
+  isPlain: (b) => !b.mod && !b.alt && !b.ctrl,
+
+  /** ¿Qué acción corresponde a esta pulsación ahora mismo? */
+  match(e) {
+    const binding = this.fromEvent(e);
+    if (!binding) return null;
+    const context = S.view === 'editor' ? 'editor' : 'library';
+    for (const [id, , , where] of SHORTCUT_ACTIONS) {
+      if (where !== 'both' && where !== context) continue;
+      if (this.bindings(id).some((b) => this.same(b, binding))) return { id, binding };
+    }
+    return null;
+  },
+
+  perform(id) {
+    const nb = activeNb();
+    const tools = { toolPen: 'pen', toolHighlighter: 'highlighter', toolEraser: 'eraser', toolLasso: 'lasso', toolText: 'text', toolSticky: 'sticky', toolComment: 'comment', toolLink: 'link', toolSelect: 'select' };
+    if (tools[id]) return setTool(tools[id]);
+    const tabIndex = S.tabs.indexOf(S.active);
+    switch (id) {
+      case 'insertImage': return $('#add-image')?.click();
+      case 'closeTab': return S.active && closeTab(S.active);
+      case 'nextTab': case 'previousTab':
+        if (S.tabs.length > 1) openNotebook(S.tabs[(tabIndex + (id === 'nextTab' ? 1 : -1) + S.tabs.length) % S.tabs.length]);
+        return;
+      case 'lastTab': return S.tabs.length && openNotebook(S.tabs[S.tabs.length - 1]);
+      case 'backToLibrary': return backToLibrary();
+      case 'undo': return undo();
+      case 'redo': return redo();
+      case 'find': return S.view === 'editor' ? openSearchPanel() : $('#search')?.focus();
+      case 'bold': return textStyle({ bold: true });
+      case 'italic': return textStyle({ italic: true });
+      case 'underline': return textStyle({ underline: true });
+      case 'strikethrough': return textStyle({ strike: true });
+      case 'biggerText': return textStyle({ size: 2 });
+      case 'smallerText': return textStyle({ size: -2 });
+      case 'newPage': return newPageDialog();
+      case 'nextPage': case 'previousPage': {
+        updateCurrentPage();
+        const page = nb?.pages[currentPageIndex + (id === 'nextPage' ? 1 : -1)];
+        return page && scrollToPage(page.id);
+      }
+      case 'pagesOverview': return $('#pages-btn')?.click();
+      case 'bookmark': return $('#bm-btn')?.click();
+      case 'share': return $('#share-btn')?.click();
+      case 'toggleSidebar': return $('#side-btn')?.click();
+      case 'timer':
+        if (!Pomo.visible) { Pomo.visible = true; Pomo.changed(); }
+        return $('#pomo-btn') && Pomo.openPanel($('#pomo-btn'));
+      case 'newNotebook': return newNotebookDialog();
+      case 'shortcutsSettings': return shortcutsDialog();
+      default: {
+        const n = /^tab(\d)$/.exec(id);
+        if (n && S.tabs[Number(n[1]) - 1]) openNotebook(S.tabs[Number(n[1]) - 1]);
+      }
+    }
+  },
+};
+
+document.addEventListener('keydown', (e) => {
+  if (Shortcuts.recording || e.defaultPrevented) return;
+  const typing = typeof typingInField === 'function' && typingInField();
+  const found = Shortcuts.match(e);
+  if (!found) return;
+  // Una tecla sola mientras se escribe es una letra, no un atajo.
+  if (typing && Shortcuts.isPlain(found.binding)) return;
+  // Con un diálogo abierto, solo los atajos de texto (que actúan sobre lo que se escribe).
+  if (document.querySelector('.scrim') && found.id !== 'shortcutsSettings') return;
+  e.preventDefault();
+  Shortcuts.perform(found.id);
+}, true);
+
+/** «Atajos de teclado»: cambiar, añadir, quitar y volver a los de siempre. */
+function shortcutsDialog() {
+  if (document.querySelector('.shortcuts-dialog')) return;
+  const row = (id) => {
+    const a = SHORTCUT_BY_ID[id];
+    return `<div class="sc-row"><span>${esc(a.title)}</span><span class="sc-keys">
+      ${Shortcuts.bindings(id).map((b) => `<button class="sc-key" data-edit="${id}" data-b='${JSON.stringify(b)}' title="Cambiar (clic derecho para quitar)">${esc(Shortcuts.display(b))}</button>`).join('')}
+      <button class="sc-add" data-add="${id}" title="Añadir otra combinación" aria-label="Añadir otra combinación para ${esc(a.title)}">${icon('plus')}</button>
+      <button class="sc-reset" data-reset="${id}" ${Shortcuts.isDefault(id) ? 'hidden' : ''} title="Volver a ${esc(a.defaults.map((b) => Shortcuts.display(b)).join(' o '))}" aria-label="Restablecer">${icon('rotate')}</button></span></div>`;
+  };
+  const body = () => `<p class="sc-help">Haz clic en una combinación para cambiarla, en + para añadir otra y con clic derecho para quitarla. Las teclas solas (como H para el subrayador) no funcionan mientras escribes.${IS_MAC ? '' : ' En la web, las pestañas de Libreta van con Alt porque Ctrl+W, Ctrl+T o Ctrl+1 son del navegador.'}</p>
+    ${SHORTCUT_GROUPS.map((g) => `<h3>${g}</h3>${SHORTCUT_ACTIONS.filter((a) => a[1] === g).map((a) => row(a[0])).join('')}`).join('')}`;
+  const scrim = dialog(`<h2>Atajos de teclado</h2><div class="sc-list">${body()}</div>
+    <div class="actions"><button class="btn" data-act="reset-all">Restablecer todo</button><span class="spacer"></span><button class="btn primary" data-act="done">Listo</button></div>`, (act, b, close) => {
+    if (act === 'done') close();
+    if (act === 'reset-all') confirmDialog('¿Volver a los atajos de siempre?', 'Se perderán los cambios que hayas hecho.', 'Restablecer todo', () => { Shortcuts.resetAll(); refresh(); });
+  }, true);
+  scrim.querySelector('.dialog').classList.add('shortcuts-dialog');
+  const list = scrim.querySelector('.sc-list');
+  const refresh = () => { const top = list.scrollTop; list.innerHTML = body(); list.scrollTop = top; };
+  const record = (id, old) => {
+    Shortcuts.recording = true;
+    const overlay = document.createElement('div');
+    overlay.className = 'sc-recorder';
+    overlay.innerHTML = `<div>${icon('keyboard')}<b>Pulsa la combinación para «${esc(SHORTCUT_BY_ID[id].title)}»</b><small>Esc para cancelar</small></div>`;
+    document.body.appendChild(overlay);
+    const finish = (message) => {
+      Shortcuts.recording = false;
+      removeEventListener('keydown', onKey, true);
+      overlay.remove();
+      refresh();
+      if (message) toast(message);
+    };
+    const onKey = (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (e.key === 'Escape' && !e.shiftKey && !e.altKey && !e.metaKey && !e.ctrlKey) return finish();
+      const binding = Shortcuts.fromEvent(e);
+      if (!binding) return;
+      if (Shortcuts.isReserved(binding)) return finish(`${Shortcuts.display(binding)} la usa el navegador; elige otra combinación.`);
+      const previous = Shortcuts.assign(binding, id, old);
+      finish(previous ? `${Shortcuts.display(binding)} ya no es «${SHORTCUT_BY_ID[previous].title}»: ahora es «${SHORTCUT_BY_ID[id].title}».` : null);
+    };
+    addEventListener('keydown', onKey, true);
+    overlay.addEventListener('click', () => finish());
+  };
+  list.addEventListener('click', (e) => {
+    const edit = e.target.closest('[data-edit]'), add = e.target.closest('[data-add]'), reset = e.target.closest('[data-reset]');
+    if (edit) record(edit.dataset.edit, JSON.parse(edit.dataset.b));
+    if (add) record(add.dataset.add, null);
+    if (reset) { Shortcuts.reset(reset.dataset.reset); refresh(); }
+  });
+  list.addEventListener('contextmenu', (e) => {
+    const edit = e.target.closest('[data-edit]');
+    if (!edit) return;
+    e.preventDefault();
+    Shortcuts.remove(JSON.parse(edit.dataset.b), edit.dataset.edit);
+    refresh();
+  });
+}
 
 // =============================================================================
 // Libretas de ejemplo (la primera vez) e inicio
@@ -3948,6 +4206,7 @@ function exampleNotebooks() {
 
 async function start() {
   Pomo.load();
+  Shortcuts.load();
   await Store.open();
   S.notebooks = (await Store.all()).map(normalizeNotebook);
   const seeded = Prefs.load().seeded;
