@@ -507,6 +507,138 @@ body.is-reordering .tabs .chip:hover { outline: 2px solid var(--accent); outline
 .pdf-panel .swatch:hover { transform: scale(1.12); }
 .pdf-panel .sep { width: 1px; height: 22px; background: var(--hairline); margin: 0 4px; }
 .pdf-panel .icon-btn { width: 32px; height: 32px; color: var(--ink); }
+/* =============================================================================
+   Tutorial de la primera vez (siempre en oscuro, como en la app nativa)
+   ============================================================================= */
+.onb { --rounded: ui-rounded, "SF Pro Rounded", "Segoe UI Variable Display", system-ui, sans-serif; position: fixed; inset: 0; z-index: 200; color: #fff; overflow: hidden; font-family: var(--font); color-scheme: dark; animation: fade .4s ease-out; }
+.onb.leaving { animation: onb-out .45s ease-in forwards; }
+@keyframes onb-out { to { opacity: 0; transform: scale(1.03); } }
+.onb-aurora, .onb-confetti { position: absolute; inset: 0; width: 100%; height: 100%; }
+.onb-confetti { pointer-events: none; z-index: 2; }
+.onb-stages { position: absolute; inset: 0; }
+.onb-stage { position: absolute; inset: 0; display: flex; flex-direction: column; transition: transform .6s cubic-bezier(.2,.9,.25,1), opacity .45s ease; }
+.onb-stage.in.from-right { transform: translateX(60px) scale(.98); opacity: 0; }
+.onb-stage.in.from-left { transform: translateX(-60px) scale(.98); opacity: 0; }
+.onb-stage.in.shown { transform: none; opacity: 1; }
+.onb-stage.out { pointer-events: none; opacity: 0; transition-duration: .4s; }
+.onb-stage.out.to-left { transform: translateX(-60px); }
+.onb-stage.out.to-right { transform: translateX(60px); }
+.onb-center { margin: auto; display: flex; flex-direction: column; align-items: center; gap: 26px; padding: 40px; text-align: center; position: relative; z-index: 3; }
+.onb-title { font: 700 46px/1.1 var(--rounded); margin: 0; background: linear-gradient(#fff, #d1d1d1); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.onb-sub { margin: -14px 0 0; font-size: 20px; color: rgba(255,255,255,.7); max-width: 560px; }
+.onb-row { display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; }
+.onb-glass { font: 600 17px var(--font); color: #fff; border: 1px solid rgba(255,255,255,.18); background: rgba(255,255,255,.1); padding: 13px 20px; border-radius: 999px; display: inline-flex; align-items: center; gap: 8px; cursor: pointer; transition: transform .25s cubic-bezier(.3,1.6,.5,1), background .2s, box-shadow .2s, opacity .2s; }
+.onb-glass:hover:not(:disabled) { background: rgba(255,255,255,.16); transform: scale(1.03); }
+.onb-glass:active:not(:disabled) { transform: scale(.96); }
+.onb-glass:disabled { opacity: .45; cursor: default; }
+.onb-glass.prominent { padding: 13px 26px; border-color: rgba(255,255,255,.35); background: linear-gradient(90deg, #7366FF, #BF59FF); box-shadow: 0 4px 12px rgba(175,82,222,.5); }
+.onb-glass.prominent:hover:not(:disabled) { background: linear-gradient(90deg, #7366FF, #BF59FF); box-shadow: 0 4px 18px rgba(175,82,222,.8); }
+.onb-glass:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
+.onb-glass svg { width: 18px; height: 18px; }
+.onb-arrow { display: inline-flex; } .onb-arrow svg { width: 18px; height: 18px; stroke-width: 2.4; }
+.onb-skip { position: absolute; top: 24px; right: 24px; z-index: 5; padding: 10px 18px; font-size: 15px; }
+/* Bienvenida */
+.onb-logo { width: 180px; height: 200px; position: relative; perspective: 600px; }
+.onb-cover { position: absolute; inset: 0; border-radius: 22px; background: linear-gradient(135deg, #6B5CFF, #B84DF2); border: 1.5px solid rgba(255,255,255,.35); box-shadow: 0 0 40px rgba(175,82,222,.7), inset 24px 0 0 rgba(0,0,0,.18); animation: onb-cover .9s cubic-bezier(.3,1.4,.5,1) both; }
+@keyframes onb-cover { from { opacity: 0; transform: scale(.4) rotateX(60deg) rotateY(24deg); } }
+.onb-sign { position: absolute; inset: 0; width: 100%; height: 100%; }
+.onb-sign path { fill: none; stroke: #fff; stroke-width: 5; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 400; stroke-dashoffset: 400; filter: drop-shadow(0 0 6px rgba(255,255,255,.8)); animation: onb-draw 1.2s .6s ease-in-out forwards; }
+@keyframes onb-draw { to { stroke-dashoffset: 0; } }
+.onb-nib { position: absolute; left: 24px; top: 104px; color: #fff; opacity: 0; animation: onb-nib 1.2s .6s ease-in-out forwards; }
+.onb-nib svg { width: 34px; height: 34px; stroke-width: 2.4; transform: rotate(-35deg); }
+@keyframes onb-nib { 0% { opacity: 1; transform: translate(0, 0); } 85% { opacity: 1; } 100% { opacity: 0; transform: translate(120px, -20px); } }
+.onb-word { margin: 0; font: 900 64px/1 var(--rounded); display: flex; }
+.onb-word span { display: inline-block; background: linear-gradient(#fff, #CCBFFF); -webkit-background-clip: text; background-clip: text; color: transparent; animation: onb-letter .6s cubic-bezier(.3,1.5,.5,1) both; animation-delay: calc(1.1s + var(--i) * .07s); }
+@keyframes onb-letter { from { opacity: 0; transform: translateY(24px); filter: blur(6px); } }
+.onb-late { animation: onb-up .8s 1.8s ease-out both; margin-top: -8px; }
+.onb-late2 { animation: onb-pop .7s 2.4s cubic-bezier(.3,1.5,.5,1) both; }
+@keyframes onb-up { from { opacity: 0; transform: translateY(12px); } }
+@keyframes onb-pop { from { opacity: 0; transform: scale(.9); } }
+/* Nombre */
+.onb-wave { font-size: 60px; line-height: 1; transform-origin: 70% 80%; }
+.onb-wave.waving { animation: onb-wave .5s cubic-bezier(.3,1.6,.5,1); }
+@keyframes onb-wave { 40% { transform: rotate(14deg) scale(1.1); } }
+.onb-name { position: relative; width: min(420px, 80vw); }
+.onb-name input { width: 100%; background: transparent; border: 0; outline: 0; color: #fff; text-align: center; font: 600 34px var(--rounded); padding: 14px 0; caret-color: #BF59FF; }
+.onb-name input::placeholder { color: rgba(255,255,255,.35); }
+.onb-name i { position: absolute; left: 0; right: 0; bottom: 0; height: 1.5px; border-radius: 2px; background: linear-gradient(90deg, #32D2FF, #AF52DE, #FF2D55); transition: height .3s, box-shadow .3s; }
+.onb-name input:focus + i { height: 3px; box-shadow: 0 0 8px rgba(175,82,222,.9); }
+/* ¿Te lo enseño? */
+.onb-rise { animation: onb-rise .7s .2s cubic-bezier(.25,1.2,.5,1) both; }
+@keyframes onb-rise { from { opacity: 0; transform: translateY(30px); } }
+.onb-choice { width: 270px; height: 210px; padding: 24px; border-radius: 24px; text-align: left; display: flex; flex-direction: column; align-items: flex-start; gap: 10px; color: #fff; cursor: pointer; background: rgba(40,40,60,.45); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,.15); transition: transform .3s cubic-bezier(.3,1.5,.5,1), box-shadow .3s; font: inherit; }
+.onb-choice.prominent { position: relative; border-color: transparent; box-shadow: 0 0 24px color-mix(in srgb, var(--c1) 35%, transparent); }
+/* Borde con degradado (solo el borde: el fondo sigue siendo cristal) */
+.onb-choice.prominent::before, .onb-topic[aria-pressed="true"]::before { content: ""; position: absolute; inset: -1px; border-radius: inherit; padding: 2px; background: linear-gradient(135deg, var(--c1), var(--c2)); pointer-events: none;
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0); }
+.onb-topic[aria-pressed="true"]::before { padding: 1.5px; }
+.onb-choice:hover { transform: scale(1.04); }
+.onb-choice.prominent:hover { box-shadow: 0 0 30px color-mix(in srgb, var(--c1) 60%, transparent); }
+.onb-choice:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
+.onb-choice b { font: 700 22px var(--rounded); margin-top: 4px; }
+.onb-choice > span:last-child { font-size: 15px; color: rgba(255,255,255,.65); }
+.onb-tile { width: 60px; height: 60px; border-radius: 16px; display: grid; place-items: center; background: linear-gradient(135deg, var(--c1), var(--c2)); box-shadow: 0 2px 8px color-mix(in srgb, var(--c1) 50%, transparent); flex: none; color: #fff; }
+.onb-tile svg { width: 30px; height: 30px; stroke-width: 2.2; }
+.onb-tile.small { width: 34px; height: 34px; border-radius: 10px; } .onb-tile.small svg { width: 17px; height: 17px; }
+/* Temas */
+.onb-topics { flex: 1; display: flex; flex-direction: column; align-items: center; min-height: 0; position: relative; z-index: 3; }
+.onb-head { padding: 64px 40px 20px; text-align: center; display: flex; flex-direction: column; gap: 26px; }
+.onb-grid { flex: 1; min-height: 0; overflow: auto; width: min(1100px, 100%); padding: 8px 40px; display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; align-content: start; }
+.onb-topic { position: relative; height: 88px; display: flex; align-items: center; gap: 14px; padding: 14px; border-radius: 18px; text-align: left; color: #fff; font: inherit; cursor: pointer; background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.1); transition: transform .3s cubic-bezier(.3,1.5,.5,1), background .2s; animation: onb-rise .6s cubic-bezier(.25,1.2,.5,1) both; animation-delay: calc(var(--i) * 35ms); }
+.onb-topic[aria-pressed="true"] { background: rgba(255,255,255,.1); border-color: transparent; }
+.onb-topic:hover { transform: scale(1.03); }
+.onb-topic.pop { animation: onb-tap .35s cubic-bezier(.3,1.6,.5,1); }
+@keyframes onb-tap { 40% { transform: scale(.96); } }
+.onb-topic .onb-tile { width: 46px; height: 46px; border-radius: 13px; transition: filter .3s, opacity .3s; }
+.onb-topic .onb-tile svg { width: 21px; height: 21px; }
+.onb-topic[aria-pressed="false"] .onb-tile { filter: saturate(0); opacity: .55; }
+.onb-tt { display: flex; flex-direction: column; gap: 3px; padding-right: 22px; min-width: 0; }
+.onb-tt b { font-size: 16px; font-weight: 600; }
+.onb-tt span { font-size: 12.5px; color: rgba(255,255,255,.6); }
+.onb-check { position: absolute; top: 8px; right: 8px; width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; border: 1.5px solid rgba(255,255,255,.3); transition: background .25s, border-color .25s; }
+.onb-check svg { width: 14px; height: 14px; stroke-width: 3; opacity: 0; transition: opacity .2s; }
+.onb-topic[aria-pressed="true"] .onb-check { background: linear-gradient(var(--c1), var(--c2)); border-color: transparent; }
+.onb-topic[aria-pressed="true"] .onb-check svg { opacity: 1; }
+.onb-foot { padding: 22px 0 32px; }
+/* Lección */
+.onb-lesson { flex: 1; display: flex; flex-direction: column; min-height: 0; position: relative; z-index: 3; }
+.onb-progress { display: flex; gap: 6px; padding: 34px 210px 0 40px; }
+.onb-progress i { flex: 1; height: 5px; border-radius: 3px; background: rgba(255,255,255,.15); transition: background .5s; }
+.onb-progress i.on { background: linear-gradient(90deg, #32D2FF, #AF52DE); }
+.onb-lesson-body { flex: 1; display: flex; align-items: center; justify-content: center; gap: 44px; padding: 20px 40px; min-height: 0; flex-wrap: wrap; overflow: auto; }
+.onb-demo { width: 440px; height: 330px; padding: 26px; border-radius: 28px; position: relative; flex: none; background: linear-gradient(135deg, color-mix(in srgb, var(--c1) 18%, transparent), color-mix(in srgb, var(--c2) 18%, transparent)), rgba(31,31,51,.75); box-shadow: 0 10px 40px color-mix(in srgb, var(--c1) 35%, transparent), inset 0 0 0 1.5px color-mix(in srgb, var(--c1) 60%, transparent); animation: onb-flip .8s cubic-bezier(.25,1.1,.4,1) both; }
+@keyframes onb-flip { from { opacity: 0; transform: perspective(900px) rotateY(18deg); } }
+.onb-demo canvas { width: 388px; height: 278px; display: block; }
+.onb-copy { max-width: 460px; display: flex; flex-direction: column; gap: 18px; }
+.onb-kicker { display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 15px; color: rgba(255,255,255,.55); }
+.onb-copy h1 { margin: 0; font: 700 40px/1.1 var(--rounded); }
+.onb-intro { margin: 0; font-size: 20px; color: rgba(255,255,255,.8); }
+.onb-steps { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 14px; }
+.onb-steps li { display: flex; gap: 12px; align-items: flex-start; font-size: 16px; color: rgba(255,255,255,.9); animation: onb-slide .6s cubic-bezier(.25,1.1,.4,1) both; animation-delay: calc(.25s + var(--i) * .12s); }
+@keyframes onb-slide { from { opacity: 0; transform: translateX(20px); } }
+.onb-step-icon { width: 30px; height: 30px; border-radius: 8px; background: rgba(255,255,255,.08); display: grid; place-items: center; flex: none; color: var(--c1); }
+.onb-step-icon svg { width: 17px; height: 17px; stroke-width: 2.3; }
+.onb-steps li > span:last-child { padding-top: 4px; }
+.onb-tip { margin: 0; display: flex; gap: 8px; align-items: flex-start; padding: 12px; border-radius: 12px; background: rgba(255,255,255,.06); font-size: 15px; color: rgba(255,255,255,.7); animation: fade .6s .75s ease-out both; }
+.onb-tip span { color: #FFD60A; display: inline-flex; } .onb-tip svg { width: 18px; height: 18px; fill: rgba(255,214,10,.35); }
+.onb-nav { display: flex; justify-content: space-between; padding: 0 40px 32px; }
+/* Final */
+.onb-seal svg { width: 100px; height: 100px; animation: onb-seal .7s cubic-bezier(.3,1.6,.5,1) both; filter: drop-shadow(0 6px 20px rgba(52,199,89,.45)); }
+@keyframes onb-seal { from { transform: scale(.3); opacity: 0; } }
+/* ¿Omitir? */
+.onb-confirm { position: absolute; inset: 0; z-index: 10; display: grid; place-items: center; background: rgba(0,0,0,.4); animation: fade .2s; }
+.onb-confirm-card { width: min(420px, 90vw); padding: 26px; border-radius: 22px; text-align: center; background: rgba(40,40,58,.85); backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px); border: 1px solid rgba(255,255,255,.15); box-shadow: 0 20px 60px rgba(0,0,0,.5); display: flex; flex-direction: column; gap: 14px; animation: rise .25s cubic-bezier(.2,.8,.3,1); }
+.onb-confirm-card h2 { margin: 0; font: 700 22px var(--rounded); }
+.onb-confirm-card p { margin: 0; color: rgba(255,255,255,.7); }
+@media (max-width: 1000px) {
+  .onb-lesson-body { align-items: flex-start; gap: 24px; }
+  .onb-demo { zoom: .8; }
+  .onb-title { font-size: 34px; } .onb-copy h1 { font-size: 32px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .onb *, .onb-stage { animation-duration: .01s !important; animation-delay: 0s !important; transition-duration: .01s !important; }
+  .onb-sign path { stroke-dashoffset: 0; }
+}
 </style>
 <div id="app"></div>
 <script>
@@ -527,6 +659,11 @@ const ICONS = {
  "stop": "<rect x=\"6\" y=\"6\" width=\"12\" height=\"12\" rx=\"2\" />",
  "waveform": "<path d=\"M2 10v3\" /> <path d=\"M6 6v11\" /> <path d=\"M10 3v18\" /> <path d=\"M14 8v7\" /> <path d=\"M18 5v13\" /> <path d=\"M22 10v3\" />",
  "waveformPlus": "<path d=\"M2 10v3\" /> <path d=\"M6 6v11\" /> <path d=\"M10 3v18\" /> <path d=\"M14 8v7\" /> <path d=\"M17 19h6\" /> <path d=\"M20 16v6\" />",
+ "compass": "<path d=\"m16.24 7.76-1.804 5.411a2 2 0 0 1-1.265 1.265L7.76 16.24l1.804-5.411a2 2 0 0 1 1.265-1.265z\" /> <circle cx=\"12\" cy=\"12\" r=\"10\" />",
+ "mail": "<rect width=\"20\" height=\"16\" x=\"2\" y=\"4\" rx=\"2\" /> <path d=\"m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7\" />",
+ "coffee": "<path d=\"M10 2v2\" /> <path d=\"M14 2v2\" /> <path d=\"M16 8a1 1 0 0 1 1 1v8a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V9a1 1 0 0 1 1-1h14a4 4 0 1 1 0 8h-1\" /> <path d=\"M6 2v2\" />",
+ "lightbulb": "<path d=\"M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5\" /> <path d=\"M9 18h6\" /> <path d=\"M10 22h4\" />",
+ "bell": "<path d=\"M10.268 21a2 2 0 0 0 3.464 0\" /> <path d=\"M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326\" />",
  "mic": "<path d=\"M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z\" /> <path d=\"M19 10v2a7 7 0 0 1-14 0v-2\" /> <line x1=\"12\" x2=\"12\" y1=\"19\" y2=\"22\" />",
  "search": "<circle cx=\"11\" cy=\"11\" r=\"8\" /> <path d=\"m21 21-4.3-4.3\" />",
  "undo": "<path d=\"M9 14 4 9l5-5\" /> <path d=\"M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5a5.5 5.5 0 0 1-5.5 5.5H11\" />",
@@ -1638,7 +1775,8 @@ function newMenu(anchor) {
     <button data-act="ap:system">${mark('system')} Automática</button>
     <button data-act="ap:light">${mark('light')} Clara</button>
     <button data-act="ap:dark">${mark('dark')} Oscura</button>
-    <hr><button data-act="shortcuts">${icon('keyboard')} Atajos de teclado…</button>
+    <hr><button data-act="tutorial">${icon('tutorial')} Ver el tutorial</button>
+    <button data-act="shortcuts">${icon('keyboard')} Atajos de teclado…</button>
     <button data-act="save">${icon('download')} Guardar copia de seguridad</button>
     <button data-act="load">${icon('upload')} Recuperar copia…</button>
     ${window.libretaInstall ? `<hr><button data-act="install">${icon('fileDown')} Instalar Libreta en este ordenador</button>` : ''}`, (act) => {
@@ -1648,6 +1786,7 @@ function newMenu(anchor) {
     if (act === 'save') saveBackup();
     if (act === 'load') loadBackup();
     if (act === 'shortcuts') shortcutsDialog();
+    if (act === 'tutorial') Onboarding.open();
     if (act === 'install') window.libretaInstall?.();
   });
 }
@@ -5136,7 +5275,7 @@ const Shortcuts = {
 };
 
 document.addEventListener('keydown', (e) => {
-  if (Shortcuts.recording || e.defaultPrevented) return;
+  if (Shortcuts.recording || e.defaultPrevented || document.querySelector('.onb')) return; // durante el tutorial, nada
   const typing = typeof typingInField === 'function' && typingInField();
   const found = Shortcuts.match(e);
   if (!found) return;
@@ -5210,6 +5349,730 @@ function shortcutsDialog() {
 }
 
 // =============================================================================
+// Tutorial de la primera vez (como en la app nativa): bienvenida animada, nombre, si se quiere
+// ver, qué temas, una lección por tema con su animación y un final con confeti. Siempre se puede
+// omitir y volver a ver desde + › Ver el tutorial.
+// =============================================================================
+const ONB_KEY = 'libreta-onboarding', ONB_NAME = 'libreta-user-name';
+const onbKey = (id) => { const b = Shortcuts.bindings(id)[0]; return b ? Shortcuts.display(b) : ''; };
+
+const ONB_TOPICS = [
+  ['handwriting', 'Escribir a mano', 'Bolígrafo, pluma y lápiz. Formas perfectas.', 'pen', ['#5C73FF', '#8C54FF']],
+  ['highlighter', 'Subrayar', 'Libre, recto o perfectamente horizontal.', 'highlighter', ['#FFC71A', '#FF8C26']],
+  ['text', 'Textos con estilo', 'Letras, colores, negritas y fondos.', 'text', ['#33BFF2', '#4073FF']],
+  ['images', 'Imágenes', 'Inserta, recorta y ajusta el tamaño.', 'photo', ['#33D999', '#1A99BF']],
+  ['notes', 'Post-its y comentarios', 'Notas de colores y comentarios con nombre.', 'sticky', ['#FFD94D', '#FF8080']],
+  ['links', 'Enlaces entre libretas', 'Une ideas entre libretas y páginas.', 'link', ['#738CFF', '#33CCF2']],
+  ['pdf', 'Trabajar con PDF', 'Importa, selecciona texto y subráyalo.', 'pdf', ['#FF6666', '#E6408C']],
+  ['organize', 'Espacios y pestañas', 'Agrupa libretas y ábrelas en pestañas.', 'folder', ['#9973FF', '#F266BF']],
+  ['dynamic', 'Modo dinámico', 'Tus libretas como una constelación.', 'sparkles', ['#BF59FF', '#4D66FF']],
+  ['voice', 'Grabaciones y notas de voz', 'Graba clases y pon el audio en la página.', 'waveform', ['#FF8C33', '#FF4D73']],
+  ['timer', 'Temporizador de estudio', 'Pomodoro con descansos y alarma.', 'timer', ['#FF5959', '#40CC80']],
+  ['search', 'Buscar', 'Encuentra cualquier palabra al instante.', 'search', ['#4DBFFF', '#66F2BF']],
+  ['shortcuts', 'Atajos de teclado', 'Todo con el teclado, a tu manera.', 'keyboard', ['#99A6BF', '#667399']],
+  ['share', 'Compartir y exportar', 'PDF o imagen, listos para enviar.', 'share', ['#40D98C', '#338CFF']],
+].map(([id, title, subtitle, sym, colors]) => ({ id, title, subtitle, sym, colors }));
+
+/** Frase personal, pasos y truco de cada tema (con los atajos que tenga puestos quien lo ve). */
+function onbLesson(id, name) {
+  const you = name ? `${name}, ` : '';
+  const mod = IS_MAC ? '⌘' : 'Ctrl+';
+  switch (id) {
+    case 'handwriting': return [`${you}escribe y dibuja como en papel. Elige pluma, bolígrafo o lápiz, el color y el grosor.`,
+      [['pen', `Pulsa el bolígrafo arriba (o la tecla ${onbKey('toolPen')}) y escribe sobre la página.`],
+        ['shapes', 'Dibuja un círculo o una flecha y mantén quieto 1 segundo al final: se vuelve perfecto.'],
+        ['sparkles', 'Con «Formas» activado, cada trazo se convierte en forma.']],
+      `La goma (${onbKey('toolEraser')}) borra trazos enteros o solo un trozo; el lazo (${onbKey('toolLasso')}) los mueve.`];
+    case 'highlighter': return [`${you}subraya sin miedo a que quede torcido.`,
+      [['highlighter', `Elige el subrayador (${onbKey('toolHighlighter')}) y su color.`],
+        ['minus', '«Recto» lo endereza en la dirección en que lo dibujas.'],
+        ['chevronUpDown', '«H / V» lo deja perfectamente horizontal o vertical.']],
+      'En «Libre», si mantienes quieto al final, también se endereza.'];
+    case 'text': return [`${you}añade cuadros de texto con el estilo que quieras.`,
+      [['text', `Elige Texto (${onbKey('toolText')}) y haz clic en la página para escribir.`],
+        ['bold', `${onbKey('bold')} negrita, ${onbKey('italic')} cursiva, ${onbKey('underline')} subrayado. Cambia letra, tamaño y color arriba.`],
+        ['check', '«Predeterminar» guarda ese estilo para los textos nuevos.']],
+      'Arrastra el borde del cuadro para moverlo mientras escribes.'];
+    case 'images': return [`${you}trae fotos, capturas o archivos a tus apuntes.`,
+      [['image', `Usa el botón de imagen, pégala (${mod}V) o arrástrala a la página.`],
+        ['crop', 'Antes de colocarla, recórtala: libre, 1:1, 4:3, 16:9… y gírala.'],
+        ['photo', 'Elige su ancho en la página, o cámbialo luego con el tirador.']],
+      'Selecciona una imagen ya puesta y pulsa «Recortar…» para volver a ajustarla.'];
+    case 'notes': return [`${you}deja notas que destaquen.`,
+      [['sticky', `Post-it (${onbKey('toolSticky')}): pega notas de colores en cualquier sitio.`],
+        ['comment', `Comentario (${onbKey('toolComment')}): un círculo con nombre que se abre con su texto.`],
+        ['palette', 'Cambia el color de cada uno desde la barra de opciones.']],
+      'Los comentarios se ven encima de la tinta y salen en el PDF como un círculo.'];
+    case 'links': return [`${you}conecta tus apuntes como en una wiki.`,
+      [['link', 'Selecciona una palabra escrita con teclado y pulsa «Enlace».'],
+        ['linkArea', `O usa la herramienta Enlace (${onbKey('toolLink')}) para crear una zona sobre lo escrito a mano.`],
+        ['eye', 'Al pulsarlo verás una vista previa y el botón «Ir».']],
+      'Puedes enlazar a una libreta entera o a una página concreta.'];
+    case 'pdf': return [`${you}estudia sobre tus PDF.`,
+      [['pdf', 'En la biblioteca: + › Importar PDF.'],
+        ['select', 'Con Seleccionar, arrastra sobre el texto del PDF (doble clic: una palabra).'],
+        ['highlighter', 'Elige un color en el panel: queda subrayado. También línea, tachado o copiar.']],
+      'Además puedes escribir a mano encima, como en cualquier página.'];
+    case 'organize': return [`${you}ordena tus libretas por asignaturas o proyectos.`,
+      [['folder', 'Crea espacios y mueve tus libretas a ellos.'],
+        ['layers', 'Abre varias a la vez: aparecen en pestañas, agrupadas por espacio.'],
+        ['pages', `Arrastra una pestaña para ordenarla. ${onbKey('tab1')}…${onbKey('lastTab')} para saltar entre ellas.`]],
+      `${onbKey('closeTab')} cierra la pestaña actual; ${onbKey('nextTab')} pasa a la siguiente.`];
+    case 'dynamic': return [`${you}mira tus libretas desde otro ángulo.`,
+      [['sparkles', 'En la biblioteca, pulsa «Modo dinámico».'],
+        ['graph', 'Las libretas flotan y los enlaces entre ellas brillan.'],
+        ['select', 'Pasa el ratón para ver una vista previa; haz clic para ver sus vínculos.']],
+      'Arrastra las libretas para colocarlas a tu gusto.'];
+    case 'voice': return [`${you}no pierdas nada de lo que se dice en clase.`,
+      [['mic', `Pulsa el micrófono para grabar mientras escribes (${onbKey('record')}).`],
+        ['waveformPlus', 'En Grabaciones, «Añadir a la página» la pone como nota de voz.'],
+        ['play', 'Haz clic en la nota para escucharla. Cópiala a otra libreta si quieres.']],
+      `Muestra u oculta las notas de voz desde el menú del micrófono (${onbKey('toggleVoiceNotes')}).`];
+    case 'timer': return [`${you}estudia con método.`,
+      [['timer', `Pulsa el reloj de la barra (${onbKey('timer')}).`],
+        ['chevronUpDown', 'Ajusta los minutos de estudio y de descanso.'],
+        ['bell', 'Al llegar el descanso suena una alarma. Si lo empezaste sin querer, «Quitar temporizador».']],
+      'Sigue contando aunque cambies de libreta o cierres la página.'];
+    case 'search': return [`${you}encuentra cualquier cosa en segundos.`,
+      [['search', 'En la biblioteca busca en todas tus libretas: títulos, textos y PDF.'],
+        ['outline', `Dentro de una libreta, ${onbKey('find')} busca solo en ella.`],
+        ['highlighter', 'El resultado se abre en su página con la palabra resaltada.']],
+      'También encuentra palabras dentro de los PDF.'];
+    case 'shortcuts': return [`${you}ve más rápido con el teclado.`,
+      [['keyboard', `${onbKey('toolPen')} bolígrafo, ${onbKey('toolHighlighter')} subrayador, ${onbKey('toolEraser')} goma, ${onbKey('toolText')} texto… mientras no estés escribiendo.`],
+        ['pages', `${onbKey('closeTab')} cierra la pestaña, ${onbKey('tab1')} va a la primera, ${onbKey('find')} busca.`],
+        ['chevronUpDown', `Cámbialos todos en + › Atajos de teclado (${onbKey('shortcutsSettings')}).`]],
+      'Las teclas solas no molestan al escribir: una «h» en un texto es una «h».'];
+    case 'share': return [`${you}comparte tus apuntes con quien quieras.`,
+      [['share', 'Compartir: descarga la libreta entera o solo la página actual.'],
+        ['fileDown', 'En PDF o como imagen, lista para enviar.'],
+        ['mail', 'Mándala por WhatsApp, correo, Drive… desde tu ordenador.']],
+      'Las grabaciones y las zonas de enlace no salen en el PDF.'];
+  }
+  return ['', [], ''];
+}
+
+// ---------- Utilidades de animación ----------
+const onbCycle = (t, p) => (t % p) / p;
+const onbRamp = (x, a, b) => Math.min(1, Math.max(0, (x - a) / (b - a)));
+const onbSmooth = (x) => x * x * (3 - 2 * x);
+const onbReduce = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
+/** Números pseudoaleatorios con semilla: las estrellas y el confeti salen siempre igual. */
+function onbRandom(seed) { let s = seed >>> 0; return () => { s = (Math.imul(s, 1664525) + 1013904223) >>> 0; return (s >>> 8) / 16777216; }; }
+const onbIconCache = new Map();
+/** Un icono como imagen para dibujarlo en un lienzo. */
+function onbIcon(name, color, size = 24, width = 2) {
+  const key = `${name}|${color}|${size}|${width}`;
+  if (!onbIconCache.has(key)) {
+    const img = new Image();
+    img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 24 24" color="${color}" fill="none" stroke="${color}" stroke-width="${width}" stroke-linecap="round" stroke-linejoin="round">${ICONS[name]}</svg>`);
+    onbIconCache.set(key, img);
+  }
+  return onbIconCache.get(key);
+}
+function onbGrad(ctx, colors, x0, y0, x1, y1) { const g = ctx.createLinearGradient(x0, y0, x1, y1); colors.forEach((c, i) => g.addColorStop(i / Math.max(1, colors.length - 1), c)); return g; }
+const onbGray = (w, a = 1) => `rgba(${Math.round(w * 255)},${Math.round(w * 255)},${Math.round(w * 255)},${a})`;
+const ROUNDED = 'ui-rounded, "SF Pro Rounded", "Segoe UI Variable Display", system-ui, sans-serif';
+
+// ---------- Demostraciones (cada tema, en un lienzo de 388 × 278) ----------
+const OnbDemos = {
+  paper(ctx, W, H) { ctx.fillStyle = onbGray(0.97); ctx.beginPath(); ctx.roundRect(0, 0, W, H, 14); ctx.fill(); },
+  lines(ctx, x, y, w, widths = [0.9, 0.75, 0.85, 0.6], color = onbGray(0.78), gap = 22) {
+    ctx.fillStyle = color;
+    widths.forEach((k, i) => { ctx.beginPath(); ctx.roundRect(x, y + i * gap, w * k, 8, 4); ctx.fill(); });
+  },
+  label(ctx, text, x, y, font = `600 17px ${ROUNDED}`, color = onbGray(0.3), align = 'center') {
+    ctx.font = font; ctx.fillStyle = color; ctx.textAlign = align; ctx.textBaseline = 'middle'; ctx.fillText(text, x, y);
+  },
+
+  handwriting(ctx, W, H, t) {
+    const p = onbCycle(t, 4), draw = onbSmooth(onbRamp(p, 0.05, 0.4)), hold = onbRamp(p, 0.42, 0.62), morph = onbSmooth(onbRamp(p, 0.62, 0.72));
+    this.paper(ctx, W, H);
+    const cx = W / 2, cy = H / 2, R = Math.min(W, H) * 0.3;
+    const pts = Array.from({ length: 73 }, (_, i) => {
+      const a = i / 72 * Math.PI * 2, wobble = 1 + 0.09 * Math.sin(a * 3 + 1) + 0.05 * Math.sin(a * 7);
+      const r = R * (1 + (wobble - 1) * (1 - morph)), close = i > 66 ? (i - 66) * 2.5 * (1 - morph) : 0;
+      return [cx + r * Math.cos(a) + close, cy + r * Math.sin(a) * (1 - 0.12 * (1 - morph))];
+    });
+    const n = draw * 72;
+    ctx.strokeStyle = 'rgb(51,77,217)'; ctx.lineWidth = 4; ctx.lineCap = ctx.lineJoin = 'round';
+    ctx.beginPath(); ctx.moveTo(...pts[0]);
+    for (let i = 1; i <= Math.floor(n); i++) ctx.lineTo(...pts[i]);
+    const f = n - Math.floor(n), k = Math.floor(n);
+    if (f > 0 && pts[k + 1]) ctx.lineTo(pts[k][0] + (pts[k + 1][0] - pts[k][0]) * f, pts[k][1] + (pts[k + 1][1] - pts[k][1]) * f);
+    if (draw > 0) ctx.stroke();
+    if (hold > 0 && morph < 1) {
+      const [ex, ey] = pts[72];
+      ctx.strokeStyle = '#AF52DE'; ctx.lineWidth = 3;
+      ctx.beginPath(); ctx.arc(ex, ey, 13, -Math.PI / 2, -Math.PI / 2 + hold * Math.PI * 2); ctx.stroke();
+    }
+    this.label(ctx, morph > 0.5 ? '¡Círculo perfecto!' : hold > 0 ? 'Mantén quieto…' : 'Dibuja', cx, H - 14);
+  },
+  highlighter(ctx, W, H, t) {
+    const p = onbCycle(t, 3.6), sweep = onbSmooth(onbRamp(p, 0.1, 0.45)), straighten = onbSmooth(onbRamp(p, 0.55, 0.65));
+    this.paper(ctx, W, H);
+    const widths = [0.85, 0.7, 0.8, 0.9, 0.55];
+    widths.forEach((k, line) => {
+      const y = 20 + line * 34;
+      if (line === 2 && sweep > 0) {
+        const len = (W - 40) * 0.8 * sweep;
+        ctx.strokeStyle = 'rgba(255,204,0,.65)'; ctx.lineWidth = 20; ctx.lineCap = 'round';
+        ctx.beginPath(); ctx.moveTo(20, y + 9);
+        for (let x = 0; x <= len; x += 4) ctx.lineTo(20 + x, y + 9 + (1 - straighten) * 4 * Math.sin(x / 18));
+        ctx.stroke();
+      }
+      ctx.fillStyle = onbGray(line === 2 ? 0.35 : 0.78);
+      ctx.beginPath(); ctx.roundRect(20, y + 5, (W - 40) * k, 8, 4); ctx.fill();
+    });
+    const modes = ['Libre', 'Recto', 'H / V'];
+    ctx.font = `600 12px ${ROUNDED}`;
+    const ws = modes.map((m) => ctx.measureText(m).width + 20), total = ws.reduce((a, b) => a + b, 0) + 12;
+    let x = W / 2 - total / 2;
+    modes.forEach((m, i) => {
+      const on = (m === 'Libre' && straighten <= 0.5) || (m === 'Recto' && straighten > 0.5);
+      ctx.fillStyle = on ? 'rgba(255,204,0,.8)' : onbGray(0.88);
+      ctx.beginPath(); ctx.roundRect(x, H - 30, ws[i], 24, 12); ctx.fill();
+      this.label(ctx, m, x + ws[i] / 2, H - 18, `600 12px ${ROUNDED}`, onbGray(0.2));
+      x += ws[i] + 6;
+    });
+  },
+  text(ctx, W, H, t) {
+    const p = onbCycle(t, 4), full = 'Hola mundo', typed = Math.floor(onbRamp(p, 0.05, 0.45) * full.length), styled = p > 0.55;
+    this.paper(ctx, W, H);
+    const text = full.slice(0, typed);
+    ctx.textBaseline = 'alphabetic'; ctx.textAlign = 'left';
+    ctx.font = '500 34px Georgia, "Times New Roman", serif';
+    const a = text.slice(0, 5), b = text.slice(5);
+    const wa = ctx.measureText('Hola ').width;
+    ctx.font = `${styled ? 900 : 500} 34px Georgia, "Times New Roman", serif`;
+    const wb = ctx.measureText(b).width;
+    const boxW = Math.max(220, wa + wb + 40), boxX = W / 2 - boxW / 2, boxY = H / 2 - 70;
+    ctx.setLineDash([6, 4]); ctx.strokeStyle = 'rgba(0,122,255,.5)'; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.roundRect(boxX, boxY, boxW, 64, 8); ctx.stroke(); ctx.setLineDash([]);
+    const tx = boxX + 14, ty = boxY + 44;
+    ctx.font = '500 34px Georgia, "Times New Roman", serif'; ctx.fillStyle = onbGray(0.15); ctx.fillText(a, tx, ty);
+    const aw = ctx.measureText(a).width;
+    if (b) {
+      ctx.font = `${styled ? 900 : 500} 34px Georgia, "Times New Roman", serif`;
+      ctx.fillStyle = styled ? 'rgb(224,51,51)' : onbGray(0.15); ctx.fillText(b, tx + aw, ty);
+      if (styled) { ctx.fillRect(tx + aw, ty + 4, wb, 2.5); }
+    }
+    if (Math.sin(t * 6) > 0) { ctx.fillStyle = '#007AFF'; ctx.fillRect(tx + aw + (b ? wb : 0) + 1, ty - 30, 2.5, 36); }
+    const keys = ['B', 'I', 'U'];
+    const rowW = 3 * 34 + 2 * 8 + 8 + 26, rx = W / 2 - rowW / 2, ry = boxY + 86;
+    keys.forEach((k, i) => {
+      const on = styled && k !== 'I';
+      ctx.fillStyle = on ? '#007AFF' : onbGray(0.88);
+      ctx.beginPath(); ctx.roundRect(rx + i * 42, ry, 34, 30, 7); ctx.fill();
+      this.label(ctx, k, rx + i * 42 + 17, ry + 15, `700 16px ${ROUNDED}`, on ? '#fff' : onbGray(0.25));
+    });
+    const ccx = rx + 3 * 42 + 13, ccy = ry + 15;
+    if (styled) { ctx.shadowColor = 'rgba(0,0,0,.3)'; ctx.shadowBlur = 3; }
+    ctx.fillStyle = 'rgb(224,51,51)'; ctx.beginPath(); ctx.arc(ccx, ccy, 13, 0, 7); ctx.fill(); ctx.shadowBlur = 0;
+    if (styled) { ctx.strokeStyle = '#fff'; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(ccx, ccy, 11.5, 0, 7); ctx.stroke(); }
+  },
+  images(ctx, W, H, t) {
+    const p = onbCycle(t, 3.6), inset = onbSmooth(onbRamp(p, 0.15, 0.45)) * (1 - onbSmooth(onbRamp(p, 0.85, 0.98)));
+    ctx.save(); ctx.beginPath(); ctx.roundRect(0, 0, W, H, 14); ctx.clip();
+    ctx.fillStyle = onbGrad(ctx, ['rgb(102,179,255)', 'rgb(255,191,128)'], 0, 0, 0, H); ctx.fillRect(0, 0, W, H);
+    ctx.fillStyle = '#FFD60A'; ctx.beginPath(); ctx.arc(W * 0.72, H * 0.3, 25, 0, 7); ctx.fill();
+    ctx.fillStyle = 'rgb(51,115,89)'; ctx.beginPath(); ctx.moveTo(0, H); ctx.lineTo(W * 0.3, H * 0.45); ctx.lineTo(W * 0.55, H * 0.75); ctx.lineTo(W * 0.8, H * 0.5); ctx.lineTo(W, H); ctx.fill();
+    const c = { x: W * 0.18 * inset, y: H * 0.12 * inset, w: W * (1 - 0.36 * inset), h: H * (1 - 0.24 * inset) };
+    ctx.fillStyle = 'rgba(0,0,0,.45)'; ctx.beginPath(); ctx.rect(0, 0, W, H); ctx.rect(c.x, c.y, c.w, c.h); ctx.fill('evenodd');
+    ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.strokeRect(c.x + 1, c.y + 1, c.w - 2, c.h - 2);
+    ctx.fillStyle = '#fff';
+    for (const [x, y] of [[c.x, c.y], [c.x + c.w, c.y], [c.x, c.y + c.h], [c.x + c.w, c.y + c.h]]) { ctx.beginPath(); ctx.roundRect(x - 7, y - 7, 14, 14, 2); ctx.fill(); }
+    ctx.restore();
+  },
+  notes(ctx, W, H, t) {
+    const p = onbCycle(t, 4), drop = onbSmooth(onbRamp(p, 0.05, 0.3)), pin = onbRamp(p, 0.4, 0.5), open = onbSmooth(onbRamp(p, 0.55, 0.7));
+    this.paper(ctx, W, H);
+    this.lines(ctx, 22, 22, W - 44);
+    if (drop > 0) {
+      ctx.save(); ctx.globalAlpha = drop;
+      ctx.translate(W * 0.3, H * 0.55 - 160 * (1 - drop)); ctx.rotate((-6 + 18 * (1 - drop)) * Math.PI / 180);
+      ctx.shadowColor = 'rgba(0,0,0,.2)'; ctx.shadowBlur = 6; ctx.shadowOffsetY = 4;
+      ctx.fillStyle = 'rgb(255,237,128)'; ctx.beginPath(); ctx.roundRect(-60, -60, 120, 120, 4); ctx.fill();
+      ctx.shadowColor = 'transparent';
+      this.label(ctx, '¡Examen', 0, -11, `600 18px ${ROUNDED}`, onbGray(0.25)); this.label(ctx, 'el lunes!', 0, 11, `600 18px ${ROUNDED}`, onbGray(0.25));
+      ctx.restore();
+    }
+    const px = W * 0.72, py = H * 0.3;
+    if (open > 0) {
+      const x = px - 17 - 10, y = py - 17 + 40, w = 140 * open, h = 70 * open;
+      ctx.save(); ctx.shadowColor = 'rgba(0,0,0,.25)'; ctx.shadowBlur = 6;
+      ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.roundRect(x, y, w, h, 10); ctx.fill(); ctx.restore();
+      ctx.save(); ctx.beginPath(); ctx.roundRect(x, y, w, h, 10); ctx.clip();
+      ctx.fillStyle = '#AF52DE'; ctx.fillRect(x, y, w, 22);
+      ctx.scale(open, open);
+      this.label(ctx, '  Ana', x / open + 2, (y + 11) / open, `700 12px ${ROUNDED}`, '#fff', 'left');
+      this.label(ctx, 'Revisar esta parte', (x + 70 * open) / open, (y + 46 * open) / open, `12px ${ROUNDED}`, onbGray(0.3));
+      ctx.restore();
+    }
+    if (pin > 0) {
+      ctx.save(); ctx.translate(px, py); ctx.scale(pin, pin);
+      ctx.fillStyle = '#AF52DE'; ctx.beginPath(); ctx.arc(0, 0, 17, 0, 7); ctx.fill();
+      ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.stroke();
+      this.label(ctx, 'A', 0, 1, `600 17px ${ROUNDED}`, '#fff');
+      ctx.restore();
+    }
+  },
+  links(ctx, W, H, t, colors) {
+    const p = onbCycle(t, 3);
+    const a = [W * 0.22, H * 0.45 + 4 * Math.sin(t * 1.5)], b = [W * 0.78, H * 0.55 + 4 * Math.sin(t * 1.5 + 2)];
+    ctx.setLineDash([8, 6]); ctx.lineDashOffset = -t * 40; ctx.strokeStyle = 'rgba(255,255,255,.7)'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(...a); ctx.lineTo(...b); ctx.stroke(); ctx.setLineDash([]);
+    [a, b].forEach((pt, i) => {
+      const color = colors[i % colors.length];
+      const g = ctx.createRadialGradient(pt[0], pt[1], 10, pt[0], pt[1], 75); g.addColorStop(0, color + '8C'); g.addColorStop(1, color + '00');
+      ctx.fillStyle = g; ctx.beginPath(); ctx.ellipse(pt[0], pt[1], 70, 80, 0, 0, 7); ctx.fill();
+      ctx.fillStyle = onbGrad(ctx, i === 0 ? colors : [...colors].reverse(), 0, pt[1] - 46, 0, pt[1] + 46);
+      ctx.beginPath(); ctx.roundRect(pt[0] - 35, pt[1] - 46, 70, 92, 8); ctx.fill();
+      ctx.fillStyle = 'rgba(0,0,0,.2)'; ctx.fillRect(pt[0] - 35, pt[1] - 44, 8, 88);
+    });
+    const s = [a[0] + (b[0] - a[0]) * p, a[1] + (b[1] - a[1]) * p];
+    const g = ctx.createRadialGradient(s[0], s[1], 0, s[0], s[1], 14); g.addColorStop(0, 'rgba(50,215,255,.8)'); g.addColorStop(1, 'rgba(50,215,255,0)');
+    ctx.fillStyle = g; ctx.beginPath(); ctx.arc(s[0], s[1], 14, 0, 7); ctx.fill();
+    ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(s[0], s[1], 5, 0, 7); ctx.fill();
+    const mx = (a[0] + b[0]) / 2, my = (a[1] + b[1]) / 2 - 26;
+    ctx.font = `700 12px ${ROUNDED}`; const lw = ctx.measureText('pág. 3').width;
+    ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.roundRect(mx - lw / 2 - 8, my - 11, lw + 16, 22, 11); ctx.fill();
+    this.label(ctx, 'pág. 3', mx, my + 1, `700 12px ${ROUNDED}`, onbGray(0.2));
+  },
+  pdf(ctx, W, H, t) {
+    const p = onbCycle(t, 4), select = onbSmooth(onbRamp(p, 0.08, 0.35)), panel = onbRamp(p, 0.38, 0.48), marked = p > 0.6;
+    this.paper(ctx, W, H);
+    const w = W - 44, widths = [0.9, 0.8, 0.85, 0.5, 0.88, 0.7];
+    widths.forEach((k, line) => {
+      const y = 22 + line * 31;
+      if (line === 2 || line === 3) {
+        const width = line === 2 ? w * 0.85 * Math.min(1, select * 2) : w * 0.5 * Math.max(0, select * 2 - 1);
+        ctx.fillStyle = marked ? 'rgba(255,204,0,.6)' : 'rgba(0,122,255,.3)';
+        if (width > 0) { ctx.beginPath(); ctx.roundRect(22, y, width, 16, 3); ctx.fill(); }
+      }
+      ctx.fillStyle = onbGray(0.55); ctx.beginPath(); ctx.roundRect(22, y + 5, w * k, 6, 3); ctx.fill();
+    });
+    const sc = marked ? 0.8 : panel, op = marked ? 0 : panel;
+    if (op > 0) {
+      ctx.save(); ctx.globalAlpha = op; ctx.translate(W / 2, 48); ctx.scale(sc, sc);
+      const pw = 4 * 26 + 30 + 24;
+      ctx.shadowColor = 'rgba(0,0,0,.25)'; ctx.shadowBlur = 8; ctx.shadowOffsetY = 3;
+      ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.roundRect(-pw / 2, -18, pw, 36, 18); ctx.fill(); ctx.shadowColor = 'transparent';
+      ['#FFD60A', '#34C759', '#FF6B9A', '#5AC8FA'].forEach((c, i) => { ctx.fillStyle = c; ctx.beginPath(); ctx.arc(-pw / 2 + 22 + i * 26, 0, 10, 0, 7); ctx.fill(); });
+      const u = onbIcon('underline', '#4D4D4D', 20, 2); if (u.complete) ctx.drawImage(u, pw / 2 - 34, -10, 20, 20);
+      ctx.restore();
+    }
+  },
+  organize(ctx, W, H, t) {
+    const p = onbCycle(t, 3.4), move = onbSmooth(onbRamp(p, 0.2, 0.6));
+    const titles = [['Historia', '#FF3B30'], ['Física', '#007AFF'], ['Lengua', '#34C759']];
+    ctx.save(); ctx.beginPath(); ctx.roundRect(0, 0, W, H, 14); ctx.clip();
+    ctx.fillStyle = onbGray(0.08); ctx.fillRect(0, 0, W, H);
+    ctx.fillStyle = onbGray(0.17); ctx.fillRect(0, 56, W, H - 56);
+    const tw = (W - 20) / 3;
+    [1, 2, 0].forEach((i) => {
+      const slot = i === 0 ? 2 * move : i - move;
+      const x = 10 + tw * slot, y = 16 - (i === 0 ? 6 * Math.sin(Math.PI * move) : 0);
+      if (i === 0) {
+        if (move > 0 && move < 1) { ctx.shadowColor = 'rgba(0,0,0,.5)'; ctx.shadowBlur = 8; }
+        ctx.fillStyle = onbGray(0.17); ctx.beginPath(); ctx.roundRect(x, y, tw - 4, 40, [9, 9, 0, 0]); ctx.fill(); ctx.shadowColor = 'transparent';
+      }
+      const book = onbIcon('book', titles[i][1], 14, 2.2); if (book.complete) ctx.drawImage(book, x + 10, y + 13, 14, 14);
+      this.label(ctx, titles[i][0], x + 30, y + 20, `500 13px ${ROUNDED}`, '#fff', 'left');
+    });
+    this.label(ctx, 'Arrastra para ordenar', W / 2, H * 0.6 + 10, `600 17px ${ROUNDED}`, 'rgba(255,255,255,.7)');
+    ctx.restore();
+  },
+  dynamic(ctx, W, H, t) {
+    ctx.fillStyle = 'rgb(13,13,33)'; ctx.beginPath(); ctx.roundRect(0, 0, W, H, 14); ctx.fill();
+    const colors = ['#AF52DE', '#007AFF', '#30B0C7', '#FF2D55'];
+    const nodes = [[0.2, 0.3], [0.75, 0.25], [0.5, 0.7], [0.85, 0.75]].map(([x, y], i) => [W * x + 8 * Math.sin(t * 0.9 + i), H * y + 10 * Math.cos(t * 0.7 + i * 1.7)]);
+    [[0, 1], [0, 2], [2, 3], [1, 3]].forEach(([a, b], e) => {
+      ctx.setLineDash([6, 5]); ctx.lineDashOffset = -t * 25; ctx.strokeStyle = 'rgba(255,255,255,.35)'; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.moveTo(...nodes[a]); ctx.lineTo(...nodes[b]); ctx.stroke(); ctx.setLineDash([]);
+      const k = onbCycle(t + e * 0.4, 2.2), s = [nodes[a][0] + (nodes[b][0] - nodes[a][0]) * k, nodes[a][1] + (nodes[b][1] - nodes[a][1]) * k];
+      const g = ctx.createRadialGradient(s[0], s[1], 0, s[0], s[1], 9); g.addColorStop(0, 'rgba(50,215,255,.7)'); g.addColorStop(1, 'rgba(50,215,255,0)');
+      ctx.fillStyle = g; ctx.beginPath(); ctx.arc(s[0], s[1], 9, 0, 7); ctx.fill();
+      ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(s[0], s[1], 3, 0, 7); ctx.fill();
+    });
+    nodes.forEach((n, i) => {
+      const g = ctx.createRadialGradient(n[0], n[1], 8, n[0], n[1], 42); g.addColorStop(0, colors[i] + '99'); g.addColorStop(1, colors[i] + '00');
+      ctx.fillStyle = g; ctx.beginPath(); ctx.ellipse(n[0], n[1], 40, 45, 0, 0, 7); ctx.fill();
+      ctx.fillStyle = colors[i]; ctx.beginPath(); ctx.roundRect(n[0] - 17, n[1] - 22, 34, 44, 5); ctx.fill();
+    });
+  },
+  voice(ctx, W, H, t) {
+    const p = onbCycle(t, 5);
+    this.paper(ctx, W, H);
+    const bw = 5, gap = 4, total = 28 * bw + 27 * gap, x0 = W / 2 - total / 2, cy = H / 2 - 40;
+    for (let i = 0; i < 28; i++) {
+      const h = 10 + 40 * Math.abs(Math.sin(i * 0.7 + t * 4) * Math.cos(i * 0.31));
+      ctx.fillStyle = i / 28 < p ? '#FF9500' : onbGray(0.75);
+      ctx.beginPath(); ctx.roundRect(x0 + i * (bw + gap), cy - h / 2, bw, h, 2.5); ctx.fill();
+    }
+    const px = W / 2 - 125, py = cy + 56;
+    ctx.fillStyle = 'rgb(255,242,224)'; ctx.strokeStyle = '#FF9500'; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.roundRect(px, py, 250, 50, 25); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = '#FF9500'; ctx.beginPath(); ctx.arc(px + 27, py + 25, 15, 0, 7); ctx.fill();
+    ctx.fillStyle = '#fff'; ctx.fillRect(px + 22, py + 18, 3.5, 14); ctx.fillRect(px + 28.5, py + 18, 3.5, 14);
+    this.label(ctx, 'Clase de Historia', px + 52, py + 17, `600 16px ${ROUNDED}`, onbGray(0.15), 'left');
+    this.label(ctx, `0:${String(Math.floor(p * 45)).padStart(2, '0')} / 0:45`, px + 52, py + 35, `12px ${ROUNDED}`, onbGray(0.4), 'left');
+  },
+  timer(ctx, W, H, t) {
+    const p = onbCycle(t, 5), isBreak = p > 0.7, color = isBreak ? '#34C759' : '#FF3B30';
+    const progress = isBreak ? (p - 0.7) / 0.3 : p / 0.7;
+    const cx = W / 2, cy = H / 2, r = Math.min(W, H) / 2 - 27;
+    ctx.lineWidth = 14; ctx.strokeStyle = color + '33'; ctx.beginPath(); ctx.arc(cx, cy, r, 0, 7); ctx.stroke();
+    ctx.shadowColor = color + 'B3'; ctx.shadowBlur = 10; ctx.lineCap = 'round'; ctx.strokeStyle = color;
+    ctx.beginPath(); ctx.arc(cx, cy, r, -Math.PI / 2, -Math.PI / 2 + Math.max(0.001, progress) * Math.PI * 2); ctx.stroke(); ctx.shadowBlur = 0;
+    const ic = onbIcon(isBreak ? 'coffee' : 'book', color, 26, 2.2); if (ic.complete) ctx.drawImage(ic, cx - 13, cy - 58, 26, 26);
+    const secs = Math.floor((1 - progress) * (isBreak ? 300 : 1500));
+    this.label(ctx, `${Math.floor(secs / 60)}:${String(secs % 60).padStart(2, '0')}`, cx, cy + 2, `600 40px ${ROUNDED}`, '#fff');
+    this.label(ctx, isBreak ? 'Descanso' : 'Estudio', cx, cy + 40, `600 15px ${ROUNDED}`, color);
+  },
+  search(ctx, W, H, t) {
+    const p = onbCycle(t, 4), word = 'célula', typed = word.slice(0, Math.floor(onbRamp(p, 0.05, 0.3) * word.length)), results = onbRamp(p, 0.35, 0.5);
+    ctx.fillStyle = 'rgba(255,255,255,.12)'; ctx.beginPath(); ctx.roundRect(0, 0, W, 46, 12); ctx.fill();
+    const mg = onbIcon('search', 'rgba(255,255,255,.7)', 20, 2); if (mg.complete) ctx.drawImage(mg, 12, 13, 20, 20);
+    this.label(ctx, typed || 'Buscar', 42, 24, `20px ${ROUNDED}`, typed ? '#fff' : 'rgba(255,255,255,.4)', 'left');
+    const books = ['#34C759', '#007AFF', '#AF52DE'], where = ['Biología · pág. 2', 'Apuntes · pág. 7', 'Resumen · pág. 1'];
+    for (let i = 0; i < 3; i++) {
+      const k = onbRamp(results, i * 0.25, i * 0.25 + 0.5);
+      if (k <= 0) continue;
+      const y = 60 + i * 72 + 12 * (1 - k);
+      ctx.save(); ctx.globalAlpha = k;
+      ctx.fillStyle = 'rgba(255,255,255,.07)'; ctx.beginPath(); ctx.roundRect(0, y, W, 62, 12); ctx.fill();
+      ctx.fillStyle = books[i]; ctx.beginPath(); ctx.roundRect(10, y + 11, 30, 40, 4); ctx.fill();
+      this.label(ctx, where[i], 52, y + 20, `12px ${ROUNDED}`, 'rgba(255,255,255,.6)', 'left');
+      ctx.font = `15px ${ROUNDED}`; const wl = ctx.measureText('La ').width;
+      ctx.font = `700 15px ${ROUNDED}`; const wc = ctx.measureText('célula').width;
+      ctx.fillStyle = '#FFD60A'; ctx.beginPath(); ctx.roundRect(52 + wl - 3, y + 32, wc + 6, 20, 10); ctx.fill();
+      this.label(ctx, 'La ', 52, y + 42, `15px ${ROUNDED}`, '#fff', 'left');
+      this.label(ctx, 'célula', 52 + wl, y + 42, `700 15px ${ROUNDED}`, '#000', 'left');
+      this.label(ctx, ' es la unidad…', 52 + wl + wc, y + 42, `15px ${ROUNDED}`, '#fff', 'left');
+      ctx.restore();
+    }
+  },
+  shortcuts(ctx, W, H, t) {
+    const p = onbCycle(t, 4);
+    const keys = [[onbKey('toolHighlighter'), 'Subrayador', 0.1], [onbKey('closeTab'), 'Cerrar pestaña', 0.4], [onbKey('find'), 'Buscar', 0.7]];
+    keys.forEach(([k, what, at], i) => {
+      const pressed = p > at && p < at + 0.08, active = p > at && p < at + 0.3;
+      const y = H / 2 - 100 + i * 70;
+      ctx.font = `600 20px ${ROUNDED}`; const kw = Math.max(70, ctx.measureText(k).width + 26);
+      ctx.fillStyle = 'rgba(0,0,0,.5)'; ctx.beginPath(); ctx.roundRect(0, y + (pressed ? 4 : 4), kw, 50, 10); ctx.fill();
+      ctx.fillStyle = onbGray(pressed ? 0.35 : 0.22); ctx.beginPath(); ctx.roundRect(0, y + (pressed ? 3 : 0), kw, 50, 10); ctx.fill();
+      ctx.strokeStyle = 'rgba(255,255,255,.25)'; ctx.lineWidth = 1; ctx.stroke();
+      this.label(ctx, k, kw / 2, y + 25 + (pressed ? 3 : 0), `600 20px ${ROUNDED}`, '#fff');
+      this.label(ctx, '→', kw + 22, y + 25, `18px ${ROUNDED}`, 'rgba(255,255,255,.4)');
+      ctx.save(); ctx.translate(kw + 46, y + 25); const s = active ? 1.06 : 1; ctx.scale(s, s);
+      this.label(ctx, what, 0, 0, `600 20px ${ROUNDED}`, active ? '#fff' : 'rgba(255,255,255,.4)', 'left'); ctx.restore();
+    });
+  },
+  share(ctx, W, H, t) {
+    const p = onbCycle(t, 3.2), cx = W / 2, cy = H / 2;
+    const targets = [['comment', '#34C759', -120, -60], ['mail', '#5AC8FA', 120, -60], ['upload', '#007AFF', -120, 70], ['fileDown', '#fff', 120, 70]];
+    targets.forEach(([ic, color, dx, dy], i) => {
+      const k = onbSmooth(onbRamp(onbCycle(t + i * 0.2, 3.2), 0.1, 0.5));
+      ctx.setLineDash([5, 5]); ctx.strokeStyle = 'rgba(255,255,255,.3)'; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(cx + dx * k, cy + dy * k); ctx.stroke(); ctx.setLineDash([]);
+      const s = 0.6 + 0.4 * k;
+      ctx.save(); ctx.translate(cx + dx, cy + dy); ctx.scale(s, s);
+      ctx.fillStyle = 'rgba(255,255,255,.1)'; ctx.beginPath(); ctx.arc(0, 0, 27, 0, 7); ctx.fill();
+      const img = onbIcon(ic, color, 26, 2); if (img.complete) ctx.drawImage(img, -13, -13, 26, 26);
+      ctx.restore();
+    });
+    const s = 1 + 0.08 * Math.sin(p * Math.PI * 2);
+    ctx.save(); ctx.translate(cx, cy); ctx.scale(s, s);
+    const doc = onbIcon('pdf', '#fff', 56, 1.6); if (doc.complete) ctx.drawImage(doc, -28, -28, 56, 56);
+    ctx.restore();
+  },
+};
+
+// ---------- El recorrido ----------
+const Onboarding = {
+  el: null, stage: null, selected: null, raf: 0,
+
+  maybeShow() {
+    let seen = null;
+    try { seen = localStorage.getItem(ONB_KEY); } catch (e) { /* sin almacenamiento */ }
+    if (!seen) this.open();
+  },
+  get name() { try { return (localStorage.getItem(ONB_NAME) || '').trim(); } catch (e) { return ''; } },
+  set name(v) { try { localStorage.setItem(ONB_NAME, v); } catch (e) { /* nada */ } },
+  get firstName() { return this.name.split(/\s+/)[0] || ''; },
+
+  open() {
+    this.close(true);
+    this.selected = new Set(ONB_TOPICS.map((t) => t.id));
+    const el = document.createElement('div');
+    el.className = 'onb';
+    el.setAttribute('role', 'dialog');
+    el.setAttribute('aria-modal', 'true');
+    el.setAttribute('aria-label', 'Tutorial de Libreta');
+    el.innerHTML = `<canvas class="onb-aurora" aria-hidden="true"></canvas><div class="onb-stages"></div>
+      <button class="onb-glass onb-skip" data-onb="skip">Omitir tutorial</button>`;
+    document.body.appendChild(el);
+    this.el = el;
+    el.addEventListener('click', (e) => this.onClick(e));
+    el.addEventListener('keydown', (e) => this.onKey(e));
+    this.startAurora();
+    this.go('welcome');
+  },
+  close(silent) {
+    cancelAnimationFrame(this.raf);
+    cancelAnimationFrame(this.demoRaf);
+    cancelAnimationFrame(this.confettiRaf);
+    if (!this.el) return;
+    const el = this.el;
+    this.el = null;
+    if (silent) return el.remove();
+    el.classList.add('leaving');
+    setTimeout(() => el.remove(), 450);
+  },
+  finish(create) {
+    try { localStorage.setItem(ONB_KEY, 'done'); } catch (e) { /* nada */ }
+    this.close();
+    if (create) setTimeout(() => newNotebookDialog(), 300);
+  },
+
+  // Transición entre etapas: entra desde un lado, sale por el otro.
+  go(stage, forward = true) {
+    const host = this.el?.querySelector('.onb-stages');
+    if (!host) return;
+    this.stage = stage;
+    cancelAnimationFrame(this.demoRaf);
+    cancelAnimationFrame(this.confettiRaf);
+    const old = host.querySelector('.onb-stage:not(.out)');
+    if (old) { old.classList.add('out', forward ? 'to-left' : 'to-right'); setTimeout(() => old.remove(), 500); }
+    const st = document.createElement('div');
+    st.className = `onb-stage in ${forward ? 'from-right' : 'from-left'}`;
+    st.innerHTML = this.html(stage);
+    host.appendChild(st);
+    requestAnimationFrame(() => requestAnimationFrame(() => st.classList.add('shown')));
+    this.el.querySelector('.onb-skip').hidden = stage === 'done';
+    this.after(stage, st);
+  },
+  html(stage) {
+    const name = this.firstName;
+    const glass = (label, act, prominent, extra = '') => `<button class="onb-glass ${prominent ? 'prominent' : ''}" data-onb="${act}" ${extra}>${label}</button>`;
+    const arrow = `<span class="onb-arrow">${icon('chevronRight')}</span>`;
+    const title = (t, sub) => `<h1 class="onb-title">${esc(t)}</h1><p class="onb-sub">${esc(sub)}</p>`;
+    if (stage === 'welcome') {
+      return `<div class="onb-center">
+        <div class="onb-logo" aria-hidden="true"><div class="onb-cover"></div>
+          <svg viewBox="0 0 180 200" class="onb-sign"><path d="M40 125 C 52 76, 64 148, 76 88 C 88 50, 100 150, 114 110 C 128 70, 142 140, 158 92" /></svg>
+          <span class="onb-nib">${icon('pen')}</span></div>
+        <h1 class="onb-word" aria-label="Libreta">${[...'Libreta'].map((c, i) => `<span style="--i:${i}">${c}</span>`).join('')}</h1>
+        <p class="onb-sub onb-late">Tus apuntes, a mano y a tu manera.</p>
+        <div class="onb-late2">${glass(`Empezar ${arrow}`, 'start', true)}</div></div>`;
+    }
+    if (stage === 'name') {
+      return `<div class="onb-center">
+        <div class="onb-wave" aria-hidden="true">👋</div>
+        ${title('¿Cómo te llamas?', 'Así te puedo guiar durante el recorrido.')}
+        <label class="onb-name"><input type="text" id="onb-name" placeholder="Tu nombre" autocomplete="given-name" maxlength="40" value="${esc(this.name)}" aria-label="Tu nombre"><i></i></label>
+        <div class="onb-row">${glass('Prefiero no decirlo', 'noname', false)}${glass(`Continuar ${arrow}`, 'name', true, this.name ? '' : 'disabled')}</div></div>`;
+    }
+    if (stage === 'ask') {
+      const card = (act, sym, colors, t, sub, prominent) => `<button class="onb-choice ${prominent ? 'prominent' : ''}" data-onb="${act}" style="--c1:${colors[0]};--c2:${colors[1]}">
+        <span class="onb-tile">${icon(sym)}</span><b>${t}</b><span>${sub}</span></button>`;
+      return `<div class="onb-center">
+        ${title(name ? `Encantado, ${name}` : '¡Encantado!', '¿Te enseño cómo funciona Libreta? Son un par de minutos y eliges qué ver.')}
+        <div class="onb-row onb-rise">${card('yes', 'sparkles', ['#AF52DE', '#007AFF'], 'Sí, enséñame', 'Un recorrido rápido por lo que tú elijas.', true)}
+        ${card('no', 'compass', ['#8E8E93', 'rgba(142,142,147,.6)'], 'Ahora no', 'Prefiero explorarla yo. Podré verlo más tarde.', false)}</div></div>`;
+    }
+    if (stage === 'topics') {
+      return `<div class="onb-topics">
+        <div class="onb-head">${title(name ? `¿Qué quieres aprender, ${name}?` : '¿Qué quieres aprender?', 'Está todo seleccionado. Quita lo que ya sepas.')}</div>
+        <div class="onb-grid">${ONB_TOPICS.map((t, i) => `<button class="onb-topic" data-topic="${t.id}" aria-pressed="${this.selected.has(t.id)}" style="--c1:${t.colors[0]};--c2:${t.colors[1]};--i:${i}">
+          <span class="onb-tile">${icon(t.sym)}</span><span class="onb-tt"><b>${t.title}</b><span>${t.subtitle}</span></span>
+          <span class="onb-check">${icon('check')}</span></button>`).join('')}</div>
+        <div class="onb-row onb-foot">${glass('', 'all', false)}${glass('', 'begin', true)}</div></div>`;
+    }
+    if (stage.startsWith('lesson:')) {
+      const lessons = this.lessons(), index = Number(stage.slice(7)), topic = lessons[index];
+      const [intro, steps, tip] = onbLesson(topic.id, name);
+      return `<div class="onb-lesson" style="--c1:${topic.colors[0]};--c2:${topic.colors[1]}">
+        <div class="onb-progress" role="progressbar" aria-valuemin="1" aria-valuemax="${lessons.length}" aria-valuenow="${index + 1}" aria-label="Tema ${index + 1} de ${lessons.length}">
+          ${lessons.map((_, i) => `<i class="${i <= index ? 'on' : ''}"></i>`).join('')}</div>
+        <div class="onb-lesson-body">
+          <div class="onb-demo"><canvas width="388" height="278" aria-hidden="true"></canvas></div>
+          <div class="onb-copy">
+            <div class="onb-kicker"><span class="onb-tile small">${icon(topic.sym)}</span>Tema ${index + 1} de ${lessons.length}</div>
+            <h1>${topic.title}</h1>
+            <p class="onb-intro">${esc(intro)}</p>
+            <ul class="onb-steps">${steps.map(([sym, text], i) => `<li style="--i:${i}"><span class="onb-step-icon">${icon(sym)}</span><span>${esc(text)}</span></li>`).join('')}</ul>
+            <p class="onb-tip"><span>${icon('lightbulb')}</span>${esc(tip)}</p>
+          </div></div>
+        <div class="onb-nav">${glass(`<span class="onb-arrow back">${icon('back')}</span> Atrás`, 'back', false)}${glass(`${index + 1 === lessons.length ? 'Terminar' : 'Siguiente'} ${arrow}`, 'next', true)}</div></div>`;
+    }
+    // Final
+    return `<canvas class="onb-confetti" aria-hidden="true"></canvas><div class="onb-center">
+      <div class="onb-seal" aria-hidden="true"><svg viewBox="0 0 24 24"><defs><linearGradient id="onb-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#34C759"/><stop offset="1" stop-color="#32D2FF"/></linearGradient></defs>
+        <path fill="url(#onb-g)" d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z"/>
+        <path d="m9 12 2 2 4-4" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      ${title(name ? `¡Todo listo, ${name}!` : '¡Todo listo!', 'Puedes volver a ver el tutorial cuando quieras desde + › Ver el tutorial.')}
+      <div class="onb-row">${glass('Ir a mis libretas', 'library', false)}${glass(`${icon('plus')} Crear mi primera libreta`, 'create', true)}</div></div>`;
+  },
+  lessons() { return ONB_TOPICS.filter((t) => this.selected.has(t.id)); },
+  after(stage, st) {
+    if (stage === 'welcome') setTimeout(() => st.querySelector('[data-onb="start"]')?.focus({ preventScroll: true }), 2500);
+    if (stage === 'name') {
+      const input = st.querySelector('#onb-name');
+      setTimeout(() => input.focus(), 400);
+      input.addEventListener('input', () => {
+        st.querySelector('[data-onb="name"]').disabled = !input.value.trim();
+        const wave = st.querySelector('.onb-wave');
+        wave.classList.remove('waving'); void wave.offsetWidth; wave.classList.add('waving');
+      });
+      input.addEventListener('keydown', (e) => { if (e.key === 'Enter' && input.value.trim()) { e.preventDefault(); this.act('name'); } });
+    }
+    if (stage === 'ask') setTimeout(() => st.querySelector('[data-onb="yes"]')?.focus({ preventScroll: true }), 300);
+    if (stage === 'topics') this.refreshTopics(st);
+    if (stage.startsWith('lesson:')) this.startDemo(st, this.lessons()[Number(stage.slice(7))]);
+    if (stage === 'done') this.startConfetti(st.querySelector('.onb-confetti'));
+  },
+  refreshTopics(st = this.el?.querySelector('.onb-stage:not(.out)')) {
+    if (!st) return;
+    const n = this.selected.size, all = n === ONB_TOPICS.length;
+    st.querySelectorAll('[data-topic]').forEach((b) => b.setAttribute('aria-pressed', this.selected.has(b.dataset.topic)));
+    st.querySelector('[data-onb="all"]').textContent = all ? 'Quitar todo' : 'Seleccionar todo';
+    st.querySelector('[data-onb="begin"]').innerHTML = `${n ? `Empezar · ${n} ${n === 1 ? 'tema' : 'temas'}` : 'Terminar'} <span class="onb-arrow">${icon('chevronRight')}</span>`;
+  },
+  onClick(e) {
+    const topic = e.target.closest('[data-topic]');
+    if (topic) {
+      const id = topic.dataset.topic;
+      if (this.selected.has(id)) this.selected.delete(id); else this.selected.add(id);
+      topic.classList.remove('pop'); void topic.offsetWidth; topic.classList.add('pop');
+      return this.refreshTopics();
+    }
+    const b = e.target.closest('[data-onb]');
+    if (b && !b.disabled) this.act(b.dataset.onb);
+  },
+  act(a) {
+    const stage = this.stage, lesson = stage?.startsWith('lesson:') ? Number(stage.slice(7)) : -1;
+    if (a === 'skip') return this.confirmSkip();
+    if (a === 'start') return this.go('name');
+    if (a === 'noname') { this.name = ''; return this.go('ask'); }
+    if (a === 'name') { this.name = this.el.querySelector('#onb-name').value.trim(); return this.go('ask'); }
+    if (a === 'yes') return this.go('topics');
+    if (a === 'no') return this.finish(false);
+    if (a === 'all') { this.selected = this.selected.size === ONB_TOPICS.length ? new Set() : new Set(ONB_TOPICS.map((t) => t.id)); return this.refreshTopics(); }
+    if (a === 'begin') return this.go(this.selected.size ? 'lesson:0' : 'done');
+    if (a === 'back') return this.go(lesson === 0 ? 'topics' : `lesson:${lesson - 1}`, false);
+    if (a === 'next') return this.go(lesson + 1 < this.lessons().length ? `lesson:${lesson + 1}` : 'done');
+    if (a === 'library') return this.finish(false);
+    if (a === 'create') return this.finish(true);
+  },
+  onKey(e) {
+    if (e.target.closest?.('.onb-confirm')) return;
+    if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); return this.stage === 'done' ? this.finish(false) : this.confirmSkip(); }
+    if (this.stage?.startsWith('lesson:') && !e.target.matches('input')) {
+      if (e.key === 'ArrowRight') { e.preventDefault(); this.act('next'); }
+      if (e.key === 'ArrowLeft') { e.preventDefault(); this.act('back'); }
+    }
+    if (e.key === 'Enter' && !e.target.closest('button') && !e.target.matches('input')) {
+      const main = { welcome: 'start', ask: 'yes', topics: 'begin', done: 'create' }[this.stage];
+      if (main) { e.preventDefault(); this.act(main); }
+    }
+  },
+  confirmSkip() {
+    if (this.el.querySelector('.onb-confirm')) return;
+    const box = document.createElement('div');
+    box.className = 'onb-confirm';
+    box.innerHTML = `<div class="onb-confirm-card" role="alertdialog" aria-modal="true" aria-labelledby="onb-skip-t">
+      <h2 id="onb-skip-t">¿Omitir el tutorial?</h2><p>Podrás verlo cuando quieras desde + › Ver el tutorial.</p>
+      <div class="onb-row"><button class="onb-glass" data-c="stay">Seguir con el tutorial</button><button class="onb-glass prominent" data-c="skip">Omitir</button></div></div>`;
+    this.el.appendChild(box);
+    const done = () => box.remove();
+    box.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const c = e.target.closest('[data-c]')?.dataset.c;
+      if (c === 'skip') { done(); this.finish(false); } else if (c === 'stay' || e.target === box) done();
+    });
+    box.addEventListener('keydown', (e) => { if (e.key === 'Escape') { e.stopPropagation(); done(); } });
+    setTimeout(() => box.querySelector('[data-c="stay"]').focus(), 30);
+  },
+
+  // ---------- Fondo: aurora con estrellas (30 fotogramas por segundo) ----------
+  startAurora() {
+    const canvas = this.el.querySelector('.onb-aurora'), ctx = canvas.getContext('2d');
+    let last = 0;
+    const blobs = [['115,64,242', 0.7, (t) => 0.25 + 0.08 * Math.sin(t * 0.21), (t) => 0.3 + 0.1 * Math.cos(t * 0.17)],
+      ['26,153,217', 0.6, (t) => 0.75 + 0.07 * Math.cos(t * 0.19), (t) => 0.65 + 0.08 * Math.sin(t * 0.23)],
+      ['217,64,153', 0.45, (t) => 0.6 + 0.1 * Math.sin(t * 0.13), (t) => 0.2 + 0.07 * Math.sin(t * 0.29)],
+      ['51,64,204', 0.5, (t) => 0.2 + 0.06 * Math.cos(t * 0.11), (t) => 0.85 + 0.05 * Math.cos(t * 0.31)]];
+    const frame = (now) => {
+      if (!this.el) return;
+      this.raf = requestAnimationFrame(frame);
+      if (now - last < 1000 / 30 && last) return;
+      last = now;
+      const dpr = Math.min(devicePixelRatio || 1, 2), W = innerWidth, H = innerHeight;
+      if (canvas.width !== Math.round(W * dpr) || canvas.height !== Math.round(H * dpr)) { canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr); }
+      const t = onbReduce() ? 0 : now / 1000;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.fillStyle = 'rgb(10,10,26)'; ctx.fillRect(0, 0, W, H);
+      for (const [rgb, size, fx, fy] of blobs) {
+        const x = W * fx(t), y = H * fy(t), r = W * size * 0.62;
+        const g = ctx.createRadialGradient(x, y, 0, x, y, r);
+        g.addColorStop(0, `rgba(${rgb},.55)`); g.addColorStop(0.5, `rgba(${rgb},.25)`); g.addColorStop(1, `rgba(${rgb},0)`);
+        ctx.fillStyle = g; ctx.fillRect(x - r, y - r, r * 2, r * 2);
+      }
+      const rnd = onbRandom(7);
+      for (let i = 0; i < 110; i++) {
+        const x = rnd() * W, y = rnd() * H, phase = rnd() * 6.28, r = 0.6 + rnd() * 1.2;
+        ctx.fillStyle = `rgba(255,255,255,${0.25 + 0.5 * (0.5 + 0.5 * Math.sin(t * 1.3 + phase))})`;
+        ctx.beginPath(); ctx.arc(x + r, y + r, r, 0, 7); ctx.fill();
+      }
+      if (onbReduce()) cancelAnimationFrame(this.raf);
+    };
+    this.raf = requestAnimationFrame(frame);
+  },
+  startDemo(st, topic) {
+    const canvas = st.querySelector('.onb-demo canvas'), ctx = canvas.getContext('2d');
+    const dpr = Math.min(devicePixelRatio || 1, 2), W = 388, H = 278;
+    canvas.width = W * dpr; canvas.height = H * dpr;
+    const frame = (now) => {
+      if (!document.contains(canvas)) return;
+      this.demoRaf = requestAnimationFrame(frame);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.clearRect(0, 0, W, H);
+      ctx.save();
+      OnbDemos[topic.id](ctx, W, H, onbReduce() ? 1.6 : now / 1000, topic.colors);
+      ctx.restore();
+    };
+    this.demoRaf = requestAnimationFrame(frame);
+  },
+  startConfetti(canvas) {
+    if (!canvas || onbReduce()) return;
+    const ctx = canvas.getContext('2d'), start = performance.now();
+    const colors = ['#FF2D55', '#AF52DE', '#32D2FF', '#FFD60A', '#34C759', '#FF9500', '#007AFF'];
+    const frame = (now) => {
+      if (!document.contains(canvas)) return;
+      const t = (now - start) / 1000, dpr = Math.min(devicePixelRatio || 1, 2), W = innerWidth, H = innerHeight;
+      if (canvas.width !== Math.round(W * dpr)) { canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr); }
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, W, H);
+      const rnd = onbRandom(42);
+      let alive = false;
+      for (let i = 0; i < 140; i++) {
+        const x0 = rnd() * W, delay = rnd() * 0.6, speed = 180 + rnd() * 260, sway = rnd() * 40, spin = rnd() * 8 - 4;
+        const time = Math.max(0, t - delay), y = -20 + speed * time + 60 * time * time;
+        if (y > H + 20) continue;
+        alive = true;
+        ctx.save(); ctx.translate(x0 + sway * Math.sin(time * 3 + i), y); ctx.rotate(spin * time);
+        ctx.globalAlpha = Math.min(1, Math.max(0, 3.5 - time));
+        ctx.fillStyle = colors[i % colors.length]; ctx.beginPath(); ctx.roundRect(-4, -7, 8, 14, 2); ctx.fill();
+        ctx.restore();
+      }
+      if (alive && t < 4) this.confettiRaf = requestAnimationFrame(frame);
+    };
+    this.confettiRaf = requestAnimationFrame(frame);
+  },
+};
+
+// =============================================================================
 // Libretas de ejemplo (la primera vez) e inicio
 // =============================================================================
 function exampleNotebooks() {
@@ -5241,7 +6104,7 @@ function exampleNotebooks() {
   const link = `<a data-link='${JSON.stringify({ nb: temas.id, page: t2.id })}'>esquema del orgánulo</a>`;
   page.items.push(
     text(64, 70, 640, 'Hola, esto es Libreta', { font: 'serif', size: 40, bold: true }),
-    text(64, 150, 660, 'Prueba el bolígrafo (B) y escribe aquí debajo. Con el subrayador (H) en «H / V», tus subrayados quedan <b>perfectamente rectos</b>.', { size: 21 }),
+    text(64, 150, 660, 'Prueba el bolígrafo (P) y escribe aquí debajo. Con el subrayador (H) en «H / V», tus subrayados quedan <b>perfectamente rectos</b>.', { size: 21 }),
     text(64, 300, 300, 'Dibuja un círculo y mantén el ratón quieto al final: se vuelve perfecto.', { font: 'hand', size: 26, color: '#1E5BD8' }),
     text(64, 560, 660, `Los enlaces llevan a otras libretas o páginas: haz clic en el ${link} para verlo. Activa el <b>Modo dinámico</b> en la biblioteca para ver cómo se relacionan tus libretas.`, { size: 19 }),
     { id: uid(), type: 'link', x: 64, y: 700, w: 300, h: 56, target: { nb: temas.id, page: null } },
@@ -5272,6 +6135,7 @@ async function start() {
   S.tabs = (tabs.tabs || []).filter((id) => nbById(id));
   S.active = null; // se empieza siempre en la biblioteca; las pestañas siguen abiertas
   renderLibrary();
+  Onboarding.maybeShow();
   // Descargas (PDF, PNG y copia): solo si el visor lo permite.
   try { if (window.claude?.use) S.downloads = await window.claude.use('downloads'); } catch (e) { S.downloads = null; }
 }
