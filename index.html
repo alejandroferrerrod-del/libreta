@@ -358,6 +358,41 @@ svg { display: block; }
   .prominent .label { display: none; }
 }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+
+/* ---------- Temporizador de estudio ---------- */
+.pomo-slot { width: 104px; display: flex; justify-content: center; flex: none; }   /* ancho fijo: no mueve nada */
+.pomo-btn.running { border: 0; height: 30px; padding: 0 10px; border-radius: 15px; display: inline-flex; align-items: center; gap: 5px; color: var(--pc); background: color-mix(in srgb, var(--pc) 15%, transparent); font: 600 15px var(--font); font-variant-numeric: tabular-nums; }
+.pomo-btn.running svg { width: 13px; height: 13px; }
+.pomo-panel { position: fixed; z-index: 75; width: 340px; background: var(--surface); border: 1px solid var(--hairline); border-radius: 16px; box-shadow: 0 14px 40px rgba(0,0,0,.25); padding: 20px; display: flex; flex-direction: column; gap: 14px; align-items: stretch; animation: pop .14s ease-out; }
+.pomo-title { text-align: center; font-weight: 600; font-size: 17px; }
+.pomo-ring { position: relative; width: 150px; height: 150px; margin: 0 auto; }
+.pomo-ring svg { width: 150px; height: 150px; }
+.pomo-ring circle { transition: stroke-dashoffset .5s linear; }
+.pomo-ring div { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.pomo-ring b { font: 600 40px/1 ui-rounded, var(--font-display); font-variant-numeric: tabular-nums; }
+.pomo-ring small { color: var(--muted); font-size: 12px; margin-top: 4px; }
+.pomo-dots { display: flex; gap: 6px; justify-content: center; }
+.pomo-dots span { width: 9px; height: 9px; border-radius: 50%; background: var(--fill-strong); }
+.pomo-dots span.on { background: #FF3B30; }
+.pomo-actions { display: flex; gap: 14px; justify-content: center; align-items: center; }
+.pomo-actions .round { width: 42px; height: 42px; border-radius: 21px; border: 0; background: var(--fill); display: grid; place-items: center; color: var(--accent); }
+.pomo-actions .round svg { width: 20px; height: 20px; }
+.pomo-actions .go { border: 0; color: #fff; font-weight: 600; font-size: 16px; height: 42px; padding: 0 22px; border-radius: 12px; display: inline-flex; align-items: center; gap: 6px; min-width: 130px; justify-content: center; }
+.pomo-actions .go svg { width: 16px; height: 16px; fill: currentColor; }
+.pomo-remove { align-self: center; border: 0; background: transparent; color: var(--danger); display: inline-flex; gap: 6px; align-items: center; font-size: 14px; }
+.pomo-remove svg { width: 16px; height: 16px; }
+.pomo-panel hr { border: 0; border-top: 1px solid var(--hairline); margin: 0; width: 100%; }
+.pomo-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; font-size: 14px; }
+.pomo-row label { display: inline-flex; gap: 6px; align-items: center; }
+.stepper { display: inline-flex; background: var(--fill); border-radius: 8px; }
+.stepper button { border: 0; background: transparent; width: 34px; height: 28px; display: grid; place-items: center; }
+.stepper button + button { border-left: 1px solid var(--hairline); }
+.stepper svg { width: 14px; height: 14px; }
+.pomo-banner { position: fixed; z-index: 70; top: 104px; left: 50%; transform: translateX(-50%); display: flex; align-items: center; gap: 12px; padding: 12px 16px;
+  background: var(--surface); border: 1.5px solid color-mix(in srgb, var(--pc) 70%, transparent); border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,.2); animation: rise .25s ease-out; }
+.pomo-banner .ico { color: var(--pc); }
+.pomo-banner .ico svg { width: 26px; height: 26px; }
+.pomo-banner small { display: block; color: var(--muted); }
 </style>
 <div id="app"></div>
 <script>
@@ -469,7 +504,9 @@ const FONTS = {
   hand: { name: 'Manuscrita', css: '"Caveat", "Segoe Print", cursive' },
 };
 const LINK_COLOR = '#1E5BD8';
-const HOLD_MS = 450;
+/** Cuánto hay que mantener quieto al final de un trazo para la forma perfecta (o la recta). Con ratón
+ *  más: al acabar una letra uno se para antes de soltar el botón y con medio segundo saltaba sin querer. */
+const holdMs = (pointerType) => (pointerType === 'mouse' ? 1000 : 450);
 
 const uid = () => (crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).slice(2));
 const clone = (v) => JSON.parse(JSON.stringify(v));
@@ -908,6 +945,7 @@ const S = {
   collapsed: [],                   // espacios plegados en la barra de pestañas
   tool: 'pen',
   penKind: saved.penKind || 'pen', penColor: saved.penColor || '#1C1C1E', penWidth: saved.penWidth || 3, penShapes: false,
+  holdToSnap: saved.holdToSnap !== false,
   hlColor: saved.hlColor || '#FFD60A', hlWidth: saved.hlWidth || 18, hlMode: saved.hlMode || 'straight',
   eraserMode: saved.eraserMode || 'stroke', eraserSize: 14,
   stickyColor: STICKY_COLORS[0], commentColor: COMMENT_COLORS[0],
@@ -921,7 +959,7 @@ const S = {
 };
 function savePrefs() {
   Prefs.save({ dynamic: S.dynamic, penKind: S.penKind, penColor: S.penColor, penWidth: S.penWidth, hlColor: S.hlColor, hlWidth: S.hlWidth,
-    hlMode: S.hlMode, eraserMode: S.eraserMode, textDefault: S.textDefault, sidebar: S.sidebar, sidebarMode: S.sidebarMode, seeded: Prefs.load().seeded });
+    hlMode: S.hlMode, eraserMode: S.eraserMode, textDefault: S.textDefault, sidebar: S.sidebar, sidebarMode: S.sidebarMode, holdToSnap: S.holdToSnap, seeded: Prefs.load().seeded });
 }
 const nbById = (id) => S.notebooks.find((n) => n.id === id);
 const activeNb = () => nbById(S.active);
@@ -1982,6 +2020,252 @@ async function startDynamic(root) {
 }
 
 // =============================================================================
+// Temporizador de estudio (pomodoro): igual que en la app nativa.
+// No cuenta segundos: guarda la hora a la que acaba cada fase, así es exacto aunque se cierre la
+// pestaña. La primera vez que se empieza pide permiso para avisar con una notificación.
+// =============================================================================
+const POMO_PHASES = {
+  focus: { title: 'Estudio', color: '#FF3B30', icon: 'book' },
+  shortBreak: { title: 'Descanso', color: '#34C759', icon: 'sun' },
+  longBreak: { title: 'Descanso largo', color: '#30B0C7', icon: 'sun' },
+};
+const POMO_DEFAULTS = { focusMinutes: 25, shortBreakMinutes: 5, longBreakMinutes: 15, sessionsBeforeLongBreak: 4, autoStartNext: true, alarm: true };
+
+const Pomo = {
+  settings: Object.assign({}, POMO_DEFAULTS),
+  // phase, completed (sesiones de estudio terminadas en la tanda), endAt (en marcha), paused (segundos que quedaban)
+  state: { phase: 'focus', completed: 0, endAt: null, paused: null },
+  announcement: null,
+  ticker: null,
+  visible: true,
+
+  load() {
+    try {
+      const saved = JSON.parse(localStorage.getItem('libreta-pomodoro') || '{}');
+      Object.assign(this.settings, saved.settings || {});
+      Object.assign(this.state, saved.state || {});
+      this.visible = saved.visible !== false;
+    } catch (e) { /* sin datos guardados */ }
+    this.tick();
+    if (this.state.endAt) this.startTicker();
+  },
+  save() {
+    try { localStorage.setItem('libreta-pomodoro', JSON.stringify({ settings: this.settings, state: this.state, visible: this.visible })); } catch (e) { /* sin guardar */ }
+  },
+  duration(phase) {
+    const s = this.settings;
+    return 60 * (phase === 'focus' ? s.focusMinutes : phase === 'shortBreak' ? s.shortBreakMinutes : s.longBreakMinutes);
+  },
+  get running() { return this.state.endAt != null; },
+  get paused() { return this.state.paused != null; },
+  get fresh() { return !this.running && !this.paused && this.state.phase === 'focus' && this.state.completed === 0; },
+  remaining(now = Date.now()) {
+    if (this.state.endAt) return Math.max(0, (this.state.endAt - now) / 1000);
+    return this.state.paused ?? this.duration(this.state.phase);
+  },
+  progress(now = Date.now()) { const total = this.duration(this.state.phase); return total > 0 ? 1 - this.remaining(now) / total : 0; },
+  remainingText() { const sec = Math.ceil(this.remaining()); return `${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, '0')}`; },
+  next() {
+    const st = this.state;
+    if (st.phase === 'focus') {
+      const done = st.completed + 1;
+      return { phase: done >= Math.max(1, this.settings.sessionsBeforeLongBreak) ? 'longBreak' : 'shortBreak', completed: done };
+    }
+    return { phase: 'focus', completed: st.phase === 'longBreak' ? 0 : st.completed };
+  },
+  moveToNext(startAt) {
+    const n = this.next();
+    this.state = { phase: n.phase, completed: n.completed, endAt: startAt != null ? startAt + this.duration(n.phase) * 1000 : null, paused: null };
+  },
+  startOrPause() {
+    if (this.running) {
+      this.state.paused = this.remaining();
+      this.state.endAt = null;
+    } else {
+      this.state.endAt = Date.now() + (this.state.paused ?? this.duration(this.state.phase)) * 1000;
+      this.state.paused = null;
+      Alarm.unlock();
+      if ('Notification' in window && Notification.permission === 'default') Notification.requestPermission().catch(() => {});
+      this.startTicker();
+    }
+    this.announcement = null;
+    this.changed();
+  },
+  skip() { this.moveToNext(this.running ? Date.now() : null); this.announcement = null; this.changed(); },
+  reset() { this.state = { phase: 'focus', completed: 0, endAt: null, paused: null }; this.announcement = null; this.changed(); },
+  startTicker() {
+    if (this.ticker) return;
+    this.ticker = setInterval(() => { this.tick(); if (!this.running) { clearInterval(this.ticker); this.ticker = null; } this.render(); }, 500);
+  },
+  /** Avanza el reloj: si una o varias fases han terminado, suena la alarma y se avisa. */
+  tick() {
+    const now = Date.now();
+    let last = null, guard = 0;
+    while (this.state.endAt && this.state.endAt <= now && guard++ < 50) {
+      last = this.state.phase;
+      const end = this.state.endAt;
+      this.moveToNext(this.settings.autoStartNext ? end : null);
+    }
+    if (!last) return;
+    if (this.settings.alarm) Alarm.play();
+    const next = this.state.phase, minutes = Math.round(this.duration(next) / 60);
+    this.announcement = { next, minutes, waiting: !this.running, at: now };
+    const title = next === 'focus' ? 'Vuelta al estudio' : '¡Hora del descanso!';
+    if (document.hidden && 'Notification' in window && Notification.permission === 'granted') {
+      try { new Notification(title, { body: `${POMO_PHASES[last].title} terminado. Ahora: ${POMO_PHASES[next].title.toLowerCase()} de ${minutes} min.`, icon: 'icon-192.png' }); } catch (e) { /* sin aviso */ }
+    }
+    this.changed();
+  },
+  changed() { this.save(); this.render(); },
+
+  // ---------- Interfaz ----------
+  /** El reloj de la barra: un icono parado; el tiempo y la fase en marcha. Siempre del mismo ancho. */
+  buttonHTML() {
+    if (!this.visible) return '';
+    if (this.fresh) return `<button class="icon-btn pomo-btn" id="pomo-btn" title="Temporizador de estudio" aria-label="Temporizador de estudio">${icon('timer')}</button>`;
+    const p = POMO_PHASES[this.state.phase];
+    return `<button class="pomo-btn running" id="pomo-btn" style="--pc:${p.color}" title="${p.title}" aria-label="${p.title}: quedan ${this.remainingText()}">
+      ${icon(this.running ? p.icon : 'pause')}<span>${this.remainingText()}</span></button>`;
+  },
+  render() {
+    const slot = document.getElementById('pomo-slot');
+    if (slot) {
+      const html = this.buttonHTML();
+      if (slot.dataset.html !== html) { slot.dataset.html = html; slot.innerHTML = html; }
+    }
+    const panel = document.getElementById('pomo-panel');
+    if (panel) this.renderPanel(panel);
+    this.renderBanner();
+  },
+  openPanel(anchor) {
+    const old = document.getElementById('pomo-panel');
+    if (old) { old.remove(); return; }
+    closePopover();
+    const panel = document.createElement('div');
+    panel.id = 'pomo-panel';
+    panel.className = 'pomo-panel';
+    panel.setAttribute('role', 'dialog');
+    panel.setAttribute('aria-label', 'Temporizador de estudio');
+    document.body.appendChild(panel);
+    const r = anchor.getBoundingClientRect();
+    panel.style.top = `${r.bottom + 8}px`;
+    panel.style.left = `${Math.min(window.innerWidth - 350, Math.max(10, r.left + r.width / 2 - 170))}px`;
+    this.renderPanel(panel);
+    setTimeout(() => document.addEventListener('pointerdown', function close(e) {
+      if (!panel.contains(e.target) && !e.target.closest('#pomo-btn')) { panel.remove(); document.removeEventListener('pointerdown', close); }
+    }), 0);
+  },
+  renderPanel(panel) {
+    const st = this.state, p = POMO_PHASES[st.phase], s = this.settings;
+    const ring = 2 * Math.PI * 64, progress = Math.min(1, Math.max(0, this.progress()));
+    const status = this.paused ? 'En pausa' : this.running ? 'quedan' : `${Math.round(this.duration(st.phase) / 60)} min`;
+    const stepper = (key, label, min, max, step) => `<div class="pomo-row"><span>${label}: <b>${s[key]}${key === 'sessionsBeforeLongBreak' ? '' : ' min'}</b></span>
+      <span class="stepper"><button data-step="${key}" data-d="${-step}" data-min="${min}" data-max="${max}" aria-label="Menos">${icon('minus')}</button><button data-step="${key}" data-d="${step}" data-min="${min}" data-max="${max}" aria-label="Más">${icon('plus')}</button></span></div>`;
+    panel.innerHTML = `
+      <div class="pomo-title" style="color:${p.color}">${this.fresh ? `${p.title} · listo para empezar` : p.title}</div>
+      <div class="pomo-ring">
+        <svg viewBox="0 0 150 150"><circle cx="75" cy="75" r="64" stroke="${p.color}" stroke-opacity=".18" stroke-width="10" fill="none"/>
+          <circle cx="75" cy="75" r="64" stroke="${p.color}" stroke-width="10" fill="none" stroke-linecap="round" stroke-dasharray="${ring}" stroke-dashoffset="${ring * (1 - progress)}" transform="rotate(-90 75 75)"/></svg>
+        <div><b>${this.remainingText()}</b><small>${status}</small></div>
+      </div>
+      <div class="pomo-dots">${Array.from({ length: Math.max(1, s.sessionsBeforeLongBreak) }, (_, i) => `<span class="${i < st.completed ? 'on' : ''}"></span>`).join('')}</div>
+      <div class="pomo-actions">
+        <button class="round" data-pomo="reset" title="Volver a empezar" aria-label="Volver a empezar">${icon('rotate')}</button>
+        <button class="go" data-pomo="toggle" style="background:${p.color}">${icon(this.running ? 'pause' : 'play')} ${this.running ? 'Pausar' : this.paused ? 'Seguir' : 'Empezar'}</button>
+        <button class="round" data-pomo="skip" title="Saltar esta fase" aria-label="Saltar esta fase">${icon('chevronRight')}</button>
+      </div>
+      ${this.fresh ? '' : `<button class="pomo-remove" data-pomo="remove">${icon('close')} Quitar temporizador</button>`}
+      <hr>
+      ${stepper('focusMinutes', 'Estudio', 5, 120, 5)}${stepper('shortBreakMinutes', 'Descanso', 1, 30, 1)}${stepper('longBreakMinutes', 'Descanso largo', 5, 60, 5)}
+      ${stepper('sessionsBeforeLongBreak', 'Descanso largo cada (sesiones)', 2, 8, 1)}
+      <label class="pomo-row"><span>Empezar la siguiente fase sola</span><input type="checkbox" data-opt="autoStartNext" ${s.autoStartNext ? 'checked' : ''}></label>
+      <div class="pomo-row"><label><input type="checkbox" data-opt="alarm" ${s.alarm ? 'checked' : ''}> Alarma</label><button class="btn" data-pomo="test">Probar</button></div>`;
+    panel.onclick = (e) => {
+      const b = e.target.closest('button');
+      if (!b) return;
+      const act = b.dataset.pomo;
+      if (act === 'toggle') this.startOrPause();
+      if (act === 'skip') this.skip();
+      if (act === 'reset') this.reset();
+      if (act === 'remove') { this.reset(); panel.remove(); }
+      if (act === 'test') { Alarm.unlock(); Alarm.play(); }
+      if (b.dataset.step) {
+        const k = b.dataset.step;
+        s[k] = Math.min(Number(b.dataset.max), Math.max(Number(b.dataset.min), s[k] + Number(b.dataset.d)));
+        this.changed();
+      }
+    };
+    panel.onchange = (e) => { const k = e.target.dataset.opt; if (k) { s[k] = e.target.checked; this.changed(); } };
+  },
+  /** «¡Hora del descanso!» arriba en el editor. */
+  renderBanner() {
+    const old = document.getElementById('pomo-banner');
+    const a = this.announcement;
+    if (!a || S.view !== 'editor') { old?.remove(); return; }
+    if (old && old.dataset.at === String(a.at)) return;
+    old?.remove();
+    const p = POMO_PHASES[a.next];
+    const banner = document.createElement('div');
+    banner.id = 'pomo-banner';
+    banner.className = 'pomo-banner';
+    banner.dataset.at = a.at;
+    banner.style.setProperty('--pc', p.color);
+    banner.setAttribute('role', 'status');
+    banner.innerHTML = `<span class="ico">${icon(p.icon)}</span><div><b>${a.next === 'focus' ? 'Vuelta al estudio' : '¡Hora del descanso!'}</b>
+      <small>${p.title} de ${a.minutes} min${a.waiting ? ', cuando quieras.' : ' en marcha.'}</small></div>
+      ${a.waiting ? '<button class="btn primary" data-b="start">Empezar</button>' : ''}<button class="icon-btn plain" data-b="close" aria-label="Cerrar aviso">${icon('close')}</button>`;
+    banner.onclick = (e) => {
+      const b = e.target.closest('[data-b]');
+      if (!b) return;
+      if (b.dataset.b === 'start') this.startOrPause();
+      this.announcement = null;
+      banner.remove();
+    };
+    document.body.appendChild(banner);
+    if (!a.waiting) setTimeout(() => { if (this.announcement?.at === a.at) { this.announcement = null; banner.remove(); } }, 10000);
+  },
+  contextMenu(e) {
+    e.preventDefault();
+    popover({ x: e.clientX, y: e.clientY }, this.fresh ? `<button data-act="toggle">${icon('play')} Empezar a estudiar</button>`
+      : `<button data-act="toggle">${icon(this.running ? 'pause' : 'play')} ${this.running ? 'Pausar' : 'Seguir'}</button>
+      <button data-act="skip">${icon('chevronRight')} Saltar esta fase</button><hr><button data-act="remove">${icon('close')} Quitar temporizador</button>`, (act) => {
+      if (act === 'toggle') this.startOrPause();
+      if (act === 'skip') this.skip();
+      if (act === 'remove') this.reset();
+    });
+  },
+};
+
+/** La alarma: tres notas suaves que suben (do-mi-sol agudos), dos veces, como en la app nativa. */
+const Alarm = {
+  ctx: null,
+  /** El navegador solo deja sonar audio después de un clic: se prepara al pulsar Empezar. */
+  unlock() {
+    try {
+      this.ctx = this.ctx || new (window.AudioContext || window.webkitAudioContext)();
+      if (this.ctx.state === 'suspended') this.ctx.resume();
+    } catch (e) { /* sin audio */ }
+  },
+  play() {
+    const ctx = this.ctx;
+    if (!ctx) return;
+    const t0 = ctx.currentTime + 0.05;
+    [[1046.5, 0], [1318.5, 0.18], [1568, 0.36], [1046.5, 0.9], [1318.5, 1.08], [1568, 1.26]].forEach(([f, at]) => {
+      for (const [mult, level] of [[1, 0.28], [2, 0.08]]) {
+        const osc = ctx.createOscillator(), gain = ctx.createGain();
+        osc.frequency.value = f * mult;
+        gain.gain.setValueAtTime(0, t0 + at);
+        gain.gain.linearRampToValueAtTime(level, t0 + at + 0.01);
+        gain.gain.exponentialRampToValueAtTime(0.0001, t0 + at + 0.55);
+        osc.connect(gain).connect(ctx.destination);
+        osc.start(t0 + at);
+        osc.stop(t0 + at + 0.6);
+      }
+    });
+  },
+};
+
+// =============================================================================
 // Editor: pestañas, barra lateral, páginas, herramientas y elementos
 // =============================================================================
 const views = new Map();   // pageId -> vistas DOM de la página
@@ -2150,6 +2434,7 @@ function renderEditor() {
         <button class="icon-btn" id="add-image" aria-label="Insertar imagen" title="Insertar imagen (también puedes pegarla o arrastrarla)">${icon('image')}</button>
       </div>
       <div class="spacer"></div>
+      <span id="pomo-slot" class="pomo-slot"></span>
       <button class="icon-btn" id="find-btn" aria-label="Buscar (Ctrl+F)" title="Buscar (Ctrl+F)">${icon('search')}</button>
       <button class="icon-btn" id="undo" aria-label="Deshacer (Ctrl+Z)" title="Deshacer (Ctrl+Z)">${icon('undo')}</button>
       <button class="icon-btn" id="redo" aria-label="Rehacer (Ctrl+Mayús+Z)" title="Rehacer (Ctrl+Mayús+Z)">${icon('redo')}</button>
@@ -2186,6 +2471,9 @@ function renderEditor() {
     S.sidebar = true; S.sidebarMode = 'thumbs'; savePrefs();
     $('#sidebar').hidden = false; $('#side-btn').setAttribute('aria-pressed', true); renderSidebar(); requestAnimationFrame(fitZoom);
   });
+  Pomo.render();
+  $('#pomo-slot').addEventListener('click', (e) => { if (e.target.closest('#pomo-btn')) Pomo.openPanel(e.target.closest('#pomo-btn')); });
+  $('#pomo-slot').addEventListener('contextmenu', (e) => { if (e.target.closest('#pomo-btn')) Pomo.contextMenu(e); });
   $('#prev-page').addEventListener('click', () => { updateCurrentPage(); const p = nb.pages[currentPageIndex - 1]; if (p) scrollToPage(p.id); });
   $('#next-page').addEventListener('click', () => { updateCurrentPage(); const p = nb.pages[currentPageIndex + 1]; if (p) scrollToPage(p.id); });
   $('#add-page-btn').addEventListener('click', () => newPageDialog());
@@ -2409,11 +2697,15 @@ function pageMenu(anchor) {
     <button data-act="all">${icon('layers')} Aplicar a todas las páginas</button>`}
     <hr><div class="label">Zoom (también con Ctrl + rueda)</div>
     <button data-act="zoom-in">${icon('plus')} Acercar</button><button data-act="zoom-out">${icon('minus')} Alejar</button><button data-act="zoom-fit">${icon('pages')} Ajustar al ancho</button>
+    <hr><button data-act="pomo-visible">${mark(Pomo.visible)} Mostrar el temporizador en la barra</button>
+    <button data-act="hold">${mark(S.holdToSnap)} Mantener quieto al final: forma perfecta o recta</button>
     <hr><div class="label">Apariencia</div>
     ${[['system', 'Automática'], ['light', 'Clara'], ['dark', 'Oscura']].map(([k, n]) => `<button data-act="ap:${k}">${mark(currentAppearance() === k)} ${n}</button>`).join('')}
     <hr><button data-act="clear">${icon('trash')} Borrar el contenido de esta página…</button>
     <button data-act="delete" ${nb.pages.length < 2 ? 'disabled' : ''}>${icon('trash')} Eliminar esta página…</button>`, (act) => {
     const [kind, value] = act.split(':');
+    if (act === 'pomo-visible') { Pomo.visible = !Pomo.visible; return Pomo.changed(); }
+    if (act === 'hold') { S.holdToSnap = !S.holdToSnap; savePrefs(); return toast(S.holdToSnap ? 'Mantener quieto al final de un trazo lo convierte en forma o recta' : 'Los trazos quedan siempre tal como los dibujas'); }
     if (act === 'zoom-in') return setZoom(S.zoom * 1.2);
     if (act === 'zoom-out') return setZoom(S.zoom / 1.2);
     if (act === 'zoom-fit') return fitZoom();
@@ -2685,6 +2977,19 @@ function restoreRange() {
   const sel = getSelection(); sel.removeAllRanges(); sel.addRange(savedRange);
   return true;
 }
+/** Se está escribiendo en un cuadro, con el cursor y sin nada seleccionado. */
+function caretInEditingText() {
+  if (!S.editing) return false;
+  let sel = getSelection();
+  // Solo se recupera el cursor guardado si ahora no hay nada dentro del cuadro (p. ej. tras pulsar
+  // un botón de la barra); una selección de verdad no se toca.
+  if (!(sel.rangeCount && nodeEl(sel.anchorNode)?.closest?.('.rich[contenteditable="true"]'))) {
+    if (!restoreRange()) return false;
+    sel = getSelection();
+  }
+  const rich = nodeEl(sel.anchorNode)?.closest?.('.rich[contenteditable="true"]');
+  return !!(rich && sel.isCollapsed && htmlText(rich.innerHTML).trim());
+}
 function hasTextSelection() {
   const sel = getSelection();
   return !!(S.editing && sel.rangeCount && !sel.isCollapsed && nodeEl(sel.anchorNode)?.closest?.('.rich[contenteditable="true"]'));
@@ -2695,6 +3000,30 @@ function textStyle(change) {
   const found = findItem(S.editing || S.selected);
   const runLevel = ['bold', 'italic', 'underline', 'strike', 'color', 'size', 'font', 'mark'];
   const key = Object.keys(change)[0];
+  // Escribiendo con el cursor y nada seleccionado: el estilo vale para lo que se escriba desde ahí.
+  if (found && runLevel.includes(key) && caretInEditingText()) {
+    if (key === 'size') {
+      const sel = getSelection(), current = parseFloat(getComputedStyle(nodeEl(sel.anchorNode)).fontSize) || found.item.base.size;
+      const span = document.createElement('span');
+      span.style.fontSize = Math.max(8, current + change.size) + 'px';
+      span.textContent = '\u200B';
+      const range = sel.getRangeAt(0);
+      range.insertNode(span);
+      range.setStart(span.firstChild, 1); range.collapse(true);
+      sel.removeAllRanges(); sel.addRange(range);
+    } else {
+      document.execCommand('styleWithCSS', false, true);
+      if (key === 'bold') document.execCommand('bold');
+      if (key === 'italic') document.execCommand('italic');
+      if (key === 'underline') document.execCommand('underline');
+      if (key === 'strike') document.execCommand('strikeThrough');
+      if (key === 'color') document.execCommand('foreColor', false, change.color);
+      if (key === 'mark') document.execCommand('hiliteColor', false, change.mark || 'transparent');
+      if (key === 'font') document.execCommand('fontName', false, FONTS[change.font].css);
+    }
+    S.typingStyle = Object.assign(S.typingStyle || {}, change);
+    return;
+  }
   if (found && runLevel.includes(key) && (hasTextSelection() || (restoreRange() && hasTextSelection()))) {
     const before = snapshotPage(found.page);
     document.execCommand('styleWithCSS', false, true);
@@ -2746,7 +3075,7 @@ function linkSelection(target) {
 
 // ---------- Tinta: bolígrafo, subrayador, goma y lazo ----------
 function attachInk(page, v) {
-  let stroke = null, lastMove = 0, lastPoint = null, before = null, erased = false, lassoPath = null;
+  let stroke = null, lastMove = 0, lastPoint = null, before = null, erased = false, lassoPath = null, pointerType = 'mouse';
   const point = (e) => {
     const r = v.ink.getBoundingClientRect();
     const pressure = e.pointerType === 'mouse' ? 0.5 : (e.pressure || 0.5);
@@ -2755,6 +3084,7 @@ function attachInk(page, v) {
   v.ink.addEventListener('pointerdown', (e) => {
     if (e.button !== 0 && e.pointerType === 'mouse') return;
     e.preventDefault();
+    pointerType = e.pointerType;
     try { v.ink.setPointerCapture(e.pointerId); } catch (err) { /* puntero sintético */ }
     currentPageIndex = activeNb().pages.indexOf(page);
     stopEditing();
@@ -2793,7 +3123,7 @@ function attachInk(page, v) {
       return;
     }
     if (!stroke) return;
-    const held = performance.now() - lastMove > HOLD_MS;
+    const held = S.holdToSnap && performance.now() - lastMove > holdMs(pointerType);
     const xy = stroke.points.map((q) => [q[0], q[1]]);
     let snapped = null;
     if (stroke.tool === 'highlighter') {
@@ -3617,6 +3947,7 @@ function exampleNotebooks() {
 }
 
 async function start() {
+  Pomo.load();
   await Store.open();
   S.notebooks = (await Store.all()).map(normalizeNotebook);
   const seeded = Prefs.load().seeded;
