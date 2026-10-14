@@ -520,7 +520,7 @@ body.is-reordering .tabs .chip:hover { outline: 2px solid var(--accent); outline
 .onb-stage.in.from-right { transform: translateX(60px) scale(.98); opacity: 0; }
 .onb-stage.in.from-left { transform: translateX(-60px) scale(.98); opacity: 0; }
 .onb-stage.in.shown { transform: none; opacity: 1; }
-.onb-stage.out { pointer-events: none; opacity: 0; transition-duration: .4s; }
+.onb-stage.out { pointer-events: none; opacity: 0; transition: transform .3s ease-in, opacity .25s ease-in; }
 .onb-stage.out.to-left { transform: translateX(-60px); }
 .onb-stage.out.to-right { transform: translateX(60px); }
 .onb-center { margin: auto; display: flex; flex-direction: column; align-items: center; gap: 26px; padding: 40px; text-align: center; position: relative; z-index: 3; }
@@ -1516,6 +1516,13 @@ async function drawPageQuick(ctx, page) {
 
 const thumbCache = new Map();
 /** Miniatura (dataURL) de una página, con caché mientras no cambie. */
+/** La miniatura si ya está hecha (para ponerla sin esperar). */
+function cachedThumb(page, width = 180) { const u = thumbCache.get(`${page.id}:${page._v || 0}:${width}`); return typeof u === 'string' ? u : ''; }
+/** <img> de una miniatura con su proporción reservada: la lista no salta al cargar. */
+function thumbImg(page, alt = '') {
+  const src = cachedThumb(page);
+  return `<img alt="${alt}" data-src="${page.id}" draggable="false" style="aspect-ratio:${page.w}/${page.h}"${src ? ` src="${src}"` : ''}>`;
+}
 async function pageThumb(page, width = 180) {
   const key = `${page.id}:${page._v || 0}:${width}`;
   if (thumbCache.has(key)) return thumbCache.get(key);
@@ -1760,7 +1767,7 @@ function cardHTML(nb) {
     ${coverHTML(nb, { extra: `data-open="${nb.id}" aria-label="Abrir ${esc(nb.title)}"` })}
     <button class="more" data-more="${nb.id}" aria-label="Opciones de ${esc(nb.title)}" aria-haspopup="menu" aria-expanded="false">${icon('more')}</button>
     <div class="name">${esc(nb.title)}</div>
-    <div class="meta">${nb.example ? '<span class="badge">Ejemplo</span>' : ''}${space}${pages} ${pages === 1 ? 'página' : 'páginas'} · ${formatDate(nb.modified)}</span></div>
+    <div class="meta">${space}${pages} ${pages === 1 ? 'página' : 'páginas'} · ${formatDate(nb.modified)}</span></div>
   </div>`;
 }
 
@@ -2906,7 +2913,7 @@ function renderPagesWindow() {
   const grid = $('#pw-grid'), nb = activeNb();
   if (!grid || !nb) return;
   grid.innerHTML = nb.pages.map((p, i) => `<div class="pw-page ${i === currentPageIndex ? 'current' : ''}" data-index="${i}" data-go="${p.id}" role="button" aria-label="Página ${i + 1}">
-    <div class="pw-thumb"><img alt="" data-src="${p.id}" draggable="false">
+    <div class="pw-thumb">${thumbImg(p)}
     <button class="bm" data-bm="${p.id}" aria-pressed="${!!p.bookmarked}" aria-label="${p.bookmarked ? 'Quitar de marcadores' : 'Guardar en marcadores'}">${icon(p.bookmarked ? 'bookmarkFill' : 'bookmark')}</button></div>
     <span class="num">${i + 1}</span></div>`).join('');
   loadThumbs(grid, nb);
@@ -4831,6 +4838,8 @@ function followLink(target) {
 function renderSidebar() {
   const el = $('#sidebar'), nb = activeNb();
   if (!el || !nb || !S.sidebar) return;
+  const keep = el.dataset.mode === S.sidebarMode && el.dataset.nb === nb.id ? $('#side-body', el)?.scrollTop || 0 : 0;
+  el.dataset.mode = S.sidebarMode; el.dataset.nb = nb.id;
   el.innerHTML = `<div class="seg" role="tablist" aria-label="Vista de la barra lateral">
       <button data-mode="thumbs" aria-pressed="${S.sidebarMode === 'thumbs'}" title="Miniaturas" aria-label="Miniaturas">${icon('pages')}</button>
       <button data-mode="bookmarks" aria-pressed="${S.sidebarMode === 'bookmarks'}" title="Marcadores" aria-label="Marcadores">${icon('bookmark')}</button>
@@ -4841,16 +4850,22 @@ function renderSidebar() {
   if (S.sidebarMode === 'thumbs') renderThumbs(body, nb);
   if (S.sidebarMode === 'bookmarks') {
     const saved = nb.pages.map((p, i) => ({ p, i })).filter((x) => x.p.bookmarked);
-    body.innerHTML = saved.length ? saved.map(({ p, i }) => `<div class="thumb ${i === currentPageIndex ? 'current' : ''}" data-index="${i}" data-go="${p.id}"><img alt="" data-src="${p.id}"><span class="num">Página ${i + 1}${nb.outline.find((o) => o.pageId === p.id) ? ' · ' + esc(nb.outline.find((o) => o.pageId === p.id).title) : ''}</span></div>`).join('')
+    body.innerHTML = saved.length ? saved.map(({ p, i }) => `<div class="thumb ${i === currentPageIndex ? 'current' : ''}" data-index="${i}" data-go="${p.id}">${thumbImg(p)}
+      <button class="bm" data-bm="${p.id}" aria-pressed="true" aria-label="Quitar de marcadores">${icon('bookmarkFill')}</button><span class="num">Página ${i + 1}${nb.outline.find((o) => o.pageId === p.id) ? ' · ' + esc(nb.outline.find((o) => o.pageId === p.id).title) : ''}</span></div>`).join('')
       : '<p class="side-empty">Sin páginas guardadas. Pulsa el marcador de una página (arriba o en Miniaturas) para guardarla aquí.</p>';
-    body.onclick = (e) => { const t = e.target.closest('[data-go]'); if (t) scrollToPage(t.dataset.go); };
+    body.onclick = (e) => {
+      const bm = e.target.closest('[data-bm]');
+      if (bm) return toggleBookmark(nb.pages.find((p) => p.id === bm.dataset.bm));
+      const t = e.target.closest('[data-go]'); if (t) scrollToPage(t.dataset.go);
+    };
     loadThumbs(body, nb);
   }
   if (S.sidebarMode === 'outline') renderOutline(body, nb);
+  body.scrollTop = keep;
 }
 function renderThumbs(body, nb) {
   body.innerHTML = nb.pages.map((p, i) => `<div class="thumb ${i === currentPageIndex ? 'current' : ''}" data-index="${i}" data-go="${p.id}">
-    <img alt="Página ${i + 1}" data-src="${p.id}" draggable="false">
+    ${thumbImg(p, `Página ${i + 1}`)}
     <button class="bm" data-bm="${p.id}" aria-pressed="${!!p.bookmarked}" aria-label="${p.bookmarked ? 'Quitar de marcadores' : 'Guardar en marcadores'}">${icon(p.bookmarked ? 'bookmarkFill' : 'bookmark')}</button>
     <span class="num">${i + 1}</span></div>`).join('');
   loadThumbs(body, nb);
@@ -4864,11 +4879,26 @@ function renderThumbs(body, nb) {
   // Arrastrar una miniatura para cambiar la página de sitio (las demás se apartan mientras tanto).
   if (!body.dataset.reorder) { body.dataset.reorder = '1'; liveReorder(body, '.thumb', { onDrop: (from, to) => movePage(activeNb(), from, to), scroller: body }); }
 }
+/** Pone las miniaturas: las que ya están, al momento; las que faltan, primero las visibles y
+ *  de una en una dejando respirar a la página (así no se queda trabada con muchas páginas). */
 async function loadThumbs(body, nb) {
+  const run = (body._thumbRun = (body._thumbRun || 0) + 1);
+  const box = body.getBoundingClientRect();
+  const pending = [];
   for (const img of $$('img[data-src]', body)) {
     const page = nb.pages.find((p) => p.id === img.dataset.src);
-    if (page) img.src = await pageThumb(page, 180);
-    if (!document.contains(img)) return;
+    if (!page) continue;
+    const ready = cachedThumb(page);
+    if (ready) { if (img.getAttribute('src') !== ready) img.src = ready; continue; }
+    const r = img.getBoundingClientRect();
+    pending.push({ img, page, visible: r.bottom > box.top - 200 && r.top < box.bottom + 200 });
+  }
+  pending.sort((a, b) => b.visible - a.visible);
+  for (const { img, page } of pending) {
+    const url = await pageThumb(page, 180);
+    if (body._thumbRun !== run || !document.contains(img)) return;
+    img.src = url;
+    await new Promise((r) => setTimeout(r, 0));
   }
 }
 function toggleBookmark(page) {
@@ -5843,15 +5873,22 @@ const Onboarding = {
     this.stage = stage;
     cancelAnimationFrame(this.demoRaf);
     cancelAnimationFrame(this.confettiRaf);
+    // Primero se va el paso actual y, cuando ya se ha desvanecido, entra el siguiente.
+    clearTimeout(this.enterTimer);
+    host.querySelectorAll('.onb-stage.pending').forEach((x) => x.remove());
     const old = host.querySelector('.onb-stage:not(.out)');
-    if (old) { old.classList.add('out', forward ? 'to-left' : 'to-right'); setTimeout(() => old.remove(), 500); }
+    if (old) { old.classList.add('out', forward ? 'to-left' : 'to-right'); setTimeout(() => old.remove(), 400); }
     const st = document.createElement('div');
     st.className = `onb-stage in ${forward ? 'from-right' : 'from-left'}`;
     st.innerHTML = this.html(stage);
-    host.appendChild(st);
-    requestAnimationFrame(() => requestAnimationFrame(() => st.classList.add('shown')));
     this.el.querySelector('.onb-skip').hidden = stage === 'done';
-    this.after(stage, st);
+    const enter = () => {
+      st.classList.remove('pending');
+      host.appendChild(st);
+      requestAnimationFrame(() => requestAnimationFrame(() => st.classList.add('shown')));
+      this.after(stage, st);
+    };
+    if (old && !onbReduce()) { st.classList.add('pending'); this.enterTimer = setTimeout(enter, 300); } else enter();
   },
   html(stage) {
     const name = this.firstName;
