@@ -21,6 +21,7 @@
 </head>
 <body>
 <style>
+[hidden] { display: none !important; }
 /* Igual que la app nativa (iPad y Mac): colores medidos en sus capturas, fuente del sistema, iconos
    de línea, pestañas como las de Chrome y barras blancas (o gris oscuro en modo oscuro). */
 :root {
@@ -3639,7 +3640,7 @@ function renderEditor() {
     </div>`;
   renderTabs();
   $('#back').addEventListener('click', backToLibrary);
-  $('#side-btn').addEventListener('click', () => { S.sidebar = !S.sidebar; savePrefs(); $('#sidebar').hidden = !S.sidebar; $('#side-btn').setAttribute('aria-pressed', S.sidebar); renderSidebar(); requestAnimationFrame(fitZoom); });
+  $('#side-btn').addEventListener('click', () => setSidebar(!S.sidebar));
   $('#title').addEventListener('change', (e) => { nb.title = e.target.value.trim() || 'Sin título'; touch(); renderTabs(); });
   $$('[data-tool]').forEach((b) => b.addEventListener('click', () => setTool(b.dataset.tool)));
   $('#add-image').addEventListener('click', () => { saveRange(); pickFile('image/*', (f) => insertImageFile(f), true); });
@@ -3667,7 +3668,12 @@ function renderEditor() {
   $('#add-page-btn').addEventListener('click', () => newPageDialog());
   $('#page-menu').addEventListener('click', (e) => pageMenu(e.currentTarget));
   const desk = $('#desk');
-  desk.addEventListener('scroll', () => { updateCurrentPage(); PdfText.place(); }, { passive: true });
+  let redrawQueued = false;
+  desk.addEventListener('scroll', () => {
+    updateCurrentPage(); PdfText.place();
+    // Al saltar lejos, se pintan primero las páginas que aparecen.
+    if (!redrawQueued) { redrawQueued = true; requestAnimationFrame(() => { redrawQueued = false; redrawPages(Math.min(window.devicePixelRatio || 1, 2)); }); }
+  }, { passive: true });
   desk.addEventListener('wheel', (e) => { if (e.ctrlKey || e.metaKey) { e.preventDefault(); setZoom(S.zoom * (e.deltaY < 0 ? 1.1 : 1 / 1.1)); } }, { passive: false });
   desk.addEventListener('dragover', (e) => { if ([...(e.dataTransfer?.items || [])].some((i) => i.kind === 'file')) e.preventDefault(); });
   desk.addEventListener('drop', (e) => {
@@ -3751,15 +3757,38 @@ function layoutPages() {
     v.wrap.style.width = page.w * S.zoom + 'px';
     v.wrap.style.height = page.h * S.zoom + 'px';
     v.inner.style.transform = `scale(${S.zoom})`;
-    const scale = Math.min(S.zoom * dpr, 3);
+    if (!v.laidOut) { v.laidOut = true; renderItems(page); }
+  }
+  redrawPages(dpr);
+  const label = $('#zoom-fit');
+  if (label) label.textContent = Math.round(S.zoom * 100) + '%';
+}
+/** Vuelve a pintar a la nueva resolución las páginas que lo necesitan: las que se ven, al momento;
+ *  el resto, poco a poco (con muchas páginas, cambiar el zoom ya no deja la libreta trabada). */
+function redrawPages(dpr) {
+  const nb = activeNb(), desk = $('#desk');
+  if (!nb || !desk) return;
+  const scale = Math.min(S.zoom * dpr, 3);
+  const top = desk.scrollTop - desk.clientHeight, bottom = desk.scrollTop + desk.clientHeight * 2;
+  const todo = nb.pages.map((page) => ({ page, v: views.get(page.id) })).filter(({ v }) => v && v.ink._scale !== scale);
+  const paint = ({ page, v }) => {
+    if (!document.contains(v.wrap) || v.ink._scale === scale) return;
     for (const c of [v.paper, v.ink, v.live]) {
       c.width = Math.round(page.w * scale); c.height = Math.round(page.h * scale);
       c.style.width = page.w + 'px'; c.style.height = page.h + 'px'; c._scale = scale;
     }
-    renderPaper(page); renderInk(page); renderItems(page);
-  }
-  const label = $('#zoom-fit');
-  if (label) label.textContent = Math.round(S.zoom * 100) + '%';
+    renderPaper(page); renderInk(page);
+  };
+  const near = todo.filter(({ v }) => v.wrap.offsetTop + v.wrap.offsetHeight > top && v.wrap.offsetTop < bottom);
+  near.forEach(paint);
+  const rest = todo.filter((x) => !near.includes(x));
+  const run = (redrawPages.run = (redrawPages.run || 0) + 1);
+  const step = () => {
+    if (redrawPages.run !== run) return;
+    rest.splice(0, 2).forEach(paint);
+    if (rest.length) setTimeout(step, 16);
+  };
+  if (rest.length) setTimeout(step, 50);
 }
 function ctxFor(canvas) { const ctx = canvas.getContext('2d'); ctx.setTransform(canvas._scale, 0, 0, canvas._scale, 0, 0); return ctx; }
 function renderPaper(page) { const v = views.get(page.id); if (v) drawPaper(ctxFor(v.paper), page); }
@@ -4835,6 +4864,21 @@ function followLink(target) {
 }
 
 // ---------- Barra lateral: miniaturas, marcadores y esquema ----------
+function setSidebar(on) {
+  S.sidebar = on; savePrefs();
+  const b = $('#side-btn');
+  $('#sidebar').hidden = !on;
+  b.setAttribute('aria-pressed', on);
+  b.setAttribute('aria-label', `${on ? 'Ocultar' : 'Mostrar'} barra lateral`); b.title = b.getAttribute('aria-label');
+  if (on) renderSidebar();
+  // La página se reajusta al nuevo ancho, sin perder la página en la que estabas.
+  updateCurrentPage();
+  const page = activeNb()?.pages[currentPageIndex], desk = $('#desk'), v = page && views.get(page.id);
+  const offset = v ? desk.scrollTop - v.wrap.offsetTop : 0, ratio = v ? offset / Math.max(1, v.wrap.offsetHeight) : 0;
+
+  fitZoom();
+  if (v) desk.scrollTop = v.wrap.offsetTop + ratio * v.wrap.offsetHeight;
+}
 function renderSidebar() {
   const el = $('#sidebar'), nb = activeNb();
   if (!el || !nb || !S.sidebar) return;
