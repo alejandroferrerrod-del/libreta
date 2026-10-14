@@ -218,7 +218,6 @@ svg { display: block; }
 .tab.active .foot.l { left: -8px; background: radial-gradient(circle at 0 0, transparent 7.5px, var(--bar) 8px); }
 .tab.active .foot.r { right: -8px; background: radial-gradient(circle at 100% 0, transparent 7.5px, var(--bar) 8px); }
 .tab .gline { position: absolute; left: 8px; right: 8px; bottom: 0; height: 2.5px; border-radius: 2px; background: var(--g); }
-.tab.drop-before { box-shadow: inset 3px 0 0 var(--accent); }
 .tab.dragging { opacity: .3; }
 .tab.floating { position: fixed; z-index: 80; pointer-events: none; background: var(--bar); border-radius: 9px 9px 0 0; box-shadow: 0 4px 14px rgba(0,0,0,.25); }
 .tabs .plus { align-self: center; }
@@ -252,7 +251,6 @@ svg { display: block; }
 .thumb { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 10px 0 4px; position: relative; cursor: pointer; }
 .thumb img { width: 100%; box-shadow: 0 0 0 1px var(--hairline), 0 1px 4px rgba(0,0,0,.12); border-radius: 3px; background: #fff; border: 3px solid transparent; }
 .thumb.current img { border-color: var(--accent); }
-.thumb.drop img { border-color: var(--accent); border-style: dashed; }
 .thumb .num { font-size: 12.5px; color: var(--muted); font-variant-numeric: tabular-nums; }
 .thumb.current .num { color: var(--accent); font-weight: 600; }
 .thumb .bm { position: absolute; top: 16px; right: 8px; border: 0; background: transparent; padding: 2px; color: var(--muted); }
@@ -435,6 +433,31 @@ svg { display: block; }
 .crop-width input { flex: 1; accent-color: var(--accent); }
 .crop-width span { min-width: 170px; text-align: right; }
 .crop-info { font-size: 12.5px; text-align: center; }
+
+/* Reordenar arrastrando (páginas y pestañas) */
+.reorder-shift { transition: transform .2s cubic-bezier(.2,.8,.3,1); }
+.reordering { position: relative; z-index: 30; cursor: grabbing !important; transition: none; }
+.reordering img, .reordering.tab { filter: drop-shadow(0 8px 18px rgba(0,0,0,.25)); }
+.reordering.pw-page .pw-thumb, .reordering.thumb img { transform: scale(1.04); }
+body.is-reordering, body.is-reordering * { cursor: grabbing !important; user-select: none; }
+body.is-reordering .tabs .chip:hover { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* Ventana «Páginas» */
+.pages-window { width: min(900px, 100%); height: min(760px, 100%); gap: 10px; }
+.pw-head { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; }
+.pw-head .btn:first-child { justify-self: start; } .pw-head .btn:last-child { justify-self: end; }
+.pw-head .btn svg { width: 16px; height: 16px; vertical-align: -3px; }
+.pw-hint { text-align: center; font-size: 12.5px; }
+.pw-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 22px 20px; padding: 8px 4px 20px; align-content: start; touch-action: none; }
+.pw-page { display: flex; flex-direction: column; align-items: center; gap: 8px; cursor: grab; }
+.pw-thumb { position: relative; width: 100%; transition: transform .15s; }
+.pw-thumb img { width: 100%; display: block; background: #fff; border-radius: 4px; border: 3px solid transparent; box-shadow: 0 0 0 1px var(--hairline), 0 2px 8px rgba(0,0,0,.12); }
+.pw-page.current img { border-color: var(--accent); }
+.pw-page .num { font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.pw-page.current .num { color: var(--accent); font-weight: 600; }
+.pw-page .bm { position: absolute; top: 6px; right: 6px; border: 0; background: transparent; padding: 2px; color: var(--muted); }
+.pw-page .bm[aria-pressed="true"] { color: #FF3B30; }
+.popover .danger { color: var(--danger); }
 </style>
 <div id="app"></div>
 <script>
@@ -2474,6 +2497,195 @@ function cropImageDialog(src, { replacing = false, inline = false, widthFraction
 }
 
 // =============================================================================
+// Reordenar arrastrando con el ratón, en vivo (como la app nativa): lo que arrastras sigue
+// al puntero y el resto se aparta para enseñar dónde quedará. Sirve para páginas y pestañas.
+// =============================================================================
+const Reorder = {
+  /** Posición en la que quedaría lo arrastrado: cuántas casillas (sin la suya) quedan antes del puntero. */
+  targetIndex(point, slots, from, axis = 'grid') {
+    let n = 0;
+    slots.forEach((s, i) => {
+      if (i === from) return;
+      const before = axis === 'x' ? point.x > s.left + s.width / 2 : point.y > s.bottom || (point.y >= s.top && point.x > s.left + s.width / 2);
+      if (before) n++;
+    });
+    return n;
+  },
+  /** El orden resultante de mover el elemento `from` a `to`. */
+  preview(list, from, to) {
+    const out = list.slice();
+    const [moved] = out.splice(from, 1);
+    out.splice(to, 0, moved);
+    return out;
+  },
+};
+
+/**
+ * Hace reordenables los hijos `selector` de `container`.
+ * onDrop(from, to, el, pointerEvent) al soltar en otro sitio; onOutside(el, pointerEvent) al soltar fuera
+ * (devuelve true si lo ha gestionado); onTarget(el, elementoDebajo) igual, antes que nada.
+ * `group(el)`: solo se reordena entre los que tienen el mismo grupo. `ignore` = selector de botones dentro que no inician arrastre.
+ */
+function liveReorder(container, selector, { onDrop, onOutside, onTarget, group, ignore = 'button', scroller = null, axis = 'grid' } = {}) {
+  container.addEventListener('pointerdown', (e) => {
+    if (e.button !== 0 || (ignore && e.target.closest(ignore))) return;
+    const el = e.target.closest(selector);
+    if (!el || !container.contains(el)) return;
+    const items = [...container.querySelectorAll(selector)].filter((x) => x.parentElement === el.parentElement && (!group || group(x) === group(el)));
+    const from = items.indexOf(el);
+    const scrollEl = scroller || container;
+    const start = { x: e.clientX, y: e.clientY, scroll: scrollEl.scrollTop };
+    let dragging = false, to = from, last = e, autoscroll = 0;
+    let slots = [];
+    const point = (ev) => ({ x: ev.clientX, y: ev.clientY + (scrollEl.scrollTop - start.scroll) });
+    const layout = () => {
+      const p = point(last);
+      to = Reorder.targetIndex(p, slots, from, axis);
+      el.style.transform = `translate(${last.clientX - start.x}px, ${axis === 'x' ? 0 : p.y - start.y}px)`;
+      const order = Reorder.preview(items.map((_, i) => i), from, to);
+      order.forEach((itemIndex, position) => {
+        if (itemIndex === from) return;
+        const a = slots[itemIndex], b = slots[position];
+        items[itemIndex].style.transform = `translate(${b.left - a.left}px, ${b.top - a.top}px)`;
+      });
+    };
+    const begin = () => {
+      dragging = true;
+      // Casillas en coordenadas de la ventana al empezar (la diferencia de scroll se suma al puntero).
+      slots = items.map((x) => { const r = x.getBoundingClientRect(); return { left: r.left, top: r.top, width: r.width, height: r.height, bottom: r.bottom }; });
+      items.forEach((x) => { if (x !== el) x.classList.add('reorder-shift'); });
+      el.classList.add('reordering');
+      document.body.classList.add('is-reordering');
+    };
+    const tick = () => {
+      if (!dragging) return;
+      const r = scrollEl.getBoundingClientRect(), edge = 40;
+      const v = last.clientY < r.top + edge ? -(r.top + edge - last.clientY) : last.clientY > r.bottom - edge ? last.clientY - (r.bottom - edge) : 0;
+      if (v && scrollEl.scrollHeight > scrollEl.clientHeight) { scrollEl.scrollTop += v * 0.4; layout(); }
+      autoscroll = requestAnimationFrame(tick);
+    };
+    const move = (ev) => {
+      last = ev;
+      if (!dragging) {
+        if (Math.hypot(ev.clientX - start.x, ev.clientY - start.y) < 5) return;
+        begin();
+        autoscroll = requestAnimationFrame(tick);
+      }
+      ev.preventDefault();
+      layout();
+    };
+    const finish = (ev, cancelled) => {
+      removeEventListener('pointermove', move);
+      removeEventListener('pointerup', up);
+      removeEventListener('pointercancel', cancel);
+      removeEventListener('keydown', esc, true);
+      cancelAnimationFrame(autoscroll);
+      if (!dragging) return;
+      // El clic que sigue a soltar no debe abrir lo arrastrado.
+      const swallow = (c) => { c.stopPropagation(); c.preventDefault(); };
+      addEventListener('click', swallow, { capture: true, once: true });
+      setTimeout(() => removeEventListener('click', swallow, true), 0);
+      el.style.pointerEvents = 'none';
+      const under = ev && document.elementFromPoint(ev.clientX, ev.clientY);
+      el.style.pointerEvents = '';
+      const r = container.getBoundingClientRect();
+      const inside = ev && ev.clientX >= r.left - 20 && ev.clientX <= r.right + 20 && ev.clientY >= r.top - 20 && ev.clientY <= r.bottom + 20;
+      items.forEach((x) => { x.classList.remove('reorder-shift', 'reordering'); x.style.transform = ''; });
+      document.body.classList.remove('is-reordering');
+      if (cancelled) return;
+      if (onTarget && onTarget(el, under, ev)) return;
+      if (!inside && onOutside && onOutside(el, ev, under)) return;
+      if (to !== from) onDrop(from, to, el, ev);
+    };
+    const up = (ev) => finish(ev, false);
+    const cancel = () => finish(null, true);
+    const esc = (ev) => { if (ev.key === 'Escape' && dragging) { ev.stopPropagation(); finish(null, true); } };
+    addEventListener('pointermove', move);
+    addEventListener('pointerup', up);
+    addEventListener('pointercancel', cancel);
+    addEventListener('keydown', esc, true);
+  });
+}
+
+// ---------- Operaciones con páginas (las usan la barra lateral y la ventana «Páginas») ----------
+function movePage(nb, from, to) {
+  to = Math.max(0, Math.min(nb.pages.length - 1, to));
+  if (from === to) return;
+  const current = nb.pages[currentPageIndex]?.id;
+  const [moved] = nb.pages.splice(from, 1);
+  nb.pages.splice(to, 0, moved);
+  touch(); buildPages(); renderSidebar();
+  if (current) currentPageIndex = Math.max(0, nb.pages.findIndex((p) => p.id === current));
+  updatePageIndicator();
+  renderPagesWindow();
+}
+function duplicatePage(nb, i) {
+  const copy = clone(nb.pages[i]);
+  copy.id = uid(); copy.items.forEach((it) => { it.id = uid(); }); copy.strokes.forEach((s) => { s.id = uid(); }); copy.bookmarked = false;
+  nb.pages.splice(i + 1, 0, copy);
+  touch(); buildPages(); renderSidebar(); renderPagesWindow();
+}
+function deletePage(nb, i) {
+  const page = nb.pages[i];
+  confirmDialog(`¿Eliminar la página ${i + 1}?`, 'No se puede deshacer.', 'Eliminar página', () => {
+    nb.pages.splice(i, 1); nb.outline = nb.outline.filter((o) => o.pageId !== page.id); S.undo[nb.id] = [];
+    touch(); buildPages(); renderSidebar(); renderPagesWindow();
+  });
+}
+function pageContextMenu(e, nb, i, { full = false } = {}) {
+  e.preventDefault();
+  const page = nb.pages[i], last = nb.pages.length - 1;
+  popover({ x: e.clientX, y: e.clientY }, `<button data-act="bm">${page.bookmarked ? 'Quitar de marcadores' : 'Guardar en marcadores'}</button>
+    <button data-act="outline">Añadir al esquema…</button><hr><button data-act="dup">${icon('copy')}Duplicar</button>
+    <button data-act="first" ${i === 0 ? 'disabled' : ''}>${icon('arrowUp')}Mover al principio</button>
+    ${full ? `<button data-act="prev" ${i === 0 ? 'disabled' : ''}>Mover antes</button><button data-act="next" ${i === last ? 'disabled' : ''}>Mover después</button>` : ''}
+    <button data-act="last" ${i === last ? 'disabled' : ''}>${icon('arrowDown')}Mover al final</button><hr>
+    <button data-act="del" class="danger" ${nb.pages.length < 2 ? 'disabled' : ''}>${icon('trash')}Eliminar…</button>`, (act) => {
+    if (act === 'bm') { toggleBookmark(page); renderPagesWindow(); }
+    if (act === 'outline') promptDialog('Añadir al esquema', `Página ${i + 1}`, (title) => addOutline(nb, page, title), 'Título del apartado');
+    if (act === 'dup') duplicatePage(nb, i);
+    if (act === 'first') movePage(nb, i, 0);
+    if (act === 'prev') movePage(nb, i, i - 1);
+    if (act === 'next') movePage(nb, i, i + 1);
+    if (act === 'last') movePage(nb, i, last);
+    if (act === 'del') deletePage(nb, i);
+  });
+}
+
+// ---------- Ventana «Páginas» (botón de la cuadrícula, arriba a la derecha) ----------
+function openPagesWindow() {
+  const nb = activeNb();
+  if (!nb) return;
+  updateCurrentPage();
+  const scrim = dialog(`<div class="pw-head"><button class="btn tinted" data-act="add">${icon('plus')} Añadir página</button><h2>Páginas</h2><button class="btn primary" data-act="done">Listo</button></div>
+    <p class="pw-hint">Arrastra una página para cambiarla de sitio. Clic para ir a ella; clic derecho para más opciones.</p>
+    <div class="pw-grid" id="pw-grid"></div>`, (act, b, close) => {
+    if (act === 'done') close();
+    if (act === 'add') { close(); newPageDialog(); }
+  }, true);
+  scrim.querySelector('.dialog').classList.add('pages-window');
+  const grid = scrim.querySelector('#pw-grid');
+  grid.addEventListener('click', (e) => {
+    const bm = e.target.closest('[data-bm]');
+    if (bm) { toggleBookmark(nb.pages.find((p) => p.id === bm.dataset.bm)); return renderPagesWindow(); }
+    const t = e.target.closest('[data-go]');
+    if (t) { scrim.remove(); scrollToPage(t.dataset.go); }
+  });
+  grid.addEventListener('contextmenu', (e) => { const t = e.target.closest('[data-index]'); if (t) pageContextMenu(e, nb, Number(t.dataset.index), { full: true }); });
+  liveReorder(grid, '.pw-page', { onDrop: (from, to) => movePage(nb, from, to), scroller: scrim.querySelector('.dialog') });
+  renderPagesWindow();
+}
+function renderPagesWindow() {
+  const grid = $('#pw-grid'), nb = activeNb();
+  if (!grid || !nb) return;
+  grid.innerHTML = nb.pages.map((p, i) => `<div class="pw-page ${i === currentPageIndex ? 'current' : ''}" data-index="${i}" data-go="${p.id}" role="button" aria-label="Página ${i + 1}">
+    <div class="pw-thumb"><img alt="" data-src="${p.id}" draggable="false">
+    <button class="bm" data-bm="${p.id}" aria-pressed="${!!p.bookmarked}" aria-label="${p.bookmarked ? 'Quitar de marcadores' : 'Guardar en marcadores'}">${icon(p.bookmarked ? 'bookmarkFill' : 'bookmark')}</button></div>
+    <span class="num">${i + 1}</span></div>`).join('');
+  loadThumbs(grid, nb);
+}
+
+// =============================================================================
 // Editor: pestañas, barra lateral, páginas, herramientas y elementos
 // =============================================================================
 const views = new Map();   // pageId -> vistas DOM de la página
@@ -2572,7 +2784,7 @@ function renderTabs() {
         ${icon('folder')}${esc(g.space || 'Sin espacio')}${collapsed ? `<span class="count">${g.ids.length}</span>` : ''}${icon(collapsed ? 'chevronRight' : 'chevronDown')}</button>` : '';
     return chip + (collapsed ? '' : g.ids.map((id) => {
       const nb = nbById(id), active = id === S.active;
-      return `<div class="tab ${active ? 'active' : ''}" draggable="true" data-tab="${id}" style="--c:${nb.color};${chips ? `--g:${color}` : ''}" role="tab" aria-selected="${active}" title="${esc(nb.title)}">
+      return `<div class="tab ${active ? 'active' : ''}" data-tab="${id}" data-group="${esc(g.key)}" style="--c:${nb.color};${chips ? `--g:${color}` : ''}" role="tab" aria-selected="${active}" title="${esc(nb.title)}">
         <span class="hover-bg"></span>${active ? '<span class="foot l"></span><span class="foot r"></span>' : ''}
         <span class="book">${icon('book')}</span><span class="t">${esc(nb.title)}</span>
         <button class="x" data-close="${id}" aria-label="Cerrar ${esc(nb.title)}">${icon('close')}</button>
@@ -2589,34 +2801,40 @@ function renderTabs() {
     if (tab && tab.dataset.tab !== S.active) return openNotebook(tab.dataset.tab);
     if (e.target.closest('#tab-plus')) return openOtherMenu(e.target.closest('#tab-plus'));
   };
-  // Arrastrar pestañas: soltar en otra pestaña la coloca delante (y en su espacio); en una etiqueta, al final de ese espacio.
-  el.ondragstart = (e) => { const t = e.target.closest('[data-tab]'); if (t) { e.dataTransfer.setData('text/x-libreta-tab', t.dataset.tab); e.dataTransfer.effectAllowed = 'move'; } };
-  el.ondragover = (e) => {
-    if (!e.dataTransfer.types.includes('text/x-libreta-tab')) return;
-    e.preventDefault();
-    $$('.drop-before, .chip.drop', el).forEach((x) => x.classList.remove('drop-before', 'drop'));
-    e.target.closest('[data-tab]')?.classList.add('drop-before');
-    e.target.closest('[data-chip]')?.classList.add('drop');
-  };
-  el.ondragleave = () => $$('.drop-before, .chip.drop', el).forEach((x) => x.classList.remove('drop-before', 'drop'));
-  el.ondrop = (e) => {
-    const id = e.dataTransfer.getData('text/x-libreta-tab');
-    if (!id) return;
-    e.preventDefault();
-    const nb = nbById(id);
-    const tab = e.target.closest('[data-tab]'), chip = e.target.closest('[data-chip]');
-    S.tabs = S.tabs.filter((x) => x !== id);
-    if (tab && tab.dataset.tab !== id) {
-      nb.space = nbById(tab.dataset.tab).space;
-      S.tabs.splice(S.tabs.indexOf(tab.dataset.tab), 0, id);
-    } else if (chip) {
-      nb.space = chip.dataset.chip || null;
-      const last = S.tabs.map(nbById).map((n, i) => (n.space === nb.space ? i : -1)).filter((i) => i >= 0).pop();
-      S.tabs.splice(last === undefined ? S.tabs.length : last + 1, 0, id);
-    } else S.tabs.push(id);
-    if (nb.space) addSpace(nb.space);
-    touch(nb); Store.put(nb); saveTabs(); renderTabs();
-  };
+  // Arrastrar pestañas (en vivo, dentro de su espacio); soltar en la etiqueta de otro espacio la lleva allí, al final.
+  if (!el.dataset.reorder) {
+    el.dataset.reorder = '1';
+    liveReorder(el, '.tab', {
+      axis: 'x', ignore: '.x', group: (t) => t.dataset.group,
+      onDrop: (from, to, t) => reorderTab(t.dataset.tab, to),
+      onTarget: (t, under) => {
+        const chip = under?.closest?.('[data-chip]');
+        if (!chip || chip.dataset.chip === t.dataset.group) return false;
+        moveTabToSpace(t.dataset.tab, chip.dataset.chip || null);
+        return true;
+      },
+    });
+  }
+}
+/** Mueve una pestaña a la posición `index` dentro de las de su espacio. */
+function reorderTab(id, index) {
+  const nb = nbById(id), key = nb.space || '';
+  const positions = S.tabs.map((t, i) => ((nbById(t)?.space || '') === key ? i : -1)).filter((i) => i >= 0);
+  const members = positions.map((i) => S.tabs[i]);
+  const order = Reorder.preview(members, members.indexOf(id), index);
+  positions.forEach((p, k) => { S.tabs[p] = order[k]; });
+  saveTabs(); renderTabs();
+}
+/** Lleva una pestaña al final de otro espacio (y la libreta a ese espacio). */
+function moveTabToSpace(id, space) {
+  const nb = nbById(id);
+  S.tabs = S.tabs.filter((x) => x !== id);
+  nb.space = space;
+  const last = S.tabs.map(nbById).map((n, i) => ((n?.space || null) === space ? i : -1)).filter((i) => i >= 0).pop();
+  S.tabs.splice(last === undefined ? S.tabs.length : last + 1, 0, id);
+  if (space) addSpace(space);
+  S.collapsed = S.collapsed.filter((k) => k !== (space || ''));
+  touch(nb); Store.put(nb); saveTabs(); renderTabs();
 }
 function openOtherMenu(anchor) {
   const closed = S.notebooks.filter((nb) => !S.tabs.includes(nb.id));
@@ -2674,11 +2892,8 @@ function renderEditor() {
   $('#share-btn').addEventListener('click', (e) => shareMenu(e.currentTarget));
   $('#undo').addEventListener('click', undo);
   $('#redo').addEventListener('click', redo);
-  $('#pages-btn').addEventListener('click', () => {
-    // Las páginas en miniatura (en la barra lateral, como la vista de páginas de la app nativa).
-    S.sidebar = true; S.sidebarMode = 'thumbs'; savePrefs();
-    $('#sidebar').hidden = false; $('#side-btn').setAttribute('aria-pressed', true); renderSidebar(); requestAnimationFrame(fitZoom);
-  });
+  $('#pages-btn').addEventListener('click', openPagesWindow);
+
   Pomo.render();
   $('#pomo-slot').addEventListener('click', (e) => { if (e.target.closest('#pomo-btn')) Pomo.openPanel(e.target.closest('#pomo-btn')); });
   $('#pomo-slot').addEventListener('contextmenu', (e) => { if (e.target.closest('#pomo-btn')) Pomo.contextMenu(e); });
@@ -3853,8 +4068,8 @@ function renderSidebar() {
   if (S.sidebarMode === 'outline') renderOutline(body, nb);
 }
 function renderThumbs(body, nb) {
-  body.innerHTML = nb.pages.map((p, i) => `<div class="thumb ${i === currentPageIndex ? 'current' : ''}" draggable="true" data-index="${i}" data-go="${p.id}">
-    <img alt="Página ${i + 1}" data-src="${p.id}">
+  body.innerHTML = nb.pages.map((p, i) => `<div class="thumb ${i === currentPageIndex ? 'current' : ''}" data-index="${i}" data-go="${p.id}">
+    <img alt="Página ${i + 1}" data-src="${p.id}" draggable="false">
     <button class="bm" data-bm="${p.id}" aria-pressed="${!!p.bookmarked}" aria-label="${p.bookmarked ? 'Quitar de marcadores' : 'Guardar en marcadores'}">${icon(p.bookmarked ? 'bookmarkFill' : 'bookmark')}</button>
     <span class="num">${i + 1}</span></div>`).join('');
   loadThumbs(body, nb);
@@ -3864,34 +4079,9 @@ function renderThumbs(body, nb) {
     const t = e.target.closest('[data-go]');
     if (t) scrollToPage(t.dataset.go);
   };
-  body.oncontextmenu = (e) => {
-    const t = e.target.closest('[data-go]');
-    if (!t) return;
-    e.preventDefault();
-    const i = Number(t.dataset.index), page = nb.pages[i];
-    popover({ x: e.clientX, y: e.clientY }, `<button data-act="bm">${page.bookmarked ? 'Quitar de marcadores' : 'Guardar en marcadores'}</button>
-      <button data-act="outline">Añadir al esquema…</button><hr><button data-act="dup">Duplicar</button>
-      <button data-act="del" ${nb.pages.length < 2 ? 'disabled' : ''}>Eliminar…</button>`, (act) => {
-      if (act === 'bm') toggleBookmark(page);
-      if (act === 'outline') promptDialog('Añadir al esquema', `Página ${i + 1}`, (title) => addOutline(nb, page, title), 'Título del apartado');
-      if (act === 'dup') { const copy = clone(page); copy.id = uid(); copy.items.forEach((it) => { it.id = uid(); }); copy.strokes.forEach((s) => { s.id = uid(); }); copy.bookmarked = false; nb.pages.splice(i + 1, 0, copy); touch(); buildPages(); renderSidebar(); }
-      if (act === 'del') confirmDialog(`¿Eliminar la página ${i + 1}?`, 'No se puede deshacer.', 'Eliminar página', () => { nb.pages.splice(i, 1); nb.outline = nb.outline.filter((o) => o.pageId !== page.id); S.undo[nb.id] = []; touch(); buildPages(); renderSidebar(); });
-    });
-  };
-  // Arrastrar una miniatura para cambiar la página de sitio.
-  body.ondragstart = (e) => { const t = e.target.closest('[data-index]'); if (t) e.dataTransfer.setData('text/x-libreta-page', t.dataset.index); };
-  body.ondragover = (e) => { if (!e.dataTransfer.types.includes('text/x-libreta-page')) return; e.preventDefault(); $$('.thumb.drop', body).forEach((x) => x.classList.remove('drop')); e.target.closest('.thumb')?.classList.add('drop'); };
-  body.ondragleave = () => $$('.thumb.drop', body).forEach((x) => x.classList.remove('drop'));
-  body.ondrop = (e) => {
-    const from = Number(e.dataTransfer.getData('text/x-libreta-page')), t = e.target.closest('[data-index]');
-    if (!t || Number.isNaN(from)) return;
-    e.preventDefault();
-    const to = Number(t.dataset.index);
-    if (from === to) return;
-    const [moved] = nb.pages.splice(from, 1);
-    nb.pages.splice(to, 0, moved);
-    touch(); buildPages(); renderSidebar();
-  };
+  body.oncontextmenu = (e) => { const t = e.target.closest('[data-index]'); if (t) pageContextMenu(e, nb, Number(t.dataset.index)); };
+  // Arrastrar una miniatura para cambiar la página de sitio (las demás se apartan mientras tanto).
+  if (!body.dataset.reorder) { body.dataset.reorder = '1'; liveReorder(body, '.thumb', { onDrop: (from, to) => movePage(activeNb(), from, to), scroller: body }); }
 }
 async function loadThumbs(body, nb) {
   for (const img of $$('img[data-src]', body)) {
