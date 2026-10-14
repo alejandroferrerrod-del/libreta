@@ -458,6 +458,44 @@ body.is-reordering .tabs .chip:hover { outline: 2px solid var(--accent); outline
 .pw-page .bm { position: absolute; top: 6px; right: 6px; border: 0; background: transparent; padding: 2px; color: var(--muted); }
 .pw-page .bm[aria-pressed="true"] { color: #FF3B30; }
 .popover .danger { color: var(--danger); }
+
+/* Grabar audio y notas de voz */
+.mic-slot { width: 96px; display: flex; justify-content: center; flex: none; }   /* ancho fijo: grabando no mueve nada */
+.mic-pill { display: inline-flex; align-items: center; }
+.mic-pill .mic-more { width: 18px; margin-left: -6px; }
+.mic-pill .mic-more svg { width: 12px; height: 12px; }
+.mic-pill.recording .mic-main { display: inline-flex; align-items: center; white-space: nowrap; width: auto; padding: 0 9px; gap: 6px; color: #FF3B30; font: 600 14px var(--font); font-variant-numeric: tabular-nums; background: rgba(255, 59, 48, .12); border-radius: 15px; height: 30px; }
+.rec-dot { width: 9px; height: 9px; border-radius: 50%; background: #FF3B30; animation: recblink 1.2s ease-in-out infinite; }
+@keyframes recblink { 50% { opacity: .25; } }
+.menu-spacer { width: 17px; flex: none; }
+.item.voice { background: #FFF2E0; border: 1.5px solid #FF9500; border-radius: 24px; cursor: pointer; display: block; color: #1F1F1F; }
+.item.voice.selected { box-shadow: 0 0 0 2px #007AFF; }
+.item.voice .resize { display: none !important; }
+.item.voice .vplay { position: absolute; left: 8px; top: 50%; margin-top: -15px; width: 30px; height: 30px; border-radius: 50%; background: #FF9500; color: #fff; display: grid; place-items: center; }
+.item.voice .vplay svg { width: 14px; height: 14px; fill: currentColor; }
+.item.voice .vtitle { position: absolute; left: 46px; right: 14px; top: 6px; font: 600 13px/18px var(--font); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.item.voice .vtime { position: absolute; left: 46px; top: 24px; font: 11px/15px var(--font); color: #595959; font-variant-numeric: tabular-nums; }
+.item.voice .vprog { position: absolute; left: 46px; bottom: 6px; height: 3px; border-radius: 1.5px; background: #FF9500; max-width: calc(100% - 64px); }
+#app.hide-voice .item.voice { display: none; }
+.voice-label { display: inline-flex; align-items: center; gap: 6px; color: #C76E00; max-width: 300px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.voice-label svg { width: 16px; height: 16px; flex: none; }
+.playback-bar { position: absolute; left: 50%; bottom: 64px; transform: translateX(-50%); display: flex; align-items: center; gap: 10px; padding: 6px 12px; border-radius: 26px; background: color-mix(in srgb, var(--bar) 85%, transparent); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); box-shadow: 0 0 0 .5px var(--hairline), 0 2px 10px rgba(0,0,0,.15); z-index: 20; font-variant-numeric: tabular-nums; font-size: 12px; animation: rise .2s ease-out; }
+.playback-bar input { width: 220px; accent-color: #FF9500; }
+.playback-bar [data-pb="play"] svg { fill: currentColor; }
+.recordings-window { width: min(640px, 100%); }
+.rec-list { display: flex; flex-direction: column; border-radius: 12px; background: var(--fill); overflow: hidden; }
+.rec-row { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-bottom: 1px solid var(--hairline); }
+.rec-row:last-child { border-bottom: 0; }
+.rec-play { width: 34px; height: 34px; border-radius: 50%; border: 0; background: var(--accent); color: #fff; display: grid; place-items: center; flex: none; }
+.rec-play svg { width: 15px; height: 15px; fill: currentColor; }
+.rec-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.rec-text b { font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rec-text span { font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.rec-row .btn svg { width: 15px; height: 15px; vertical-align: -3px; }
+.rec-foot { font-size: 12.5px; }
+.empty-state { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 36px 20px; color: var(--muted); text-align: center; }
+.empty-state svg { width: 40px; height: 40px; }
+.empty-state b { color: var(--ink); font-size: 17px; }
 </style>
 <div id="app"></div>
 <script>
@@ -475,6 +513,9 @@ const ICONS = {
  "select": "<path d=\"M22 14a8 8 0 0 1-8 8\" /> <path d=\"M18 11v-1a2 2 0 0 0-2-2a2 2 0 0 0-2 2\" /> <path d=\"M14 10V9a2 2 0 0 0-2-2a2 2 0 0 0-2 2v1\" /> <path d=\"M10 9.5V4a2 2 0 0 0-2-2a2 2 0 0 0-2 2v10\" /> <path d=\"M18 11a2 2 0 1 1 4 0v3a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15\" />",
  "image": "<path d=\"M16 5h6\" /> <path d=\"M19 2v6\" /> <path d=\"M21 11.5V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7.5\" /> <path d=\"m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21\" /> <circle cx=\"9\" cy=\"9\" r=\"2\" />",
  "timer": "<line x1=\"10\" x2=\"14\" y1=\"2\" y2=\"2\" /> <line x1=\"12\" x2=\"15\" y1=\"14\" y2=\"11\" /> <circle cx=\"12\" cy=\"14\" r=\"8\" />",
+ "stop": "<rect x=\"6\" y=\"6\" width=\"12\" height=\"12\" rx=\"2\" />",
+ "waveform": "<path d=\"M2 10v3\" /> <path d=\"M6 6v11\" /> <path d=\"M10 3v18\" /> <path d=\"M14 8v7\" /> <path d=\"M18 5v13\" /> <path d=\"M22 10v3\" />",
+ "waveformPlus": "<path d=\"M2 10v3\" /> <path d=\"M6 6v11\" /> <path d=\"M10 3v18\" /> <path d=\"M14 8v7\" /> <path d=\"M17 19h6\" /> <path d=\"M20 16v6\" />",
  "mic": "<path d=\"M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z\" /> <path d=\"M19 10v2a7 7 0 0 1-14 0v-2\" /> <line x1=\"12\" x2=\"12\" y1=\"19\" y2=\"22\" />",
  "search": "<circle cx=\"11\" cy=\"11\" r=\"8\" /> <path d=\"m21 21-4.3-4.3\" />",
  "undo": "<path d=\"M9 14 4 9l5-5\" /> <path d=\"M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5a5.5 5.5 0 0 1-5.5 5.5H11\" />",
@@ -902,11 +943,12 @@ const Store = {
   async open() {
     try {
       this.db = await new Promise((resolve, reject) => {
-        const req = indexedDB.open('libreta', 2);
+        const req = indexedDB.open('libreta', 3);
         req.onupgradeneeded = () => {
           const db = req.result;
           if (!db.objectStoreNames.contains('notebooks')) db.createObjectStore('notebooks', { keyPath: 'id' });
           if (!db.objectStoreNames.contains('kv')) db.createObjectStore('kv');
+          if (!db.objectStoreNames.contains('audio')) db.createObjectStore('audio');
         };
         req.onsuccess = () => resolve(req.result);
         req.onerror = () => reject(req.error);
@@ -943,6 +985,20 @@ const Store = {
     });
   },
   set(key, value) { try { this.db?.transaction('kv', 'readwrite').objectStore('kv').put(clone(value), key); } catch (e) { this.fail(); } },
+  /** Audio de las grabaciones, por id de grabación. */
+  putAudio(id, blob) {
+    if (!this.db) { (this.memAudio = this.memAudio || new Map()).set(id, blob); return Promise.resolve(); }
+    return new Promise((resolve) => {
+      try { const tx = this.db.transaction('audio', 'readwrite'); tx.objectStore('audio').put(blob, id); tx.oncomplete = () => resolve(); tx.onerror = () => { this.fail(); resolve(); }; } catch (e) { this.fail(); resolve(); }
+    });
+  },
+  getAudio(id) {
+    if (!this.db) return Promise.resolve(this.memAudio?.get(id) || null);
+    return new Promise((resolve) => {
+      try { const req = this.db.transaction('audio').objectStore('audio').get(id); req.onsuccess = () => resolve(req.result || null); req.onerror = () => resolve(null); } catch (e) { resolve(null); }
+    });
+  },
+  removeAudio(id) { this.memAudio?.delete(id); try { this.db?.transaction('audio', 'readwrite').objectStore('audio').delete(id); } catch (e) { /* nada */ } },
   fail() { if (this.working) { this.working = false; toast('Tu navegador no deja guardar más. Usa «Copia de seguridad» para no perder nada.'); } },
 };
 const Prefs = {
@@ -967,6 +1023,7 @@ function normalizeNotebook(nb) {
   nb.cover = nb.cover || { type: 'color' };
   nb.space = nb.space ?? null;
   nb.outline = nb.outline || [];
+  nb.recordings = nb.recordings || [];
   for (const page of nb.pages) {
     page.w = page.w || PORTRAIT.w; page.h = page.h || PORTRAIT.h;
     page.strokes = page.strokes || []; page.items = page.items || [];
@@ -1011,6 +1068,7 @@ const S = {
   tool: 'pen',
   penKind: saved.penKind || 'pen', penColor: saved.penColor || '#1C1C1E', penWidth: saved.penWidth || 3, penShapes: false,
   holdToSnap: saved.holdToSnap !== false,
+  showVoiceNotes: saved.showVoiceNotes !== false,
   hlColor: saved.hlColor || '#FFD60A', hlWidth: saved.hlWidth || 18, hlMode: saved.hlMode || 'straight',
   eraserMode: saved.eraserMode || 'stroke', eraserSize: 14,
   stickyColor: STICKY_COLORS[0], commentColor: COMMENT_COLORS[0],
@@ -1024,7 +1082,7 @@ const S = {
 };
 function savePrefs() {
   Prefs.save({ dynamic: S.dynamic, penKind: S.penKind, penColor: S.penColor, penWidth: S.penWidth, hlColor: S.hlColor, hlWidth: S.hlWidth,
-    hlMode: S.hlMode, eraserMode: S.eraserMode, textDefault: S.textDefault, sidebar: S.sidebar, sidebarMode: S.sidebarMode, holdToSnap: S.holdToSnap, seeded: Prefs.load().seeded });
+    hlMode: S.hlMode, eraserMode: S.eraserMode, textDefault: S.textDefault, sidebar: S.sidebar, sidebarMode: S.sidebarMode, holdToSnap: S.holdToSnap, showVoiceNotes: S.showVoiceNotes, seeded: Prefs.load().seeded });
 }
 const nbById = (id) => S.notebooks.find((n) => n.id === id);
 const activeNb = () => nbById(S.active);
@@ -1276,6 +1334,14 @@ async function drawPageQuick(ctx, page) {
   drawPaper(ctx, page);
   if (page.bg) { const img = await loadImage(page.bg); if (img) ctx.drawImage(img, 0, 0, page.w, page.h); }
   for (const it of page.items) {
+    if (it.type === 'voice') {
+      if (!S.showVoiceNotes) continue;
+      ctx.fillStyle = '#FFF2E0'; ctx.strokeStyle = '#FF9500'; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.roundRect(it.x, it.y, it.w, it.h, it.h / 2); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#FF9500'; ctx.beginPath(); ctx.arc(it.x + 23, it.y + it.h / 2, 13, 0, 7); ctx.fill();
+      ctx.fillStyle = '#555'; ctx.fillRect(it.x + 46, it.y + 15, it.w * 0.55, 6); ctx.fillRect(it.x + 46, it.y + 27, 34, 4);
+      continue;
+    }
     if (it.type === 'image') {
       const img = await loadImage(it.src);
       if (img) ctx.drawImage(img, it.x, it.y, it.w, it.h);
@@ -1370,6 +1436,7 @@ function buildStaticPage(page) {
 }
 function staticItem(it, page) {
   const div = document.createElement('div');
+  if (it.type === 'voice') return div; // el audio no cabe en un PDF ni en una imagen
   div.style.cssText = `position:absolute;left:${it.x}px;top:${it.y}px;width:${it.w}px;${it.h && it.type !== 'text' ? `height:${it.h}px;` : ''}`;
   if (it.type === 'image') {
     const img = document.createElement('img');
@@ -1616,6 +1683,7 @@ function notebookMenu(anchor, nb) {
     if (act === 'pdf') exportPDF(nb);
     if (act === 'delete') confirmDialog(`¿Eliminar «${nb.title}»?`, 'Se borrarán todas sus páginas de este navegador. No se puede deshacer.', 'Eliminar', () => {
       S.notebooks = S.notebooks.filter((n) => n.id !== nb.id); Store.remove(nb.id);
+      (nb.recordings || []).forEach((r) => Voice.forgetIfUnused(r.id));
       S.tabs = S.tabs.filter((id) => id !== nb.id); if (S.active === nb.id) S.active = S.tabs[0] || null; saveTabs();
       refresh();
     });
@@ -1787,6 +1855,7 @@ function loadBackup() {
           Store.put(nb); added++;
         }
         for (const s of data.spaces || []) addSpace(s);
+        for (const [id, url] of Object.entries(data.audio || {})) { try { await Store.putAudio(id, await (await fetch(url)).blob()); } catch (e) { /* audio dañado */ } }
         renderLibrary();
         toast(added ? `Recuperadas ${added} libretas` : 'El archivo no tenía libretas');
       } catch (e) { toast('Ese archivo no es una copia de Libreta.'); }
@@ -1795,7 +1864,14 @@ function loadBackup() {
 }
 async function saveBackup() {
   flushAll();
-  const data = JSON.stringify({ app: 'Libreta', version: 2, saved: new Date().toISOString(), spaces: S.spaces, notebooks: S.notebooks });
+  // El audio de las grabaciones va dentro, en base64.
+  const audio = {};
+  for (const r of S.notebooks.flatMap((n) => n.recordings || [])) {
+    if (audio[r.id]) continue;
+    const blob = await Store.getAudio(r.id);
+    if (blob) audio[r.id] = await new Promise((res) => { const fr = new FileReader(); fr.onload = () => res(fr.result); fr.readAsDataURL(blob); });
+  }
+  const data = JSON.stringify({ app: 'Libreta', version: 3, saved: new Date().toISOString(), spaces: S.spaces, notebooks: S.notebooks, audio });
   if (await saveFile(`libreta-copia-${new Date().toISOString().slice(0, 10)}.json`, new Blob([data], { type: 'application/json' }))) toast('Copia guardada');
 }
 
@@ -2686,6 +2762,290 @@ function renderPagesWindow() {
 }
 
 // =============================================================================
+// Grabaciones y notas de voz (como en la app nativa). El audio se guarda en IndexedDB, aparte de
+// la libreta, por el id de la grabación: una libreta duplicada o una nota copiada a otra libreta
+// comparten el mismo audio, que solo se borra cuando ya no lo usa ninguna.
+// =============================================================================
+const VOICE_SIZE = { w: 220, h: 48 };
+
+const Voice = {
+  rec: null, // grabando: { nbId, start, recorder, stream, chunks, timer }
+  player: null, // reproduciendo: { recId, audio, url }
+  raf: 0,
+
+  recordings(nb) { return (nb.recordings = nb.recordings || []); },
+  find(nb, id) { return this.recordings(nb).find((r) => r.id === id); },
+  title(r) {
+    if (r?.title && r.title.trim()) return r.title;
+    return 'Nota de voz · ' + new Date(r.start).toLocaleString('es-ES', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+  },
+  format(s) { s = Math.max(0, Math.round(s || 0)); return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`; },
+  placedCount(nb, id) { return nb.pages.reduce((n, p) => n + p.items.filter((i) => i.type === 'voice' && i.rec === id).length, 0); },
+
+  // ---------- Grabar ----------
+  async toggleRecording() {
+    if (this.rec) return this.stop();
+    const nb = activeNb();
+    if (!nb) return;
+    if (!navigator.mediaDevices?.getUserMedia || typeof MediaRecorder === 'undefined') return toast('Este navegador no deja grabar audio.');
+    let stream;
+    try { stream = await navigator.mediaDevices.getUserMedia({ audio: true }); } catch (e) {
+      return dialog(`<h2>Sin acceso al micrófono</h2><p>Para grabar, deja que esta página use el micrófono: pulsa el icono del candado o de la cámara en la barra de direcciones y permite «Micrófono».</p><div class="actions"><button class="btn primary" data-act="ok">Aceptar</button></div>`, (a, b, close) => close());
+    }
+    const mime = ['audio/webm;codecs=opus', 'audio/mp4', 'audio/ogg;codecs=opus', 'audio/webm'].find((m) => MediaRecorder.isTypeSupported?.(m)) || '';
+    const recorder = new MediaRecorder(stream, mime ? { mimeType: mime } : undefined);
+    const rec = { nbId: nb.id, start: Date.now(), recorder, stream, chunks: [] };
+    recorder.ondataavailable = (e) => { if (e.data.size) rec.chunks.push(e.data); };
+    recorder.onstop = () => this.saved(rec);
+    recorder.start(1000);
+    this.rec = rec;
+    rec.timer = setInterval(() => this.renderButton(), 500);
+    this.renderButton();
+  },
+  stop() {
+    const rec = this.rec;
+    if (!rec) return;
+    this.rec = null;
+    clearInterval(rec.timer);
+    rec.duration = (Date.now() - rec.start) / 1000;
+    try { rec.recorder.stop(); } catch (e) { this.saved(rec); }
+    rec.stream.getTracks().forEach((t) => t.stop());
+    this.renderButton();
+  },
+  async saved(rec) {
+    const nb = nbById(rec.nbId);
+    if (!nb || !rec.chunks.length) return;
+    const blob = new Blob(rec.chunks, { type: rec.recorder.mimeType || 'audio/webm' });
+    const r = { id: uid(), start: rec.start, duration: rec.duration || (Date.now() - rec.start) / 1000, title: null };
+    await Store.putAudio(r.id, blob);
+    this.recordings(nb).push(r);
+    touch(nb); Store.put(nb);
+    this.renderButton();
+    toast(`Grabación guardada (${this.format(r.duration)}). Está en el menú del micrófono › Grabaciones.`);
+  },
+
+  // ---------- Botón del micrófono ----------
+  buttonHTML() {
+    const elapsed = this.rec ? this.format((Date.now() - this.rec.start) / 1000) : '';
+    return `<div class="mic-pill ${this.rec ? 'recording' : ''}">
+      <button class="icon-btn mic-main" data-mic="toggle" aria-label="${this.rec ? 'Detener grabación' : 'Grabar audio'}" title="${this.rec ? 'Detener grabación' : 'Grabar audio'} ${Shortcuts.bindings('record')[0] ? ` (${Shortcuts.display(Shortcuts.bindings('record')[0])})` : ''}">
+        ${this.rec ? `<span class="rec-dot"></span><span class="rec-time">${elapsed}</span>` : icon('mic')}</button>
+      <button class="icon-btn mic-more" data-mic="menu" aria-label="Grabaciones y notas de voz" aria-haspopup="menu" title="Grabaciones y notas de voz">${icon('chevronDown')}</button></div>`;
+  },
+  renderButton() {
+    const slot = $('#mic-slot');
+    if (slot) slot.innerHTML = this.buttonHTML();
+  },
+  menu(anchor) {
+    const nb = activeNb();
+    if (!nb) return;
+    const list = this.recordings(nb), last = list[list.length - 1];
+    popover(anchor, `<button data-act="toggle">${icon(this.rec ? 'stop' : 'mic')}${this.rec ? 'Detener grabación' : 'Grabar audio'}</button>
+      <button data-act="list" ${list.length ? '' : 'disabled'}>${icon('waveform')}Grabaciones (${list.length})</button>
+      ${last ? `<button data-act="last">${icon('waveformPlus')}Poner la última grabación en la página</button>` : ''}<hr>
+      <button data-act="show" role="menuitemcheckbox" aria-checked="${S.showVoiceNotes}">${S.showVoiceNotes ? icon('check') : '<span class="menu-spacer"></span>'}Mostrar notas de voz en la página</button>`, (act) => {
+      if (act === 'toggle') this.toggleRecording();
+      if (act === 'list') this.listDialog();
+      if (act === 'last') this.place(nb, last.id);
+      if (act === 'show') this.setShown(!S.showVoiceNotes);
+    });
+  },
+  setShown(on) {
+    S.showVoiceNotes = on;
+    savePrefs();
+    document.getElementById('app')?.classList.toggle('hide-voice', !on);
+    if (!on && S.selected) { const f = findItem(S.selected); if (f?.item.type === 'voice') { S.selected = null; renderOptions(); } }
+    toast(on ? 'Notas de voz visibles' : 'Notas de voz ocultas');
+  },
+
+  // ---------- Notas de voz en la página ----------
+  place(nb, recId, at) {
+    updateCurrentPage();
+    const page = at?.page || nb.pages[currentPageIndex] || nb.pages[0];
+    const v = views.get(page.id), desk = $('#desk');
+    const cx = at ? at.x : page.w / 2;
+    const cy = at ? at.y : v && desk ? (desk.scrollTop + desk.clientHeight / 2 - v.wrap.offsetTop) / S.zoom : page.h / 2;
+    const item = { id: uid(), type: 'voice', rec: recId, w: VOICE_SIZE.w, h: VOICE_SIZE.h,
+      x: Math.min(Math.max(0, cx - VOICE_SIZE.w / 2), page.w - VOICE_SIZE.w), y: Math.min(Math.max(0, cy - VOICE_SIZE.h / 2), page.h - VOICE_SIZE.h) };
+    const before = snapshotPage(page);
+    page.items.push(item);
+    commit(page, before);
+    if (!S.showVoiceNotes) this.setShown(true);
+    if (INK_TOOLS.includes(S.tool)) setTool('select');
+    renderItems(page);
+    select({ pageId: page.id, itemId: item.id });
+    return item;
+  },
+  noteHTML(nb, item) {
+    const r = nb && this.find(nb, item.rec);
+    const playing = this.player?.recId === item.rec && !this.player.audio.paused;
+    const progress = this.player?.recId === item.rec && r ? this.player.audio.currentTime / Math.max(r.duration, 0.1) : 0;
+    const time = !r ? '' : progress > 0 || playing ? `${this.format(r.duration * progress)} / ${this.format(r.duration)}` : this.format(r.duration);
+    return `<span class="vplay">${icon(playing ? 'pause' : 'play')}</span><span class="vtitle">${esc(r ? this.title(r) : 'Grabación borrada')}</span>
+      <span class="vtime">${time}</span><span class="vprog" style="width:${Math.min(Math.max(progress, 0), 1) * 100}%;${progress > 0 ? '' : 'display:none'}"></span>`;
+  },
+  refreshNotes(recId) {
+    const nb = activeNb();
+    for (const el of $$(`.item.voice[data-rec="${recId}"]`)) {
+      const page = nb?.pages.find((p) => p.items.some((i) => i.id === el.dataset.id));
+      const item = page?.items.find((i) => i.id === el.dataset.id);
+      if (!item) continue;
+      const handle = el.querySelector('.resize');
+      el.innerHTML = this.noteHTML(nb, item);
+      if (handle) el.appendChild(handle);
+    }
+  },
+
+  // ---------- Reproducir ----------
+  async togglePlay(nb, recId) {
+    if (this.player?.recId === recId) {
+      const a = this.player.audio;
+      if (a.paused) { if (a.ended) a.currentTime = 0; await a.play().catch(() => {}); } else a.pause();
+      return this.update();
+    }
+    this.stopPlayback();
+    const blob = await Store.getAudio(recId);
+    if (!blob) return toast('No se encuentra el audio de esta grabación.');
+    const url = URL.createObjectURL(blob);
+    const audio = new Audio(url);
+    this.player = { recId, audio, url, nbId: nb.id };
+    audio.onplay = audio.onpause = audio.onended = () => this.update();
+    try { await audio.play(); } catch (e) { toast('No se ha podido reproducir.'); }
+    this.update();
+  },
+  stopPlayback() {
+    const p = this.player;
+    if (!p) return;
+    this.player = null;
+    p.audio.pause();
+    URL.revokeObjectURL(p.url);
+    cancelAnimationFrame(this.raf);
+    this.refreshNotes(p.recId);
+    $('#playback-bar')?.remove();
+  },
+  update() {
+    const p = this.player;
+    if (!p) return;
+    const nb = nbById(p.nbId), r = nb && this.find(nb, p.recId);
+    this.refreshNotes(p.recId);
+    this.renderBar(r);
+    cancelAnimationFrame(this.raf);
+    if (!p.audio.paused) this.raf = requestAnimationFrame(() => this.update());
+  },
+  renderBar(r) {
+    const p = this.player, host = $('.desk-wrap');
+    if (!host) return;
+    if (!p || !r || S.view !== 'editor') return $('#playback-bar')?.remove();
+    let bar = $('#playback-bar');
+    const total = Number.isFinite(p.audio.duration) ? p.audio.duration : r.duration;
+    if (!bar) {
+      bar = document.createElement('div');
+      bar.id = 'playback-bar';
+      bar.className = 'playback-bar';
+      bar.innerHTML = `<button class="icon-btn" data-pb="play"></button><span class="pb-cur"></span>
+        <input type="range" min="0" step="0.01" aria-label="Posición"><span class="pb-total"></span>
+        <button class="icon-btn" data-pb="close" aria-label="Cerrar">${icon('close')}</button>`;
+      host.appendChild(bar);
+      bar.addEventListener('click', (e) => {
+        const b = e.target.closest('[data-pb]');
+        if (b?.dataset.pb === 'play') this.togglePlay(nbById(this.player.nbId), this.player.recId);
+        if (b?.dataset.pb === 'close') this.stopPlayback();
+      });
+      bar.querySelector('input').addEventListener('input', (e) => { if (this.player) { this.player.audio.currentTime = Number(e.target.value); this.update(); } });
+    }
+    bar.title = this.title(r);
+    const playing = !p.audio.paused;
+    const pb = bar.querySelector('[data-pb="play"]');
+    if (pb.dataset.state !== String(playing)) { pb.dataset.state = playing; pb.innerHTML = icon(playing ? 'pause' : 'play'); pb.setAttribute('aria-label', playing ? 'Pausa' : 'Reproducir'); }
+    const range = bar.querySelector('input');
+    range.max = total; if (document.activeElement !== range) range.value = p.audio.currentTime;
+    bar.querySelector('.pb-cur').textContent = this.format(p.audio.currentTime);
+    bar.querySelector('.pb-total').textContent = this.format(total);
+  },
+
+  // ---------- Ventana «Grabaciones» ----------
+  listDialog() {
+    const nb = activeNb();
+    if (!nb) return;
+    const scrim = dialog(`<div class="pw-head"><span></span><h2>Grabaciones</h2><button class="btn primary" data-act="done">Listo</button></div>
+      <div class="rec-list" id="rec-list"></div>
+      <p class="rec-foot">«Añadir a la página» la pone como nota de voz donde estés; arrástrala adonde quieras. Con clic derecho (o ⋯) puedes renombrarla o copiarla a otra libreta.</p>`,
+    (act, b, close) => { if (act === 'done') close(); }, false);
+    scrim.querySelector('.dialog').classList.add('recordings-window');
+    const list = scrim.querySelector('#rec-list');
+    const render = () => {
+      const recs = this.recordings(nb);
+      list.innerHTML = recs.length ? recs.map((r) => {
+        const n = this.placedCount(nb, r.id), playing = this.player?.recId === r.id && !this.player.audio.paused;
+        return `<div class="rec-row" data-rec="${r.id}">
+          <button class="rec-play" data-r="play" aria-label="${playing ? 'Pausa' : 'Reproducir'}">${icon(playing ? 'pause' : 'play')}</button>
+          <div class="rec-text"><b>${esc(this.title(r))}</b><span>${this.format(r.duration)}${n ? ` · en la libreta ${n === 1 ? '1 vez' : `${n} veces`}` : ''}</span></div>
+          <button class="btn tinted" data-r="place">${icon('waveformPlus')} Añadir a la página</button>
+          <button class="icon-btn" data-r="more" aria-label="Más opciones">${icon('more')}</button></div>`;
+      }).join('') : `<div class="empty-state">${icon('waveform')}<b>Sin grabaciones</b><span>Pulsa el micrófono para grabar mientras tomas apuntes.</span></div>`;
+    };
+    const more = (anchor, r) => {
+      const others = S.notebooks.filter((n) => n.id !== nb.id);
+      popover(anchor, `<button data-act="place">${icon('waveformPlus')}Añadir a la página</button><button data-act="rename">${icon('rename')}Renombrar…</button>
+        <button data-act="copy" ${others.length ? '' : 'disabled'}>${icon('copy')}Copiar a otra libreta…</button><hr>
+        <button data-act="del" class="danger">${icon('trash')}Eliminar</button>`, (act) => {
+        if (act === 'place') { scrim.remove(); this.place(nb, r.id); }
+        if (act === 'rename') promptDialog('Nombre de la nota de voz', r.title || '', (t) => { r.title = t.trim() || null; touch(nb); Store.put(nb); render(); this.refreshNotes(r.id); });
+        if (act === 'copy') popover(anchor, `<div class="label">Copiar a…</div>${others.map((o) => `<button data-act="${o.id}">${esc(o.title)}</button>`).join('')}`, (id) => {
+          const target = nbById(id);
+          this.copyTo(nb, r, target);
+          toast(`Copiada a «${target.title}», en su primera página.`);
+          render();
+        });
+        if (act === 'del') confirmDialog('¿Eliminar la grabación?', 'Se borra el audio y sus notas de voz en las páginas. No se puede deshacer.', 'Eliminar', () => { this.remove(nb, r.id); render(); });
+      });
+    };
+    list.addEventListener('click', (e) => {
+      const b = e.target.closest('[data-r]'), row = e.target.closest('[data-rec]');
+      if (!b || !row) return;
+      const r = this.find(nb, row.dataset.rec);
+      if (b.dataset.r === 'play') this.togglePlay(nb, r.id).then(render);
+      if (b.dataset.r === 'place') { scrim.remove(); this.place(nb, r.id); }
+      if (b.dataset.r === 'more') more(b, r);
+    });
+    list.addEventListener('contextmenu', (e) => {
+      const row = e.target.closest('[data-rec]');
+      if (!row) return;
+      e.preventDefault();
+      more({ x: e.clientX, y: e.clientY }, this.find(nb, row.dataset.rec));
+    });
+    render();
+  },
+  /** Añade a `target` la grabación (si no la tenía) y la pone como nota de voz en su primera página. */
+  copyTo(from, r, target) {
+    this.receive(target, r);
+    const page = target.pages[0];
+    page.items.push({ id: uid(), type: 'voice', rec: r.id, w: VOICE_SIZE.w, h: VOICE_SIZE.h, x: 40, y: 40 });
+    touch(target); Store.put(target);
+    if (S.active === target.id) renderItems(page);
+  },
+  receive(target, r) {
+    if (!this.find(target, r.id)) { this.recordings(target).push(clone(r)); touch(target); Store.put(target); }
+  },
+  remove(nb, id) {
+    if (this.player?.recId === id) this.stopPlayback();
+    nb.recordings = this.recordings(nb).filter((r) => r.id !== id);
+    for (const page of nb.pages) {
+      if (!page.items.some((i) => i.type === 'voice' && i.rec === id)) continue;
+      page.items = page.items.filter((i) => !(i.type === 'voice' && i.rec === id));
+      if (views.has(page.id)) renderItems(page);
+    }
+    if (S.selected && !findItem(S.selected)) { S.selected = null; renderOptions(); }
+    touch(nb); Store.put(nb);
+    this.forgetIfUnused(id);
+  },
+  /** Borra el audio si ya no lo usa ninguna libreta. */
+  forgetIfUnused(id) {
+    if (!S.notebooks.some((n) => (n.recordings || []).some((r) => r.id === id))) Store.removeAudio(id);
+  },
+};
+
+// =============================================================================
 // Editor: pestañas, barra lateral, páginas, herramientas y elementos
 // =============================================================================
 const views = new Map();   // pageId -> vistas DOM de la página
@@ -2741,6 +3101,7 @@ function leaveNotebook(nb) {
   touch(nb);
 }
 function backToLibrary() {
+  Voice.stopPlayback();
   leaveNotebook(activeNb());
   flushAll();
   views.clear();
@@ -2861,6 +3222,7 @@ function renderEditor() {
       </div>
       <div class="spacer"></div>
       <span id="pomo-slot" class="pomo-slot"></span>
+      <span id="mic-slot" class="mic-slot"></span>
       <button class="icon-btn" id="find-btn" aria-label="Buscar (Ctrl+F)" title="Buscar (Ctrl+F)">${icon('search')}</button>
       <button class="icon-btn" id="undo" aria-label="Deshacer (Ctrl+Z)" title="Deshacer (Ctrl+Z)">${icon('undo')}</button>
       <button class="icon-btn" id="redo" aria-label="Rehacer (Ctrl+Mayús+Z)" title="Rehacer (Ctrl+Mayús+Z)">${icon('redo')}</button>
@@ -2895,6 +3257,15 @@ function renderEditor() {
   $('#pages-btn').addEventListener('click', openPagesWindow);
 
   Pomo.render();
+  Voice.renderButton();
+  $('#app').classList.toggle('hide-voice', !S.showVoiceNotes);
+  $('#mic-slot').addEventListener('click', (e) => {
+    const b = e.target.closest('[data-mic]');
+    if (b?.dataset.mic === 'toggle') Voice.toggleRecording();
+    if (b?.dataset.mic === 'menu') Voice.menu(b);
+  });
+  $('#mic-slot').addEventListener('contextmenu', (e) => { e.preventDefault(); Voice.menu(e.target.closest('.mic-pill') || e.currentTarget); });
+  if (Voice.player) Voice.update();
   $('#pomo-slot').addEventListener('click', (e) => { if (e.target.closest('#pomo-btn')) Pomo.openPanel(e.target.closest('#pomo-btn')); });
   $('#pomo-slot').addEventListener('contextmenu', (e) => { if (e.target.closest('#pomo-btn')) Pomo.contextMenu(e); });
   $('#prev-page').addEventListener('click', () => { updateCurrentPage(); const p = nb.pages[currentPageIndex - 1]; if (p) scrollToPage(p.id); });
@@ -3256,6 +3627,11 @@ function renderOptions() {
     html = `<b style="color:${LINK_COLOR}">${icon('link').replace('<svg', '<svg width="16" height="16"')} ${esc(item.target ? linkTitle(item.target) : 'Sin destino')}</b>
       <button class="btn" data-act="link-pick">${item.target ? 'Cambiar destino' : 'Elegir destino'}</button>
       ${item.target ? '<button class="btn" data-act="link-preview">Vista previa</button>' : ''}${itemActions()}`;
+  } else if (item && item.type === 'voice') {
+    const r = Voice.find(activeNb(), item.rec);
+    html = `<b class="voice-label">${icon('waveform')} ${esc(r ? Voice.title(r) : 'Grabación borrada')}</b>
+      ${r ? `<button class="btn" data-act="voice-play">${icon('play')} Reproducir</button><button class="btn" data-act="voice-rename">${icon('rename')} Renombrar…</button>` : ''}
+      <button class="btn" data-act="voice-list">Grabaciones</button>${itemActions()}`;
   } else if (item && item.type === 'image') {
     html = `<button class="btn tinted" data-act="image-crop">${icon('crop')} Recortar…</button><span class="hint">Arrástrala o usa el círculo de la esquina para cambiar su tamaño.</span>${itemActions()}`;
   } else if (S.tool === 'pen') {
@@ -3348,6 +3724,9 @@ function onOptionsClick(e) {
     case 'text-link': saveRange(); return linkPicker((target) => linkSelection(target));
     case 'default': if (found) { S.textDefault = Object.assign({}, found.item.base); savePrefs(); toast('Los textos nuevos tendrán este estilo'); } break;
     case 'image-crop': return cropPlacedImage(found);
+    case 'voice-play': return found && Voice.togglePlay(activeNb(), found.item.rec);
+    case 'voice-list': return Voice.listDialog();
+    case 'voice-rename': { const r = found && Voice.find(activeNb(), found.item.rec); return r && promptDialog('Nombre de la nota de voz', r.title || '', (t) => { r.title = t.trim() || null; touch(); Voice.refreshNotes(r.id); renderOptions(); }); }
     case 'link-pick': return linkPicker((target) => editItem(found, (it) => { it.target = target; }));
     case 'link-preview': return showLinkPreview(found.item.target, { item: found.item, page: found.page });
     case 'copy': copySelection(); break;
@@ -3752,6 +4131,11 @@ function itemElement(page, item) {
     el.appendChild(richElement(page, item, S.tool === 'text' || S.tool === 'sticky' || S.editing?.itemId === item.id));
   } else if (item.type === 'image') {
     el.innerHTML = `<img src="${item.src}" alt="${esc(item.alt || 'Imagen')}">`;
+  } else if (item.type === 'voice') {
+    el.dataset.rec = item.rec;
+    el.innerHTML = Voice.noteHTML(activeNb(), item);
+    el.setAttribute('role', 'button');
+    el.setAttribute('aria-label', 'Nota de voz: reproduce o pausa');
   } else if (item.type === 'link') {
     el.innerHTML = `<span class="tag">🔗 ${esc(item.target ? linkTitle(item.target) : 'Elige destino')}</span>`;
     el.setAttribute('role', 'button');
@@ -3827,6 +4211,7 @@ function onItemPointerDown(e, page, item, el) {
     if (moved) { commit(page, before); if (item.type === 'comment' && item.expanded) views.get(page.id).over.appendChild(commentPanel(page, item)); return; }
     // Clic sin mover
     if (item.type === 'comment') return toggleComment({ page, item });
+    if (item.type === 'voice') return Voice.togglePlay(activeNb(), item.rec);
     if (item.type === 'link' && (item.target ? !['select'].includes(S.tool) || wasSelected : false)) return showLinkPreview(item.target, { item, page });
     if (item.type === 'link' && !item.target) return linkPicker((target) => editItem({ page, item }, (it) => { it.target = target; }));
     if (RICH_TYPES.includes(item.type) && (S.tool === 'text' || S.tool === 'sticky' || wasSelected)) {
@@ -4190,6 +4575,8 @@ function copySelection() {
     const found = findItem(S.selected);
     if (!found) return false;
     S.clipboard = { kind: 'item', data: clone(found.item), pageId: found.page.id, text: RICH_TYPES.includes(found.item.type) ? itemText(found.item) || ' ' : ' ' };
+    // Una nota de voz lleva su grabación, para poder pegarla en otra libreta.
+    if (found.item.type === 'voice') S.clipboard.recording = clone(Voice.find(activeNb(), found.item.rec) || null);
   }
   navigator.clipboard?.writeText?.(S.clipboard.text).catch(() => {});
   toast('Copiado');
@@ -4230,6 +4617,7 @@ function pasteInternal() {
   const item = clone(cb.data);
   item.id = uid(); item.x += offset; item.y += offset;
   if (item.type === 'comment') item.expanded = false;
+  if (item.type === 'voice' && cb.recording) { Voice.receive(activeNb(), cb.recording); if (!S.showVoiceNotes) Voice.setShown(true); }
   cb.data = clone(item); cb.pageId = page.id;
   page.items.push(item);
   commit(page, before);
@@ -4359,6 +4747,8 @@ const SHORTCUT_ACTIONS = [
   ['bookmark', 'Páginas', 'Marcador de la página', 'editor', [K('d', { mod: true })]],
   ['share', 'Páginas', 'Compartir', 'editor', [K('s', { mod: true, shift: true })]],
   ['toggleSidebar', 'Páginas', 'Mostrar u ocultar la barra lateral', 'editor', [K('s', { mod: true, alt: true })]],
+  ['record', 'Otros', 'Grabar audio', 'editor', [K('r', { alt: true })]],
+  ['toggleVoiceNotes', 'Otros', 'Mostrar u ocultar notas de voz', 'editor', [K('r', { alt: true, shift: true })]],
   ['timer', 'Otros', 'Temporizador de estudio', 'editor', [K('t', { alt: true })]],
   ['newNotebook', 'Otros', 'Nueva libreta', 'library', [K('n', { alt: true })]],
   ['shortcutsSettings', 'Otros', 'Atajos de teclado', 'both', [K('?')]],
@@ -4474,6 +4864,8 @@ const Shortcuts = {
       case 'timer':
         if (!Pomo.visible) { Pomo.visible = true; Pomo.changed(); }
         return $('#pomo-btn') && Pomo.openPanel($('#pomo-btn'));
+      case 'record': return Voice.toggleRecording();
+      case 'toggleVoiceNotes': return Voice.setShown(!S.showVoiceNotes);
       case 'newNotebook': return newNotebookDialog();
       case 'shortcutsSettings': return shortcutsDialog();
       default: {
