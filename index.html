@@ -605,6 +605,11 @@ body:not(.kbd-nav) select:focus-visible, body:not(.kbd-nav) .options :focus-visi
 .dyn .panel > * { flex-shrink: 0; }
 .dyn .panel .strip { min-height: 100px; align-items: flex-start; }
 .dyn .panel { overscroll-behavior: contain; }
+/* Idioma en Ajustes */
+.popover .lang-row { display: flex; gap: 6px; padding: 2px 6px 6px; }
+.popover .lang-btn { flex: 1; border: 1px solid var(--hairline); border-radius: 9px; padding: 7px 10px; justify-content: center; }
+.popover .lang-btn[aria-pressed="true"] { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent) inset; }
+.popover .lang-btn svg { width: 22px; height: 15px; border-radius: 2px; box-shadow: 0 0 0 1px rgba(0,0,0,.12); }
 /* =============================================================================
    Tutorial de la primera vez (siempre en oscuro, como en la app nativa)
    ============================================================================= */
@@ -737,6 +742,13 @@ body:not(.kbd-nav) select:focus-visible, body:not(.kbd-nav) .options :focus-visi
   .onb *, .onb-stage { animation-duration: .01s !important; animation-delay: 0s !important; transition-duration: .01s !important; }
   .onb-sign path { stroke-dashoffset: 0; }
 }
+/* Idioma con banderas */
+.onb-langs { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+.onb-langs .lang-btn { padding: 9px 16px 9px 12px; font-size: 15px; }
+.onb-langs .lang-btn[aria-pressed="true"] { background: rgba(255,255,255,.22); border-color: rgba(255,255,255,.6); box-shadow: 0 0 18px rgba(255,255,255,.25); }
+.lang-btn svg { width: 26px; height: 17px; border-radius: 3px; box-shadow: 0 0 0 1px rgba(0,0,0,.15); flex: none; }
+.onb-copy.instant .onb-steps li, .onb-copy.instant .onb-tip { animation: none; }
+.onb-copy .onb-langs { justify-content: flex-start; }
 </style>
 <div id="app"></div>
 <script>
@@ -770,6 +782,7 @@ const ICONS = {
  "duplicate": "<line x1=\"15\" x2=\"15\" y1=\"12\" y2=\"18\" /> <line x1=\"12\" x2=\"18\" y1=\"15\" y2=\"15\" /> <rect width=\"14\" height=\"14\" x=\"8\" y=\"8\" rx=\"2\" ry=\"2\" /> <path d=\"M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2\" />",
  "toFront": "<rect x=\"8\" y=\"8\" width=\"8\" height=\"8\" rx=\"2\" /> <path d=\"M4 10a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2\" /> <path d=\"M14 20a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2v-4a2 2 0 0 0-2-2\" />",
  "toBack": "<rect x=\"14\" y=\"14\" width=\"8\" height=\"8\" rx=\"2\" /> <rect x=\"2\" y=\"2\" width=\"8\" height=\"8\" rx=\"2\" /> <path d=\"M7 14v1a2 2 0 0 0 2 2h1\" /> <path d=\"M14 7h1a2 2 0 0 1 2 2v1\" />",
+ "globe": "<circle cx=\"12\" cy=\"12\" r=\"10\" /> <path d=\"M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20\" /> <path d=\"M2 12h20\" />",
  "mic": "<path d=\"M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z\" /> <path d=\"M19 10v2a7 7 0 0 1-14 0v-2\" /> <line x1=\"12\" x2=\"12\" y1=\"19\" y2=\"22\" />",
  "search": "<circle cx=\"11\" cy=\"11\" r=\"8\" /> <path d=\"m21 21-4.3-4.3\" />",
  "undo": "<path d=\"M9 14 4 9l5-5\" /> <path d=\"M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5a5.5 5.5 0 0 1-5.5 5.5H11\" />",
@@ -831,6 +844,362 @@ const ICONS = {
 };
 const icon = (name, extra = '') => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" ${extra}>${ICONS[name] || ''}</svg>`;
 
+// =============================================================================
+// Idiomas (español e italiano). La interfaz está escrita en español; al mostrarse, cada texto de
+// la interfaz (y los títulos, ayudas y marcadores de posición) se traduce con el diccionario de
+// i18n-it.js. Lo que escribe quien usa Libreta (textos, títulos, páginas) no se toca nunca.
+// =============================================================================
+const LANGS = { es: { name: 'Español', locale: 'es-ES' }, it: { name: 'Italiano', locale: 'it-IT' } };
+const I18N = {
+  lang: (() => {
+    try { const v = localStorage.getItem('libreta-lang'); if (LANGS[v]) return v; } catch (e) { /* sin almacenamiento */ }
+    return /^it\b/i.test(navigator.language || '') ? 'it' : 'es';
+  })(),
+  dict: {},            // { it: { 'texto en español': 'testo in italiano' } }
+  patterns: {},        // { it: [[/regex/, (m) => '...'], ...] }
+  words: {},           // { it: [['palabra', 'parola'], ...] } para textos con números o nombres
+  missing: /[?&]collect/.test(location.search) ? new Set() : null, // al probar: los textos sin traducir
+};
+const LOCALE = () => LANGS[I18N.lang].locale;
+const SKIP_I18N = '[translate="no"], .rich, .page-inner, script, style, textarea, .title-input';
+
+/** Traduce un texto de la interfaz (si hace falta). */
+function tr(s) {
+  if (I18N.lang === 'es' || s == null) return s;
+  const str = String(s);
+  const m = str.match(/^(\s*)([\s\S]*?)(\s*)$/);
+  const core = m[2];
+  if (!core || !/[A-Za-zÁÉÍÓÚáéíóúñÑ¿¡]/.test(core)) return str;
+  const out = trCore(core);
+  return out === null ? str : m[1] + out + m[3];
+}
+function trCore(core) {
+  const d = I18N.dict[I18N.lang] || {};
+  if (Object.prototype.hasOwnProperty.call(d, core)) return d[core];
+  for (const [re, fn] of I18N.patterns[I18N.lang] || []) {
+    const mm = core.match(re);
+    if (mm) return typeof fn === 'function' ? fn(mm, trCore) : core.replace(re, fn);
+  }
+  // Último recurso: palabras sueltas (para «3 páginas · 15 ott 2026» y parecidos).
+  let changed = false, out = core;
+  for (const [es, it] of I18N.words[I18N.lang] || []) {
+    const re = new RegExp(`(^|[^\\p{L}])${es.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(?=$|[^\\p{L}])`, 'gu');
+    if (re.test(out)) { out = out.replace(re, `$1${it}`); changed = true; }
+  }
+  if (!changed && I18N.missing && core.length > 1 && /[a-záéíóúñ]{2}/i.test(core)) I18N.missing.add(core);
+  return changed ? out : null;
+}
+
+// ---------- Traducir la página según aparece ----------
+const I18N_ATTRS = ['title', 'aria-label', 'placeholder', 'alt'];
+function translateTextNode(n) {
+  const v = n.nodeValue;
+  if (n.__trOut === v) return; // ya traducido por nosotros
+  const p = n.parentElement;
+  if (!p || p.closest(SKIP_I18N)) return;
+  n.__trIn = v;
+  const out = tr(v);
+  n.__trOut = out;
+  if (out !== v) n.nodeValue = out;
+}
+function translateAttrs(el) {
+  if (el.closest(SKIP_I18N)) return;
+  el.__trAttr = el.__trAttr || {};
+  for (const a of I18N_ATTRS) {
+    const v = el.getAttribute(a);
+    if (v == null || el.__trAttr[a]?.out === v) continue;
+    const out = tr(v);
+    el.__trAttr[a] = { in: v, out };
+    if (out !== v) el.setAttribute(a, out);
+  }
+}
+function translateTree(root) {
+  if (I18N.lang === 'es' || !root) return;
+  if (root.nodeType === 3) return translateTextNode(root);
+  if (root.nodeType !== 1) return;
+  translateAttrs(root);
+  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT | NodeFilter.SHOW_ELEMENT);
+  for (let n = walker.nextNode(); n; n = walker.nextNode()) {
+    if (n.nodeType === 3) translateTextNode(n); else translateAttrs(n);
+  }
+}
+/** Al volver al español, se recupera el texto original de todo lo ya traducido. */
+function untranslateTree(root) {
+  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT | NodeFilter.SHOW_ELEMENT);
+  for (let n = walker.nextNode(); n; n = walker.nextNode()) {
+    if (n.nodeType === 3) { if (n.__trIn != null && n.nodeValue === n.__trOut) n.nodeValue = n.__trIn; n.__trOut = n.__trIn = undefined; }
+    else if (n.__trAttr) { for (const [a, v] of Object.entries(n.__trAttr)) if (n.getAttribute(a) === v.out) n.setAttribute(a, v.in); n.__trAttr = null; }
+  }
+}
+const i18nObserver = new MutationObserver((list) => {
+  if (I18N.lang === 'es') return;
+  for (const m of list) {
+    if (m.type === 'childList') m.addedNodes.forEach(translateTree);
+    else if (m.type === 'characterData') translateTextNode(m.target);
+    else if (m.type === 'attributes') translateAttrs(m.target);
+  }
+});
+function startI18n() {
+  document.documentElement.lang = I18N.lang;
+  i18nObserver.observe(document.body, { childList: true, subtree: true, characterData: true, attributes: true, attributeFilter: I18N_ATTRS });
+  translateTree(document.body);
+}
+
+/** Cambiar de idioma: se vuelve a pintar todo en el idioma nuevo. */
+function setLanguage(lang) {
+  if (!LANGS[lang] || lang === I18N.lang) return;
+  I18N.lang = lang;
+  try { localStorage.setItem('libreta-lang', lang); } catch (e) { /* nada */ }
+  document.documentElement.lang = lang;
+  untranslateTree(document.body);
+  translateExamples();
+  if (S.view === 'editor') renderEditor(); else renderLibrary();
+  translateTree(document.body);
+  if (typeof Onboarding !== 'undefined' && Onboarding.el) Onboarding.relabel();
+}
+
+/** Banderas (dibujadas: en Windows los emojis de banderas salen como letras). */
+const FLAGS = {
+  es: '<svg viewBox="0 0 30 20" aria-hidden="true"><rect width="30" height="20" fill="#AA151B"/><rect y="5" width="30" height="10" fill="#F1BF00"/></svg>',
+  it: '<svg viewBox="0 0 30 20" aria-hidden="true"><rect width="10" height="20" fill="#009246"/><rect x="10" width="10" height="20" fill="#fff"/><rect x="20" width="10" height="20" fill="#CE2B37"/></svg>',
+};
+function languageButtons(cls = '') {
+  return Object.entries(LANGS).map(([k, l]) => `<button class="lang-btn ${cls}" data-lang="${k}" aria-pressed="${I18N.lang === k}" translate="no">${FLAGS[k]}<span>${l.name}</span></button>`).join('');
+}
+document.addEventListener('click', (e) => {
+  const b = e.target.closest('[data-lang]');
+  if (!b) return;
+  setLanguage(b.dataset.lang);
+  document.querySelectorAll('[data-lang]').forEach((x) => x.setAttribute('aria-pressed', x.dataset.lang === I18N.lang));
+});
+
+// =============================================================================
+// Italiano. Términos: libreta → quaderno, carpeta → cartella, biblioteca → libreria,
+// pestaña → scheda, subrayador → evidenziatore, enlace/vínculo → collegamento.
+// =============================================================================
+I18N.dict.it = {
+  // --- Biblioteca y carpetas ---
+  'Libretas': 'Quaderni', 'Libreta': 'Libreta', 'Libretas (inicio)': 'Quaderni (inizio)', 'Libretas abiertas': 'Quaderni aperti',
+  'Tus libretas': 'I tuoi quaderni', 'Vista y ajustes': 'Vista e impostazioni', 'Ir a una carpeta': 'Vai a una cartella', 'Ir a': 'Vai a',
+  'Crear o importar': 'Crea o importa', 'Crear': 'Crea', 'Importar': 'Importa', 'Nueva libreta': 'Nuovo quaderno', 'Nueva carpeta': 'Nuova cartella',
+  'Nueva carpeta…': 'Nuova cartella…', 'Nueva carpeta aquí…': 'Nuova cartella qui…', 'Nueva carpeta dentro…': 'Nuova cartella dentro…',
+  'Importar PDF…': 'Importa PDF…', 'Ajustes': 'Impostazioni', 'Ajustes: apariencia, atajos, copias de seguridad…': 'Impostazioni: aspetto, scorciatoie, backup…',
+  'Idioma': 'Lingua', 'Apariencia': 'Aspetto', 'Automática': 'Automatico', 'Clara': 'Chiaro', 'Oscura': 'Scuro',
+  'Pantalla completa': 'Schermo intero', 'Salir de pantalla completa': 'Esci da schermo intero', 'Atajos de teclado': 'Scorciatoie da tastiera',
+  'Atajos de teclado…': 'Scorciatoie da tastiera…', 'Ver el tutorial': 'Guarda il tutorial', 'Copia de seguridad': 'Backup',
+  'Guardar copia de seguridad': 'Salva backup', 'Recuperar copia…': 'Ripristina backup…', 'Instalar Libreta en este ordenador': 'Installa Libreta su questo computer',
+  'Buscar por título o contenido': 'Cerca per titolo o contenuto', 'Buscar libretas': 'Cerca quaderni', 'Buscar': 'Cerca',
+  'Modo dinámico': 'Modalità dinamica', 'Salir del modo dinámico': 'Esci dalla modalità dinamica',
+  'Tus carpetas y libretas como una constelación, con sus vínculos': 'Le tue cartelle e i tuoi quaderni come una costellazione, con i loro collegamenti',
+  'Seleccionar': 'Seleziona', 'Seleccionar todo': 'Seleziona tutto', 'Deseleccionar todo': 'Deseleziona tutto', 'Seleccionar varias libretas o carpetas': 'Seleziona più quaderni o cartelle',
+  'Acciones con lo seleccionado': 'Azioni sulla selezione', 'Toca para seleccionar': 'Tocca per selezionare', 'Listo': 'Fatto',
+  'Exportar': 'Esporta', 'Duplicar': 'Duplica', 'Mover': 'Sposta', 'Eliminar': 'Elimina', 'Eliminar…': 'Elimina…', 'Mover a…': 'Sposta in…',
+  'Mover aquí': 'Sposta qui', 'Carpeta de destino': 'Cartella di destinazione', 'Abrir': 'Apri', 'Renombrar…': 'Rinomina…', 'Color…': 'Colore…',
+  'Portada…': 'Copertina…', 'Descargar PDF': 'Scarica PDF', 'Carpeta duplicada': 'Cartella duplicata', 'Libreta duplicada': 'Quaderno duplicato',
+  'Carpeta sin título': 'Cartella senza titolo', 'Sin título': 'Senza titolo', 'Nombre de la carpeta': 'Nome della cartella', 'Nombre': 'Nome',
+  'Renombrar carpeta': 'Rinomina cartella', 'Renombrar libreta': 'Rinomina quaderno', 'Título': 'Titolo', 'Título de la libreta': 'Titolo del quaderno',
+  'Esta carpeta está vacía.': 'Questa cartella è vuota.', 'Esta carpeta está vacía. Crea aquí una libreta o una carpeta con +, o mueve otras con «Mover».': 'Questa cartella è vuota. Crea qui un quaderno o una cartella con +, oppure spostane altri con «Sposta».',
+  'Aún no tienes libretas. Crea la primera con +.': 'Non hai ancora quaderni. Crea il primo con +.', 'Aún no tienes carpetas. Créalas con +.': 'Non hai ancora cartelle. Creale con +.',
+  'Ruta': 'Percorso', 'Volver': 'Indietro', 'Eliminado': 'Eliminato', 'Duplicado': 'Duplicato', 'No hay libretas que exportar': 'Non ci sono quaderni da esportare',
+  'No se puede meter una carpeta dentro de sí misma.': 'Non si può mettere una cartella dentro se stessa.', 'Se borran de este navegador y no se puede deshacer.': 'Vengono cancellati da questo browser e non si può annullare.',
+  'Se borrarán todas sus páginas de este navegador. No se puede deshacer.': 'Verranno cancellate tutte le sue pagine da questo browser. Non si può annullare.',
+  'Este navegador no permite guardar (puede ser una ventana privada). Lo que hagas se perderá al cerrar: usa + › Copia de seguridad.': 'Questo browser non permette di salvare (forse è una finestra privata). Quello che fai andrà perso alla chiusura: usa ⚙︎ › Backup.',
+  'Libreta instalada. Ábrela desde el menú Inicio o el Dock.': 'Libreta installata. Aprila dal menu Start o dal Dock.',
+  'Hay una versión nueva de Libreta.': 'C’è una nuova versione di Libreta.', 'Actualizar': 'Aggiorna', 'Cerrar aviso': 'Chiudi avviso',
+  'Tu navegador no deja guardar más. Usa «Copia de seguridad» para no perder nada.': 'Il tuo browser non permette di salvare altro. Usa «Backup» per non perdere nulla.',
+  'Ese archivo no es una copia de Libreta.': 'Questo file non è un backup di Libreta.', 'El archivo no tenía libretas': 'Il file non conteneva quaderni', 'Copia guardada': 'Backup salvato',
+  'Libretas': 'Quaderni', 'Ejemplos': 'Esempi', 'Sin carpeta': 'Senza cartella', 'Esta libreta': 'Questo quaderno',
+  'Todas las libretas están abiertas': 'Tutti i quaderni sono aperti', 'Abrir otra libreta': 'Apri un altro quaderno',
+  'Portada': 'Copertina', 'Color': 'Colore', 'Página': 'Pagina', 'Foto': 'Foto', 'Elegir imagen…': 'Scegli immagine…',
+  'Elige una imagen de tu ordenador. Se recorta por el centro para llenar la portada.': 'Scegli un’immagine dal tuo computer. Viene ritagliata al centro per riempire la copertina.',
+  'La portada mostrará esta página. Se actualiza al cerrar la libreta.': 'La copertina mostrerà questa pagina. Si aggiorna quando chiudi il quaderno.',
+  'Papel': 'Carta', 'Vertical': 'Verticale', 'Horizontal': 'Orizzontale', 'Cancelar': 'Annulla', 'Aceptar': 'OK', 'Guardar': 'Salva',
+  'Por ejemplo: Biología, tema 3': 'Per esempio: Biologia, tema 3', 'Importando el PDF…': 'Importazione del PDF…',
+  'No se ha podido cargar el lector de PDF. Revisa la conexión y recarga.': 'Impossibile caricare il lettore PDF. Controlla la connessione e ricarica.',
+  'No se ha podido importar ese PDF.': 'Impossibile importare questo PDF.',
+  'Nada coincide': 'Nessun risultato', 'Sin resultados. La escritura a mano no se puede buscar en la versión web.': 'Nessun risultato. La scrittura a mano non si può cercare nella versione web.',
+  'No hay libretas con ese nombre.': 'Nessun quaderno con quel nome.', 'Cuadro de texto': 'Casella di testo', 'Post-it': 'Post-it', 'Comentario': 'Commento', 'PDF': 'PDF',
+  // --- Modo dinámico ---
+  'Clic en una carpeta para entrar · arrastra para colocar · pasa el ratón para ver · clic en una libreta para sus vínculos · doble clic para abrirla': 'Clic su una cartella per entrare · trascina per sistemare · passa il mouse per vedere · clic su un quaderno per i suoi collegamenti · doppio clic per aprirlo',
+  'Recolocar automáticamente': 'Risistema automaticamente', 'Clic para entrar': 'Clic per entrare', 'Cerrar panel': 'Chiudi pannello',
+  'Abrir libreta': 'Apri quaderno', 'Abrir donde lo dejaste': 'Apri dove eri rimasto', 'Vínculos': 'Collegamenti', 'Enlaza a': 'Collega a',
+  'Enlazado desde': 'Collegato da', 'Dentro de esta libreta': 'Dentro questo quaderno', 'Apartados': 'Sezioni', 'Comentarios': 'Commenti', 'Esquema': 'Indice',
+  'Esta libreta aún no tiene vínculos. Selecciona un texto y pulsa «Enlace», o usa la herramienta de enlace.': 'Questo quaderno non ha ancora collegamenti. Seleziona un testo e premi «Collegamento», o usa lo strumento collegamento.',
+  'Libreta borrada': 'Quaderno eliminato',
+  // --- Editor: barra y herramientas ---
+  'Volver a la biblioteca': 'Torna alla libreria', 'Herramientas': 'Strumenti', 'Barra lateral': 'Barra laterale', 'Mostrar barra lateral': 'Mostra barra laterale',
+  'Ocultar barra lateral': 'Nascondi barra laterale', 'Título de la libreta': 'Titolo del quaderno', 'Bolígrafo': 'Penna', 'Subrayador': 'Evidenziatore', 'Goma': 'Gomma',
+  'Lazo': 'Lazo', 'Texto': 'Testo', 'Seleccionar (V)': 'Seleziona (V)', 'Enlace': 'Collegamento', 'Pluma': 'Stilografica', 'Lápiz': 'Matita',
+  'Insertar imagen': 'Inserisci immagine', 'Insertar imagen (también puedes pegarla o arrastrarla)': 'Inserisci immagine (puoi anche incollarla o trascinarla)',
+  'Deshacer': 'Annulla', 'Rehacer': 'Ripeti', 'Buscar en la libreta': 'Cerca nel quaderno', 'Compartir': 'Condividi',
+  'Guardar esta página en marcadores': 'Salva questa pagina nei segnalibri', 'Quitar esta página de marcadores': 'Togli questa pagina dai segnalibri',
+  'Guardar en marcadores': 'Salva nei segnalibri', 'Quitar de marcadores': 'Togli dai segnalibri', 'Ver todas las páginas': 'Vedi tutte le pagine',
+  'Página: añadir, plantilla y papel': 'Pagina: aggiungi, modello e carta', 'Más opciones': 'Altre opzioni', 'Más opciones: zoom, apariencia, atajos…': 'Altre opzioni: zoom, aspetto, scorciatoie…',
+  'Modo lectura': 'Modalità lettura', 'Salir del modo lectura': 'Esci dalla modalità lettura', 'Salir': 'Esci',
+  'Modo lectura: moverte sin escribir por accidente': 'Modalità lettura: muoversi senza scrivere per sbaglio',
+  'Modo lectura: muévete con tranquilidad, no se escribe nada': 'Modalità lettura: muoviti tranquillo, non si scrive nulla',
+  'Modo lectura desactivado: ya puedes escribir': 'Modalità lettura disattivata: ora puoi scrivere',
+  'Estás en modo lectura': 'Sei in modalità lettura', 'Estás en modo lectura. Sal con el lápiz tachado de arriba para escribir.': 'Sei in modalità lettura. Esci con la matita barrata in alto per scrivere.',
+  'Página anterior': 'Pagina precedente', 'Página siguiente': 'Pagina successiva', 'Página': 'Pagina', 'Páginas': 'Pagine',
+  'Miniaturas': 'Miniature', 'Marcadores': 'Segnalibri', 'Vista de la barra lateral': 'Vista della barra laterale',
+  'Sin páginas guardadas. Pulsa el marcador de una página (arriba o en Miniaturas) para guardarla aquí.': 'Nessuna pagina salvata. Premi il segnalibro di una pagina (in alto o in Miniature) per salvarla qui.',
+  'Página guardada en marcadores': 'Pagina salvata nei segnalibri', 'Página quitada de marcadores': 'Pagina tolta dai segnalibri',
+  '+ Añadir página': '+ Aggiungi pagina', 'Añadir página': 'Aggiungi pagina', 'Añadir página…': 'Aggiungi pagina…', 'Duplicar esta página': 'Duplica questa pagina',
+  'Plantilla': 'Modello', 'Color del papel': 'Colore della carta', 'Aplicar a todas las páginas': 'Applica a tutte le pagine',
+  'Borrar el contenido de esta página…': 'Cancella il contenuto di questa pagina…', 'Eliminar esta página…': 'Elimina questa pagina…', 'Eliminar página': 'Elimina pagina',
+  'Zoom (también con Ctrl + rueda)': 'Zoom (anche con Ctrl + rotella)', 'Acercar': 'Ingrandisci', 'Alejar': 'Riduci', 'Ajustar al ancho': 'Adatta alla larghezza',
+  'Mostrar el temporizador en la barra': 'Mostra il timer nella barra', 'Mantener quieto al final: forma perfecta o recta': 'Tieni fermo alla fine: forma perfetta o dritta',
+  'Borrar contenido': 'Cancella contenuto', '¿Borrar todo el contenido de esta página?': 'Cancellare tutto il contenuto di questa pagina?',
+  'Se quitarán la tinta, los textos, las imágenes, los post-its y los comentarios. La página y su papel se conservan. Puedes deshacerlo.': 'Verranno tolti inchiostro, testi, immagini, post-it e commenti. La pagina e la sua carta restano. Puoi annullarlo.',
+  'No se puede deshacer.': 'Non si può annullare.',
+  'Rayado': 'A righe', 'Rayado estrecho': 'A righe strette', 'Cuadrícula': 'A quadretti', 'Puntos': 'A puntini', 'En blanco': 'Bianca', 'Pentagrama': 'Pentagramma', 'Cornell': 'Cornell',
+  'Blanco': 'Bianco', 'Crema': 'Crema', 'Gris': 'Grigio', 'Oscuro': 'Scuro',
+  // --- Opciones de herramientas ---
+  'Formas': 'Forme', 'Para una forma perfecta, al acabar el trazo mantén quieto 1 segundo antes de soltar': 'Per una forma perfetta, alla fine del tratto tieni fermo 1 secondo prima di rilasciare',
+  'Cada trazo se convierte en línea, círculo, rectángulo…': 'Ogni tratto diventa linea, cerchio, rettangolo…', 'Grosor': 'Spessore', 'Otro color': 'Altro colore',
+  'Libre': 'Libero', 'Recto': 'Dritto', 'H / V': 'O / V', 'Forma del subrayado': 'Forma dell’evidenziatura', 'Trazo entero': 'Tratto intero', 'Parcial': 'Parziale',
+  'Tamaño': 'Dimensione', 'Haz clic en la página para pegar un post-it. Puedes escribir encima con el bolígrafo.': 'Fai clic sulla pagina per attaccare un post-it. Puoi scriverci sopra con la penna.',
+  'Haz clic en la página para añadir un comentario.': 'Fai clic sulla pagina per aggiungere un commento.',
+  'Haz clic en un elemento para seleccionarlo y arrástralo para moverlo. Doble clic en un texto para escribir. Ctrl+C, Ctrl+X y Ctrl+V para copiar, cortar y pegar.': 'Fai clic su un elemento per selezionarlo e trascinalo per spostarlo. Doppio clic su un testo per scrivere. Ctrl+C, Ctrl+X e Ctrl+V per copiare, tagliare e incollare.',
+  'Haz clic en la página para escribir.': 'Fai clic sulla pagina per scrivere.', 'Rodea trazos para seleccionarlos': 'Circonda i tratti per selezionarli',
+  'Dibuja un recuadro sobre lo escrito a mano para enlazarlo': 'Disegna un riquadro sopra lo scritto a mano per collegarlo',
+  'Tipo de letra': 'Carattere', 'Sistema': 'Sistema', 'Serif': 'Serif', 'Manuscrita': 'Manoscritta', 'Mono': 'Mono',
+  'Letra más grande': 'Testo più grande', 'Letra más pequeña': 'Testo più piccolo', 'Menos': 'Meno', 'Más': 'Più',
+  'Negrita': 'Grassetto', 'Cursiva': 'Corsivo', 'Subrayado': 'Sottolineato', 'Tachado': 'Barrato', 'Resaltar ▾': 'Evidenzia ▾', 'Fondo ▾': 'Sfondo ▾',
+  'Sin resaltar': 'Senza evidenziatura', 'Amarillo': 'Giallo', 'Verde': 'Verde', 'Azul': 'Blu', 'Rosa': 'Rosa', 'Naranja': 'Arancione', 'Sin fondo': 'Senza sfondo', 'Borde': 'Bordo',
+  'Predeterminar': 'Predefinito', 'Los textos nuevos tendrán este estilo': 'I testi nuovi avranno questo stile', 'Color de fondo de las letras': 'Colore di sfondo del testo',
+  'Alinear a la izquierda': 'Allinea a sinistra', 'Centrar': 'Centra', 'Alinear a la derecha': 'Allinea a destra',
+  'Insertar una imagen donde está el cursor': 'Inserisci un’immagine dove si trova il cursore', 'Enlazar el texto seleccionado con otra libreta o página': 'Collega il testo selezionato a un altro quaderno o pagina',
+  'Selecciona el texto que quieres enlazar.': 'Seleziona il testo che vuoi collegare.', 'Selecciona el texto que quieres resaltar.': 'Seleziona il testo che vuoi evidenziare.',
+  'Copiar': 'Copia', 'Cortar': 'Taglia', 'Traer al frente': 'Porta in primo piano', 'Enviar atrás': 'Porta sullo sfondo', 'Copiado': 'Copiato',
+  'Arrástrala o usa el círculo de la esquina para cambiar su tamaño.': 'Trascinala o usa il cerchio nell’angolo per cambiarne la dimensione.', 'Recortar…': 'Ritaglia…',
+  'Elegir destino': 'Scegli destinazione', 'Cambiar destino': 'Cambia destinazione', 'Vista previa': 'Anteprima', 'Sin destino': 'Senza destinazione', 'Elige destino': 'Scegli destinazione',
+  'Enlazar con…': 'Collega a…', 'Enlazar con toda la libreta': 'Collega all’intero quaderno', 'O con una página concreta:': 'O a una pagina precisa:', 'Texto enlazado': 'Testo collegato',
+  'Ir →': 'Vai →', 'Vista previa del enlace': 'Anteprima del collegamento', 'Esa libreta ya no existe.': 'Quel quaderno non esiste più.', 'Enlace a': 'Collegamento a',
+  'Cerrar comentario': 'Chiudi commento', 'Nombre del comentario': 'Nome del commento', 'Profe': 'Prof',
+  'Reproducir': 'Riproduci', 'Grabaciones': 'Registrazioni', 'Renombrar': 'Rinomina',
+  // --- Buscar ---
+  'Cerrar búsqueda': 'Chiudi ricerca', 'Buscar en esta libreta': 'Cerca in questo quaderno',
+  // --- Compartir ---
+  'Descargar para enviar': 'Scarica per inviare', 'PDF de toda la libreta': 'PDF di tutto il quaderno', 'PDF de esta página': 'PDF di questa pagina',
+  'Imagen PNG de esta página': 'Immagine PNG di questa pagina', 'Después, envía el archivo por WhatsApp, correo, Drive… desde tu ordenador.': 'Poi invia il file via WhatsApp, e-mail, Drive… dal tuo computer.',
+  'PDF descargado': 'PDF scaricato', 'Imagen descargada': 'Immagine scaricata', 'No se ha podido descargar el archivo.': 'Impossibile scaricare il file.',
+  'No se ha podido cargar el generador de PDF. Revisa la conexión y recarga.': 'Impossibile caricare il generatore di PDF. Controlla la connessione e ricarica.',
+  // --- Páginas ---
+  'Arrastra una página para cambiarla de sitio. Clic para ir a ella; clic derecho para más opciones.': 'Trascina una pagina per spostarla. Clic per andarci; clic destro per altre opzioni.',
+  'Añadir al esquema…': 'Aggiungi all’indice…', 'Añadir al esquema': 'Aggiungi all’indice', 'Mover al principio': 'Sposta all’inizio', 'Mover al final': 'Sposta alla fine',
+  'Mover antes': 'Sposta prima', 'Mover después': 'Sposta dopo', 'Título del apartado': 'Titolo della sezione', 'Renombrar apartado': 'Rinomina sezione',
+  'Eliminar del esquema': 'Elimina dall’indice', 'Quitar sangría': 'Togli rientro', 'Añadir sangría': 'Aggiungi rientro',
+  'Esquema vacío. Crea un índice: añade la página actual con un título y usa clic derecho para hacer apartados y subapartados.': 'Indice vuoto. Crea un indice: aggiungi la pagina attuale con un titolo e usa il clic destro per fare sezioni e sottosezioni.',
+  'Aquí lo dejaste la última vez': 'Eri rimasto qui l’ultima volta', 'Continúas en la página': 'Riprendi dalla pagina',
+  'Después de la actual': 'Dopo quella attuale', 'Al final': 'Alla fine', 'Al principio': 'All’inizio', 'Añadir': 'Aggiungi', 'Cuántas': 'Quante', 'Dónde': 'Dove', 'Orientación': 'Orientamento',
+  // --- Imágenes ---
+  'Insertar': 'Inserisci', 'No insertar': 'Non inserire', 'Recortar imagen': 'Ritaglia immagine', 'Recortar': 'Ritaglia', 'Girar': 'Ruota', 'Restablecer': 'Ripristina',
+  'Original': 'Originale', 'Imagen para recortar': 'Immagine da ritagliare', 'Ancho en la página': 'Larghezza nella pagina', 'No se ha podido leer esa imagen.': 'Impossibile leggere questa immagine.',
+  // --- Notas de voz ---
+  'Grabar audio': 'Registra audio', 'Detener grabación': 'Ferma registrazione', 'Grabaciones y notas de voz': 'Registrazioni e note vocali',
+  'Poner la última grabación en la página': 'Metti l’ultima registrazione nella pagina', 'Mostrar notas de voz en la página': 'Mostra le note vocali nella pagina',
+  'Notas de voz ocultas': 'Note vocali nascoste', 'Notas de voz visibles': 'Note vocali visibili', 'Añadir a la página': 'Aggiungi alla pagina',
+  'Copiar a otra libreta…': 'Copia in un altro quaderno…', 'Copiar a…': 'Copia in…', 'Sin grabaciones': 'Nessuna registrazione',
+  'Pulsa el micrófono para grabar mientras tomas apuntes.': 'Premi il microfono per registrare mentre prendi appunti.', 'Nombre de la nota de voz': 'Nome della nota vocale',
+  '¿Eliminar la grabación?': 'Eliminare la registrazione?', 'Se borra el audio y sus notas de voz en las páginas. No se puede deshacer.': 'Si cancellano l’audio e le sue note vocali nelle pagine. Non si può annullare.',
+  'Nota de voz': 'Nota vocale', 'Nota de voz: reproduce o pausa': 'Nota vocale: riproduci o metti in pausa', 'Grabación borrada': 'Registrazione eliminata',
+  'Sin acceso al micrófono': 'Nessun accesso al microfono', 'Este navegador no deja grabar audio.': 'Questo browser non permette di registrare audio.',
+  'Para grabar, deja que esta página use el micrófono: pulsa el icono del candado o de la cámara en la barra de direcciones y permite «Micrófono».': 'Per registrare, lascia che questa pagina usi il microfono: premi l’icona del lucchetto o della fotocamera nella barra degli indirizzi e consenti «Microfono».',
+  'No se encuentra el audio de esta grabación.': 'Audio di questa registrazione non trovato.', 'No se ha podido reproducir.': 'Impossibile riprodurre.', 'Posición': 'Posizione', 'Pausa': 'Pausa', 'Cerrar': 'Chiudi',
+  '«Añadir a la página» la pone como nota de voz donde estés; arrástrala adonde quieras. Con clic derecho (o ⋯) puedes renombrarla o copiarla a otra libreta.': '«Aggiungi alla pagina» la inserisce come nota vocale dove ti trovi; trascinala dove vuoi. Con il clic destro (o ⋯) puoi rinominarla o copiarla in un altro quaderno.',
+  'Grabaciones y notas de voz ': 'Registrazioni e note vocali',
+  // --- PDF ---
+  'Texto del PDF': 'Testo del PDF', 'Subrayar': 'Evidenzia', 'Subrayar con línea': 'Sottolinea', 'Tachar': 'Barra', 'Copiar texto': 'Copia testo', 'Texto copiado': 'Testo copiato',
+  // --- Temporizador ---
+  'Temporizador de estudio': 'Timer di studio', 'Estudio': 'Studio', 'Descanso': 'Pausa', 'Descanso largo': 'Pausa lunga', 'Empezar': 'Inizia', 'Empezar a estudiar': 'Inizia a studiare',
+  'Pausar': 'Metti in pausa', 'Reanudar': 'Riprendi', 'Saltar esta fase': 'Salta questa fase', 'Quitar temporizador': 'Rimuovi timer', 'En pausa': 'In pausa',
+  'Empezar la siguiente fase sola': 'Avvia da sola la fase successiva', 'Alarma': 'Sveglia', 'Probar': 'Prova', 'Vuelta al estudio': 'Si torna a studiare',
+  '¡Hora del descanso!': 'È ora della pausa!', 'Volver a empezar': 'Ricomincia', 'min.': 'min.', 'Sesiones antes del descanso largo': 'Sessioni prima della pausa lunga',
+  'Cerrar temporizador': 'Chiudi timer',
+  // --- Atajos ---
+  'Restablecer todo': 'Ripristina tutto', '¿Volver a los atajos de siempre?': 'Tornare alle scorciatoie di sempre?', 'Se perderán los cambios que hayas hecho.': 'Le modifiche fatte andranno perse.',
+  'Añadir otra combinación': 'Aggiungi un’altra combinazione', 'Esc para cancelar': 'Esc per annullare', 'Pestañas': 'Schede', 'Edición': 'Modifica', 'Páginas ': 'Pagine', 'Otros': 'Altro',
+  'Pestaña siguiente': 'Scheda successiva', 'Pestaña anterior': 'Scheda precedente', 'Última pestaña': 'Ultima scheda', 'Cerrar pestaña': 'Chiudi scheda',
+  'Mostrar u ocultar la barra lateral': 'Mostra o nascondi la barra laterale', 'Mostrar u ocultar notas de voz': 'Mostra o nascondi le note vocali', 'Marcador de la página': 'Segnalibro della pagina',
+  'Espacio': 'Spazio', 'Supr': 'Canc', 'Mayús': 'Maiusc', 'Haz clic en un atajo para cambiarlo. Clic derecho para quitarlo.': 'Fai clic su una scorciatoia per cambiarla. Clic destro per toglierla.',
+  // --- Tutorial ---
+  'Tutorial de Libreta': 'Tutorial di Libreta', 'Omitir tutorial': 'Salta il tutorial', 'Tus apuntes, a mano y a tu manera.': 'I tuoi appunti, a mano e a modo tuo.',
+  '¿Cómo te llamas?': 'Come ti chiami?', 'Así te puedo guiar durante el recorrido.': 'Così posso guidarti durante il percorso.', 'Tu nombre': 'Il tuo nome',
+  'Prefiero no decirlo': 'Preferisco non dirlo', 'Continuar': 'Continua', '¡Encantado!': 'Piacere!',
+  '¿Te enseño cómo funciona Libreta? Son un par de minutos y eliges qué ver.': 'Ti mostro come funziona Libreta? Sono un paio di minuti e scegli tu cosa vedere.',
+  'Sí, enséñame': 'Sì, mostrami', 'Un recorrido rápido por lo que tú elijas.': 'Un giro veloce su quello che scegli tu.', 'Ahora no': 'Non ora',
+  'Prefiero explorarla yo. Podré verlo más tarde.': 'Preferisco esplorarla da solo. Potrò vederlo più tardi.', '¿Qué quieres aprender?': 'Cosa vuoi imparare?',
+  'Está todo seleccionado. Quita lo que ya sepas.': 'È tutto selezionato. Togli quello che già sai.', 'Quitar todo': 'Togli tutto', 'Terminar': 'Termina',
+  'Atrás': 'Indietro', 'Siguiente': 'Avanti', '¡Todo listo!': 'Tutto pronto!',
+  'Puedes volver a ver el tutorial cuando quieras desde + › Ver el tutorial.': 'Puoi rivedere il tutorial quando vuoi da ⚙︎ › Guarda il tutorial.',
+  'Puedes volver a ver el tutorial cuando quieras desde ⚙︎ › Ver el tutorial.': 'Puoi rivedere il tutorial quando vuoi da ⚙︎ › Guarda il tutorial.',
+  'Ir a mis libretas': 'Vai ai miei quaderni', 'Crear mi primera libreta': 'Crea il mio primo quaderno', '¿Omitir el tutorial?': 'Saltare il tutorial?',
+  'Podrás verlo cuando quieras desde + › Ver el tutorial.': 'Potrai vederlo quando vuoi da ⚙︎ › Guarda il tutorial.', 'Podrás verlo cuando quieras desde ⚙︎ › Ver el tutorial.': 'Potrai vederlo quando vuoi da ⚙︎ › Guarda il tutorial.',
+  'Seguir con el tutorial': 'Continua il tutorial', 'Omitir': 'Salta',
+  'Español o italiano, cuando quieras.': 'Spagnolo o italiano, quando vuoi.', 'Escribir a mano': 'Scrivere a mano', 'Bolígrafo, pluma y lápiz. Formas perfectas.': 'Penna, stilografica e matita. Forme perfette.',
+  'Libre, recto o perfectamente horizontal.': 'Libero, dritto o perfettamente orizzontale.', 'Textos con estilo': 'Testi con stile', 'Letras, colores, negritas y fondos.': 'Caratteri, colori, grassetti e sfondi.',
+  'Imágenes': 'Immagini', 'Inserta, recorta y ajusta el tamaño.': 'Inserisci, ritaglia e regola la dimensione.', 'Post-its y comentarios': 'Post-it e commenti',
+  'Notas de colores y comentarios con nombre.': 'Note colorate e commenti con nome.', 'Enlaces entre libretas': 'Collegamenti tra quaderni', 'Une ideas entre libretas y páginas.': 'Unisci idee tra quaderni e pagine.',
+  'Trabajar con PDF': 'Lavorare con i PDF', 'Importa, selecciona texto y subráyalo.': 'Importa, seleziona il testo ed evidenzialo.', 'Carpetas y pestañas': 'Cartelle e schede',
+  'Carpetas dentro de carpetas y pestañas.': 'Cartelle dentro cartelle e schede.', 'Tus libretas como una constelación.': 'I tuoi quaderni come una costellazione.',
+  'Graba clases y pon el audio en la página.': 'Registra le lezioni e metti l’audio nella pagina.', 'Pomodoro con descansos y alarma.': 'Pomodoro con pause e sveglia.',
+  'Encuentra cualquier palabra al instante.': 'Trova qualsiasi parola all’istante.', 'Todo con el teclado, a tu manera.': 'Tutto con la tastiera, a modo tuo.',
+  'Compartir y exportar': 'Condividere ed esportare', 'PDF o imagen, listos para enviar.': 'PDF o immagine, pronti da inviare.',
+  // Textos dibujados en las animaciones del tutorial
+  'Dibuja': 'Disegna', 'Mantén quieto…': 'Tieni fermo…', '¡Círculo perfecto!': 'Cerchio perfetto!', '¡Examen': 'Esame', 'el lunes!': 'lunedì!',
+  'Revisar esta parte': 'Rivedere questa parte', 'pág. 3': 'pag. 3', 'Arrastra para ordenar': 'Trascina per ordinare', 'Cardiología': 'Cardiologia',
+  'Digestivo': 'Gastroenterologia', 'Cirugía vascular': 'Chirurgia vascolare', 'Clase de Cardiología': 'Lezione di Cardiologia', 'célula': 'cellula', 'La': 'La',
+  'es la unidad…': 'è l’unità…', 'Biología · pág. 2': 'Biologia · pag. 2', 'Apuntes · pág. 7': 'Appunti · pag. 7', 'Resumen · pág. 1': 'Riassunto · pag. 1',
+  // Libretas de ejemplo (títulos)
+  'Bienvenida a Libreta': 'Benvenuto in Libreta', 'Biología · Tema 3': 'Biologia · Tema 3',
+};
+
+/** Textos con nombres o números dentro. */
+I18N.patterns.it = [
+  [/^(.+?)\s+\(([^()]+)\)$/, (m, t) => { const a = t(m[1].trim()); return a === null ? null : `${a} (${m[2]})`; }],
+  [/^(.+) · (.+)$/, (m, t) => m[0].split(' · ').map((p) => t(p) ?? p).join(' · ')],
+  [/^Abrir carpeta (.+)$/, 'Apri cartella $1'], [/^Abrir (.+)$/, 'Apri $1'], [/^Cerrar (.+)$/, 'Chiudi $1'],
+  [/^Opciones de la carpeta (.+)$/, 'Opzioni della cartella $1'], [/^Opciones de (.+)$/, 'Opzioni di $1'],
+  [/^Seleccionar carpeta (.+)$/, 'Seleziona cartella $1'], [/^Seleccionar (.+)$/, 'Seleziona $1'],
+  [/^Carpeta (.+), (\d+) libretas?\. Entrar$/, (m) => `Cartella ${m[1]}, ${m[2]} ${m[2] === '1' ? 'quaderno' : 'quaderni'}. Entra`],
+  [/^(.+), (\d+) vínculos?$/, (m) => `${m[1]}, ${m[2]} ${m[2] === '1' ? 'collegamento' : 'collegamenti'}`],
+  [/^Mover «(.+)»$/, 'Sposta «$1»'], [/^Mover (\d+) elementos$/, 'Sposta $1 elementi'], [/^Movido a «(.+)»$/, 'Spostato in «$1»'], [/^Movido a Libretas$/, 'Spostato in Quaderni'],
+  [/^¿Eliminar «(.+)»\?$/, 'Eliminare «$1»?'], [/^¿Eliminar (\d+) elementos\?$/, 'Eliminare $1 elementi?'], [/^¿Eliminar la página (\d+)\?$/, 'Eliminare la pagina $1?'],
+  [/^Se borrará (\d+) libreta \(también las que hay dentro de las carpetas\)\. (.*)$/, (m, t) => `Verrà cancellato ${m[1]} quaderno (anche quelli dentro le cartelle). ${t(m[2]) ?? m[2]}`],
+  [/^Se borrarán (\d+) libretas \(también las que hay dentro de las carpetas\)\. (.*)$/, (m, t) => `Verranno cancellati ${m[1]} quaderni (anche quelli dentro le cartelle). ${t(m[2]) ?? m[2]}`],
+  [/^Se creará en la carpeta «(.+)»\.$/, 'Verrà creato nella cartella «$1».'], [/^Crear en «(.+)»$/, 'Crea in «$1»'],
+  [/^Empezar · (\d+) temas?$/, (m) => `Inizia · ${m[1]} ${m[1] === '1' ? 'argomento' : 'argomenti'}`], [/^Tema (\d+) de (\d+)$/, 'Argomento $1 di $2'],
+  [/^Encantado, (.+)$/, 'Piacere, $1'], [/^¿Qué quieres aprender, (.+)\?$/, 'Cosa vuoi imparare, $1?'], [/^¡Todo listo, (.+)!$/, 'Tutto pronto, $1!'],
+  [/^(\d+) seleccionados?$/, (m) => `${m[1]} ${m[1] === '1' ? 'selezionato' : 'selezionati'}`],
+  [/^PDF importado: (\d+) páginas?$/, (m) => `PDF importato: ${m[1]} ${m[1] === '1' ? 'pagina' : 'pagine'}`],
+  [/^Importando el PDF… (\d+) de (\d+)$/, 'Importazione del PDF… $1 di $2'], [/^Recuperadas (\d+) libretas$/, 'Recuperati $1 quaderni'],
+  [/^Exportando (\d+) libretas? en PDF…$/, (m) => `Esportazione di ${m[1]} ${m[1] === '1' ? 'quaderno' : 'quaderni'} in PDF…`],
+  [/^(\d+) elementos duplicados$/, '$1 elementi duplicati'], [/^Grosor ([\d.]+)$/, 'Spessore $1'], [/^Color (#\w+)$/, 'Colore $1'], [/^Portada (#\w+)$/, 'Copertina $1'],
+  [/^Página (\d+)$/, 'Pagina $1'], [/^Página (\d+) \/ (\d+)$/, 'Pagina $1 / $2'], [/^Continúas en la página (\d+)$/, 'Riprendi dalla pagina $1'],
+  [/^Portada de «(.+)»$/, 'Copertina di «$1»'], [/^Color de «(.+)»$/, 'Colore di «$1»'], [/^Mover «(.+)» a$/, 'Sposta «$1» in'],
+  [/^Copiada a «(.+)», en su primera página\.$/, 'Copiata in «$1», nella sua prima pagina.'],
+  [/^Grabación guardada \((.+)\)\. Está en el menú del micrófono › Grabaciones\.$/, 'Registrazione salvata ($1). È nel menu del microfono › Registrazioni.'],
+  [/^Grabaciones \((\d+)\)$/, 'Registrazioni ($1)'], [/^Nada coincide con «(.+)»\. (.*)$/, (m, t) => `Nessun risultato per «${m[1]}». La scrittura a mano non si può cercare nella versione web; testi, post-it, commenti e PDF sì.`],
+  [/^Pulsa la combinación para «(.+)»$/, (m, t) => `Premi la combinazione per «${t(m[1]) ?? m[1]}»`],
+  [/^(.+) la usa el navegador; elige otra combinación\.$/, '$1 la usa il browser; scegli un’altra combinazione.'],
+  [/^(.+) ya no es «(.+)»: ahora es «(.+)»\.$/, (m, t) => `${m[1]} non è più «${t(m[2]) ?? m[2]}»: ora è «${t(m[3]) ?? m[3]}».`],
+  [/^Volver a (.+)$/, 'Torna a $1'], [/^Ancho en la página: (\d+) %$/, 'Larghezza nella pagina: $1 %'],
+  [/^Recorte: (\d+) × (\d+) píxeles\. (.*)$/, 'Ritaglio: $1 × $2 pixel. Trascina gli angoli o i bordi; trascina dentro per spostare il ritaglio.'],
+  [/^Insertar imagen \(quedan (\d+) más\)$/, 'Inserisci immagine (ne restano altre $1)'],
+  [/^(\d+):(\d+) \/ (\d+):(\d+)$/, '$&'], [/^\w{3}\.? \d{1,2} \w{3}\.?,? \d{1,2}:\d{2}$/, '$&'],
+  [/^Pestaña (\d+)$/, 'Scheda $1'], [/^Ir a la pestaña (\d+)$/, 'Vai alla scheda $1'],
+  [/^Nota de voz · (.+)$/, 'Nota vocale · $1'], [/^Libreta duplicada$/, 'Quaderno duplicato'],
+  [/^(Ahora: )?(.+) terminado\. Ahora: (.+)$/, (m, t) => `${t(m[2]) ?? m[2]} finito. Ora: ${t(m[3]) ?? m[3]}`],
+];
+
+/** Palabras sueltas, para lo que mezcla números y nombres («3 libretas · 2 carpetas»). */
+I18N.words.it = [
+  ['libretas', 'quaderni'], ['libreta', 'quaderno'], ['carpetas', 'cartelle'], ['carpeta', 'cartella'], ['páginas', 'pagine'], ['página', 'pagina'],
+  ['vínculos', 'collegamenti'], ['vínculo', 'collegamento'], ['a la pág.', 'alla pag.'], ['desde pág.', 'da pag.'], ['pág.', 'pag.'],
+  ['en la libreta', 'nel quaderno'], ['vez', 'volta'], ['veces', 'volte'], ['temas', 'argomenti'], ['seleccionados', 'selezionati'],
+];
+
 'use strict';
 // =============================================================================
 // Libreta (versión web). Núcleo: constantes, utilidades, almacenamiento, estado.
@@ -886,7 +1255,7 @@ function displayColor(hex, paper) {
   return paper === 'dark' && luminance(hex) < 0.35 ? '#EDEEF2' : hex;
 }
 function formatDate(ms) {
-  try { return new Date(ms).toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' }); } catch (e) { return ''; }
+  try { return new Date(ms).toLocaleDateString(LOCALE(), { day: 'numeric', month: 'short', year: 'numeric' }); } catch (e) { return ''; }
 }
 function spaceColor(name) {
   if (!name) return '#6B7280';
@@ -911,7 +1280,7 @@ function setAppearance(value) {
 }
 applyAppearance();
 
-const CLOCK_FORMAT = new Intl.DateTimeFormat('es-ES', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+const clockFormat = () => new Intl.DateTimeFormat(LOCALE(), { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
 /** Fecha y hora («mié, 14 oct, 10:29») en todos los relojes de la pantalla. */
 /** Pantalla completa (toda la app, sin la barra del navegador). */
 function toggleFullscreen() {
@@ -922,7 +1291,7 @@ function toggleFullscreen() {
   } catch (e) { toast('Este navegador no deja poner la página en pantalla completa.'); }
 }
 function updateClocks() {
-  const text = CLOCK_FORMAT.format(new Date());
+  const text = clockFormat().format(new Date());
   document.querySelectorAll('[data-clock]').forEach((el) => { if (el.textContent !== text) el.textContent = text; });
 }
 setInterval(updateClocks, 15000);
@@ -1785,7 +2154,7 @@ function paperPreview(canvas, template, paper, landscape = false, width = 54) {
 function coverHTML(nb, { label = true, tag = 'button', extra = '' } = {}) {
   const c = nb.cover || { type: 'color' };
   const inner = c.type === 'color' || !c.image
-    ? (label ? `<span>${esc(nb.title)}</span>` : '')
+    ? (label ? `<span translate="no">${esc(nb.title)}</span>` : '')
     : `<img src="${c.image}" alt="">`;
   const cls = c.type === 'photo' && c.image ? 'photo' : c.type === 'page' && c.image ? 'page' : 'color';
   return `<${tag} class="cover ${cls}" style="--c:${nb.color}" ${extra}>${inner}</${tag}>`;
@@ -1875,11 +2244,11 @@ function renderLibrary() {
       </div>
       <div class="clock lib-clock" data-clock></div>
     </header>`;
-  const breadcrumb = crumbs.length ? `<nav class="crumbs" aria-label="Ruta"><button data-go-folder="">Libretas</button>${crumbs.slice(0, -1).map((f) => `<span>›</span><button data-go-folder="${f.id}">${esc(f.name)}</button>`).join('')}<span>›</span></nav>` : '';
+  const breadcrumb = crumbs.length ? `<nav class="crumbs" aria-label="Ruta"><button data-go-folder="">Libretas</button>${crumbs.slice(0, -1).map((f) => `<span>›</span><button data-go-folder="${f.id}" translate="no">${esc(f.name)}</button>`).join('')}<span>›</span></nav>` : '';
   $('#app').innerHTML = `<div class="${dark ? 'dark-zone' : ''}" style="display:contents">${header}
     ${q ? `<main class="library" id="lib-main">${resultsHTML(q)}</main>`
       : S.dynamic ? '<div class="dyn" id="dyn"></div>'
-      : `<div class="title-row">${breadcrumb}<h1 class="large-title">${crumbs.length ? `<button class="back-folder" data-go-folder="${crumbs.length > 1 ? crumbs[crumbs.length - 2].id : ''}" aria-label="Volver">${icon('back')}</button>` : ''}${esc(crumbs.length ? crumbs[crumbs.length - 1].name : 'Libretas')}</h1></div>
+      : `<div class="title-row">${breadcrumb}<h1 class="large-title">${crumbs.length ? `<button class="back-folder" data-go-folder="${crumbs.length > 1 ? crumbs[crumbs.length - 2].id : ''}" aria-label="Volver">${icon('back')}</button><span translate="no">${esc(crumbs[crumbs.length - 1].name)}</span>` : 'Libretas'}</h1></div>
     <main class="library ${sel ? 'selecting' : ''}" id="lib-main">
       ${Store.working ? '' : '<p class="notice">Este navegador no permite guardar (puede ser una ventana privada). Lo que hagas se perderá al cerrar: usa + › Copia de seguridad.</p>'}
       ${folders.length || notebooks.length ? `<div class="shelf">${folders.map(folderCardHTML).join('')}${notebooks.map(cardHTML).join('')}</div>`
@@ -1920,7 +2289,7 @@ function cardHTML(nb) {
   return `<div class="card ${picked ? 'picked' : ''}" data-id="${nb.id}">
     ${coverHTML(nb, { extra: S.selecting ? `data-pick="${key}" aria-pressed="${picked}" aria-label="Seleccionar ${esc(nb.title)}"` : `data-open="${nb.id}" aria-label="Abrir ${esc(nb.title)}"` })}
     ${S.selecting ? `<span class="pick-mark" aria-hidden="true">${picked ? icon('check') : ''}</span>` : `<button class="more" data-more="${nb.id}" aria-label="Opciones de ${esc(nb.title)}" aria-haspopup="menu" aria-expanded="false">${icon('more')}</button>`}
-    <div class="name">${esc(nb.title)}</div>
+    <div class="name" translate="no">${esc(nb.title)}</div>
     <div class="meta"><span>${pages} ${pages === 1 ? 'página' : 'páginas'} · ${formatDate(nb.modified)}</span></div>
   </div>`;
 }
@@ -1932,7 +2301,7 @@ function folderCardHTML(f) {
     <button class="folder-icon" style="--c:${Folders.color(Folders.top(f.id))}" ${S.selecting ? `data-pick="${key}" aria-pressed="${picked}" aria-label="Seleccionar carpeta ${esc(f.name)}"` : `data-go-folder="${f.id}" aria-label="Abrir carpeta ${esc(f.name)}"`}>
       <span class="count">${inside}</span></button>
     ${S.selecting ? `<span class="pick-mark" aria-hidden="true">${picked ? icon('check') : ''}</span>` : `<button class="more" data-fmore="${f.id}" aria-label="Opciones de la carpeta ${esc(f.name)}" aria-haspopup="menu">${icon('more')}</button>`}
-    <div class="name">${esc(f.name)}</div>
+    <div class="name" translate="no">${esc(f.name)}</div>
     <div class="meta"><span>${inside} ${inside === 1 ? 'libreta' : 'libretas'}${subs ? ` · ${subs} ${subs === 1 ? 'carpeta' : 'carpetas'}` : ''} · ${formatDate(newest)}</span></div>
   </div>`;
 }
@@ -1957,7 +2326,9 @@ function settingsMenu(anchor) {
   const appearance = currentAppearance();
   const mark = (v) => (appearance === v ? icon('check') : '<svg width="17" height="17"></svg>');
   popover(anchor, `
-    <div class="label">Apariencia</div>
+    <div class="label">Idioma</div>
+    <div class="lang-row">${languageButtons()}</div>
+    <hr><div class="label">Apariencia</div>
     <button data-act="ap:system">${mark('system')} Automática</button>
     <button data-act="ap:light">${mark('light')} Clara</button>
     <button data-act="ap:dark">${mark('dark')} Oscura</button>
@@ -1996,7 +2367,7 @@ function resultsHTML(q) {
   if (!byTitle.length && !groups.length) return `<p class="empty">Nada coincide con «${esc(q)}». La escritura a mano no se puede buscar en la versión web; los textos, post-its, comentarios y PDF sí.</p>`;
   const mini = (nb) => `<span class="mini">${coverHTML(nb, { label: false, tag: 'span' })}</span>`;
   return `<div class="results">
-    ${byTitle.length ? `<section><h2>Libretas</h2>${byTitle.map((nb) => `<button class="result" data-open="${nb.id}">${mini(nb)}<span><b>${highlightAll(nb.title, q)}</b><br><span class="where">${nb.folder ? esc(Folders.label(nb)) + ' · ' : ''}${nb.pages.length} páginas · ${formatDate(nb.modified)}</span></span></button>`).join('')}</section>` : ''}
+    ${byTitle.length ? `<section><h2>Libretas</h2>${byTitle.map((nb) => `<button class="result" data-open="${nb.id}">${mini(nb)}<span><b translate="no">${highlightAll(nb.title, q)}</b><br><span class="where">${nb.folder ? esc(Folders.label(nb)) + ' · ' : ''}${nb.pages.length} páginas · ${formatDate(nb.modified)}</span></span></button>`).join('')}</section>` : ''}
     ${groups.map((g) => `<section><h2>${mini(g.nb)} ${esc(g.nb.title)}</h2>${g.hits.map((h) => `
       <button class="result" data-open="${g.nb.id}" data-page="${h.pageId}" data-item="${h.itemId || ''}" data-query="${esc(q)}">
         <span><span class="where">Página ${h.pageIndex + 1} · ${SOURCE_NAMES[h.source]}</span><br>${h.snippet}</span></button>`).join('')}</section>`).join('')}
@@ -2047,7 +2418,7 @@ function folderJumpMenu(anchor) {
   const tree = Folders.tree();
   popover(anchor, `<div class="label">Ir a</div>
     <button data-act="root">${S.folder ? '<svg width="17" height="17"></svg>' : icon('check')} Libretas (inicio)</button>
-    ${tree.map(({ folder, depth }) => `<button data-act="${folder.id}" style="padding-left:${10 + depth * 16}px">${S.folder === folder.id ? icon('check') : `<span class="chip-dot" style="--c:${Folders.color(Folders.top(folder.id))}"></span>`} ${esc(folder.name)}</button>`).join('')}
+    ${tree.map(({ folder, depth }) => `<button data-act="${folder.id}" style="padding-left:${10 + depth * 16}px">${S.folder === folder.id ? icon('check') : `<span class="chip-dot" style="--c:${Folders.color(Folders.top(folder.id))}"></span>`} <span translate="no">${esc(folder.name)}</span></button>`).join('')}
     ${tree.length ? '' : '<div class="label" style="text-transform:none;letter-spacing:0;white-space:normal;max-width:220px">Aún no tienes carpetas. Créalas con +.</div>'}`, (act) => {
     if (act === 'root') return goFolder(null);
     goFolder(act);
@@ -2356,14 +2727,14 @@ async function startDynamic(root) {
         el.className = 'dnode';
         el.dataset.id = n.nb.id;
         el.style.setProperty('--glow', n.nb.color);
-        el.innerHTML = `${coverHTML(n.nb, { label: false, tag: 'div' })}<div class="lbl">${esc(n.nb.title)}</div>`;
+        el.innerHTML = `${coverHTML(n.nb, { label: false, tag: 'div' })}<div class="lbl" translate="no">${esc(n.nb.title)}</div>`;
         el.setAttribute('aria-label', `${n.nb.title}, ${degree(n.key)} vínculos`);
       } else {
         const inside = Folders.notebooksIn(n.folder.id).length;
         el.className = 'dfolder';
         el.dataset.folder = n.folder.id;
         el.style.setProperty('--glow', Folders.color(Folders.top(n.folder.id)));
-        el.innerHTML = `<span class="core">${icon('folder')}</span><div class="lbl">${esc(n.folder.name)}</div><div class="sub">${inside} ${inside === 1 ? 'libreta' : 'libretas'}</div>`;
+        el.innerHTML = `<span class="core">${icon('folder')}</span><div class="lbl" translate="no">${esc(n.folder.name)}</div><div class="sub">${inside} ${inside === 1 ? 'libreta' : 'libretas'}</div>`;
         el.setAttribute('aria-label', `Carpeta ${n.folder.name}, ${inside} libretas. Entrar`);
       }
       nodesEl.appendChild(el);
@@ -2385,7 +2756,7 @@ async function startDynamic(root) {
   function renderCrumbs() {
     const path = Folders.path(S.folder);
     crumbsEl.innerHTML = `<button data-crumb="" ${path.length ? '' : 'aria-current="page"'}>${icon('sparkles')} Libretas</button>`
-      + path.map((f, i) => `<span>›</span><button data-crumb="${f.id}" ${i === path.length - 1 ? 'aria-current="page"' : ''} style="--glow:${Folders.color(Folders.top(f.id))}">${esc(f.name)}</button>`).join('');
+      + path.map((f, i) => `<span>›</span><button translate="no" data-crumb="${f.id}" ${i === path.length - 1 ? 'aria-current="page"' : ''} style="--glow:${Folders.color(Folders.top(f.id))}">${esc(f.name)}</button>`).join('');
   }
   crumbsEl.addEventListener('click', (e) => {
     const b = e.target.closest('[data-crumb]');
@@ -2584,15 +2955,15 @@ async function startDynamic(root) {
       const f = Folders.byId(key.slice(2)), list = Folders.notebooksIn(f.id).sort((a, b) => b.modified - a.modified);
       const subs = Folders.children(f.id).length;
       hoverEl.style.setProperty('--glow', Folders.color(Folders.top(f.id)));
-      hoverEl.innerHTML = `<div style="font-weight:700;font-size:14px">${esc(f.name)}</div><div style="opacity:.75">${list.length} ${list.length === 1 ? 'libreta' : 'libretas'}${subs ? ` · ${subs} ${subs === 1 ? 'carpeta' : 'carpetas'}` : ''}</div>
-        <div class="hover-list">${list.slice(0, 4).map((nb) => `<span style="--c:${nb.color}">${esc(nb.title)}</span>`).join('')}${list.length > 4 ? `<span class="more">y ${list.length - 4} más…</span>` : ''}</div>
+      hoverEl.innerHTML = `<div style="font-weight:700;font-size:14px" translate="no">${esc(f.name)}</div><div style="opacity:.75">${list.length} ${list.length === 1 ? 'libreta' : 'libretas'}${subs ? ` · ${subs} ${subs === 1 ? 'carpeta' : 'carpetas'}` : ''}</div>
+        <div class="hover-list">${list.slice(0, 4).map((nb) => `<span style="--c:${nb.color}" translate="no">${esc(nb.title)}</span>`).join('')}${list.length > 4 ? `<span class="more">y ${list.length - 4} más…</span>` : ''}</div>
         <div class="hover-go">Clic para entrar</div>`;
       root.appendChild(hoverEl);
       return;
     }
     const nb = nbById(key.slice(2));
     hoverEl.style.setProperty('--glow', nb.color);
-    hoverEl.innerHTML = `<img alt=""><div style="margin-top:6px;font-weight:700">${esc(nb.title)}</div><div style="opacity:.75">${nb.pages.length} ${nb.pages.length === 1 ? 'página' : 'páginas'} · ${degree(key)} ${degree(key) === 1 ? 'vínculo' : 'vínculos'}</div>`;
+    hoverEl.innerHTML = `<img alt=""><div style="margin-top:6px;font-weight:700" translate="no">${esc(nb.title)}</div><div style="opacity:.75">${nb.pages.length} ${nb.pages.length === 1 ? 'página' : 'páginas'} · ${degree(key)} ${degree(key) === 1 ? 'vínculo' : 'vínculos'}</div>`;
     root.appendChild(hoverEl);
     const url = await pageThumb(nb.pages[0], 180);
     if (hoverEl?.dataset.key === key) $('img', hoverEl).src = url;
@@ -2621,13 +2992,13 @@ async function startDynamic(root) {
     const comments = nb.pages.flatMap((p, i) => p.items.filter((it) => it.type === 'comment').map((it) => ({ it, i, page: p })));
     const row = (other, text, page, extra, openPage) => `<button class="lrow" data-go="${other?.id || ''}" data-page="${openPage || ''}">
       <span style="width:12px;height:12px;border-radius:50%;background:${other?.color || '#888'};box-shadow:0 0 6px ${other?.color || '#888'};flex:none"></span>
-      <span style="flex:1;min-width:0"><b>${esc(other?.title || 'Libreta borrada')}</b><small>${[other && other.folder !== nb.folder && Folders.label(other), text && `«${esc(text)}»`, page !== undefined && `pág. ${page + 1}`, extra].filter(Boolean).join(' · ')}</small></span>
+      <span style="flex:1;min-width:0"><b ${other ? 'translate="no"' : ''}>${esc(other?.title || 'Libreta borrada')}</b><small>${[other && other.folder !== nb.folder && Folders.label(other), text && `«${esc(text)}»`, page !== undefined && `pág. ${page + 1}`, extra].filter(Boolean).join(' · ')}</small></span>
       <span aria-hidden="true">↗</span></button>`;
     const panel = document.createElement('div');
     panel.className = 'panel';
     panel.style.setProperty('--glow', nb.color);
     panel.innerHTML = `
-      <div style="display:flex;align-items:flex-start;gap:8px"><div style="flex:1"><h3>${esc(nb.title)}</h3>
+      <div style="display:flex;align-items:flex-start;gap:8px"><div style="flex:1"><h3 translate="no">${esc(nb.title)}</h3>
         <small style="color:#A9B0C6">${nb.folder ? esc(Folders.label(nb)) + ' · ' : ''}${nb.pages.length} ${nb.pages.length === 1 ? 'página' : 'páginas'} · ${formatDate(nb.modified)}</small></div>
         <button class="btn" data-close aria-label="Cerrar panel">✕</button></div>
       <img alt="" style="width:100%;border-radius:10px;background:#fff">
@@ -3185,7 +3556,7 @@ function moveDialog(items, onDone = refresh) {
     const row = (id, name, depth, color) => {
       const ok = allowed(id), on = (target || null) === (id || null);
       return `<button class="move-row" data-act="pick" data-id="${id || ''}" role="option" aria-selected="${on}" ${ok ? '' : 'disabled'} style="--d:${depth}">
-        <span class="mf" style="--c:${color}">${icon(id ? 'folder' : 'book')}</span>${esc(name)}</button>`;
+        <span class="mf" style="--c:${color}">${icon(id ? 'folder' : 'book')}</span><span ${id ? 'translate="no"' : ''}>${esc(name)}</span></button>`;
     };
     $('#move-tree', scrim).innerHTML = row(null, 'Libretas (inicio)', 0, 'var(--accent)')
       + Folders.tree().map(({ folder, depth }) => row(folder.id, folder.name, depth + 1, Folders.color(Folders.top(folder.id)))).join('');
@@ -3572,7 +3943,7 @@ const Voice = {
   find(nb, id) { return this.recordings(nb).find((r) => r.id === id); },
   title(r) {
     if (r?.title && r.title.trim()) return r.title;
-    return 'Nota de voz · ' + new Date(r.start).toLocaleString('es-ES', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+    return tr('Nota de voz') + ' · ' + new Date(r.start).toLocaleString(LOCALE(), { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
   },
   format(s) { s = Math.max(0, Math.round(s || 0)); return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`; },
   placedCount(nb, id) { return nb.pages.reduce((n, p) => n + p.items.filter((i) => i.type === 'voice' && i.rec === id).length, 0); },
@@ -3676,7 +4047,7 @@ const Voice = {
     const playing = this.player?.recId === item.rec && !this.player.audio.paused;
     const progress = this.player?.recId === item.rec && r ? this.player.audio.currentTime / Math.max(r.duration, 0.1) : 0;
     const time = !r ? '' : progress > 0 || playing ? `${this.format(r.duration * progress)} / ${this.format(r.duration)}` : this.format(r.duration);
-    return `<span class="vplay">${icon(playing ? 'pause' : 'play')}</span><span class="vtitle">${esc(r ? this.title(r) : 'Grabación borrada')}</span>
+    return `<span class="vplay">${icon(playing ? 'pause' : 'play')}</span><span class="vtitle" ${r?.title ? 'translate="no"' : ''}>${esc(r ? this.title(r) : 'Grabación borrada')}</span>
       <span class="vtime">${time}</span><span class="vprog" style="width:${Math.min(Math.max(progress, 0), 1) * 100}%;${progress > 0 ? '' : 'display:none'}"></span>`;
   },
   refreshNotes(recId) {
@@ -3774,7 +4145,7 @@ const Voice = {
         const n = this.placedCount(nb, r.id), playing = this.player?.recId === r.id && !this.player.audio.paused;
         return `<div class="rec-row" data-rec="${r.id}">
           <button class="rec-play" data-r="play" aria-label="${playing ? 'Pausa' : 'Reproducir'}">${icon(playing ? 'pause' : 'play')}</button>
-          <div class="rec-text"><b>${esc(this.title(r))}</b><span>${this.format(r.duration)}${n ? ` · en la libreta ${n === 1 ? '1 vez' : `${n} veces`}` : ''}</span></div>
+          <div class="rec-text"><b ${r.title ? 'translate="no"' : ''}>${esc(this.title(r))}</b><span>${this.format(r.duration)}${n ? ` · en la libreta ${n === 1 ? '1 vez' : `${n} veces`}` : ''}</span></div>
           <button class="btn tinted" data-r="place">${icon('waveformPlus')} Añadir a la página</button>
           <button class="icon-btn" data-r="more" aria-label="Más opciones">${icon('more')}</button></div>`;
       }).join('') : `<div class="empty-state">${icon('waveform')}<b>Sin grabaciones</b><span>Pulsa el micrófono para grabar mientras tomas apuntes.</span></div>`;
@@ -4174,12 +4545,12 @@ function renderTabs() {
     const color = g.color;
     const collapsed = S.collapsed.includes(g.key);
     const chip = chips ? `<button class="chip" data-chip="${esc(g.key)}" style="--c:${color}" title="${collapsed ? 'Mostrar' : 'Plegar'} ${esc(g.space || 'Sin carpeta')} · arrastra para moverla">
-        ${icon('folder')}${esc(g.space || 'Sin carpeta')}${collapsed ? `<span class="count">${g.ids.length}</span>` : ''}${icon(collapsed ? 'chevronRight' : 'chevronDown')}</button>` : '';
+        ${icon('folder')}${g.space ? `<span translate="no">${esc(g.space)}</span>` : 'Sin carpeta'}${collapsed ? `<span class="count">${g.ids.length}</span>` : ''}${icon(collapsed ? 'chevronRight' : 'chevronDown')}</button>` : '';
     return `<div class="tab-group" data-gkey="${esc(g.key)}">` + chip + (collapsed ? '' : g.ids.map((id) => {
       const nb = nbById(id), active = id === S.active;
       return `<div class="tab ${active ? 'active' : ''}" data-tab="${id}" data-group="${esc(g.key)}" style="--c:${nb.color};${chips ? `--g:${color}` : ''}" role="tab" aria-selected="${active}" title="${esc(nb.title)}">
         <span class="hover-bg"></span>${active ? '<span class="foot l"></span><span class="foot r"></span>' : ''}
-        <span class="book">${icon('book')}</span><span class="t">${esc(nb.title)}</span>
+        <span class="book">${icon('book')}</span><span class="t" translate="no">${esc(nb.title)}</span>
         <button class="x" data-close="${id}" aria-label="Cerrar ${esc(nb.title)}">${icon('close')}</button>
         ${chips ? '<span class="gline"></span>' : ''}</div>`;
     }).join('')) + '</div>';
@@ -4243,7 +4614,7 @@ function openOtherMenu(anchor) {
   const closed = S.notebooks.filter((nb) => !S.tabs.includes(nb.id));
   const label = (n) => Folders.topOf(n)?.name || '';
   const bySpace = [...new Set(closed.map(label))];
-  popover(anchor, closed.length ? bySpace.map((sp) => `<div class="label">${esc(sp || 'Sin carpeta')}</div>${closed.filter((n) => label(n) === sp).map((n) => `<button data-act="${n.id}">${esc(n.title)}</button>`).join('')}`).join('')
+  popover(anchor, closed.length ? bySpace.map((sp) => `<div class="label" ${sp ? 'translate="no"' : ''}>${esc(sp || 'Sin carpeta')}</div>${closed.filter((n) => label(n) === sp).map((n) => `<button data-act="${n.id}" translate="no">${esc(n.title)}</button>`).join('')}`).join('')
     : '<div class="label">Todas las libretas están abiertas</div>', (id) => openNotebook(id));
 }
 
@@ -6172,6 +6543,7 @@ const ONB_KEY = 'libreta-onboarding', ONB_NAME = 'libreta-user-name';
 const onbKey = (id) => { const b = Shortcuts.bindings(id)[0]; return b ? Shortcuts.display(b) : ''; };
 
 const ONB_TOPICS = [
+  ['language', 'Idioma', 'Español o italiano, cuando quieras.', 'globe', ['#34C759', '#FF3B30']],
   ['handwriting', 'Escribir a mano', 'Bolígrafo, pluma y lápiz. Formas perfectas.', 'pen', ['#5C73FF', '#8C54FF']],
   ['highlighter', 'Subrayar', 'Libre, recto o perfectamente horizontal.', 'highlighter', ['#FFC71A', '#FF8C26']],
   ['text', 'Textos con estilo', 'Letras, colores, negritas y fondos.', 'text', ['#33BFF2', '#4073FF']],
@@ -6193,6 +6565,11 @@ function onbLesson(id, name) {
   const you = name ? `${name}, ` : '';
   const mod = IS_MAC ? '⌘' : 'Ctrl+';
   switch (id) {
+    case 'language': return [`${you}Libreta habla tu idioma.`,
+      [['globe', 'Al empezar elegiste el idioma con las banderas. Pruébalas aquí abajo.'],
+        ['settings', 'Cámbialo cuando quieras en la biblioteca: ⚙︎ Ajustes › Idioma.'],
+        ['check', 'Cambia todo al momento: menús, avisos, fechas y este tutorial.']],
+      'Tus apuntes no se traducen: se quedan tal y como los escribes.'];
     case 'handwriting': return [`${you}escribe y dibuja como en papel. Elige pluma, bolígrafo o lápiz, el color y el grosor.`,
       [['pen', `Pulsa el bolígrafo arriba (o la tecla ${onbKey('toolPen')}) y escribe sobre la página.`],
         ['shapes', 'Dibuja un círculo o una flecha y mantén quieto 1 segundo al final: se vuelve perfecto.'],
@@ -6235,9 +6612,9 @@ function onbLesson(id, name) {
       `${onbKey('closeTab')} cierra la pestaña actual; ${onbKey('nextTab')} pasa a la siguiente.`];
     case 'dynamic': return [`${you}mira tus libretas desde otro ángulo.`,
       [['sparkles', 'En la biblioteca, pulsa «Modo dinámico».'],
-        ['graph', 'Las libretas flotan y los enlaces entre ellas brillan.'],
-        ['select', 'Pasa el ratón para ver una vista previa; haz clic para ver sus vínculos.']],
-      'Arrastra las libretas para colocarlas a tu gusto.'];
+        ['graph', 'Las carpetas son nebulosas: haz clic para entrar viajando a la velocidad de la luz.'],
+        ['select', 'Pasa el ratón para ver una vista previa; clic en una libreta para sus vínculos.']],
+      'Arrastra libretas y carpetas para colocarlas a tu gusto.'];
     case 'voice': return [`${you}no pierdas nada de lo que se dice en clase.`,
       [['mic', `Pulsa el micrófono para grabar mientras escribes (${onbKey('record')}).`],
         ['waveformPlus', 'En Grabaciones, «Añadir a la página» la pone como nota de voz.'],
@@ -6267,6 +6644,91 @@ function onbLesson(id, name) {
   return ['', [], ''];
 }
 
+/** Las mismas lecciones, en italiano. */
+function onbLessonIt(id, name) {
+  const you = name ? `${name}, ` : '';
+  const mod = IS_MAC ? '⌘' : 'Ctrl+';
+  const k = onbKey;
+  switch (id) {
+    case 'language': return [`${you}Libreta parla la tua lingua.`,
+      [['globe', 'All’inizio hai scelto la lingua con le bandiere. Provale qui sotto.'],
+        ['settings', 'Cambiala quando vuoi nella libreria: ⚙︎ Impostazioni › Lingua.'],
+        ['check', 'Cambia tutto all’istante: menu, avvisi, date e questo tutorial.']],
+      'I tuoi appunti non vengono tradotti: restano esattamente come li scrivi.'];
+    case 'handwriting': return [`${you}scrivi e disegna come sulla carta. Scegli stilografica, penna o matita, il colore e lo spessore.`,
+      [['pen', `Tocca la penna in alto (o il tasto ${k('toolPen')}) e scrivi sulla pagina.`],
+        ['shapes', 'Disegna un cerchio o una freccia e tieni fermo 1 secondo alla fine: diventa perfetto.'],
+        ['sparkles', 'Con «Forme» attivo, ogni tratto diventa una forma.']],
+      `La gomma (${k('toolEraser')}) cancella tratti interi o solo un pezzo; il lazo (${k('toolLasso')}) li sposta.`];
+    case 'highlighter': return [`${you}evidenzia senza paura che venga storto.`,
+      [['highlighter', `Scegli l’evidenziatore (${k('toolHighlighter')}) e il suo colore.`],
+        ['minus', '«Dritto» lo raddrizza nella direzione in cui lo disegni.'],
+        ['chevronUpDown', '«O / V» lo rende perfettamente orizzontale o verticale.']],
+      'In «Libero», se tieni fermo alla fine, si raddrizza lo stesso.'];
+    case 'text': return [`${you}aggiungi caselle di testo con lo stile che vuoi.`,
+      [['text', `Scegli Testo (${k('toolText')}) e fai clic sulla pagina per scrivere.`],
+        ['bold', `${k('bold')} grassetto, ${k('italic')} corsivo, ${k('underline')} sottolineato. Cambia carattere, dimensione e colore in alto.`],
+        ['check', '«Predefinito» salva quello stile per i testi nuovi.']],
+      'Trascina il bordo della casella per spostarla mentre scrivi.'];
+    case 'images': return [`${you}porta foto, screenshot o file nei tuoi appunti.`,
+      [['image', `Usa il pulsante immagine, incollala (${mod}V) o trascinala sulla pagina.`],
+        ['crop', 'Prima di posizionarla, ritagliala: libero, 1:1, 4:3, 16:9… e ruotala.'],
+        ['photo', 'Scegli la sua larghezza nella pagina, o cambiala dopo con la maniglia.']],
+      'Seleziona un’immagine già inserita e premi «Ritaglia…» per regolarla di nuovo.'];
+    case 'notes': return [`${you}lascia note che si notano.`,
+      [['sticky', `Post-it (${k('toolSticky')}): attacca note colorate ovunque.`],
+        ['comment', `Commento (${k('toolComment')}): un cerchio con un nome che si apre con il suo testo.`],
+        ['palette', 'Cambia il colore di ognuno dalla barra delle opzioni.']],
+      'I commenti si vedono sopra l’inchiostro e nel PDF escono come un cerchio.'];
+    case 'links': return [`${you}collega i tuoi appunti come in una wiki.`,
+      [['link', 'Seleziona una parola scritta con la tastiera e premi «Collegamento».'],
+        ['linkArea', `Oppure usa lo strumento Collegamento (${k('toolLink')}) per creare una zona sopra lo scritto a mano.`],
+        ['eye', 'Toccandolo vedrai un’anteprima e il pulsante «Vai».']],
+      'Puoi collegare un quaderno intero o una pagina precisa.'];
+    case 'pdf': return [`${you}studia sui tuoi PDF.`,
+      [['pdf', 'Nella libreria: + › Importa PDF.'],
+        ['select', 'Con Seleziona, trascina sul testo del PDF (doppio clic: una parola).'],
+        ['highlighter', 'Scegli un colore nel pannello: resta evidenziato. Anche linea, barrato o copia.']],
+      'Inoltre puoi scriverci sopra a mano, come su qualsiasi pagina.'];
+    case 'organize': return [`${you}ordina i tuoi quaderni per materie o progetti.`,
+      [['folder', 'Crea cartelle (anche dentro altre) con + e sposta i quaderni con «Sposta» o «Seleziona».'],
+        ['layers', 'Aprine diversi alla volta: compaiono in schede, raggruppate per cartella.'],
+        ['pages', `Trascina una scheda per ordinarla. ${k('tab1')}…${k('lastTab')} per saltare tra di esse.`]],
+      `${k('closeTab')} chiude la scheda attuale; ${k('nextTab')} passa alla successiva.`];
+    case 'dynamic': return [`${you}guarda i tuoi quaderni da un’altra prospettiva.`,
+      [['sparkles', 'Nella libreria, premi «Modalità dinamica».'],
+        ['graph', 'Le cartelle sono nebulose: fai clic per entrarci viaggiando alla velocità della luce.'],
+        ['select', 'Passa il mouse per un’anteprima; clic su un quaderno per i suoi collegamenti.']],
+      'Trascina quaderni e cartelle per sistemarli a tuo piacere.'];
+    case 'voice': return [`${you}non perdere nulla di quello che si dice in classe.`,
+      [['mic', `Premi il microfono per registrare mentre scrivi (${k('record')}).`],
+        ['waveformPlus', 'In Registrazioni, «Aggiungi alla pagina» la inserisce come nota vocale.'],
+        ['play', 'Fai clic sulla nota per ascoltarla. Copiala in un altro quaderno se vuoi.']],
+      `Mostra o nascondi le note vocali dal menu del microfono (${k('toggleVoiceNotes')}).`];
+    case 'timer': return [`${you}studia con metodo.`,
+      [['timer', `Premi l’orologio nella barra (${k('timer')}).`],
+        ['chevronUpDown', 'Regola i minuti di studio e di pausa.'],
+        ['bell', 'Quando arriva la pausa suona una sveglia. Se l’hai avviato per sbaglio, «Rimuovi timer».']],
+      'Continua a contare anche se cambi quaderno o chiudi la pagina.'];
+    case 'search': return [`${you}trova qualsiasi cosa in pochi secondi.`,
+      [['search', 'Nella libreria cerca in tutti i quaderni: titoli, testi e PDF.'],
+        ['outline', `Dentro un quaderno, ${k('find')} cerca solo lì.`],
+        ['highlighter', 'Il risultato si apre nella sua pagina con la parola evidenziata.']],
+      'Trova anche le parole dentro i PDF.'];
+    case 'shortcuts': return [`${you}vai più veloce con la tastiera.`,
+      [['keyboard', `${k('toolPen')} penna, ${k('toolHighlighter')} evidenziatore, ${k('toolEraser')} gomma, ${k('toolText')} testo… quando non stai scrivendo.`],
+        ['pages', `${k('closeTab')} chiude la scheda, ${k('tab1')} va alla prima, ${k('find')} cerca.`],
+        ['chevronUpDown', `Cambiali tutti in ⚙︎ › Scorciatoie da tastiera (${k('shortcutsSettings')}).`]],
+      'I tasti da soli non disturbano mentre scrivi: una «h» in un testo è una «h».'];
+    case 'share': return [`${you}condividi i tuoi appunti con chi vuoi.`,
+      [['share', 'Condividi: scarica il quaderno intero o solo la pagina attuale.'],
+        ['fileDown', 'In PDF o come immagine, pronto da inviare.'],
+        ['mail', 'Mandalo via WhatsApp, e-mail, Drive… dal tuo computer.']],
+      'Le registrazioni e le zone di collegamento non escono nel PDF.'];
+  }
+  return ['', [], ''];
+}
+
 // ---------- Utilidades de animación ----------
 const onbCycle = (t, p) => (t % p) / p;
 const onbRamp = (x, a, b) => Math.min(1, Math.max(0, (x - a) / (b - a)));
@@ -6291,6 +6753,38 @@ const ROUNDED = 'ui-rounded, "SF Pro Rounded", "Segoe UI Variable Display", syst
 
 // ---------- Demostraciones (cada tema, en un lienzo de 388 × 278) ----------
 const OnbDemos = {
+  language(ctx, W, H, t) {
+    this.paper(ctx, W, H);
+    const p = onbCycle(t, 4), it = p > 0.5;
+    const flip = Math.min(onbRamp(p, 0.42, 0.5), 1 - onbRamp(p, 0.92, 1)) ;
+    // Dos banderas; la elegida, más grande y con anillo
+    const flags = [['es', W / 2 - 60], ['it', W / 2 + 60]];
+    for (const [k, x] of flags) {
+      const on = (k === 'it') === it, s = on ? 1.15 : 0.9, w = 54 * s, h = 36 * s, y = 56;
+      ctx.save(); ctx.translate(x, y);
+      if (on) { ctx.strokeStyle = '#007AFF'; ctx.lineWidth = 3; ctx.beginPath(); ctx.roundRect(-w / 2 - 6, -h / 2 - 6, w + 12, h + 12, 8); ctx.stroke(); }
+      ctx.beginPath(); ctx.roundRect(-w / 2, -h / 2, w, h, 4); ctx.clip();
+      if (k === 'es') { ctx.fillStyle = '#AA151B'; ctx.fillRect(-w / 2, -h / 2, w, h); ctx.fillStyle = '#F1BF00'; ctx.fillRect(-w / 2, -h / 4, w, h / 2); }
+      else { ctx.fillStyle = '#009246'; ctx.fillRect(-w / 2, -h / 2, w / 3, h); ctx.fillStyle = '#fff'; ctx.fillRect(-w / 6, -h / 2, w / 3, h); ctx.fillStyle = '#CE2B37'; ctx.fillRect(w / 6, -h / 2, w / 3, h); }
+      ctx.restore();
+    }
+    // Un menú que cambia de idioma, con un pequeño giro
+    const rows = it ? ['Nuovo quaderno', 'Nuova cartella', 'Importa PDF…'] : ['Nueva libreta', 'Nueva carpeta', 'Importar PDF…'];
+    const sx = Math.cos(flip * Math.PI / 2) || 0.001;
+    ctx.save(); ctx.translate(W / 2, 175); ctx.scale(1, Math.max(0.05, 1 - flip));
+    ctx.shadowColor = 'rgba(0,0,0,.18)'; ctx.shadowBlur = 12; ctx.shadowOffsetY = 4;
+    ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.roundRect(-110, -62, 220, 124, 14); ctx.fill(); ctx.shadowColor = 'transparent';
+    rows.forEach((r, i) => this.label(ctx, r, -88, -34 + i * 34, `500 16px ${ROUNDED}`, onbGray(0.15), 'left'));
+    ctx.restore();
+    void sx;
+    // Cursor que va a la bandera
+    const target = it ? W / 2 + 60 : W / 2 - 60, from = it ? W / 2 - 60 : W / 2 + 60;
+    const mv = onbSmooth(onbRamp((p % 0.5) * 2, 0.55, 0.85));
+    const cx = from + (target - from) * mv, cy = 80 + 20 * Math.sin(mv * Math.PI);
+    ctx.fillStyle = '#1C1C1E'; ctx.strokeStyle = '#fff'; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(cx, cy + 20); ctx.lineTo(cx + 5, cy + 15); ctx.lineTo(cx + 9, cy + 23); ctx.lineTo(cx + 12, cy + 21); ctx.lineTo(cx + 8, cy + 14); ctx.lineTo(cx + 14, cy + 14); ctx.closePath(); ctx.fill(); ctx.stroke();
+  },
+
   paper(ctx, W, H) { ctx.fillStyle = onbGray(0.97); ctx.beginPath(); ctx.roundRect(0, 0, W, H, 14); ctx.fill(); },
   lines(ctx, x, y, w, widths = [0.9, 0.75, 0.85, 0.6], color = onbGray(0.78), gap = 22) {
     ctx.fillStyle = color;
@@ -6321,7 +6815,7 @@ const OnbDemos = {
       ctx.strokeStyle = '#AF52DE'; ctx.lineWidth = 3;
       ctx.beginPath(); ctx.arc(ex, ey, 13, -Math.PI / 2, -Math.PI / 2 + hold * Math.PI * 2); ctx.stroke();
     }
-    this.label(ctx, morph > 0.5 ? '¡Círculo perfecto!' : hold > 0 ? 'Mantén quieto…' : 'Dibuja', cx, H - 14);
+    this.label(ctx, tr(morph > 0.5 ? '¡Círculo perfecto!' : hold > 0 ? 'Mantén quieto…' : 'Dibuja'), cx, H - 14);
   },
   highlighter(ctx, W, H, t) {
     const p = onbCycle(t, 3.6), sweep = onbSmooth(onbRamp(p, 0.1, 0.45)), straighten = onbSmooth(onbRamp(p, 0.55, 0.65));
@@ -6339,12 +6833,12 @@ const OnbDemos = {
       ctx.fillStyle = onbGray(line === 2 ? 0.35 : 0.78);
       ctx.beginPath(); ctx.roundRect(20, y + 5, (W - 40) * k, 8, 4); ctx.fill();
     });
-    const modes = ['Libre', 'Recto', 'H / V'];
+    const modes = ['Libre', 'Recto', 'H / V'].map(tr);
     ctx.font = `600 12px ${ROUNDED}`;
     const ws = modes.map((m) => ctx.measureText(m).width + 20), total = ws.reduce((a, b) => a + b, 0) + 12;
     let x = W / 2 - total / 2;
     modes.forEach((m, i) => {
-      const on = (m === 'Libre' && straighten <= 0.5) || (m === 'Recto' && straighten > 0.5);
+      const on = (m === tr('Libre') && straighten <= 0.5) || (m === tr('Recto') && straighten > 0.5);
       ctx.fillStyle = on ? 'rgba(255,204,0,.8)' : onbGray(0.88);
       ctx.beginPath(); ctx.roundRect(x, H - 30, ws[i], 24, 12); ctx.fill();
       this.label(ctx, m, x + ws[i] / 2, H - 18, `600 12px ${ROUNDED}`, onbGray(0.2));
@@ -6409,7 +6903,7 @@ const OnbDemos = {
       ctx.shadowColor = 'rgba(0,0,0,.2)'; ctx.shadowBlur = 6; ctx.shadowOffsetY = 4;
       ctx.fillStyle = 'rgb(255,237,128)'; ctx.beginPath(); ctx.roundRect(-60, -60, 120, 120, 4); ctx.fill();
       ctx.shadowColor = 'transparent';
-      this.label(ctx, '¡Examen', 0, -11, `600 18px ${ROUNDED}`, onbGray(0.25)); this.label(ctx, 'el lunes!', 0, 11, `600 18px ${ROUNDED}`, onbGray(0.25));
+      this.label(ctx, tr('¡Examen'), 0, -11, `600 18px ${ROUNDED}`, onbGray(0.25)); this.label(ctx, tr('el lunes!'), 0, 11, `600 18px ${ROUNDED}`, onbGray(0.25));
       ctx.restore();
     }
     const px = W * 0.72, py = H * 0.3;
@@ -6421,7 +6915,7 @@ const OnbDemos = {
       ctx.fillStyle = '#AF52DE'; ctx.fillRect(x, y, w, 22);
       ctx.scale(open, open);
       this.label(ctx, '  Stella', x / open + 2, (y + 11) / open, `700 12px ${ROUNDED}`, '#fff', 'left');
-      this.label(ctx, 'Revisar esta parte', (x + 70 * open) / open, (y + 46 * open) / open, `12px ${ROUNDED}`, onbGray(0.3));
+      this.label(ctx, tr('Revisar esta parte'), (x + 70 * open) / open, (y + 46 * open) / open, `12px ${ROUNDED}`, onbGray(0.3));
       ctx.restore();
     }
     if (pin > 0) {
@@ -6450,9 +6944,9 @@ const OnbDemos = {
     ctx.fillStyle = g; ctx.beginPath(); ctx.arc(s[0], s[1], 14, 0, 7); ctx.fill();
     ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(s[0], s[1], 5, 0, 7); ctx.fill();
     const mx = (a[0] + b[0]) / 2, my = (a[1] + b[1]) / 2 - 26;
-    ctx.font = `700 12px ${ROUNDED}`; const lw = ctx.measureText('pág. 3').width;
+    const pg3 = tr('pág. 3'); ctx.font = `700 12px ${ROUNDED}`; const lw = ctx.measureText(pg3).width;
     ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.roundRect(mx - lw / 2 - 8, my - 11, lw + 16, 22, 11); ctx.fill();
-    this.label(ctx, 'pág. 3', mx, my + 1, `700 12px ${ROUNDED}`, onbGray(0.2));
+    this.label(ctx, pg3, mx, my + 1, `700 12px ${ROUNDED}`, onbGray(0.2));
   },
   pdf(ctx, W, H, t) {
     const p = onbCycle(t, 4), select = onbSmooth(onbRamp(p, 0.08, 0.35)), panel = onbRamp(p, 0.38, 0.48), marked = p > 0.6;
@@ -6480,7 +6974,7 @@ const OnbDemos = {
   },
   organize(ctx, W, H, t) {
     const p = onbCycle(t, 3.4), move = onbSmooth(onbRamp(p, 0.2, 0.6));
-    const titles = [['Cardiología', '#FF3B30'], ['Digestivo', '#007AFF'], ['Cirugía vascular', '#34C759']];
+    const titles = [['Cardiología', '#FF3B30'], ['Digestivo', '#007AFF'], ['Cirugía vascular', '#34C759']].map(([n, c]) => [tr(n), c]);
     ctx.save(); ctx.beginPath(); ctx.roundRect(0, 0, W, H, 14); ctx.clip();
     ctx.fillStyle = onbGray(0.08); ctx.fillRect(0, 0, W, H);
     ctx.fillStyle = onbGray(0.17); ctx.fillRect(0, 56, W, H - 56);
@@ -6498,7 +6992,7 @@ const OnbDemos = {
       while (title.length > 3 && ctx.measureText(title).width > tw - 42) title = title.slice(0, -2) + '…';
       this.label(ctx, title, x + 30, y + 20, `500 12.5px ${ROUNDED}`, '#fff', 'left');
     });
-    this.label(ctx, 'Arrastra para ordenar', W / 2, H * 0.6 + 10, `600 17px ${ROUNDED}`, 'rgba(255,255,255,.7)');
+    this.label(ctx, tr('Arrastra para ordenar'), W / 2, H * 0.6 + 10, `600 17px ${ROUNDED}`, 'rgba(255,255,255,.7)');
     ctx.restore();
   },
   dynamic(ctx, W, H, t) {
@@ -6533,7 +7027,7 @@ const OnbDemos = {
     ctx.beginPath(); ctx.roundRect(px, py, 250, 50, 25); ctx.fill(); ctx.stroke();
     ctx.fillStyle = '#FF9500'; ctx.beginPath(); ctx.arc(px + 27, py + 25, 15, 0, 7); ctx.fill();
     ctx.fillStyle = '#fff'; ctx.fillRect(px + 22, py + 18, 3.5, 14); ctx.fillRect(px + 28.5, py + 18, 3.5, 14);
-    this.label(ctx, 'Clase de Cardiología', px + 52, py + 17, `600 16px ${ROUNDED}`, onbGray(0.15), 'left');
+    this.label(ctx, tr('Clase de Cardiología'), px + 52, py + 17, `600 16px ${ROUNDED}`, onbGray(0.15), 'left');
     this.label(ctx, `0:${String(Math.floor(p * 45)).padStart(2, '0')} / 0:45`, px + 52, py + 35, `12px ${ROUNDED}`, onbGray(0.4), 'left');
   },
   timer(ctx, W, H, t) {
@@ -6546,14 +7040,14 @@ const OnbDemos = {
     const ic = onbIcon(isBreak ? 'coffee' : 'book', color, 26, 2.2); if (ic.complete) ctx.drawImage(ic, cx - 13, cy - 58, 26, 26);
     const secs = Math.floor((1 - progress) * (isBreak ? 300 : 1500));
     this.label(ctx, `${Math.floor(secs / 60)}:${String(secs % 60).padStart(2, '0')}`, cx, cy + 2, `600 40px ${ROUNDED}`, '#fff');
-    this.label(ctx, isBreak ? 'Descanso' : 'Estudio', cx, cy + 40, `600 15px ${ROUNDED}`, color);
+    this.label(ctx, tr(isBreak ? 'Descanso' : 'Estudio'), cx, cy + 40, `600 15px ${ROUNDED}`, color);
   },
   search(ctx, W, H, t) {
-    const p = onbCycle(t, 4), word = 'célula', typed = word.slice(0, Math.floor(onbRamp(p, 0.05, 0.3) * word.length)), results = onbRamp(p, 0.35, 0.5);
+    const p = onbCycle(t, 4), word = tr('célula'), typed = word.slice(0, Math.floor(onbRamp(p, 0.05, 0.3) * word.length)), results = onbRamp(p, 0.35, 0.5);
     ctx.fillStyle = 'rgba(255,255,255,.12)'; ctx.beginPath(); ctx.roundRect(0, 0, W, 46, 12); ctx.fill();
     const mg = onbIcon('search', 'rgba(255,255,255,.7)', 20, 2); if (mg.complete) ctx.drawImage(mg, 12, 13, 20, 20);
-    this.label(ctx, typed || 'Buscar', 42, 24, `20px ${ROUNDED}`, typed ? '#fff' : 'rgba(255,255,255,.4)', 'left');
-    const books = ['#34C759', '#007AFF', '#AF52DE'], where = ['Biología · pág. 2', 'Apuntes · pág. 7', 'Resumen · pág. 1'];
+    this.label(ctx, typed || tr('Buscar'), 42, 24, `20px ${ROUNDED}`, typed ? '#fff' : 'rgba(255,255,255,.4)', 'left');
+    const books = ['#34C759', '#007AFF', '#AF52DE'], where = ['Biología · pág. 2', 'Apuntes · pág. 7', 'Resumen · pág. 1'].map(tr);
     for (let i = 0; i < 3; i++) {
       const k = onbRamp(results, i * 0.25, i * 0.25 + 0.5);
       if (k <= 0) continue;
@@ -6562,18 +7056,18 @@ const OnbDemos = {
       ctx.fillStyle = 'rgba(255,255,255,.07)'; ctx.beginPath(); ctx.roundRect(0, y, W, 62, 12); ctx.fill();
       ctx.fillStyle = books[i]; ctx.beginPath(); ctx.roundRect(10, y + 11, 30, 40, 4); ctx.fill();
       this.label(ctx, where[i], 52, y + 20, `12px ${ROUNDED}`, 'rgba(255,255,255,.6)', 'left');
-      ctx.font = `15px ${ROUNDED}`; const wl = ctx.measureText('La ').width;
-      ctx.font = `700 15px ${ROUNDED}`; const wc = ctx.measureText('célula').width;
+      const la = tr('La') + ' ', rest = ' ' + tr('es la unidad…'); ctx.font = `15px ${ROUNDED}`; const wl = ctx.measureText(la).width;
+      ctx.font = `700 15px ${ROUNDED}`; const wc = ctx.measureText(word).width;
       ctx.fillStyle = '#FFD60A'; ctx.beginPath(); ctx.roundRect(52 + wl - 3, y + 32, wc + 6, 20, 10); ctx.fill();
-      this.label(ctx, 'La ', 52, y + 42, `15px ${ROUNDED}`, '#fff', 'left');
-      this.label(ctx, 'célula', 52 + wl, y + 42, `700 15px ${ROUNDED}`, '#000', 'left');
-      this.label(ctx, ' es la unidad…', 52 + wl + wc, y + 42, `15px ${ROUNDED}`, '#fff', 'left');
+      this.label(ctx, la, 52, y + 42, `15px ${ROUNDED}`, '#fff', 'left');
+      this.label(ctx, word, 52 + wl, y + 42, `700 15px ${ROUNDED}`, '#000', 'left');
+      this.label(ctx, rest, 52 + wl + wc, y + 42, `15px ${ROUNDED}`, '#fff', 'left');
       ctx.restore();
     }
   },
   shortcuts(ctx, W, H, t) {
     const p = onbCycle(t, 4);
-    const keys = [[onbKey('toolHighlighter'), 'Subrayador', 0.1], [onbKey('closeTab'), 'Cerrar pestaña', 0.4], [onbKey('find'), 'Buscar', 0.7]];
+    const keys = [[onbKey('toolHighlighter'), tr('Subrayador'), 0.1], [onbKey('closeTab'), tr('Cerrar pestaña'), 0.4], [onbKey('find'), tr('Buscar'), 0.7]];
     keys.forEach(([k, what, at], i) => {
       const pressed = p > at && p < at + 0.08, active = p > at && p < at + 0.3;
       const y = H / 2 - 100 + i * 70;
@@ -6690,6 +7184,7 @@ const Onboarding = {
           <span class="onb-nib">${icon('pen')}</span></div>
         <h1 class="onb-word" aria-label="Libreta">${[...'Libreta'].map((c, i) => `<span style="--i:${i}">${c}</span>`).join('')}</h1>
         <p class="onb-sub onb-late">Tus apuntes, a mano y a tu manera.</p>
+        <div class="onb-langs onb-late" role="group" aria-label="Idioma">${languageButtons('onb-glass')}</div>
         <div class="onb-late2">${glass(`Empezar ${arrow}`, 'start', true)}</div></div>`;
     }
     if (stage === 'name') {
@@ -6717,7 +7212,7 @@ const Onboarding = {
     }
     if (stage.startsWith('lesson:')) {
       const lessons = this.lessons(), index = Number(stage.slice(7)), topic = lessons[index];
-      const [intro, steps, tip] = onbLesson(topic.id, name);
+      const [intro, steps, tip] = (I18N.lang === 'it' ? onbLessonIt : onbLesson)(topic.id, name);
       return `<div class="onb-lesson" style="--c1:${topic.colors[0]};--c2:${topic.colors[1]}">
         <div class="onb-progress" role="progressbar" aria-valuemin="1" aria-valuemax="${lessons.length}" aria-valuenow="${index + 1}" aria-label="Tema ${index + 1} de ${lessons.length}">
           ${lessons.map((_, i) => `<i class="${i <= index ? 'on' : ''}"></i>`).join('')}</div>
@@ -6728,6 +7223,7 @@ const Onboarding = {
             <h1>${topic.title}</h1>
             <p class="onb-intro">${esc(intro)}</p>
             <ul class="onb-steps">${steps.map(([sym, text], i) => `<li style="--i:${i}"><span class="onb-step-icon">${icon(sym)}</span><span>${esc(text)}</span></li>`).join('')}</ul>
+            ${topic.id === 'language' ? `<div class="onb-langs">${languageButtons('onb-glass')}</div>` : ''}
             <p class="onb-tip"><span>${icon('lightbulb')}</span>${esc(tip)}</p>
           </div></div>
         <div class="onb-nav">${glass(`<span class="onb-arrow back">${icon('back')}</span> Atrás`, 'back', false)}${glass(`${index + 1 === lessons.length ? 'Terminar' : 'Siguiente'} ${arrow}`, 'next', true)}</div></div>`;
@@ -6741,6 +7237,16 @@ const Onboarding = {
       <div class="onb-row">${glass('Ir a mis libretas', 'library', false)}${glass(`${icon('plus')} Crear mi primera libreta`, 'create', true)}</div></div>`;
   },
   lessons() { return ONB_TOPICS.filter((t) => this.selected.has(t.id)); },
+  /** Al cambiar de idioma: la lección (que lleva tu nombre y tus atajos) se vuelve a escribir. */
+  relabel() {
+    const st = this.el?.querySelector('.onb-stage:not(.out)');
+    if (!st || !this.stage?.startsWith('lesson:')) return;
+    const fresh = document.createElement('div');
+    fresh.innerHTML = this.html(this.stage);
+    const copy = st.querySelector('.onb-copy'), next = fresh.querySelector('.onb-copy');
+    if (copy && next) { next.classList.add('instant'); copy.replaceWith(next); }
+    st.querySelectorAll('.onb-nav .onb-glass').forEach((b, i) => { const nb = fresh.querySelectorAll('.onb-nav .onb-glass')[i]; if (nb) b.innerHTML = nb.innerHTML; });
+  },
   after(stage, st) {
     if (stage === 'welcome') setTimeout(() => st.querySelector('[data-onb="start"]')?.focus({ preventScroll: true }), 2500);
     if (stage === 'name') {
@@ -6919,39 +7425,51 @@ function fixExampleHighlights(nb) {
   }
   if (changed) { touch(nb); Store.put(nb); }
 }
+/** Las libretas de ejemplo que aún no se han abierto se cambian al idioma elegido (y su carpeta). */
+function translateExamples() {
+  const old = S.notebooks.filter((n) => n.example);
+  // Solo si siguen todas sin abrir (si ya usaste alguna, se quedan como están).
+  if (old.length < 2) return;
+  const folder = Folders.byId(old[0].folder);
+  for (const nb of old) { S.notebooks = S.notebooks.filter((n) => n.id !== nb.id); Store.remove(nb.id); S.tabs = S.tabs.filter((id) => id !== nb.id); }
+  saveTabs();
+  for (const nb of exampleNotebooks()) { delete nb.space; nb.folder = folder?.id || null; S.notebooks.push(nb); Store.put(nb); }
+  if (folder && ['Ejemplos', 'Esempi'].includes(folder.name)) Folders.rename(folder.id, I18N.lang === 'it' ? 'Esempi' : 'Ejemplos');
+}
 function exampleNotebooks() {
+  const L = (es, it) => (I18N.lang === 'it' ? it : es);
   const style = (o) => Object.assign({}, DEFAULT_TEXT, o);
   const text = (x, y, w, html, base) => ({ id: uid(), type: 'text', x, y, w, html, base: style(base) });
   const line = (pts) => Shapes.densify(pts).map(([x, y]) => [x, y, 0.5]);
 
-  const temas = newNotebook('Biología · Tema 3', '#2E7D4F', 'ruled', 'white');
-  temas.space = 'Ejemplos';
+  const temas = newNotebook(L('Biología · Tema 3', 'Biologia · Tema 3'), '#2E7D4F', 'ruled', 'white');
+  temas.space = L('Ejemplos', 'Esempi');
   temas.example = true;
   temas.pages.push(newPage('grid', 'cream'));
   const [t1, t2] = temas.pages;
   t1.items.push(
-    text(64, 60, 660, 'La célula', { font: 'serif', size: 40, bold: true }),
-    text(64, 140, 660, 'La <span style="background-color:#FFE66B"><b>membrana plasmática</b></span> separa el interior de la célula del exterior y controla qué entra y qué sale.', { size: 21 }),
-    { id: uid(), type: 'sticky', x: 520, y: 320, w: 220, h: 200, color: STICKY_COLORS[0], html: 'Repasar el <b>transporte activo</b> antes del examen', base: style({ font: 'hand', size: 24 }) },
-    { id: uid(), type: 'comment', x: 30, y: 150, title: 'Profe', color: COMMENT_COLORS[0], expanded: false, html: 'Esto entra seguro en el examen.', base: style({ size: 16 }) },
+    text(64, 60, 660, L('La célula', 'La cellula'), { font: 'serif', size: 40, bold: true }),
+    text(64, 140, 660, L('La <span style="background-color:#FFE66B"><b>membrana plasmática</b></span> separa el interior de la célula del exterior y controla qué entra y qué sale.', 'La <span style="background-color:#FFE66B"><b>membrana plasmatica</b></span> separa l’interno della cellula dall’esterno e controlla cosa entra e cosa esce.'), { size: 21 }),
+    { id: uid(), type: 'sticky', x: 520, y: 320, w: 220, h: 200, color: STICKY_COLORS[0], html: L('Repasar el <b>transporte activo</b> antes del examen', 'Ripassare il <b>trasporto attivo</b> prima dell’esame'), base: style({ font: 'hand', size: 24 }) },
+    { id: uid(), type: 'comment', x: 30, y: 150, title: L('Profe', 'Prof'), color: COMMENT_COLORS[0], expanded: false, html: L('Esto entra seguro en el examen.', 'Questo esce sicuro all’esame.'), base: style({ size: 16 }) },
   );
-  t2.items.push(text(64, 60, 660, 'Esquema del orgánulo', { font: 'serif', size: 32, bold: true }));
+  t2.items.push(text(64, 60, 660, L('Esquema del orgánulo', 'Schema dell’organello'), { font: 'serif', size: 32, bold: true }));
   const circle = Array.from({ length: 70 }, (_, i) => { const a = (i / 64) * Math.PI * 2; return [400 + 150 * Math.cos(a), 360 + 100 * Math.sin(a), 0.5]; });
   t2.strokes.push({ id: uid(), tool: 'pen', kind: 'pen', color: '#1E5BD8', width: 3, points: circle });
-  temas.outline = [{ id: uid(), title: 'La célula', pageId: t1.id, level: 0 }, { id: uid(), title: 'Esquema', pageId: t2.id, level: 1 }];
+  temas.outline = [{ id: uid(), title: L('La célula', 'La cellula'), pageId: t1.id, level: 0 }, { id: uid(), title: L('Esquema', 'Schema'), pageId: t2.id, level: 1 }];
 
-  const nb = newNotebook('Bienvenida a Libreta', '#1F7A8C', 'dots', 'white');
-  nb.space = 'Ejemplos';
+  const nb = newNotebook(L('Bienvenida a Libreta', 'Benvenuto in Libreta'), '#1F7A8C', 'dots', 'white');
+  nb.space = L('Ejemplos', 'Esempi');
   nb.example = true;
   const page = nb.pages[0];
-  const link = `<a data-link='${JSON.stringify({ nb: temas.id, page: t2.id })}'>esquema del orgánulo</a>`;
+  const link = `<a data-link='${JSON.stringify({ nb: temas.id, page: t2.id })}'>${L('esquema del orgánulo', 'schema dell’organello')}</a>`;
   page.items.push(
-    text(64, 70, 640, 'Hola, esto es Libreta', { font: 'serif', size: 40, bold: true }),
-    text(64, 150, 660, 'Prueba el bolígrafo (P) y escribe aquí debajo. Con el subrayador (H) en «H / V», tus subrayados quedan <span style="background-color:#FFE66B"><b>perfectamente rectos</b></span>.', { size: 21 }),
-    text(64, 300, 300, 'Dibuja un círculo y mantén el ratón quieto al final: se vuelve perfecto.', { font: 'hand', size: 26, color: '#1E5BD8' }),
-    text(64, 560, 660, `Los enlaces llevan a otras libretas o páginas: haz clic en el ${link} para verlo. Activa el <b>Modo dinámico</b> en la biblioteca para ver cómo se relacionan tus libretas.`, { size: 19 }),
+    text(64, 70, 640, L('Hola, esto es Libreta', 'Ciao, questa è Libreta'), { font: 'serif', size: 40, bold: true }),
+    text(64, 150, 660, L('Prueba el bolígrafo (P) y escribe aquí debajo. Con el subrayador (H) en «H / V», tus subrayados quedan <span style="background-color:#FFE66B"><b>perfectamente rectos</b></span>.', 'Prova la penna (P) e scrivi qui sotto. Con l’evidenziatore (H) in «H / V», le tue sottolineature restano <span style="background-color:#FFE66B"><b>perfettamente dritte</b></span>.'), { size: 21 }),
+    text(64, 300, 300, L('Dibuja un círculo y mantén el ratón quieto al final: se vuelve perfecto.', 'Disegna un cerchio e tieni fermo il mouse alla fine: diventa perfetto.'), { font: 'hand', size: 26, color: '#1E5BD8' }),
+    text(64, 560, 660, L(`Los enlaces llevan a otras libretas o páginas: haz clic en el ${link} para verlo. Activa el <b>Modo dinámico</b> en la biblioteca para ver cómo se relacionan tus libretas.`, `I collegamenti portano ad altri quaderni o pagine: fai clic sullo ${link} per vederlo. Attiva la <b>Modalità dinamica</b> nella libreria per vedere come si collegano i tuoi quaderni.`), { size: 19 }),
     { id: uid(), type: 'link', x: 64, y: 700, w: 300, h: 56, target: { nb: temas.id, page: null } },
-    text(64, 980, 660, 'Todo se guarda en este navegador. Para pasarle tus apuntes a alguien, usa Compartir → PDF. Para llevártelo todo a otro ordenador, usa «Copia de seguridad».', { size: 17, color: '#5D6475', italic: true }),
+    text(64, 980, 660, L('Todo se guarda en este navegador. Para pasarle tus apuntes a alguien, usa Compartir → PDF. Para llevártelo todo a otro ordenador, usa «Copia de seguridad».', 'Tutto si salva in questo browser. Per passare i tuoi appunti a qualcuno, usa Condividi → PDF. Per portare tutto su un altro computer, usa «Backup».'), { size: 17, color: '#5D6475', italic: true }),
   );
   const c2 = Array.from({ length: 70 }, (_, i) => { const a = (i / 64) * Math.PI * 2; return [520 + 70 * Math.cos(a), 360 + 70 * Math.sin(a), 0.5]; });
   page.strokes.push({ id: uid(), tool: 'pen', kind: 'pen', color: '#E0362C', width: 3, points: c2 });
@@ -6961,6 +7479,7 @@ function exampleNotebooks() {
 }
 
 async function start() {
+  startI18n();
   Pomo.load();
   Shortcuts.load();
   await Store.open();
