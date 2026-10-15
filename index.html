@@ -601,6 +601,10 @@ body.is-reordering .tabs .chip:hover { outline: 2px solid var(--accent); outline
 body:not(.kbd-nav) select:focus-visible, body:not(.kbd-nav) .options :focus-visible { outline: none; }
 .options .item-acts { display: inline-flex; gap: 2px; }
 .options .item-acts [data-act="delete"] { color: var(--danger); }
+/* Cada parte del panel conserva su tamaño (si no, la fila de miniaturas de «Apartados» se aplasta) y se baja con la rueda */
+.dyn .panel > * { flex-shrink: 0; }
+.dyn .panel .strip { min-height: 100px; align-items: flex-start; }
+.dyn .panel { overscroll-behavior: contain; }
 /* =============================================================================
    Tutorial de la primera vez (siempre en oscuro, como en la app nativa)
    ============================================================================= */
