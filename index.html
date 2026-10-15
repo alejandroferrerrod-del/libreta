@@ -1858,13 +1858,15 @@ function renderLibrary() {
       <button class="prominent" id="sel-done">${icon('check')}<span class="label">Listo</span></button>
     </header>` : `
     <header class="lib-header">
-      <button class="round-btn" id="space-btn" aria-haspopup="menu" title="Ir a una carpeta" aria-label="Ir a una carpeta">${icon('folder')}</button>
+      <div class="pill-group" role="group" aria-label="Tus libretas">
+        <button id="space-btn" aria-haspopup="menu" title="Ir a una carpeta" aria-label="Ir a una carpeta">${icon('folder')}</button>
+        <button id="new-btn" aria-haspopup="menu" title="Crear o importar" aria-label="Crear o importar">${icon('plus')}</button>
+      </div>
       <div class="center"><label class="search" for="search">${icon('search')}<input id="search" type="search" placeholder="Buscar por título o contenido" value="${esc(S.query)}" autocomplete="off"><span class="ghost"></span></label></div>
       <div class="spacer"></div>
       <button class="prominent ${S.dynamic ? 'purple' : ''}" id="dyn-btn" aria-pressed="${S.dynamic}" title="Tus carpetas y libretas como una constelación, con sus vínculos">${icon('sparkles')}<span class="label">${S.dynamic ? 'Salir del modo dinámico' : 'Modo dinámico'}</span></button>
-      <div class="pill-group">
+      <div class="pill-group" role="group" aria-label="Vista y ajustes">
         <button id="select-btn" title="Seleccionar varias libretas o carpetas" aria-label="Seleccionar" ${S.dynamic ? 'disabled' : ''}>${icon('checkCircle')}</button>
-        <button id="new-btn" aria-haspopup="menu" title="Crear o importar" aria-label="Crear o importar">${icon('plus')}</button>
         <button id="settings-btn" aria-haspopup="menu" title="Ajustes: apariencia, atajos, copias de seguridad…" aria-label="Ajustes">${icon('settings')}</button>
       </div>
       <div class="clock lib-clock" data-clock></div>
