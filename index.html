@@ -508,6 +508,12 @@ body.is-reordering .tabs .chip:hover { outline: 2px solid var(--accent); outline
 .pdf-panel .swatch:hover { transform: scale(1.12); }
 .pdf-panel .sep { width: 1px; height: 22px; background: var(--hairline); margin: 0 4px; }
 .pdf-panel .icon-btn { width: 32px; height: 32px; color: var(--ink); }
+.tab-group { display: flex; align-items: flex-end; align-self: stretch; min-width: 0; flex: 0 1 auto; }
+.tab-group > .chip { cursor: grab; }
+.tab-group.reordering { z-index: 30; }
+.tab-group.reordering > .chip { cursor: grabbing; box-shadow: 0 4px 14px rgba(0,0,0,.3); }
+.popover .kbd-hint { margin-left: auto; padding-left: 16px; color: var(--muted); font-size: 12.5px; }
+.popover button:hover:not(:disabled) .kbd-hint { color: rgba(255,255,255,.8); }
 /* =============================================================================
    Tutorial de la primera vez (siempre en oscuro, como en la app nativa)
    ============================================================================= */
@@ -665,6 +671,7 @@ const ICONS = {
  "coffee": "<path d=\"M10 2v2\" /> <path d=\"M14 2v2\" /> <path d=\"M16 8a1 1 0 0 1 1 1v8a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V9a1 1 0 0 1 1-1h14a4 4 0 1 1 0 8h-1\" /> <path d=\"M6 2v2\" />",
  "lightbulb": "<path d=\"M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5\" /> <path d=\"M9 18h6\" /> <path d=\"M10 22h4\" />",
  "bell": "<path d=\"M10.268 21a2 2 0 0 0 3.464 0\" /> <path d=\"M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326\" />",
+ "maximize": "<path d=\"M8 3H5a2 2 0 0 0-2 2v3\" /> <path d=\"M21 8V5a2 2 0 0 0-2-2h-3\" /> <path d=\"M3 16v3a2 2 0 0 0 2 2h3\" /> <path d=\"M16 21h3a2 2 0 0 0 2-2v-3\" />",
  "mic": "<path d=\"M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z\" /> <path d=\"M19 10v2a7 7 0 0 1-14 0v-2\" /> <line x1=\"12\" x2=\"12\" y1=\"19\" y2=\"22\" />",
  "search": "<circle cx=\"11\" cy=\"11\" r=\"8\" /> <path d=\"m21 21-4.3-4.3\" />",
  "undo": "<path d=\"M9 14 4 9l5-5\" /> <path d=\"M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5a5.5 5.5 0 0 1-5.5 5.5H11\" />",
@@ -808,6 +815,14 @@ applyAppearance();
 
 const CLOCK_FORMAT = new Intl.DateTimeFormat('es-ES', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
 /** Fecha y hora («mié, 14 oct, 10:29») en todos los relojes de la pantalla. */
+/** Pantalla completa (toda la app, sin la barra del navegador). */
+function toggleFullscreen() {
+  const d = document;
+  try {
+    if (d.fullscreenElement || d.webkitFullscreenElement) (d.exitFullscreen || d.webkitExitFullscreen).call(d);
+    else { const el = d.documentElement; (el.requestFullscreen || el.webkitRequestFullscreen).call(el); }
+  } catch (e) { toast('Este navegador no deja poner la página en pantalla completa.'); }
+}
 function updateClocks() {
   const text = CLOCK_FORMAT.format(new Date());
   document.querySelectorAll('[data-clock]').forEach((el) => { if (el.textContent !== text) el.textContent = text; });
@@ -1784,6 +1799,7 @@ function newMenu(anchor) {
     <button data-act="ap:light">${mark('light')} Clara</button>
     <button data-act="ap:dark">${mark('dark')} Oscura</button>
     <hr><button data-act="tutorial">${icon('tutorial')} Ver el tutorial</button>
+    <button data-act="fullscreen">${icon('maximize')} ${document.fullscreenElement ? 'Salir de pantalla completa' : 'Pantalla completa'} <span class="kbd-hint">${onbKey('fullscreen')}</span></button>
     <button data-act="shortcuts">${icon('keyboard')} Atajos de teclado…</button>
     <button data-act="save">${icon('download')} Guardar copia de seguridad</button>
     <button data-act="load">${icon('upload')} Recuperar copia…</button>
@@ -1794,6 +1810,7 @@ function newMenu(anchor) {
     if (act === 'save') saveBackup();
     if (act === 'load') loadBackup();
     if (act === 'shortcuts') shortcutsDialog();
+    if (act === 'fullscreen') toggleFullscreen();
     if (act === 'tutorial') Onboarding.open();
     if (act === 'install') window.libretaInstall?.();
   });
@@ -2778,6 +2795,15 @@ function liveReorder(container, selector, { onDrop, onOutside, onTarget, group, 
       to = Reorder.targetIndex(p, slots, from, axis);
       el.style.transform = `translate(${last.clientX - start.x}px, ${axis === 'x' ? 0 : p.y - start.y}px)`;
       const order = Reorder.preview(items.map((_, i) => i), from, to);
+      if (axis === 'x') {
+        const gap = slots.length > 1 ? slots[1].left - slots[0].left - slots[0].width : 0;
+        let x = slots[0].left;
+        order.forEach((itemIndex) => {
+          if (itemIndex !== from) items[itemIndex].style.transform = `translateX(${x - slots[itemIndex].left}px)`;
+          x += slots[itemIndex].width + gap;
+        });
+        return;
+      }
       order.forEach((itemIndex, position) => {
         if (itemIndex === from) return;
         const a = slots[itemIndex], b = slots[position];
@@ -3538,14 +3564,14 @@ function renderTabs() {
     const collapsed = S.collapsed.includes(g.key);
     const chip = chips ? `<button class="chip" data-chip="${esc(g.key)}" style="--c:${color}" title="${collapsed ? 'Mostrar' : 'Plegar'} ${esc(g.space || 'Sin espacio')}">
         ${icon('folder')}${esc(g.space || 'Sin espacio')}${collapsed ? `<span class="count">${g.ids.length}</span>` : ''}${icon(collapsed ? 'chevronRight' : 'chevronDown')}</button>` : '';
-    return chip + (collapsed ? '' : g.ids.map((id) => {
+    return `<div class="tab-group" data-gkey="${esc(g.key)}">` + chip + (collapsed ? '' : g.ids.map((id) => {
       const nb = nbById(id), active = id === S.active;
       return `<div class="tab ${active ? 'active' : ''}" data-tab="${id}" data-group="${esc(g.key)}" style="--c:${nb.color};${chips ? `--g:${color}` : ''}" role="tab" aria-selected="${active}" title="${esc(nb.title)}">
         <span class="hover-bg"></span>${active ? '<span class="foot l"></span><span class="foot r"></span>' : ''}
         <span class="book">${icon('book')}</span><span class="t">${esc(nb.title)}</span>
         <button class="x" data-close="${id}" aria-label="Cerrar ${esc(nb.title)}">${icon('close')}</button>
         ${chips ? '<span class="gline"></span>' : ''}</div>`;
-    }).join(''));
+    }).join('')) + '</div>';
   }).join('') + `<span class="clock" data-clock></span><button class="icon-btn plus" id="tab-plus" aria-label="Abrir otra libreta" title="Abrir otra libreta">${icon('plus')}</button>`;
   updateClocks();
   el.onclick = (e) => {
@@ -3568,6 +3594,15 @@ function renderTabs() {
         if (!chip || chip.dataset.chip === t.dataset.group) return false;
         moveTabToSpace(t.dataset.tab, chip.dataset.chip || null);
         return true;
+      },
+    });
+    // Arrastrar la etiqueta de un espacio mueve el grupo entero (con sus pestañas).
+    liveReorder(el, '.tab-group', {
+      axis: 'x', ignore: '.tab',
+      onDrop: (from, to) => {
+        const order = Reorder.preview(tabGroups(), from, to);
+        S.tabs = order.flatMap((g) => g.ids);
+        saveTabs(); renderTabs();
       },
     });
   }
@@ -3916,6 +3951,7 @@ function pageMenu(anchor) {
     <button data-act="zoom-in">${icon('plus')} Acercar</button><button data-act="zoom-out">${icon('minus')} Alejar</button><button data-act="zoom-fit">${icon('pages')} Ajustar al ancho</button>
     <hr><button data-act="pomo-visible">${mark(Pomo.visible)} Mostrar el temporizador en la barra</button>
     <button data-act="hold">${mark(S.holdToSnap)} Mantener quieto al final: forma perfecta o recta</button>
+    <button data-act="fullscreen">${icon('maximize')} ${document.fullscreenElement ? 'Salir de pantalla completa' : 'Pantalla completa'} <span class="kbd-hint">${onbKey('fullscreen')}</span></button>
     <button data-act="shortcuts">${icon('keyboard')} Atajos de teclado…</button>
     <hr><div class="label">Apariencia</div>
     ${[['system', 'Automática'], ['light', 'Clara'], ['dark', 'Oscura']].map(([k, n]) => `<button data-act="ap:${k}">${mark(currentAppearance() === k)} ${n}</button>`).join('')}
@@ -3923,6 +3959,7 @@ function pageMenu(anchor) {
     <button data-act="delete" ${nb.pages.length < 2 ? 'disabled' : ''}>${icon('trash')} Eliminar esta página…</button>`, (act) => {
     const [kind, value] = act.split(':');
     if (act === 'shortcuts') return shortcutsDialog();
+    if (act === 'fullscreen') return toggleFullscreen();
     if (act === 'pomo-visible') { Pomo.visible = !Pomo.visible; return Pomo.changed(); }
     if (act === 'hold') { S.holdToSnap = !S.holdToSnap; savePrefs(); return toast(S.holdToSnap ? 'Mantener quieto al final de un trazo lo convierte en forma o recta' : 'Los trazos quedan siempre tal como los dibujas'); }
     if (act === 'zoom-in') return setZoom(S.zoom * 1.2);
@@ -5222,6 +5259,8 @@ const SHORTCUT_ACTIONS = [
   ['record', 'Otros', 'Grabar audio', 'editor', [K('r', { alt: true })]],
   ['toggleVoiceNotes', 'Otros', 'Mostrar u ocultar notas de voz', 'editor', [K('r', { alt: true, shift: true })]],
   ['timer', 'Otros', 'Temporizador de estudio', 'editor', [K('t', { alt: true })]],
+  // En el Mac, ⌃⌘F como en todas las apps; en Windows, Ctrl+Mayús+F (F11 lo coge el navegador).
+  ['fullscreen', 'Otros', 'Pantalla completa', 'both', [IS_MAC ? K('f', { mod: true, ctrl: true }) : K('f', { mod: true, shift: true })]],
   ['newNotebook', 'Otros', 'Nueva libreta', 'library', [K('n', { alt: true })]],
   ['shortcutsSettings', 'Otros', 'Atajos de teclado', 'both', [K('?')]],
 ];
@@ -5338,6 +5377,7 @@ const Shortcuts = {
         return $('#pomo-btn') && Pomo.openPanel($('#pomo-btn'));
       case 'record': return Voice.toggleRecording();
       case 'toggleVoiceNotes': return Voice.setShown(!S.showVoiceNotes);
+      case 'fullscreen': return toggleFullscreen();
       case 'newNotebook': return newNotebookDialog();
       case 'shortcutsSettings': return shortcutsDialog();
       default: {
@@ -5679,7 +5719,7 @@ const OnbDemos = {
       ctx.save(); ctx.beginPath(); ctx.roundRect(x, y, w, h, 10); ctx.clip();
       ctx.fillStyle = '#AF52DE'; ctx.fillRect(x, y, w, 22);
       ctx.scale(open, open);
-      this.label(ctx, '  Ana', x / open + 2, (y + 11) / open, `700 12px ${ROUNDED}`, '#fff', 'left');
+      this.label(ctx, '  Stella', x / open + 2, (y + 11) / open, `700 12px ${ROUNDED}`, '#fff', 'left');
       this.label(ctx, 'Revisar esta parte', (x + 70 * open) / open, (y + 46 * open) / open, `12px ${ROUNDED}`, onbGray(0.3));
       ctx.restore();
     }
@@ -5687,7 +5727,7 @@ const OnbDemos = {
       ctx.save(); ctx.translate(px, py); ctx.scale(pin, pin);
       ctx.fillStyle = '#AF52DE'; ctx.beginPath(); ctx.arc(0, 0, 17, 0, 7); ctx.fill();
       ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.stroke();
-      this.label(ctx, 'A', 0, 1, `600 17px ${ROUNDED}`, '#fff');
+      this.label(ctx, 'S', 0, 1, `600 17px ${ROUNDED}`, '#fff');
       ctx.restore();
     }
   },
@@ -5739,7 +5779,7 @@ const OnbDemos = {
   },
   organize(ctx, W, H, t) {
     const p = onbCycle(t, 3.4), move = onbSmooth(onbRamp(p, 0.2, 0.6));
-    const titles = [['Historia', '#FF3B30'], ['Física', '#007AFF'], ['Lengua', '#34C759']];
+    const titles = [['Cardiología', '#FF3B30'], ['Digestivo', '#007AFF'], ['Cirugía vascular', '#34C759']];
     ctx.save(); ctx.beginPath(); ctx.roundRect(0, 0, W, H, 14); ctx.clip();
     ctx.fillStyle = onbGray(0.08); ctx.fillRect(0, 0, W, H);
     ctx.fillStyle = onbGray(0.17); ctx.fillRect(0, 56, W, H - 56);
@@ -5752,7 +5792,10 @@ const OnbDemos = {
         ctx.fillStyle = onbGray(0.17); ctx.beginPath(); ctx.roundRect(x, y, tw - 4, 40, [9, 9, 0, 0]); ctx.fill(); ctx.shadowColor = 'transparent';
       }
       const book = onbIcon('book', titles[i][1], 14, 2.2); if (book.complete) ctx.drawImage(book, x + 10, y + 13, 14, 14);
-      this.label(ctx, titles[i][0], x + 30, y + 20, `500 13px ${ROUNDED}`, '#fff', 'left');
+      ctx.font = `500 12.5px ${ROUNDED}`;
+      let title = titles[i][0];
+      while (title.length > 3 && ctx.measureText(title).width > tw - 42) title = title.slice(0, -2) + '…';
+      this.label(ctx, title, x + 30, y + 20, `500 12.5px ${ROUNDED}`, '#fff', 'left');
     });
     this.label(ctx, 'Arrastra para ordenar', W / 2, H * 0.6 + 10, `600 17px ${ROUNDED}`, 'rgba(255,255,255,.7)');
     ctx.restore();
@@ -5789,7 +5832,7 @@ const OnbDemos = {
     ctx.beginPath(); ctx.roundRect(px, py, 250, 50, 25); ctx.fill(); ctx.stroke();
     ctx.fillStyle = '#FF9500'; ctx.beginPath(); ctx.arc(px + 27, py + 25, 15, 0, 7); ctx.fill();
     ctx.fillStyle = '#fff'; ctx.fillRect(px + 22, py + 18, 3.5, 14); ctx.fillRect(px + 28.5, py + 18, 3.5, 14);
-    this.label(ctx, 'Clase de Historia', px + 52, py + 17, `600 16px ${ROUNDED}`, onbGray(0.15), 'left');
+    this.label(ctx, 'Clase de Cardiología', px + 52, py + 17, `600 16px ${ROUNDED}`, onbGray(0.15), 'left');
     this.label(ctx, `0:${String(Math.floor(p * 45)).padStart(2, '0')} / 0:45`, px + 52, py + 35, `12px ${ROUNDED}`, onbGray(0.4), 'left');
   },
   timer(ctx, W, H, t) {
@@ -6156,6 +6199,23 @@ const Onboarding = {
 // =============================================================================
 // Libretas de ejemplo (la primera vez) e inicio
 // =============================================================================
+/** Libretas de ejemplo creadas antes: el subrayado era un trazo que, según la letra del ordenador,
+ *  no caía encima del texto. Se cambia por el resaltado del propio texto (una sola vez). */
+function fixExampleHighlights(nb) {
+  let changed = false;
+  for (const page of nb.pages) {
+    const before = page.strokes.length;
+    page.strokes = page.strokes.filter((s) => !(s.tool === 'highlighter' && s.points[0] && ((s.points[0][0] === 392 && s.points[0][1] === 194) || (s.points[0][0] === 92 && s.points[0][1] === 170))));
+    if (page.strokes.length === before) continue;
+    for (const it of page.items) {
+      for (const words of ['<b>perfectamente rectos</b>', '<b>membrana plasmática</b>']) {
+        if (it.html?.includes(words) && !it.html.includes('<span style="background-color:#FFE66B">' + words)) it.html = it.html.replace(words, '<span style="background-color:#FFE66B">' + words + '</span>');
+      }
+    }
+    changed = true;
+  }
+  if (changed) { touch(nb); Store.put(nb); }
+}
 function exampleNotebooks() {
   const style = (o) => Object.assign({}, DEFAULT_TEXT, o);
   const text = (x, y, w, html, base) => ({ id: uid(), type: 'text', x, y, w, html, base: style(base) });
@@ -6168,11 +6228,10 @@ function exampleNotebooks() {
   const [t1, t2] = temas.pages;
   t1.items.push(
     text(64, 60, 660, 'La célula', { font: 'serif', size: 40, bold: true }),
-    text(64, 140, 660, 'La <b>membrana plasmática</b> separa el interior de la célula del exterior y controla qué entra y qué sale.', { size: 21 }),
+    text(64, 140, 660, 'La <span style="background-color:#FFE66B"><b>membrana plasmática</b></span> separa el interior de la célula del exterior y controla qué entra y qué sale.', { size: 21 }),
     { id: uid(), type: 'sticky', x: 520, y: 320, w: 220, h: 200, color: STICKY_COLORS[0], html: 'Repasar el <b>transporte activo</b> antes del examen', base: style({ font: 'hand', size: 24 }) },
     { id: uid(), type: 'comment', x: 30, y: 150, title: 'Profe', color: COMMENT_COLORS[0], expanded: false, html: 'Esto entra seguro en el examen.', base: style({ size: 16 }) },
   );
-  t1.strokes.push({ id: uid(), tool: 'highlighter', kind: 'pen', color: '#FFD60A', width: 18, points: line([[92, 170], [330, 170]]) });
   t2.items.push(text(64, 60, 660, 'Esquema del orgánulo', { font: 'serif', size: 32, bold: true }));
   const circle = Array.from({ length: 70 }, (_, i) => { const a = (i / 64) * Math.PI * 2; return [400 + 150 * Math.cos(a), 360 + 100 * Math.sin(a), 0.5]; });
   t2.strokes.push({ id: uid(), tool: 'pen', kind: 'pen', color: '#1E5BD8', width: 3, points: circle });
@@ -6185,13 +6244,12 @@ function exampleNotebooks() {
   const link = `<a data-link='${JSON.stringify({ nb: temas.id, page: t2.id })}'>esquema del orgánulo</a>`;
   page.items.push(
     text(64, 70, 640, 'Hola, esto es Libreta', { font: 'serif', size: 40, bold: true }),
-    text(64, 150, 660, 'Prueba el bolígrafo (P) y escribe aquí debajo. Con el subrayador (H) en «H / V», tus subrayados quedan <b>perfectamente rectos</b>.', { size: 21 }),
+    text(64, 150, 660, 'Prueba el bolígrafo (P) y escribe aquí debajo. Con el subrayador (H) en «H / V», tus subrayados quedan <span style="background-color:#FFE66B"><b>perfectamente rectos</b></span>.', { size: 21 }),
     text(64, 300, 300, 'Dibuja un círculo y mantén el ratón quieto al final: se vuelve perfecto.', { font: 'hand', size: 26, color: '#1E5BD8' }),
     text(64, 560, 660, `Los enlaces llevan a otras libretas o páginas: haz clic en el ${link} para verlo. Activa el <b>Modo dinámico</b> en la biblioteca para ver cómo se relacionan tus libretas.`, { size: 19 }),
     { id: uid(), type: 'link', x: 64, y: 700, w: 300, h: 56, target: { nb: temas.id, page: null } },
     text(64, 980, 660, 'Todo se guarda en este navegador. Para pasarle tus apuntes a alguien, usa Compartir → PDF. Para llevártelo todo a otro ordenador, usa «Copia de seguridad».', { size: 17, color: '#5D6475', italic: true }),
   );
-  page.strokes.push({ id: uid(), tool: 'highlighter', kind: 'pen', color: '#FFD60A', width: 18, points: line([[392, 194], [585, 194]]) });
   const c2 = Array.from({ length: 70 }, (_, i) => { const a = (i / 64) * Math.PI * 2; return [520 + 70 * Math.cos(a), 360 + 70 * Math.sin(a), 0.5]; });
   page.strokes.push({ id: uid(), tool: 'pen', kind: 'pen', color: '#E0362C', width: 3, points: c2 });
   page.strokes.push({ id: uid(), tool: 'pen', kind: 'pen', color: '#1C1C1E', width: 2.5, points: line([[370, 345], [440, 360]]) });
@@ -6204,6 +6262,7 @@ async function start() {
   Shortcuts.load();
   await Store.open();
   S.notebooks = (await Store.all()).map(normalizeNotebook);
+  S.notebooks.forEach(fixExampleHighlights);
   const seeded = Prefs.load().seeded;
   if (!S.notebooks.length && !seeded) {
     for (const nb of exampleNotebooks()) { S.notebooks.push(nb); Store.put(nb); }
