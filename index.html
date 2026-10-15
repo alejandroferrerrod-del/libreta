@@ -758,6 +758,7 @@ const ICONS = {
  "pageFormat": "<path d=\"M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z\" /> <path d=\"M14 2v4a2 2 0 0 0 2 2h4\" /> <path d=\"M8 12h8\" /> <path d=\"M10 11v2\" /> <path d=\"M8 17h8\" /> <path d=\"M14 16v2\" />",
  "penOff": "<path d=\"m10 10-6.157 6.162a2 2 0 0 0-.5.833l-1.322 4.36a.5.5 0 0 0 .622.624l4.358-1.323a2 2 0 0 0 .83-.5L14 13.982\" /> <path d=\"m12.829 7.172 4.359-4.346a1 1 0 1 1 3.986 3.986l-4.353 4.353\" /> <path d=\"m2 2 20 20\" />",
  "checkCircle": "<circle cx=\"12\" cy=\"12\" r=\"10\" /> <path d=\"m9 12 2 2 4-4\" />",
+ "settings": "<path d=\"M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z\" /> <circle cx=\"12\" cy=\"12\" r=\"3\" />",
  "mic": "<path d=\"M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z\" /> <path d=\"M19 10v2a7 7 0 0 1-14 0v-2\" /> <line x1=\"12\" x2=\"12\" y1=\"19\" y2=\"22\" />",
  "search": "<circle cx=\"11\" cy=\"11\" r=\"8\" /> <path d=\"m21 21-4.3-4.3\" />",
  "undo": "<path d=\"M9 14 4 9l5-5\" /> <path d=\"M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5a5.5 5.5 0 0 1-5.5 5.5H11\" />",
@@ -1853,7 +1854,8 @@ function renderLibrary() {
       <div class="pill-group">
         <button id="select-btn" title="Seleccionar varias libretas o carpetas" aria-label="Seleccionar" ${S.dynamic ? 'disabled' : ''}>${icon('checkCircle')}</button>
         <button id="graph-btn" title="Ver cómo se enlazan las libretas" aria-label="Grafo de enlaces">${icon('graph')}</button>
-        <button id="new-btn" aria-haspopup="menu" title="Nuevo" aria-label="Nuevo">${icon('plus')}</button>
+        <button id="new-btn" aria-haspopup="menu" title="Crear o importar" aria-label="Crear o importar">${icon('plus')}</button>
+        <button id="settings-btn" aria-haspopup="menu" title="Ajustes: apariencia, atajos, copias de seguridad…" aria-label="Ajustes">${icon('settings')}</button>
       </div>
       <div class="clock lib-clock" data-clock></div>
     </header>`;
@@ -1889,6 +1891,7 @@ function renderLibrary() {
     $('#graph-btn').addEventListener('click', () => { if (!S.dynamic) { S.dynamic = true; savePrefs(); renderLibrary(); } });
     $('#select-btn').addEventListener('click', () => setSelecting(true));
     $('#new-btn').addEventListener('click', (e) => newMenu(e.currentTarget));
+    $('#settings-btn').addEventListener('click', (e) => settingsMenu(e.currentTarget));
   }
   $('.title-row')?.addEventListener('click', (e) => { const b = e.target.closest('[data-go-folder]'); if (b) goFolder(b.dataset.goFolder || null); });
   $('#lib-main')?.addEventListener('click', onLibraryClick);
@@ -1920,26 +1923,36 @@ function folderCardHTML(f) {
 }
 
 /** Menú «+» de la biblioteca (como el de la app nativa) con lo propio de la web. */
+/** «+»: solo crear e importar. */
 function newMenu(anchor) {
-  const appearance = currentAppearance();
-  const mark = (v) => (appearance === v ? icon('check') : '<svg width="17" height="17"></svg>');
+  const where = S.folder ? ` en «${esc(Folders.byId(S.folder)?.name || '')}»` : '';
   popover(anchor, `
+    <div class="label">Crear${where}</div>
     <button data-act="new">${icon('book')} Nueva libreta</button>
-    <button data-act="folder">${icon('folder')} Nueva carpeta${S.folder ? ' aquí' : ''}…</button>
-    <button data-act="pdf">${icon('pdf')} Importar PDF…</button>
-    <hr><div class="label">Apariencia</div>
-    <button data-act="ap:system">${mark('system')} Automática</button>
-    <button data-act="ap:light">${mark('light')} Clara</button>
-    <button data-act="ap:dark">${mark('dark')} Oscura</button>
-    <hr><button data-act="tutorial">${icon('tutorial')} Ver el tutorial</button>
-    <button data-act="fullscreen">${icon('maximize')} ${document.fullscreenElement ? 'Salir de pantalla completa' : 'Pantalla completa'} <span class="kbd-hint">${onbKey('fullscreen')}</span></button>
-    <button data-act="shortcuts">${icon('keyboard')} Atajos de teclado…</button>
-    <button data-act="save">${icon('download')} Guardar copia de seguridad</button>
-    <button data-act="load">${icon('upload')} Recuperar copia…</button>
-    ${window.libretaInstall ? `<hr><button data-act="install">${icon('fileDown')} Instalar Libreta en este ordenador</button>` : ''}`, (act) => {
+    <button data-act="folder">${icon('folder')} Nueva carpeta…</button>
+    <hr><div class="label">Importar</div>
+    <button data-act="pdf">${icon('pdf')} Importar PDF…</button>`, (act) => {
     if (act === 'new') newNotebookDialog();
     if (act === 'folder') promptDialog('Nueva carpeta', '', (v) => { Folders.create(v, S.folder); renderLibrary(); }, 'Nombre de la carpeta');
     if (act === 'pdf') pickFile('application/pdf', importPDF);
+  });
+}
+/** ⚙︎ Ajustes: apariencia, pantalla, atajos, tutorial, copias de seguridad e instalar. */
+function settingsMenu(anchor) {
+  const appearance = currentAppearance();
+  const mark = (v) => (appearance === v ? icon('check') : '<svg width="17" height="17"></svg>');
+  popover(anchor, `
+    <div class="label">Apariencia</div>
+    <button data-act="ap:system">${mark('system')} Automática</button>
+    <button data-act="ap:light">${mark('light')} Clara</button>
+    <button data-act="ap:dark">${mark('dark')} Oscura</button>
+    <hr><button data-act="fullscreen">${icon('maximize')} ${document.fullscreenElement ? 'Salir de pantalla completa' : 'Pantalla completa'} <span class="kbd-hint">${onbKey('fullscreen')}</span></button>
+    <button data-act="shortcuts">${icon('keyboard')} Atajos de teclado…</button>
+    <button data-act="tutorial">${icon('tutorial')} Ver el tutorial</button>
+    <hr><div class="label">Copia de seguridad</div>
+    <button data-act="save">${icon('download')} Guardar copia de seguridad</button>
+    <button data-act="load">${icon('upload')} Recuperar copia…</button>
+    ${window.libretaInstall ? `<hr><button data-act="install">${icon('fileDown')} Instalar Libreta en este ordenador</button>` : ''}`, (act) => {
     if (act.startsWith('ap:')) setAppearance(act.slice(3));
     if (act === 'save') saveBackup();
     if (act === 'load') loadBackup();
@@ -2020,9 +2033,8 @@ function folderJumpMenu(anchor) {
   popover(anchor, `<div class="label">Ir a</div>
     <button data-act="root">${S.folder ? '<svg width="17" height="17"></svg>' : icon('check')} Libretas (inicio)</button>
     ${tree.map(({ folder, depth }) => `<button data-act="${folder.id}" style="padding-left:${10 + depth * 16}px">${S.folder === folder.id ? icon('check') : `<span class="chip-dot" style="--c:${Folders.color(Folders.top(folder.id))}"></span>`} ${esc(folder.name)}</button>`).join('')}
-    <hr><button data-act="new">${icon('plus')} Nueva carpeta${S.folder ? ' aquí' : ''}…</button>`, (act) => {
+    ${tree.length ? '' : '<div class="label" style="text-transform:none;letter-spacing:0;white-space:normal;max-width:220px">Aún no tienes carpetas. Créalas con +.</div>'}`, (act) => {
     if (act === 'root') return goFolder(null);
-    if (act === 'new') return promptDialog('Nueva carpeta', '', (v) => { Folders.create(v, S.folder); renderLibrary(); }, 'Nombre de la carpeta');
     goFolder(act);
   });
 }
