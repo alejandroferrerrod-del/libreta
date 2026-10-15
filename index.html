@@ -325,14 +325,14 @@ svg { display: block; }
 .dyn { flex: 1; position: relative; overflow: hidden; background: #0A0C16; color: #fff; }
 .dyn canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
 .dyn .nodes { position: absolute; inset: 0; }
-.dnode { position: absolute; width: 150px; margin-left: -75px; margin-top: -62px; display: flex; flex-direction: column; align-items: center; gap: 8px; cursor: pointer; user-select: none; transition: opacity .3s, transform .25s; touch-action: none; }
+.dnode { position: absolute; width: 150px; margin-left: -75px; margin-top: -62px; display: flex; flex-direction: column; align-items: center; gap: 8px; cursor: pointer; user-select: none; transition: transform .25s; touch-action: none; transform: scale(var(--s, 1)); will-change: left, top, transform; }
 .dnode .cover { width: 74px; box-shadow: 0 0 18px var(--glow); }
 .dnode .cover span { display: none; }
 .dnode .lbl { font-size: 12.5px; font-weight: 600; text-shadow: 0 1px 3px rgba(0,0,0,.8); max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.dnode:hover { transform: scale(1.1); }
-.dnode.sel { transform: scale(1.28); }
+.dnode:hover { transform: scale(calc(var(--s, 1) * 1.1)); }
+.dnode.sel { transform: scale(calc(var(--s, 1) * 1.28)); }
 .dnode.sel .cover { box-shadow: 0 0 0 3px #fff, 0 0 30px var(--glow); }
-.dnode.dim { opacity: .3; }
+.dnode.dim { filter: opacity(.3); }
 .dyn .hover-card { position: absolute; z-index: 5; width: 200px; background: rgba(28, 30, 48, .92); border: 1px solid var(--glow); border-radius: 14px; padding: 10px; pointer-events: none; text-align: center; font-size: 12.5px; box-shadow: 0 0 24px var(--glow); }
 .dyn .hover-card img { width: 100%; border-radius: 5px; background: #fff; }
 .dyn .panel { position: absolute; z-index: 6; top: 16px; right: 16px; bottom: 16px; width: min(380px, calc(100% - 32px)); background: rgba(24, 26, 42, .94); border: 1px solid var(--glow); border-radius: 20px; padding: 18px; overflow: auto; display: flex; flex-direction: column; gap: 14px; box-shadow: 0 0 40px var(--glow); color: #EEF0F6; }
@@ -573,6 +573,30 @@ body.is-reordering .tabs .chip:hover { outline: 2px solid var(--accent); outline
 .move-row:disabled { opacity: .35; cursor: not-allowed; }
 .move-row .mf { width: 26px; height: 26px; border-radius: 7px; display: grid; place-items: center; background: var(--c); color: #fff; flex: none; }
 .move-row .mf svg { width: 15px; height: 15px; }
+
+/* Modo dinámico: carpetas como nebulosas, ruta y viaje al abrir */
+.dfolder { position: absolute; width: 170px; margin-left: -85px; margin-top: -26px; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; user-select: none; touch-action: none; transform: scale(var(--s, 1)); transition: transform .25s; will-change: left, top, transform; }
+.dfolder .core { width: 52px; height: 52px; border-radius: 50%; display: grid; place-items: center; background: radial-gradient(circle at 35% 30%, #fff, color-mix(in srgb, var(--glow) 70%, white) 45%, var(--glow)); color: color-mix(in srgb, var(--glow) 40%, black); box-shadow: 0 0 22px var(--glow), 0 0 60px color-mix(in srgb, var(--glow) 60%, transparent); }
+.dfolder .core svg { width: 24px; height: 24px; stroke-width: 2.2; }
+.dfolder .lbl { margin-top: 70px; font: 700 15px var(--font); text-shadow: 0 1px 6px rgba(0,0,0,.9); max-width: 170px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dfolder .sub { font-size: 12px; color: rgba(255,255,255,.7); text-shadow: 0 1px 4px rgba(0,0,0,.9); }
+.dfolder:hover { transform: scale(calc(var(--s, 1) * 1.08)); }
+.dfolder:focus-visible, .dnode:focus-visible { outline: 2px solid #fff; outline-offset: 6px; border-radius: 12px; }
+.dyn-crumbs { position: absolute; left: 20px; top: 16px; z-index: 4; display: flex; align-items: center; gap: 4px; flex-wrap: wrap; color: rgba(255,255,255,.5); font-size: 14px; }
+.dyn-crumbs button { border: 1px solid rgba(255,255,255,.14); background: rgba(255,255,255,.08); color: #fff; font: 600 13.5px var(--font); padding: 6px 12px; border-radius: 99px; display: inline-flex; align-items: center; gap: 6px; cursor: pointer; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
+.dyn-crumbs button svg { width: 15px; height: 15px; }
+.dyn-crumbs button:hover:not([aria-current]) { background: rgba(255,255,255,.16); }
+.dyn-crumbs button[aria-current] { cursor: default; border-color: var(--glow, rgba(255,255,255,.3)); box-shadow: 0 0 14px color-mix(in srgb, var(--glow, #8E7CFF) 50%, transparent); }
+.dyn .reset { top: 60px; }
+.dyn .hover-list { display: flex; flex-direction: column; gap: 4px; margin-top: 8px; text-align: left; }
+.dyn .hover-list span { display: flex; align-items: center; gap: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dyn .hover-list span::before { content: ""; width: 8px; height: 11px; border-radius: 2px; background: var(--c); box-shadow: 0 0 6px var(--c); flex: none; }
+.dyn .hover-list .more::before { display: none; }
+.dyn .hover-go { margin-top: 8px; font-weight: 600; color: color-mix(in srgb, var(--glow) 60%, white); }
+.dyn-fly { position: fixed; z-index: 300; border-radius: 6px; overflow: hidden; perspective: 800px; background: linear-gradient(180deg, color-mix(in srgb, var(--c) 72%, white), color-mix(in srgb, var(--c) 93%, white)); box-shadow: 0 0 60px var(--c), 0 20px 80px rgba(0,0,0,.5); pointer-events: none; }
+.dyn-fly .paper-in { position: absolute; inset: 0; background: var(--desk, #EAEBEB); }
+.dyn .hint { transition: opacity .8s; }
+.dyn .hint.gone { opacity: 0; }
 /* =============================================================================
    Tutorial de la primera vez (siempre en oscuro, como en la app nativa)
    ============================================================================= */
@@ -2218,10 +2242,19 @@ async function saveBackup() {
 }
 
 // =============================================================================
-// Modo dinámico: las libretas flotan sobre un fondo animado, unidas por sus enlaces
+// Modo dinámico: las libretas flotan en el espacio, unidas por sus enlaces. Las carpetas son
+// nebulosas con sus libretas orbitando: al hacer clic se viaja dentro (a velocidad de la luz) y
+// al volver se sale hacia atrás. Doble clic en una libreta la abre creciendo desde su portada.
+// Todo el fondo, las nebulosas y los enlaces van en un solo lienzo (para que vaya suave).
 // =============================================================================
 const Dyn = { running: false };
 const reduceMotion = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
+const easeInOut = (k) => (k < 0.5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2);
+const easeOutBack = (k) => { const c = 1.6; return 1 + (c + 1) * Math.pow(k - 1, 3) + c * Math.pow(k - 1, 2); };
+const easeIn = (k) => k * k * k;
+const clamp01 = (k) => Math.min(1, Math.max(0, k));
+/** Viajando entre carpetas (mientras, no se hace caso a los clics). Aparecer no cuenta. */
+const dynBusy = () => !!Dyn.anim && Dyn.anim.kind !== 'emerge';
 
 function stopDynamic() {
   Dyn.running = false;
@@ -2229,88 +2262,243 @@ function stopDynamic() {
   if (Dyn.onResize) removeEventListener('resize', Dyn.onResize);
 }
 
-function dynamicGraph() {
-  const nodes = S.notebooks.filter((nb) => Folders.inSubtree(nb, S.folder));
-  const ids = new Set(nodes.map((n) => n.id));
+/** Qué representa a una libreta en el nivel `level`: ella misma o la subcarpeta (hija de `level`) que la contiene. */
+function dynRep(nb, level) {
+  if ((nb.folder || null) === (level || null)) return `n:${nb.id}`;
+  const path = Folders.path(nb.folder);
+  const i = level ? path.findIndex((f) => f.id === level) : -1;
+  if (level && i < 0) return null;
+  const child = path[i + 1];
+  return child ? `f:${child.id}` : null;
+}
+
+/** El grafo del nivel actual: carpetas y libretas, y los enlaces entre ellas (agrupados por carpeta). */
+function dynamicGraph(level = S.folder) {
+  level = level || null;
+  const folders = Folders.children(level);
+  const notebooks = S.notebooks.filter((nb) => (nb.folder || null) === level);
+  const nodes = [...folders.map((f) => ({ key: `f:${f.id}`, kind: 'folder', folder: f })), ...notebooks.map((nb) => ({ key: `n:${nb.id}`, kind: 'nb', nb, id: nb.id }))];
   const pageIndex = new Map(S.notebooks.map((nb) => [nb.id, new Map(nb.pages.map((p, i) => [p.id, i]))]));
   const details = S.notebooks.flatMap(notebookLinks).map((d) => ({ ...d, targetPage: d.target.page ? pageIndex.get(d.target.nb)?.get(d.target.page) : undefined }));
+  const reps = new Map(S.notebooks.map((nb) => [nb.id, dynRep(nb, level)]));
   const edges = new Map();
   for (const d of details) {
-    if (d.source === d.target.nb || !ids.has(d.source) || !ids.has(d.target.nb)) continue;
-    const key = d.source + '|' + d.target.nb;
-    const e = edges.get(key) || { from: d.source, to: d.target.nb, count: 0, pages: new Set(), whole: false };
+    const a = reps.get(d.source), b = reps.get(d.target.nb);
+    if (!a || !b || a === b) continue;
+    const key = a + '|' + b;
+    const e = edges.get(key) || { from: a, to: b, count: 0, pages: new Set(), whole: false, direct: a.startsWith('n:') && b.startsWith('n:') };
     e.count++;
     if (d.targetPage !== undefined) e.pages.add(d.targetPage + 1); else e.whole = true;
     edges.set(key, e);
   }
-  for (const e of edges.values()) e.labels = [...e.pages].sort((a, b) => a - b).concat(e.whole ? [null] : []);
+  for (const e of edges.values()) e.labels = e.direct ? [...e.pages].sort((x, y) => x - y).concat(e.whole ? [null] : []) : [null];
   return { nodes, edges: [...edges.values()], details };
 }
 
 async function startDynamic(root) {
   stopDynamic();
   if (!root) return;
-  const g = dynamicGraph();
-  Object.assign(Dyn, { running: true, root, g, selected: null, hovered: null, selectedAt: 0, cam: [0, 0], camTarget: [0, 0], zoom: 1, zoomTarget: 1, dragging: null });
+  Object.assign(Dyn, { running: true, root, selected: null, selectedAt: 0, cam: [0, 0], camTarget: [0, 0], zoom: 1, zoomTarget: 1, dragging: null, anim: null, warp: 0.04, flash: null });
   root.innerHTML = `<canvas></canvas><div class="nodes"></div>
+    <nav class="dyn-crumbs" aria-label="Ruta"></nav>
     <button class="btn reset" hidden>Recolocar automáticamente</button>
-    <div class="hint">Arrastra las libretas para colocarlas · pasa el ratón para verlas · clic para ver sus vínculos · doble clic para abrirlas</div>`;
-  if (!g.nodes.length) { root.querySelector('.hint').textContent = 'No hay libretas en esta carpeta.'; }
-  const canvas = $('canvas', root), nodesEl = $('.nodes', root);
-  const layout = Graph.layout(g.nodes.map((n) => n.id), g.edges.map((e) => [e.from, e.to]));
-  const spaceKey = S.folder || '*';
-  const manual = () => (S.dynpos[spaceKey] = S.dynpos[spaceKey] || {});
-  const resetBtn = $('.reset', root);
-  resetBtn.hidden = !Object.keys(manual()).length;
-  resetBtn.addEventListener('click', () => { S.dynpos[spaceKey] = {}; Store.set('dynpos', S.dynpos); resetBtn.hidden = true; place(); });
+    <div class="hint">Clic en una carpeta para entrar · arrastra para colocar · pasa el ratón para ver · clic en una libreta para sus vínculos · doble clic para abrirla</div>`;
+  const canvas = $('canvas', root), nodesEl = $('.nodes', root), resetBtn = $('.reset', root), crumbsEl = $('.dyn-crumbs', root);
+  const ctx = canvas.getContext('2d');
+  const W = () => root.clientWidth, H = () => root.clientHeight;
+  let g, base = {}, born = new Map(), phase = new Map(), layout = {};
 
-  // Nodos (portadas)
-  const phase = new Map(g.nodes.map((n, i) => [n.id, (i * 2.399) % (Math.PI * 2)]));
-  for (const nb of g.nodes) {
-    const el = document.createElement('div');
-    el.className = 'dnode';
-    el.dataset.id = nb.id;
-    el.style.setProperty('--glow', nb.color);
-    el.innerHTML = `${coverHTML(nb, { label: false, tag: 'div' })}<div class="lbl">${esc(nb.title)}</div>`;
-    el.setAttribute('role', 'button');
-    el.setAttribute('tabindex', '0');
-    el.setAttribute('aria-label', `${nb.title}, ${degree(nb.id)} vínculos`);
-    nodesEl.appendChild(el);
+  // ---------- Escena (un nivel de carpetas) ----------
+  const spaceKey = () => S.folder || '*';
+  const manual = () => (S.dynpos[spaceKey()] = S.dynpos[spaceKey()] || {});
+  function build() {
+    g = dynamicGraph(S.folder);
+    Dyn.g = g;
+    Dyn.selected = null;
+    $('.panel', root)?.remove();
+    hideHover();
+    nodesEl.innerHTML = '';
+    layout = Graph.layout(g.nodes.map((n) => n.key), g.edges.map((e) => [e.from, e.to]), 280);
+    phase = new Map(g.nodes.map((n, i) => [n.key, (i * 2.399) % (Math.PI * 2)]));
+    for (const n of g.nodes) {
+      const el = document.createElement('div');
+      el.dataset.key = n.key;
+      el.setAttribute('role', 'button');
+      el.setAttribute('tabindex', '0');
+      if (n.kind === 'nb') {
+        el.className = 'dnode';
+        el.dataset.id = n.nb.id;
+        el.style.setProperty('--glow', n.nb.color);
+        el.innerHTML = `${coverHTML(n.nb, { label: false, tag: 'div' })}<div class="lbl">${esc(n.nb.title)}</div>`;
+        el.setAttribute('aria-label', `${n.nb.title}, ${degree(n.key)} vínculos`);
+      } else {
+        const inside = Folders.notebooksIn(n.folder.id).length;
+        el.className = 'dfolder';
+        el.dataset.folder = n.folder.id;
+        el.style.setProperty('--glow', Folders.color(Folders.top(n.folder.id)));
+        el.innerHTML = `<span class="core">${icon('folder')}</span><div class="lbl">${esc(n.folder.name)}</div><div class="sub">${inside} ${inside === 1 ? 'libreta' : 'libretas'}</div>`;
+        el.setAttribute('aria-label', `Carpeta ${n.folder.name}, ${inside} libretas. Entrar`);
+      }
+      nodesEl.appendChild(el);
+    }
+    const empty = !g.nodes.length;
+    root.querySelector('.hint').textContent = empty ? 'Esta carpeta está vacía.' : 'Clic en una carpeta para entrar · arrastra para colocar · pasa el ratón para ver · clic en una libreta para sus vínculos · doble clic para abrirla';
+    resetBtn.hidden = !Object.keys(manual()).length;
+    place();
+    renderCrumbs();
+    const hint = root.querySelector('.hint');
+    hint.classList.remove('gone'); clearTimeout(Dyn.hintTimer);
+    if (!empty) Dyn.hintTimer = setTimeout(() => hint.classList.add('gone'), 7000);
   }
-  function degree(id) { return g.edges.filter((e) => e.from === id || e.to === id).reduce((s, e) => s + e.count, 0); }
-
-  let base = {};
+  function degree(key) { return g.edges.filter((e) => e.from === key || e.to === key).reduce((s, e) => s + e.count, 0); }
   function place() {
-    const W = root.clientWidth, H = root.clientHeight;
-    base = Graph.place(layout, W, H, 100, { w: 150, h: 150 });
-    for (const [id, rel] of Object.entries(manual())) if (base[id]) base[id] = [rel[0] * W, rel[1] * H];
+    base = Graph.place(layout, W(), H() - 40, 150, { w: 250, h: 230 }); // abajo queda sitio para los nombres
+    for (const [id, rel] of Object.entries(manual())) if (base[id]) base[id] = [rel[0] * W(), rel[1] * H()];
   }
-  place();
-  Dyn.onResize = () => { place(); sizeCanvas(); };
-  addEventListener('resize', Dyn.onResize);
+  function renderCrumbs() {
+    const path = Folders.path(S.folder);
+    crumbsEl.innerHTML = `<button data-crumb="" ${path.length ? '' : 'aria-current="page"'}>${icon('sparkles')} Libretas</button>`
+      + path.map((f, i) => `<span>›</span><button data-crumb="${f.id}" ${i === path.length - 1 ? 'aria-current="page"' : ''} style="--glow:${Folders.color(Folders.top(f.id))}">${esc(f.name)}</button>`).join('');
+  }
+  crumbsEl.addEventListener('click', (e) => {
+    const b = e.target.closest('[data-crumb]');
+    if (!b || b.getAttribute('aria-current')) return;
+    leaveTo(b.dataset.crumb || null);
+  });
+  resetBtn.addEventListener('click', () => { S.dynpos[spaceKey()] = {}; Store.set('dynpos', S.dynpos); resetBtn.hidden = true; place(); });
+
   function sizeCanvas() {
     const dpr = Math.min(devicePixelRatio || 1, 2);
-    canvas.width = root.clientWidth * dpr; canvas.height = root.clientHeight * dpr;
-    canvas.getContext('2d').setTransform(dpr, 0, 0, dpr, 0, 0);
+    canvas.width = W() * dpr; canvas.height = H() * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   }
+  Dyn.onResize = () => { place(); sizeCanvas(); };
+  addEventListener('resize', Dyn.onResize);
   sizeCanvas();
 
-  const screen = (id, t) => {
-    if (Dyn.dragging?.id === id && Dyn.dragging.moved) return Dyn.dragging.at;
-    const b = base[id] || [0, 0], W = root.clientWidth, H = root.clientHeight;
-    const f = reduceMotion() ? [0, 0] : [Math.sin(t * 0.5 + phase.get(id)) * 7, Math.cos(t * 0.4 + phase.get(id) * 1.3) * 9];
-    return [W / 2 + (b[0] - W / 2) * Dyn.zoom + Dyn.cam[0] + f[0], H / 2 + (b[1] - H / 2) * Dyn.zoom + Dyn.cam[1] + f[1]];
-  };
-  const neighbors = () => new Set(g.edges.flatMap((e) => (e.from === Dyn.selected ? [e.to] : e.to === Dyn.selected ? [e.from] : [])));
+  // ---------- Posición en pantalla (con cámara, flotación y animaciones de viaje) ----------
+  function rest(key, t) {
+    if (Dyn.dragging?.key === key && Dyn.dragging.moved) return Dyn.dragging.at;
+    const b = base[key] || [W() / 2, H() / 2];
+    const ph = phase.get(key) || 0;
+    const f = reduceMotion() ? [0, 0] : [Math.sin(t * 0.5 + ph) * 7, Math.cos(t * 0.4 + ph * 1.3) * 9];
+    return [W() / 2 + (b[0] - W() / 2) * Dyn.zoom + Dyn.cam[0] + f[0], H() / 2 + (b[1] - H() / 2) * Dyn.zoom + Dyn.cam[1] + f[1]];
+  }
+  /** Posición, escala y opacidad de cada nodo en este fotograma. */
+  function view(key, t, now) {
+    let p = rest(key, t), s = 1, a = 1;
+    const A = Dyn.anim;
+    const c = [W() / 2, H() / 2];
+    if (A) {
+      const k = clamp01((now - A.start) / A.dur);
+      if (A.kind === 'dive') {
+        // La cámara se lanza hacia la carpeta: todo se agranda alrededor de ella y se aparta.
+        const e = easeIn(k), z = 1 + 9 * e, focus = [A.focus[0] + (c[0] - A.focus[0]) * easeInOut(k), A.focus[1] + (c[1] - A.focus[1]) * easeInOut(k)];
+        p = [focus[0] + (p[0] - A.focus[0]) * z, focus[1] + (p[1] - A.focus[1]) * z];
+        s = 1 + 3 * e; a = key === A.key ? 1 - clamp01((k - 0.55) / 0.35) : 1 - clamp01(k * 1.6);
+      } else if (A.kind === 'emerge') {
+        // Al llegar: todo nace del centro y se despliega, cada uno un poco después del anterior.
+        const kk = clamp01((now - A.start - (born.get(key) || 0)) / (A.dur * 0.75));
+        const e = easeOutBack(kk);
+        p = [c[0] + (p[0] - c[0]) * e, c[1] + (p[1] - c[1]) * e];
+        s = 0.2 + 0.8 * clamp01(e); a = clamp01(kk * 2);
+      } else if (A.kind === 'rise') {
+        // Volver: lo de dentro se recoge hacia el centro y se aleja.
+        const e = easeIn(k);
+        p = [c[0] + (p[0] - c[0]) * (1 - e), c[1] + (p[1] - c[1]) * (1 - e)];
+        s = 1 - 0.85 * e; a = 1 - clamp01(k * 1.3);
+      } else if (A.kind === 'land') {
+        // Y aparecer fuera: la escena de arriba viene desde muy cerca de la carpeta de la que salimos.
+        const e = easeInOut(k), z = 6 - 5 * e, focus = A.focusKey && base[A.focusKey] ? rest(A.focusKey, t) : c;
+        p = [focus[0] + (p[0] - focus[0]) * z, focus[1] + (p[1] - focus[1]) * z];
+        s = 2.4 - 1.4 * e; a = key === A.focusKey ? 1 : clamp01((k - 0.15) / 0.6);
+      }
+    }
+    return { p, s, a };
+  }
 
-  // Interacción: arrastrar, pasar por encima, clic y doble clic
+  // ---------- Viajes entre carpetas ----------
+  function enterFolder(fid) {
+    if (dynBusy()) return;
+    const key = `f:${fid}`, f = Folders.byId(fid);
+    const color = Folders.color(Folders.top(fid));
+    hideHover(); select(null);
+    if (reduceMotion()) { goLevel(fid); return; }
+    const t = performance.now() / 1000;
+    Dyn.anim = { kind: 'dive', start: performance.now(), dur: 900, key, focus: rest(key, t), color };
+    Dyn.flash = { color, start: performance.now() + 550, dur: 900 };
+    Dyn.warpTarget = 1;
+    setTimeout(() => {
+      goLevel(fid);
+      const a = (Dyn.anim = { kind: 'emerge', start: performance.now(), dur: 1100 });
+      Dyn.warpTarget = 0.04;
+      setTimeout(() => { if (Dyn.anim === a) Dyn.anim = null; }, 1150);
+    }, 900);
+    void f;
+  }
+  function leaveTo(target) {
+    if (dynBusy()) return;
+    // La carpeta de este nivel por la que se vuelve (para salir «desde» ella).
+    const path = Folders.path(S.folder);
+    const i = target ? path.findIndex((f) => f.id === target) : -1;
+    const from = path[i + 1];
+    hideHover(); select(null);
+    if (reduceMotion()) { goLevel(target); return; }
+    Dyn.anim = { kind: 'rise', start: performance.now(), dur: 650 };
+    Dyn.warpTarget = -0.9;
+    setTimeout(() => {
+      goLevel(target);
+      const a = (Dyn.anim = { kind: 'land', start: performance.now(), dur: 1000, focusKey: from ? `f:${from.id}` : null });
+      Dyn.flash = { color: from ? Folders.color(Folders.top(from.id)) : '#8E7CFF', start: performance.now() - 200, dur: 700 };
+      Dyn.warpTarget = 0.04;
+      setTimeout(() => { if (Dyn.anim === a) Dyn.anim = null; }, 1050);
+    }, 650);
+  }
+  function goLevel(fid) {
+    S.folder = fid || null;
+    build();
+    born = new Map(g.nodes.map((n) => {
+      const b = base[n.key] || [W() / 2, H() / 2];
+      return [n.key, Math.min(380, Math.hypot(b[0] - W() / 2, b[1] - H() / 2) * 0.6)];
+    }));
+  }
+  Dyn.enterFolder = enterFolder;
+  Dyn.leaveTo = leaveTo;
+
+  /** Abrir una libreta: su portada crece hasta llenar la pantalla y se abre. */
+  function openWithZoom(id) {
+    const nb = nbById(id), el = nodesEl.querySelector(`.dnode[data-id="${id}"] .cover`);
+    if (!nb) return;
+    if (!el || reduceMotion()) return openNotebook(id);
+    const r = el.getBoundingClientRect();
+    const fly = document.createElement('div');
+    fly.className = 'dyn-fly';
+    fly.style.cssText = `left:${r.left}px;top:${r.top}px;width:${r.width}px;height:${r.height}px;--c:${nb.color}`;
+    fly.innerHTML = `<div class="paper-in"></div>`;
+    document.body.appendChild(fly);
+    const vw = innerWidth, vh = innerHeight;
+    fly.animate([
+      { left: `${r.left}px`, top: `${r.top}px`, width: `${r.width}px`, height: `${r.height}px`, borderRadius: '6px', transform: 'rotateY(0deg)' },
+      { left: `${vw / 2 - r.width * 1.6}px`, top: `${vh / 2 - r.height * 1.6}px`, width: `${r.width * 3.2}px`, height: `${r.height * 3.2}px`, borderRadius: '10px', transform: 'rotateY(-12deg)', offset: 0.45 },
+      { left: '0px', top: '0px', width: `${vw}px`, height: `${vh}px`, borderRadius: '0px', transform: 'rotateY(0deg)' },
+    ], { duration: 700, easing: 'cubic-bezier(.7,0,.2,1)', fill: 'forwards' });
+    fly.querySelector('.paper-in').animate([{ opacity: 0 }, { opacity: 0, offset: 0.55 }, { opacity: 1 }], { duration: 700, fill: 'forwards' });
+    Dyn.warpTarget = 0.7;
+    setTimeout(() => {
+      openNotebook(id);
+      fly.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 380, easing: 'ease-out', fill: 'forwards' }).onfinish = () => fly.remove();
+    }, 720);
+  }
+  Dyn.openWithZoom = openWithZoom;
+
+  // ---------- Interacción ----------
   nodesEl.addEventListener('pointerdown', (e) => {
-    const el = e.target.closest('.dnode');
-    if (!el) return;
+    const el = e.target.closest('.dnode, .dfolder');
+    if (!el || dynBusy()) return;
     e.preventDefault();
     try { el.setPointerCapture(e.pointerId); } catch (err) { /* puntero sintético */ }
     const r = root.getBoundingClientRect();
-    Dyn.dragging = { id: el.dataset.id, start: [e.clientX, e.clientY], at: [e.clientX - r.left, e.clientY - r.top], moved: false };
+    Dyn.dragging = { key: el.dataset.key, el, start: [e.clientX, e.clientY], at: [e.clientX - r.left, e.clientY - r.top], moved: false };
   });
   nodesEl.addEventListener('pointermove', (e) => {
     const d = Dyn.dragging;
@@ -2324,49 +2512,67 @@ async function startDynamic(root) {
     Dyn.dragging = null;
     if (!d) return;
     if (d.moved) {
-      const W = root.clientWidth, H = root.clientHeight;
-      const b = [W / 2 + (d.at[0] - Dyn.cam[0] - W / 2) / Dyn.zoom, H / 2 + (d.at[1] - Dyn.cam[1] - H / 2) / Dyn.zoom];
-      manual()[d.id] = [Math.min(Math.max(b[0], 50), W - 50) / W, Math.min(Math.max(b[1], 50), H - 50) / H];
+      const b = [W() / 2 + (d.at[0] - Dyn.cam[0] - W() / 2) / Dyn.zoom, H() / 2 + (d.at[1] - Dyn.cam[1] - H() / 2) / Dyn.zoom];
+      manual()[d.key] = [Math.min(Math.max(b[0], 60), W() - 60) / W(), Math.min(Math.max(b[1], 60), H() - 60) / H()];
       Store.set('dynpos', S.dynpos);
       resetBtn.hidden = false;
       place();
-    } else {
-      select(d.id);
-    }
+    } else if (d.key.startsWith('f:')) enterFolder(d.key.slice(2));
+    else select(d.key);
   });
-  nodesEl.addEventListener('dblclick', (e) => { const el = e.target.closest('.dnode'); if (el) openNotebook(el.dataset.id); });
-  nodesEl.addEventListener('keydown', (e) => { const el = e.target.closest('.dnode'); if (el && e.key === 'Enter') openNotebook(el.dataset.id); if (el && e.key === ' ') { e.preventDefault(); select(el.dataset.id); } });
-  nodesEl.addEventListener('pointerover', (e) => { const el = e.target.closest('.dnode'); if (el && !Dyn.dragging && el.dataset.id !== Dyn.selected) showHover(el.dataset.id); });
-  nodesEl.addEventListener('pointerout', (e) => { const el = e.target.closest('.dnode'); if (el && !el.contains(e.relatedTarget)) hideHover(); });
+  nodesEl.addEventListener('dblclick', (e) => { const el = e.target.closest('.dnode'); if (el) openWithZoom(el.dataset.id); });
+  nodesEl.addEventListener('keydown', (e) => {
+    const el = e.target.closest('.dnode, .dfolder');
+    if (!el) return;
+    if (el.classList.contains('dfolder') && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); return enterFolder(el.dataset.folder); }
+    if (e.key === 'Enter') openWithZoom(el.dataset.id);
+    if (e.key === ' ') { e.preventDefault(); select(el.dataset.key); }
+  });
+  root.addEventListener('keydown', (e) => {
+    if (e.key === 'Backspace' && S.folder && !e.target.closest('input')) { e.preventDefault(); leaveTo(Folders.byId(S.folder)?.parent || null); }
+  });
+  nodesEl.addEventListener('pointerover', (e) => { const el = e.target.closest('.dnode, .dfolder'); if (el && !Dyn.dragging && !dynBusy() && el.dataset.key !== Dyn.selected) showHover(el.dataset.key); });
+  nodesEl.addEventListener('pointerout', (e) => { const el = e.target.closest('.dnode, .dfolder'); if (el && !el.contains(e.relatedTarget)) hideHover(); });
   canvas.addEventListener('click', () => select(null));
 
   let hoverEl = null;
-  async function showHover(id) {
+  async function showHover(key) {
     hideHover();
-    const nb = nbById(id);
     hoverEl = document.createElement('div');
     hoverEl.className = 'hover-card';
+    hoverEl.dataset.key = key;
+    if (key.startsWith('f:')) {
+      const f = Folders.byId(key.slice(2)), list = Folders.notebooksIn(f.id).sort((a, b) => b.modified - a.modified);
+      const subs = Folders.children(f.id).length;
+      hoverEl.style.setProperty('--glow', Folders.color(Folders.top(f.id)));
+      hoverEl.innerHTML = `<div style="font-weight:700;font-size:14px">${esc(f.name)}</div><div style="opacity:.75">${list.length} ${list.length === 1 ? 'libreta' : 'libretas'}${subs ? ` · ${subs} ${subs === 1 ? 'carpeta' : 'carpetas'}` : ''}</div>
+        <div class="hover-list">${list.slice(0, 4).map((nb) => `<span style="--c:${nb.color}">${esc(nb.title)}</span>`).join('')}${list.length > 4 ? `<span class="more">y ${list.length - 4} más…</span>` : ''}</div>
+        <div class="hover-go">Clic para entrar</div>`;
+      root.appendChild(hoverEl);
+      return;
+    }
+    const nb = nbById(key.slice(2));
     hoverEl.style.setProperty('--glow', nb.color);
-    hoverEl.dataset.id = id;
-    hoverEl.innerHTML = `<img alt=""><div style="margin-top:6px;font-weight:700">${esc(nb.title)}</div><div style="opacity:.75">${nb.pages.length} ${nb.pages.length === 1 ? 'página' : 'páginas'} · ${degree(id)} ${degree(id) === 1 ? 'vínculo' : 'vínculos'}</div>`;
+    hoverEl.innerHTML = `<img alt=""><div style="margin-top:6px;font-weight:700">${esc(nb.title)}</div><div style="opacity:.75">${nb.pages.length} ${nb.pages.length === 1 ? 'página' : 'páginas'} · ${degree(key)} ${degree(key) === 1 ? 'vínculo' : 'vínculos'}</div>`;
     root.appendChild(hoverEl);
-    $('img', hoverEl).src = await pageThumb(nb.pages[0], 180);
+    const url = await pageThumb(nb.pages[0], 180);
+    if (hoverEl?.dataset.key === key) $('img', hoverEl).src = url;
   }
   function hideHover() { hoverEl?.remove(); hoverEl = null; }
 
-  function select(id) {
+  function select(key) {
     hideHover();
-    Dyn.selected = id;
+    Dyn.selected = key;
     Dyn.selectedAt = performance.now();
     $('.panel', root)?.remove();
-    if (!id) { Dyn.camTarget = [0, 0]; Dyn.zoomTarget = 1; return; }
-    const W = root.clientWidth, H = root.clientHeight, b = base[id];
+    if (!key) { Dyn.camTarget = [0, 0]; Dyn.zoomTarget = 1; return; }
+    const b = base[key];
     Dyn.zoomTarget = 1.15;
-    const targetX = W > 760 ? (W - 400) / 2 : W / 2;
-    Dyn.camTarget = [targetX - (W / 2 + (b[0] - W / 2) * 1.15), H / 2 - (H / 2 + (b[1] - H / 2) * 1.15)];
-    renderPanel(id);
+    const targetX = W() > 760 ? (W() - 400) / 2 : W() / 2;
+    Dyn.camTarget = [targetX - (W() / 2 + (b[0] - W() / 2) * 1.15), H() / 2 - (H() / 2 + (b[1] - H() / 2) * 1.15)];
+    renderPanel(key.slice(2));
   }
-  Dyn.select = select;
+  Dyn.select = (id) => select(id ? `n:${id}` : null);
 
   async function renderPanel(id) {
     const nb = nbById(id);
@@ -2376,7 +2582,7 @@ async function startDynamic(root) {
     const comments = nb.pages.flatMap((p, i) => p.items.filter((it) => it.type === 'comment').map((it) => ({ it, i, page: p })));
     const row = (other, text, page, extra, openPage) => `<button class="lrow" data-go="${other?.id || ''}" data-page="${openPage || ''}">
       <span style="width:12px;height:12px;border-radius:50%;background:${other?.color || '#888'};box-shadow:0 0 6px ${other?.color || '#888'};flex:none"></span>
-      <span style="flex:1;min-width:0"><b>${esc(other?.title || 'Libreta borrada')}</b><small>${[text && `«${esc(text)}»`, page !== undefined && `pág. ${page + 1}`, extra].filter(Boolean).join(' · ')}</small></span>
+      <span style="flex:1;min-width:0"><b>${esc(other?.title || 'Libreta borrada')}</b><small>${[other && other.folder !== nb.folder && Folders.label(other), text && `«${esc(text)}»`, page !== undefined && `pág. ${page + 1}`, extra].filter(Boolean).join(' · ')}</small></span>
       <span aria-hidden="true">↗</span></button>`;
     const panel = document.createElement('div');
     panel.className = 'panel';
@@ -2399,13 +2605,13 @@ async function startDynamic(root) {
     root.appendChild(panel);
     panel.addEventListener('click', (e) => {
       if (e.target.closest('[data-close]')) return select(null);
-      if (e.target.closest('[data-open-nb]')) return openNotebook(id);
+      if (e.target.closest('[data-open-nb]')) return openWithZoom(id);
       const po = e.target.closest('[data-page-open]');
       if (po) return openNotebook(id, { pageId: po.dataset.pageOpen });
       const go = e.target.closest('[data-go]');
       if (go && go.dataset.go) {
         if (e.target.textContent === '↗' || go.dataset.go === id) return openNotebook(go.dataset.go, { pageId: go.dataset.page || null });
-        if (nbById(go.dataset.go) && g.nodes.some((n) => n.id === go.dataset.go)) return select(go.dataset.go);
+        if (g.nodes.some((n) => n.key === `n:${go.dataset.go}`)) return select(`n:${go.dataset.go}`);
         return openNotebook(go.dataset.go, { pageId: go.dataset.page || null });
       }
     });
@@ -2413,94 +2619,184 @@ async function startDynamic(root) {
     for (const img of $$('img[data-thumb]', panel)) img.src = await pageThumb(nb.pages[Number(img.dataset.thumb)], 64);
   }
 
-  // Bucle de dibujo
-  const stars = Array.from({ length: 110 }, (_, i) => ({ x: (Math.sin(i * 12.9898) * 43758.5453) % 1, y: (Math.sin(i * 78.233) * 12345.6789) % 1, s: 0.6 + ((i * 0.73) % 1) * 1.4, sp: 0.8 + ((i * 0.37) % 1) * 2 }));
-  const blobs = [['#3F59FF', 0.07, 0], ['#BF40F2', 0.05, 1.7], ['#1AD9D9', 0.06, 3.1], ['#FF5999', 0.045, 4.4]];
+  // ---------- Dibujo ----------
+  // Estrellas en 3D: avanzan hacia la cámara; al viajar se estiran como a velocidad de la luz.
+  const rnd = onbRandom(11);
+  const stars = Array.from({ length: 220 }, () => ({ x: rnd() * 2 - 1, y: rnd() * 2 - 1, z: 0.05 + rnd() * 0.95, tw: rnd() * 6.28 }));
+  const blobs = [['63,89,255', 0.07, 0], ['191,64,242', 0.05, 1.7], ['26,217,217', 0.06, 3.1], ['255,89,153', 0.045, 4.4]];
+  const rgb = (hex) => { const h = hex.replace('#', ''); const n = parseInt(h.length === 3 ? h.replace(/./g, (c) => c + c) : h, 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; };
+  let lastNow = performance.now();
+  Dyn.warpTarget = 0.04;
   function frame(now) {
     if (!Dyn.running || !document.body.contains(root)) return;
+    const dt = Math.min(0.05, (now - lastNow) / 1000); lastNow = now;
     const t = reduceMotion() ? 0 : now / 1000;
     Dyn.cam = Dyn.cam.map((c, i) => c + (Dyn.camTarget[i] - c) * 0.08);
     Dyn.zoom += (Dyn.zoomTarget - Dyn.zoom) * 0.08;
-    const W = root.clientWidth, H = root.clientHeight, ctx = canvas.getContext('2d');
-    // Fondo
-    const grad = ctx.createLinearGradient(0, 0, W, H);
-    grad.addColorStop(0, '#080A19'); grad.addColorStop(1, '#170D33');
-    ctx.fillStyle = grad; ctx.fillRect(0, 0, W, H);
-    ctx.save();
-    ctx.filter = 'blur(70px)';
+    Dyn.warp += ((reduceMotion() ? 0 : Dyn.warpTarget) - Dyn.warp) * Math.min(1, dt * 4);
+    const w = W(), h = H(), cx = w / 2, cy = h / 2, focal = Math.max(w, h) * 0.5;
+    const tint = Dyn.anim?.color || (S.folder ? Folders.color(Folders.top(S.folder)) : null);
+    // Fondo y nebulosas de fondo (degradados radiales: no hace falta difuminar nada grande)
+    const grad = ctx.createLinearGradient(0, 0, w, h);
+    grad.addColorStop(0, '#070918'); grad.addColorStop(1, '#150C30');
+    ctx.fillStyle = grad; ctx.fillRect(0, 0, w, h);
     ctx.globalCompositeOperation = 'screen';
-    for (const [c, sp, ph] of blobs) {
-      const x = W * (0.5 + 0.38 * Math.sin(t * sp + ph)), y = H * (0.5 + 0.34 * Math.cos(t * sp * 1.3 + ph * 0.7));
-      const r = Math.min(W, H) * (0.32 + 0.06 * Math.sin(t * sp * 2 + ph));
-      ctx.globalAlpha = 0.35; ctx.fillStyle = c; ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill();
-    }
-    ctx.restore();
+    blobs.forEach(([c, sp, ph], i) => {
+      const x = w * (0.5 + 0.38 * Math.sin(t * sp + ph)), y = h * (0.5 + 0.34 * Math.cos(t * sp * 1.3 + ph * 0.7));
+      const r = Math.min(w, h) * (0.55 + 0.08 * Math.sin(t * sp * 2 + ph));
+      const col = tint && i === 0 ? rgb(tint).join(',') : c;
+      const rg = ctx.createRadialGradient(x, y, 0, x, y, r);
+      rg.addColorStop(0, `rgba(${col},.30)`); rg.addColorStop(1, `rgba(${col},0)`);
+      ctx.fillStyle = rg; ctx.fillRect(x - r, y - r, r * 2, r * 2);
+    });
+    ctx.globalCompositeOperation = 'source-over';
+    // Estrellas
+    const speed = Dyn.warp;
+    ctx.lineCap = 'round';
     for (const s of stars) {
-      const tw = 0.35 + 0.65 * (0.5 + 0.5 * Math.sin(t * s.sp + s.x * 10));
-      ctx.globalAlpha = tw * 0.8; ctx.fillStyle = '#fff';
-      ctx.beginPath(); ctx.arc(Math.abs(s.x) * W, Math.abs(s.y) * H, s.s, 0, Math.PI * 2); ctx.fill();
+      const pz = s.z;
+      s.z -= speed * dt * 1.2;
+      if (s.z <= 0.03) { s.z = 1; s.x = rnd() * 2 - 1; s.y = rnd() * 2 - 1; continue; }
+      if (s.z > 1) { s.z = 0.04; s.x = (rnd() * 2 - 1) * 0.3; s.y = (rnd() * 2 - 1) * 0.3; continue; }
+      const sx = cx + (s.x / s.z) * focal * 0.5, sy = cy + (s.y / s.z) * focal * 0.5;
+      if (sx < -50 || sx > w + 50 || sy < -50 || sy > h + 50) { s.z = 1; s.x = rnd() * 2 - 1; s.y = rnd() * 2 - 1; continue; }
+      const bright = (1 - s.z) * (0.55 + 0.45 * Math.sin(t * 1.7 + s.tw));
+      const streak = Math.abs(speed) > 0.12;
+      if (streak) {
+        const px = cx + (s.x / pz) * focal * 0.5, py = cy + (s.y / pz) * focal * 0.5;
+        ctx.strokeStyle = `rgba(220,230,255,${Math.min(1, 0.3 + bright)})`; ctx.lineWidth = Math.max(0.6, (1 - s.z) * 2.6);
+        ctx.beginPath(); ctx.moveTo(px, py); ctx.lineTo(sx, sy); ctx.stroke();
+      } else {
+        ctx.fillStyle = `rgba(255,255,255,${0.15 + bright * 0.85})`;
+        ctx.beginPath(); ctx.arc(sx, sy, Math.max(0.5, (1 - s.z) * 1.8), 0, 6.283); ctx.fill();
+      }
     }
-    ctx.globalAlpha = 1;
     // Enlaces
-    const near = neighbors();
+    const views = new Map(g.nodes.map((n) => [n.key, view(n.key, t, now)]));
+    const near = new Set(g.edges.flatMap((e) => (e.from === Dyn.selected ? [e.to] : e.to === Dyn.selected ? [e.from] : [])));
     g.edges.forEach((e, index) => {
-      const a = screen(e.from, t), b = screen(e.to, t);
+      const A = views.get(e.from), B = views.get(e.to);
+      if (!A || !B) return;
+      const alpha = Math.min(A.a, B.a);
+      if (alpha <= 0.01) return;
+      const a = A.p, b = B.p;
       const involved = Dyn.selected && (e.from === Dyn.selected || e.to === Dyn.selected);
       const faded = Dyn.selected && !involved;
-      const color = nbById(e.from)?.color || '#fff';
-      const width = (1 + Math.log2(e.count)) * (involved ? 2.2 : 1.2);
-      ctx.lineCap = 'round';
-      ctx.strokeStyle = color; ctx.globalAlpha = faded ? 0.04 : involved ? 0.35 : 0.15; ctx.lineWidth = width * 5;
-      ctx.beginPath(); ctx.moveTo(...a); ctx.lineTo(...b); ctx.stroke();
-      ctx.strokeStyle = '#fff'; ctx.globalAlpha = faded ? 0.08 : involved ? 0.95 : 0.45; ctx.lineWidth = width;
+      const fromNode = g.nodes.find((n) => n.key === e.from);
+      const color = fromNode.kind === 'nb' ? fromNode.nb.color : Folders.color(Folders.top(fromNode.folder.id));
+      const width = (1 + Math.log2(e.count)) * (involved ? 2.2 : e.direct ? 1.2 : 1.6);
+      // Un poco curvado: queda más orgánico.
+      const mx = (a[0] + b[0]) / 2 + (b[1] - a[1]) * 0.12, my = (a[1] + b[1]) / 2 - (b[0] - a[0]) * 0.12;
+      const path = () => { ctx.beginPath(); ctx.moveTo(...a); ctx.quadraticCurveTo(mx, my, ...b); };
+      ctx.strokeStyle = color; ctx.globalAlpha = alpha * (faded ? 0.04 : involved ? 0.35 : 0.16); ctx.lineWidth = width * 6;
+      path(); ctx.stroke();
+      ctx.strokeStyle = '#fff'; ctx.globalAlpha = alpha * (faded ? 0.08 : involved ? 0.95 : 0.45); ctx.lineWidth = width;
       ctx.setLineDash([10, 8]); ctx.lineDashOffset = -t * (involved ? 60 : 25);
-      ctx.beginPath(); ctx.moveTo(...a); ctx.lineTo(...b); ctx.stroke();
-      ctx.setLineDash([]); ctx.globalAlpha = 1;
-      if (faded) return;
-      const particles = involved ? Math.max(3, Math.min(e.labels.length, 4)) : 1, speed = involved ? 0.45 : 0.2;
+      path(); ctx.stroke();
+      ctx.setLineDash([]);
+      if (faded) { ctx.globalAlpha = 1; return; }
+      const particles = involved ? Math.max(3, Math.min(e.labels.length, 4)) : e.direct ? 1 : Math.min(3, e.count), sp = involved ? 0.45 : 0.2;
       for (let k = 0; k < particles; k++) {
-        const raw = t * speed + k / particles + index * 0.17, u = raw % 1, lap = Math.floor(raw);
+        const raw = t * sp + k / particles + index * 0.17, u = raw % 1, lap = Math.floor(raw);
         const label = e.labels[Math.abs(lap * particles + k) % e.labels.length];
-        const p = [a[0] + (b[0] - a[0]) * u, a[1] + (b[1] - a[1]) * u];
+        const q = 1 - u, p = [q * q * a[0] + 2 * q * u * mx + u * u * b[0], q * q * a[1] + 2 * q * u * my + u * u * b[1]];
         if (label != null) {
           // Hojita con el número de la página que se «envía».
           const big = involved, wv = big ? 18 : 15, hv = big ? 23 : 19, fold = 5;
-          ctx.globalAlpha = 0.35; ctx.fillStyle = color; ctx.beginPath(); ctx.roundRect(p[0] - wv / 2 - 5, p[1] - hv / 2 - 5, wv + 10, hv + 10, 6); ctx.fill();
-          ctx.globalAlpha = 1; ctx.fillStyle = '#fff'; ctx.strokeStyle = color; ctx.lineWidth = 1;
+          ctx.globalAlpha = alpha * 0.35; ctx.fillStyle = color; ctx.beginPath(); ctx.roundRect(p[0] - wv / 2 - 5, p[1] - hv / 2 - 5, wv + 10, hv + 10, 6); ctx.fill();
+          ctx.globalAlpha = alpha; ctx.fillStyle = '#fff'; ctx.strokeStyle = color; ctx.lineWidth = 1;
           ctx.beginPath(); ctx.moveTo(p[0] - wv / 2, p[1] - hv / 2); ctx.lineTo(p[0] + wv / 2 - fold, p[1] - hv / 2); ctx.lineTo(p[0] + wv / 2, p[1] - hv / 2 + fold);
           ctx.lineTo(p[0] + wv / 2, p[1] + hv / 2); ctx.lineTo(p[0] - wv / 2, p[1] + hv / 2); ctx.closePath(); ctx.fill(); ctx.stroke();
           ctx.fillStyle = '#222'; ctx.font = `700 ${big ? 11 : 9}px sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
           ctx.fillText(String(label), p[0], p[1] + 1);
         } else {
-          const r = involved ? 4 : 2.5;
-          ctx.globalAlpha = 0.25; ctx.fillStyle = color; ctx.beginPath(); ctx.arc(p[0], p[1], r * 3, 0, Math.PI * 2); ctx.fill();
-          ctx.globalAlpha = 1; ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(p[0], p[1], r, 0, Math.PI * 2); ctx.fill();
+          const r = involved ? 4 : 2.8;
+          ctx.globalAlpha = alpha * 0.3; ctx.fillStyle = color; ctx.beginPath(); ctx.arc(p[0], p[1], r * 3, 0, 6.283); ctx.fill();
+          ctx.globalAlpha = alpha; ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(p[0], p[1], r, 0, 6.283); ctx.fill();
         }
       }
+      ctx.globalAlpha = 1;
     });
+    // Nebulosas de las carpetas, con sus libretas orbitando (en 3D: las de detrás, más pequeñas y oscuras)
+    for (const n of g.nodes) {
+      if (n.kind !== 'folder') continue;
+      const { p, s, a } = views.get(n.key);
+      if (a <= 0.01) continue;
+      const col = rgb(Folders.color(Folders.top(n.folder.id))), c = col.join(',');
+      const hovered = hoverEl?.dataset.key === n.key;
+      const pulse = 1 + 0.06 * Math.sin(t * 1.6 + (phase.get(n.key) || 0)) + (hovered ? 0.12 : 0);
+      const R = 92 * s * pulse;
+      ctx.globalAlpha = a;
+      ctx.globalCompositeOperation = 'screen';
+      const neb = ctx.createRadialGradient(p[0], p[1], 0, p[0], p[1], R * 1.5);
+      neb.addColorStop(0, `rgba(${c},.85)`); neb.addColorStop(0.25, `rgba(${c},.38)`); neb.addColorStop(0.6, `rgba(${c},.12)`); neb.addColorStop(1, `rgba(${c},0)`);
+      ctx.fillStyle = neb; ctx.beginPath(); ctx.arc(p[0], p[1], R * 1.5, 0, 6.283); ctx.fill();
+      // Brazos de la nebulosa girando
+      ctx.lineWidth = 2 * s;
+      for (let k = 0; k < 3; k++) {
+        const rot = t * (0.25 + k * 0.07) + k * 2.1 + (phase.get(n.key) || 0);
+        ctx.strokeStyle = `rgba(${c},${0.35 - k * 0.08})`;
+        ctx.beginPath(); ctx.ellipse(p[0], p[1], R * (0.75 + k * 0.18), R * (0.28 + k * 0.06), rot, 0.3, 2.6); ctx.stroke();
+      }
+      ctx.globalCompositeOperation = 'source-over';
+      const inside = Folders.notebooksIn(n.folder.id).slice(0, 9);
+      const orbit = inside.map((nb, i) => {
+        const ang = t * 0.45 + (i / Math.max(inside.length, 1)) * 6.283 + (phase.get(n.key) || 0);
+        return { nb, x: Math.cos(ang) * R * 0.95, y: Math.sin(ang) * R * 0.32, depth: Math.sin(ang) };
+      }).sort((u, v) => u.depth - v.depth);
+      for (const o of orbit) {
+        const sc = s * (0.75 + 0.3 * (o.depth + 1) / 2), ww = 14 * sc, hh = 19 * sc;
+        ctx.globalAlpha = a * (0.45 + 0.55 * (o.depth + 1) / 2);
+        ctx.shadowColor = o.nb.color; ctx.shadowBlur = 10 * sc;
+        ctx.fillStyle = o.nb.color; ctx.beginPath(); ctx.roundRect(p[0] + o.x - ww / 2, p[1] + o.y - hh / 2, ww, hh, 2.5 * sc); ctx.fill();
+        ctx.shadowBlur = 0;
+        ctx.fillStyle = 'rgba(0,0,0,.22)'; ctx.fillRect(p[0] + o.x - ww / 2, p[1] + o.y - hh / 2 + 1, 2.5 * sc, hh - 2);
+      }
+      ctx.globalAlpha = 1;
+    }
     // Ondas de la libreta seleccionada
-    if (Dyn.selected && !reduceMotion()) {
-      const c = screen(Dyn.selected, t), color = nbById(Dyn.selected)?.color || '#fff', el = (now - Dyn.selectedAt) / 1000;
+    if (Dyn.selected && !reduceMotion() && views.get(Dyn.selected)) {
+      const c = views.get(Dyn.selected).p, color = nbById(Dyn.selected.slice(2))?.color || '#fff', el = (now - Dyn.selectedAt) / 1000;
       for (let k = 0; k < 3; k++) {
         const u = el - k * 0.18;
         if (u <= 0 || u >= 1.4) continue;
         const pr = u / 1.4, r = 40 + pr * 260;
-        ctx.globalAlpha = 0.7 * (1 - pr); ctx.strokeStyle = color; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(c[0], c[1], r, 0, Math.PI * 2); ctx.stroke();
+        ctx.globalAlpha = 0.7 * (1 - pr); ctx.strokeStyle = color; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(c[0], c[1], r, 0, 6.283); ctx.stroke();
       }
       const pulse = 70 + Math.sin(now / 1000 * 2.4) * 10;
-      ctx.globalAlpha = 0.25; ctx.strokeStyle = color; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(c[0], c[1], pulse, 0, Math.PI * 2); ctx.stroke();
+      ctx.globalAlpha = 0.25; ctx.strokeStyle = color; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(c[0], c[1], pulse, 0, 6.283); ctx.stroke();
       ctx.globalAlpha = 1;
     }
-    // Posición de las portadas
+    // Destello del color de la carpeta al cruzar
+    if (Dyn.flash) {
+      const k = (now - Dyn.flash.start) / Dyn.flash.dur;
+      if (k > 1) Dyn.flash = null;
+      else if (k > 0) {
+        const f = k < 0.25 ? k / 0.25 : 1 - (k - 0.25) / 0.75;
+        const c = rgb(Dyn.flash.color).join(',');
+        const fg = ctx.createRadialGradient(cx, cy, 0, cx, cy, Math.max(w, h) * 0.75);
+        fg.addColorStop(0, `rgba(255,255,255,${0.9 * f})`); fg.addColorStop(0.25, `rgba(${c},${0.75 * f})`); fg.addColorStop(1, `rgba(${c},${0.25 * f})`);
+        ctx.fillStyle = fg; ctx.fillRect(0, 0, w, h);
+      }
+    }
+    // Posición de las portadas y las carpetas (elementos de la página, encima del lienzo)
     for (const el of nodesEl.children) {
-      const id = el.dataset.id, p = screen(id, t);
-      el.style.left = p[0] + 'px'; el.style.top = p[1] + 'px';
-      el.classList.toggle('sel', id === Dyn.selected);
-      el.classList.toggle('dim', !!Dyn.selected && id !== Dyn.selected && !near.has(id));
-      if (hoverEl && hoverEl.dataset.id === id) { hoverEl.style.left = (p[0] - 100) + 'px'; hoverEl.style.top = Math.max(8, p[1] - 280) + 'px'; }
+      const key = el.dataset.key, v = views.get(key);
+      if (!v) continue;
+      el.style.left = v.p[0] + 'px'; el.style.top = v.p[1] + 'px';
+      el.style.opacity = v.a;
+      el.style.setProperty('--s', v.s);
+      el.style.pointerEvents = dynBusy() ? 'none' : '';
+      el.classList.toggle('sel', key === Dyn.selected);
+      el.classList.toggle('dim', !!Dyn.selected && key !== Dyn.selected && !near.has(key));
+      if (hoverEl && hoverEl.dataset.key === key) { hoverEl.style.left = (v.p[0] - 100) + 'px'; hoverEl.style.top = key.startsWith('f:') ? (v.p[1] + 90) + 'px' : Math.max(8, v.p[1] - 280) + 'px'; }
     }
     Dyn.raf = requestAnimationFrame(frame);
   }
+
+  // Al entrar en el modo dinámico, todo aparece desde el centro.
+  goLevel(S.folder);
+  if (!reduceMotion()) { const a = (Dyn.anim = { kind: 'emerge', start: performance.now(), dur: 1200 }); Dyn.warp = 0.8; setTimeout(() => { if (Dyn.anim === a) Dyn.anim = null; }, 1250); }
   Dyn.raf = requestAnimationFrame(frame);
 }
 
