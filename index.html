@@ -514,6 +514,11 @@ body.is-reordering .tabs .chip:hover { outline: 2px solid var(--accent); outline
 .tab-group.reordering > .chip { cursor: grabbing; box-shadow: 0 4px 14px rgba(0,0,0,.3); }
 .popover .kbd-hint { margin-left: auto; padding-left: 16px; color: var(--muted); font-size: 12.5px; }
 .popover button:hover:not(:disabled) .kbd-hint { color: rgba(255,255,255,.8); }
+/* Barra del editor, lado derecho: grupos separados por una línea fina */
+.bar .cluster { display: flex; align-items: center; gap: 2px; flex: none; }
+.bar .bar-sep { width: 1px; height: 22px; background: var(--line, var(--hairline)); margin: 0 6px; flex: none; opacity: .9; }
+.bar .pomo-slot { justify-content: flex-end; }
+.bar .mic-slot { justify-content: flex-start; }
 /* =============================================================================
    Tutorial de la primera vez (siempre en oscuro, como en la app nativa)
    ============================================================================= */
@@ -672,6 +677,7 @@ const ICONS = {
  "lightbulb": "<path d=\"M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5\" /> <path d=\"M9 18h6\" /> <path d=\"M10 22h4\" />",
  "bell": "<path d=\"M10.268 21a2 2 0 0 0 3.464 0\" /> <path d=\"M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326\" />",
  "maximize": "<path d=\"M8 3H5a2 2 0 0 0-2 2v3\" /> <path d=\"M21 8V5a2 2 0 0 0-2-2h-3\" /> <path d=\"M3 16v3a2 2 0 0 0 2 2h3\" /> <path d=\"M16 21h3a2 2 0 0 0 2-2v-3\" />",
+ "pageFormat": "<path d=\"M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z\" /> <path d=\"M14 2v4a2 2 0 0 0 2 2h4\" /> <path d=\"M8 12h8\" /> <path d=\"M10 11v2\" /> <path d=\"M8 17h8\" /> <path d=\"M14 16v2\" />",
  "mic": "<path d=\"M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z\" /> <path d=\"M19 10v2a7 7 0 0 1-14 0v-2\" /> <line x1=\"12\" x2=\"12\" y1=\"19\" y2=\"22\" />",
  "search": "<circle cx=\"11\" cy=\"11\" r=\"8\" /> <path d=\"m21 21-4.3-4.3\" />",
  "undo": "<path d=\"M9 14 4 9l5-5\" /> <path d=\"M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5a5.5 5.5 0 0 1-5.5 5.5H11\" />",
@@ -3654,16 +3660,21 @@ function renderEditor() {
         <button class="icon-btn" id="add-image" aria-label="Insertar imagen" title="Insertar imagen (también puedes pegarla o arrastrarla)">${icon('image')}</button>
       </div>
       <div class="spacer"></div>
-      <span id="pomo-slot" class="pomo-slot"></span>
-      <span id="mic-slot" class="mic-slot"></span>
-      <button class="icon-btn" id="find-btn" aria-label="Buscar (Ctrl+F)" title="Buscar (Ctrl+F)">${icon('search')}</button>
-      <button class="icon-btn" id="undo" aria-label="Deshacer (Ctrl+Z)" title="Deshacer (Ctrl+Z)">${icon('undo')}</button>
-      <button class="icon-btn" id="redo" aria-label="Rehacer (Ctrl+Mayús+Z)" title="Rehacer (Ctrl+Mayús+Z)">${icon('redo')}</button>
-      <button class="icon-btn" id="bm-btn" aria-label="Guardar esta página en marcadores" title="Guardar esta página en marcadores">${icon('bookmark')}</button>
-      <button class="icon-btn" id="share-btn" aria-label="Compartir" title="Compartir" aria-haspopup="menu">${icon('share')}</button>
-      <button class="icon-btn" id="pages-btn" aria-label="Páginas" title="Páginas">${icon('pages')}</button>
-      <button class="icon-btn" id="add-page-btn" aria-label="Añadir página" title="Añadir página">${icon('addPage')}</button>
-      <button class="icon-btn" id="page-menu" aria-label="Más opciones" title="Más opciones" aria-haspopup="menu">${icon('more')}</button>
+      <div class="cluster" aria-label="Estudio"><span id="pomo-slot" class="pomo-slot"></span><span id="mic-slot" class="mic-slot"></span></div>
+      <span class="bar-sep" aria-hidden="true"></span>
+      <div class="cluster" aria-label="Deshacer">
+        <button class="icon-btn" id="undo" aria-label="Deshacer" title="Deshacer (${onbKey('undo')})">${icon('undo')}</button>
+        <button class="icon-btn" id="redo" aria-label="Rehacer" title="Rehacer (${onbKey('redo')})">${icon('redo')}</button></div>
+      <span class="bar-sep" aria-hidden="true"></span>
+      <div class="cluster" aria-label="Libreta">
+        <button class="icon-btn" id="find-btn" aria-label="Buscar en la libreta" title="Buscar en la libreta (${onbKey('find')})">${icon('search')}</button>
+        <button class="icon-btn" id="bm-btn" aria-label="Guardar esta página en marcadores" title="Guardar esta página en marcadores">${icon('bookmark')}</button>
+        <button class="icon-btn" id="share-btn" aria-label="Compartir" title="Compartir" aria-haspopup="menu">${icon('share')}</button></div>
+      <span class="bar-sep" aria-hidden="true"></span>
+      <div class="cluster" aria-label="Páginas">
+        <button class="icon-btn" id="pages-btn" aria-label="Ver todas las páginas" title="Ver todas las páginas">${icon('pages')}</button>
+        <button class="icon-btn" id="page-format" aria-label="Página: añadir, plantilla y papel" title="Página: añadir, plantilla y papel" aria-haspopup="menu">${icon('pageFormat')}</button>
+        <button class="icon-btn" id="page-menu" aria-label="Más opciones" title="Más opciones: zoom, apariencia, atajos…" aria-haspopup="menu">${icon('more')}</button></div>
     </header>
     <div class="options" id="options"></div>
     <div class="workspace">
@@ -3703,7 +3714,7 @@ function renderEditor() {
   $('#pomo-slot').addEventListener('contextmenu', (e) => { if (e.target.closest('#pomo-btn')) Pomo.contextMenu(e); });
   $('#prev-page').addEventListener('click', () => { updateCurrentPage(); const p = nb.pages[currentPageIndex - 1]; if (p) scrollToPage(p.id); });
   $('#next-page').addEventListener('click', () => { updateCurrentPage(); const p = nb.pages[currentPageIndex + 1]; if (p) scrollToPage(p.id); });
-  $('#add-page-btn').addEventListener('click', () => newPageDialog());
+  $('#page-format').addEventListener('click', (e) => pageFormatMenu(e.currentTarget));
   $('#page-menu').addEventListener('click', (e) => pageMenu(e.currentTarget));
   const desk = $('#desk');
   let redrawQueued = false;
@@ -3942,33 +3953,22 @@ function textRanges(root, query) {
 // ---------- Menús de la página ----------
 /** Marca de «elegido» en los menús (o un hueco del mismo ancho). */
 const mark = (on) => (on ? icon('check') : '<svg width="17" height="17"></svg>');
-function pageMenu(anchor) {
+/** Menú «Página»: añadir páginas y el formato de la actual (plantilla, papel…). */
+function pageFormatMenu(anchor) {
   updateCurrentPage();
   const nb = activeNb(), page = nb.pages[currentPageIndex];
   popover(anchor, `
-    <div class="label">Plantilla de esta página${page.bg ? ' (PDF)' : ''}</div>
+    <button data-act="add">${icon('addPage')} Añadir página… <span class="kbd-hint">${onbKey('newPage')}</span></button>
+    <button data-act="dup">${icon('copy')} Duplicar esta página</button>
+    <hr><div class="label">Plantilla${page.bg ? ': página de PDF' : ''}</div>
     ${page.bg ? '' : Object.entries(TEMPLATES).map(([k, n]) => `<button data-act="tpl:${k}">${mark(page.template === k)} ${n}</button>`).join('')}
     ${page.bg ? '' : `<hr><div class="label">Color del papel</div>${Object.entries(PAPERS).map(([k, p]) => `<button data-act="paper:${k}">${mark(page.paper === k)} ${p.name}</button>`).join('')}
     <button data-act="all">${icon('layers')} Aplicar a todas las páginas</button>`}
-    <hr><div class="label">Zoom (también con Ctrl + rueda)</div>
-    <button data-act="zoom-in">${icon('plus')} Acercar</button><button data-act="zoom-out">${icon('minus')} Alejar</button><button data-act="zoom-fit">${icon('pages')} Ajustar al ancho</button>
-    <hr><button data-act="pomo-visible">${mark(Pomo.visible)} Mostrar el temporizador en la barra</button>
-    <button data-act="hold">${mark(S.holdToSnap)} Mantener quieto al final: forma perfecta o recta</button>
-    <button data-act="fullscreen">${icon('maximize')} ${document.fullscreenElement ? 'Salir de pantalla completa' : 'Pantalla completa'} <span class="kbd-hint">${onbKey('fullscreen')}</span></button>
-    <button data-act="shortcuts">${icon('keyboard')} Atajos de teclado…</button>
-    <hr><div class="label">Apariencia</div>
-    ${[['system', 'Automática'], ['light', 'Clara'], ['dark', 'Oscura']].map(([k, n]) => `<button data-act="ap:${k}">${mark(currentAppearance() === k)} ${n}</button>`).join('')}
-    <hr><button data-act="clear">${icon('trash')} Borrar el contenido de esta página…</button>
-    <button data-act="delete" ${nb.pages.length < 2 ? 'disabled' : ''}>${icon('trash')} Eliminar esta página…</button>`, (act) => {
+    <hr><button data-act="clear">${icon('eraser')} Borrar el contenido de esta página…</button>
+    <button data-act="delete" class="danger" ${nb.pages.length < 2 ? 'disabled' : ''}>${icon('trash')} Eliminar esta página…</button>`, (act) => {
     const [kind, value] = act.split(':');
-    if (act === 'shortcuts') return shortcutsDialog();
-    if (act === 'fullscreen') return toggleFullscreen();
-    if (act === 'pomo-visible') { Pomo.visible = !Pomo.visible; return Pomo.changed(); }
-    if (act === 'hold') { S.holdToSnap = !S.holdToSnap; savePrefs(); return toast(S.holdToSnap ? 'Mantener quieto al final de un trazo lo convierte en forma o recta' : 'Los trazos quedan siempre tal como los dibujas'); }
-    if (act === 'zoom-in') return setZoom(S.zoom * 1.2);
-    if (act === 'zoom-out') return setZoom(S.zoom / 1.2);
-    if (act === 'zoom-fit') return fitZoom();
-    if (kind === 'ap') { setAppearance(value); return refreshToolButtons(); }
+    if (act === 'add') return newPageDialog();
+    if (act === 'dup') return duplicatePage(nb, currentPageIndex);
     if (kind === 'tpl' || kind === 'paper') {
       const before = snapshotPage(page);
       page[kind === 'tpl' ? 'template' : 'paper'] = value;
@@ -3984,6 +3984,29 @@ function pageMenu(anchor) {
       S.undo[nb.id] = []; S.redo[nb.id] = [];
       touch(); buildPages(); renderSidebar();
     });
+  });
+}
+function pageMenu(anchor) {
+  updateCurrentPage();
+  const nb = activeNb(), page = nb.pages[currentPageIndex];
+  popover(anchor, `
+    <div class="label">Zoom (también con Ctrl + rueda)</div>
+    <button data-act="zoom-in">${icon('plus')} Acercar</button><button data-act="zoom-out">${icon('minus')} Alejar</button><button data-act="zoom-fit">${icon('pages')} Ajustar al ancho</button>
+    <hr><button data-act="pomo-visible">${mark(Pomo.visible)} Mostrar el temporizador en la barra</button>
+    <button data-act="hold">${mark(S.holdToSnap)} Mantener quieto al final: forma perfecta o recta</button>
+    <button data-act="fullscreen">${icon('maximize')} ${document.fullscreenElement ? 'Salir de pantalla completa' : 'Pantalla completa'} <span class="kbd-hint">${onbKey('fullscreen')}</span></button>
+    <button data-act="shortcuts">${icon('keyboard')} Atajos de teclado…</button>
+    <hr><div class="label">Apariencia</div>
+    ${[['system', 'Automática'], ['light', 'Clara'], ['dark', 'Oscura']].map(([k, n]) => `<button data-act="ap:${k}">${mark(currentAppearance() === k)} ${n}</button>`).join('')}`, (act) => {
+    const [kind, value] = act.split(':');
+    if (act === 'shortcuts') return shortcutsDialog();
+    if (act === 'fullscreen') return toggleFullscreen();
+    if (act === 'pomo-visible') { Pomo.visible = !Pomo.visible; return Pomo.changed(); }
+    if (act === 'hold') { S.holdToSnap = !S.holdToSnap; savePrefs(); return toast(S.holdToSnap ? 'Mantener quieto al final de un trazo lo convierte en forma o recta' : 'Los trazos quedan siempre tal como los dibujas'); }
+    if (act === 'zoom-in') return setZoom(S.zoom * 1.2);
+    if (act === 'zoom-out') return setZoom(S.zoom / 1.2);
+    if (act === 'zoom-fit') return fitZoom();
+    if (kind === 'ap') { setAppearance(value); return refreshToolButtons(); }
   });
 }
 function shareMenu(anchor) {
