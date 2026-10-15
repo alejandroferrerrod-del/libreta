@@ -1983,7 +1983,7 @@ function notebookMenu(anchor, nb) {
     <button data-act="move">${icon('folder')} Mover a…</button>
     <button data-act="duplicate">Duplicar</button>
     <button data-act="pdf">Descargar PDF</button>
-    <hr><button data-act="select">${icon('checkCircle')} Seleccionar</button>
+    ${S.dynamic ? '' : `<hr><button data-act="select">${icon('checkCircle')} Seleccionar</button>`}
     <hr><button data-act="delete" class="danger">Eliminar…</button>`, (act) => {
     if (act === 'rename') promptDialog('Renombrar libreta', nb.title, (v) => { nb.title = v; touch(nb); Store.put(nb); refresh(); }, 'Título');
     if (act === 'cover') coverDialog(nb);
@@ -2002,9 +2002,9 @@ function folderMenu(anchor, f) {
     ${f.parent ? '' : `<button data-act="color">${icon('palette')} Color…</button>`}
     <button data-act="move">${icon('folder')} Mover a…</button>
     <button data-act="duplicate">${icon('copy')} Duplicar</button>
-    <hr><button data-act="select">${icon('checkCircle')} Seleccionar</button>
+    ${S.dynamic ? '' : `<hr><button data-act="select">${icon('checkCircle')} Seleccionar</button>`}
     <hr><button data-act="delete" class="danger">${icon('trash')} Eliminar…</button>`, (act) => {
-    if (act === 'open') return goFolder(f.id);
+    if (act === 'open') return S.dynamic && Dyn.running ? Dyn.enterFolder(f.id) : goFolder(f.id);
     if (act === 'new') return promptDialog('Nueva carpeta', '', (v) => { Folders.create(v, f.id); refresh(); }, 'Nombre de la carpeta');
     if (act === 'rename') return promptDialog('Renombrar carpeta', f.name, (v) => { Folders.rename(f.id, v); refresh(); }, 'Nombre');
     if (act === 'color') return popover(anchor, `<div class="label">Color de «${esc(f.name)}»</div><div class="choices" style="padding:4px 8px 8px">${COVERS.map((c) => `<button class="swatch" data-act="${c}" style="background:${c};width:28px;height:28px" aria-label="Color ${c}"></button>`).join('')}</div>`, (c) => { f.color = c; Folders.save(); refresh(); });
@@ -2495,6 +2495,7 @@ async function startDynamic(root) {
   nodesEl.addEventListener('pointerdown', (e) => {
     const el = e.target.closest('.dnode, .dfolder');
     if (!el || dynBusy()) return;
+    if (e.pointerType === 'mouse' && e.button !== 0) return; // solo el botón izquierdo arrastra
     e.preventDefault();
     try { el.setPointerCapture(e.pointerId); } catch (err) { /* puntero sintético */ }
     const r = root.getBoundingClientRect();
@@ -2519,6 +2520,17 @@ async function startDynamic(root) {
       place();
     } else if (d.key.startsWith('f:')) enterFolder(d.key.slice(2));
     else select(d.key);
+  });
+  // Clic derecho: el menú de la carpeta o de la libreta (como en la biblioteca).
+  nodesEl.addEventListener('contextmenu', (e) => {
+    const el = e.target.closest('.dnode, .dfolder');
+    if (!el) return;
+    e.preventDefault();
+    Dyn.dragging = null;
+    hideHover();
+    const at = { x: e.clientX, y: e.clientY };
+    if (el.dataset.folder) folderMenu(at, Folders.byId(el.dataset.folder));
+    else notebookMenu(at, nbById(el.dataset.id));
   });
   nodesEl.addEventListener('dblclick', (e) => { const el = e.target.closest('.dnode'); if (el) openWithZoom(el.dataset.id); });
   nodesEl.addEventListener('keydown', (e) => {
