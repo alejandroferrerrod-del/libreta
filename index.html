@@ -1280,6 +1280,9 @@ let openPopover = null;
 function closePopover() { if (openPopover) { openPopover.el.remove(); openPopover.anchor?.setAttribute?.('aria-expanded', 'false'); openPopover = null; } }
 /** Menú flotante junto a `anchor` (un elemento o un punto {x, y}). */
 function popover(anchor, html, onAct) {
+  // Volver a pulsar el botón que abrió el menú lo cierra (aunque el botón se haya vuelto a pintar).
+  const same = (a, b) => a === b || (a?.nodeType === 1 && b?.nodeType === 1 && !a.isConnected && ((a.id && a.id === b.id) || (a.dataset.act && a.dataset.act === b.dataset.act)));
+  if (openPopover && anchor?.nodeType === 1 && same(openPopover.anchor, anchor)) { closePopover(); return; }
   closePopover();
   const el = document.createElement('div');
   el.className = 'popover';
