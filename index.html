@@ -10,7 +10,7 @@
 <link rel="icon" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-180.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<title>Libreta</title>
+<title>Folia</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400;1,700&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Caveat:wght@500;700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,700;1,8..60,400;1,8..60,700&display=swap">
@@ -848,7 +848,7 @@ const icon = (name, extra = '') => `<svg viewBox="0 0 24 24" fill="none" stroke=
 // =============================================================================
 // Idiomas (español e italiano). La interfaz está escrita en español; al mostrarse, cada texto de
 // la interfaz (y los títulos, ayudas y marcadores de posición) se traduce con el diccionario de
-// i18n-it.js. Lo que escribe quien usa Libreta (textos, títulos, páginas) no se toca nunca.
+// i18n-it.js. Lo que escribe quien usa Folia (textos, títulos, páginas) no se toca nunca.
 // =============================================================================
 const LANGS = { es: { name: 'Español', locale: 'es-ES' }, it: { name: 'Italiano', locale: 'it-IT' } };
 const I18N = {
@@ -988,7 +988,7 @@ I18N.dict.it = {
   'Idioma': 'Lingua', 'Apariencia': 'Aspetto', 'Automática': 'Automatico', 'Clara': 'Chiaro', 'Oscura': 'Scuro',
   'Pantalla completa': 'Schermo intero', 'Salir de pantalla completa': 'Esci da schermo intero', 'Atajos de teclado': 'Scorciatoie da tastiera',
   'Atajos de teclado…': 'Scorciatoie da tastiera…', 'Ver el tutorial': 'Guarda il tutorial', 'Copia de seguridad': 'Backup',
-  'Guardar copia de seguridad': 'Salva backup', 'Recuperar copia…': 'Ripristina backup…', 'Instalar Libreta en este ordenador': 'Installa Libreta su questo computer',
+  'Guardar copia de seguridad': 'Salva backup', 'Recuperar copia…': 'Ripristina backup…', 'Instalar Folia en este ordenador': 'Installa Folia su questo computer',
   'Buscar por título o contenido': 'Cerca per titolo o contenuto', 'Buscar libretas': 'Cerca quaderni', 'Buscar': 'Cerca',
   'Modo dinámico': 'Modalità dinamica', 'Salir del modo dinámico': 'Esci dalla modalità dinamica',
   'Tus carpetas y libretas como una constelación, con sus vínculos': 'Le tue cartelle e i tuoi quaderni come una costellazione, con i loro collegamenti',
@@ -1005,10 +1005,10 @@ I18N.dict.it = {
   'No se puede meter una carpeta dentro de sí misma.': 'Non si può mettere una cartella dentro se stessa.', 'Se borran de este navegador y no se puede deshacer.': 'Vengono cancellati da questo browser e non si può annullare.',
   'Se borrarán todas sus páginas de este navegador. No se puede deshacer.': 'Verranno cancellate tutte le sue pagine da questo browser. Non si può annullare.',
   'Este navegador no permite guardar (puede ser una ventana privada). Lo que hagas se perderá al cerrar: usa + › Copia de seguridad.': 'Questo browser non permette di salvare (forse è una finestra privata). Quello che fai andrà perso alla chiusura: usa ⚙︎ › Backup.',
-  'Libreta instalada. Ábrela desde el menú Inicio o el Dock.': 'Libreta installata. Aprila dal menu Start o dal Dock.',
-  'Hay una versión nueva de Libreta.': 'C’è una nuova versione di Libreta.', 'Actualizar': 'Aggiorna', 'Cerrar aviso': 'Chiudi avviso',
+  'Folia instalada. Ábrela desde el menú Inicio o el Dock.': 'Folia installata. Aprila dal menu Start o dal Dock.',
+  'Hay una versión nueva de Folia.': 'C’è una nuova versione di Folia.', 'Actualizar': 'Aggiorna', 'Cerrar aviso': 'Chiudi avviso',
   'Tu navegador no deja guardar más. Usa «Copia de seguridad» para no perder nada.': 'Il tuo browser non permette di salvare altro. Usa «Backup» per non perdere nulla.',
-  'Ese archivo no es una copia de Libreta.': 'Questo file non è un backup di Libreta.', 'El archivo no tenía libretas': 'Il file non conteneva quaderni', 'Copia guardada': 'Backup salvato',
+  'Ese archivo no es una copia de Folia.': 'Questo file non è un backup di Folia.', 'El archivo no tenía libretas': 'Il file non conteneva quaderni', 'Copia guardada': 'Backup salvato',
   'Libretas': 'Quaderni', 'Ejemplos': 'Esempi', 'Sin carpeta': 'Senza cartella', 'Esta libreta': 'Questo quaderno',
   'Todas las libretas están abiertas': 'Tutti i quaderni sono aperti', 'Abrir otra libreta': 'Apri un altro quaderno',
   'Portada': 'Copertina', 'Color': 'Colore', 'Página': 'Pagina', 'Foto': 'Foto', 'Elegir imagen…': 'Scegli immagine…',
@@ -1125,10 +1125,10 @@ I18N.dict.it = {
   'Mostrar u ocultar la barra lateral': 'Mostra o nascondi la barra laterale', 'Mostrar u ocultar notas de voz': 'Mostra o nascondi le note vocali', 'Marcador de la página': 'Segnalibro della pagina',
   'Espacio': 'Spazio', 'Supr': 'Canc', 'Mayús': 'Maiusc', 'Haz clic en un atajo para cambiarlo. Clic derecho para quitarlo.': 'Fai clic su una scorciatoia per cambiarla. Clic destro per toglierla.',
   // --- Tutorial ---
-  'Tutorial de Libreta': 'Tutorial di Libreta', 'Omitir tutorial': 'Salta il tutorial', 'Tus apuntes, a mano y a tu manera.': 'I tuoi appunti, a mano e a modo tuo.',
+  'Tutorial de Folia': 'Tutorial di Folia', 'Omitir tutorial': 'Salta il tutorial', 'Tus apuntes, a mano y a tu manera.': 'I tuoi appunti, a mano e a modo tuo.',
   '¿Cómo te llamas?': 'Come ti chiami?', 'Así te puedo guiar durante el recorrido.': 'Così posso guidarti durante il percorso.', 'Tu nombre': 'Il tuo nome',
   'Prefiero no decirlo': 'Preferisco non dirlo', 'Continuar': 'Continua', '¡Encantado!': 'Piacere!',
-  '¿Te enseño cómo funciona Libreta? Son un par de minutos y eliges qué ver.': 'Ti mostro come funziona Libreta? Sono un paio di minuti e scegli tu cosa vedere.',
+  '¿Te enseño cómo funciona Folia? Son un par de minutos y eliges qué ver.': 'Ti mostro come funziona Folia? Sono un paio di minuti e scegli tu cosa vedere.',
   'Sí, enséñame': 'Sì, mostrami', 'Un recorrido rápido por lo que tú elijas.': 'Un giro veloce su quello che scegli tu.', 'Ahora no': 'Non ora',
   'Prefiero explorarla yo. Podré verlo más tarde.': 'Preferisco esplorarla da solo. Potrò vederlo più tardi.', '¿Qué quieres aprender?': 'Cosa vuoi imparare?',
   'Está todo seleccionado. Quita lo que ya sepas.': 'È tutto selezionato. Togli quello che già sai.', 'Quitar todo': 'Togli tutto', 'Terminar': 'Termina',
@@ -1153,7 +1153,7 @@ I18N.dict.it = {
   'Digestivo': 'Gastroenterologia', 'Cirugía vascular': 'Chirurgia vascolare', 'Clase de Cardiología': 'Lezione di Cardiologia', 'célula': 'cellula', 'La': 'La',
   'es la unidad…': 'è l’unità…', 'Biología · pág. 2': 'Biologia · pag. 2', 'Apuntes · pág. 7': 'Appunti · pag. 7', 'Resumen · pág. 1': 'Riassunto · pag. 1',
   // Libretas de ejemplo (títulos)
-  'Bienvenida a Libreta': 'Benvenuto in Libreta', 'Biología · Tema 3': 'Biologia · Tema 3',
+  'Bienvenida a Folia': 'Benvenuto in Folia', 'Biología · Tema 3': 'Biologia · Tema 3',
 };
 
 /** Textos con nombres o números dentro. */
@@ -1203,7 +1203,7 @@ I18N.words.it = [
 
 'use strict';
 // =============================================================================
-// Libreta (versión web). Núcleo: constantes, utilidades, almacenamiento, estado.
+// Folia (versión web). Núcleo: constantes, utilidades, almacenamiento, estado.
 // =============================================================================
 
 const PORTRAIT = { w: 820, h: 1160 };
@@ -2155,7 +2155,7 @@ async function exportPDF(nb, pages = nb.pages) {
     const canvas = await renderPageCanvas(page, 2);
     pdf.addImage(canvas.toDataURL('image/jpeg', 0.9), 'JPEG', 0, 0, page.w, page.h);
   }
-  pdf.setProperties({ title: nb.title, creator: 'Libreta' });
+  pdf.setProperties({ title: nb.title, creator: 'Folia' });
   const name = (nb.title || 'libreta').replace(/[\\/:*?"<>|]/g, '-');
   if (await saveFile(`${name}${pages.length === 1 && nb.pages.length > 1 ? ' - página ' + (nb.pages.indexOf(pages[0]) + 1) : ''}.pdf`, pdf.output('blob'))) toast('PDF descargado');
 }
@@ -2368,7 +2368,7 @@ function settingsMenu(anchor) {
     <hr><div class="label">Copia de seguridad</div>
     <button data-act="save">${icon('download')} Guardar copia de seguridad</button>
     <button data-act="load">${icon('upload')} Recuperar copia…</button>
-    ${window.libretaInstall ? `<hr><button data-act="install">${icon('fileDown')} Instalar Libreta en este ordenador</button>` : ''}`, (act) => {
+    ${window.libretaInstall ? `<hr><button data-act="install">${icon('fileDown')} Instalar Folia en este ordenador</button>` : ''}`, (act) => {
     if (act.startsWith('ap:')) setAppearance(act.slice(3));
     if (act === 'save') saveBackup();
     if (act === 'load') loadBackup();
@@ -2652,7 +2652,7 @@ function loadBackup() {
         for (const [id, url] of Object.entries(data.audio || {})) { try { await Store.putAudio(id, await (await fetch(url)).blob()); } catch (e) { /* audio dañado */ } }
         renderLibrary();
         toast(added ? `Recuperadas ${added} libretas` : 'El archivo no tenía libretas');
-      } catch (e) { toast('Ese archivo no es una copia de Libreta.'); }
+      } catch (e) { toast('Ese archivo no es una copia de Folia.'); }
     });
   }
 }
@@ -2665,7 +2665,7 @@ async function saveBackup() {
     const blob = await Store.getAudio(r.id);
     if (blob) audio[r.id] = await new Promise((res) => { const fr = new FileReader(); fr.onload = () => res(fr.result); fr.readAsDataURL(blob); });
   }
-  const data = JSON.stringify({ app: 'Libreta', version: 4, saved: new Date().toISOString(), folders: Folders.list, notebooks: S.notebooks, audio });
+  const data = JSON.stringify({ app: 'Folia', version: 4, saved: new Date().toISOString(), folders: Folders.list, notebooks: S.notebooks, audio });
   if (await saveFile(`libreta-copia-${new Date().toISOString().slice(0, 10)}.json`, new Blob([data], { type: 'application/json' }))) toast('Copia guardada');
 }
 
@@ -4248,7 +4248,7 @@ const Voice = {
 // coordenadas de la página); la posición de cada letra se calcula al usarlo.
 // =============================================================================
 
-/** Trozos de texto de una página de PDF (pdf.js), en coordenadas de la página de Libreta. */
+/** Trozos de texto de una página de PDF (pdf.js), en coordenadas de la página de Folia. */
 async function pdfTextRuns(pdfPage, viewport) {
   const content = await pdfPage.getTextContent();
   const runs = [];
@@ -6341,7 +6341,7 @@ document.addEventListener('keydown', (e) => {
 // =============================================================================
 // Atajos de teclado personalizables (como en la app nativa).
 // «mod» es ⌘ en el Mac y Ctrl en Windows. Las combinaciones que el navegador se reserva (cerrar
-// pestaña, nueva ventana, recargar…) no se pueden usar; por eso las pestañas de Libreta van con Alt.
+// pestaña, nueva ventana, recargar…) no se pueden usar; por eso las pestañas de Folia van con Alt.
 // =============================================================================
 const IS_MAC = /Mac|iPhone|iPad/.test(navigator.platform) || /Mac OS/.test(navigator.userAgent);
 
@@ -6541,7 +6541,7 @@ function shortcutsDialog() {
       <button class="sc-add" data-add="${id}" title="Añadir otra combinación" aria-label="Añadir otra combinación para ${esc(a.title)}">${icon('plus')}</button>
       <button class="sc-reset" data-reset="${id}" ${Shortcuts.isDefault(id) ? 'hidden' : ''} title="Volver a ${esc(a.defaults.map((b) => Shortcuts.display(b)).join(' o '))}" aria-label="Restablecer">${icon('rotate')}</button></span></div>`;
   };
-  const body = () => `<p class="sc-help">Haz clic en una combinación para cambiarla, en + para añadir otra y con clic derecho para quitarla. Las teclas solas (como H para el subrayador) no funcionan mientras escribes.${IS_MAC ? '' : ' En la web, las pestañas de Libreta van con Alt porque Ctrl+W, Ctrl+T o Ctrl+1 son del navegador.'}</p>
+  const body = () => `<p class="sc-help">Haz clic en una combinación para cambiarla, en + para añadir otra y con clic derecho para quitarla. Las teclas solas (como H para el subrayador) no funcionan mientras escribes.${IS_MAC ? '' : ' En la web, las pestañas de Folia van con Alt porque Ctrl+W, Ctrl+T o Ctrl+1 son del navegador.'}</p>
     ${SHORTCUT_GROUPS.map((g) => `<h3>${g}</h3>${SHORTCUT_ACTIONS.filter((a) => a[1] === g).map((a) => row(a[0])).join('')}`).join('')}`;
   const scrim = dialog(`<h2>Atajos de teclado</h2><div class="sc-list">${body()}</div>
     <div class="actions"><button class="btn" data-act="reset-all">Restablecer todo</button><span class="spacer"></span><button class="btn primary" data-act="done">Listo</button></div>`, (act, b, close) => {
@@ -6623,7 +6623,7 @@ function onbLesson(id, name) {
   const you = name ? `${name}, ` : '';
   const mod = IS_MAC ? '⌘' : 'Ctrl+';
   switch (id) {
-    case 'language': return [`${you}Libreta habla tu idioma.`,
+    case 'language': return [`${you}Folia habla tu idioma.`,
       [['globe', 'Al empezar elegiste el idioma con las banderas. Pruébalas aquí abajo.'],
         ['settings', 'Cámbialo cuando quieras en la biblioteca: ⚙︎ Ajustes › Idioma.'],
         ['check', 'Cambia todo al momento: menús, avisos, fechas y este tutorial.']],
@@ -6708,7 +6708,7 @@ function onbLessonIt(id, name) {
   const mod = IS_MAC ? '⌘' : 'Ctrl+';
   const k = onbKey;
   switch (id) {
-    case 'language': return [`${you}Libreta parla la tua lingua.`,
+    case 'language': return [`${you}Folia parla la tua lingua.`,
       [['globe', 'All’inizio hai scelto la lingua con le bandiere. Provale qui sotto.'],
         ['settings', 'Cambiala quando vuoi nella libreria: ⚙︎ Impostazioni › Lingua.'],
         ['check', 'Cambia tutto all’istante: menu, avvisi, date e questo tutorial.']],
@@ -7179,7 +7179,7 @@ const Onboarding = {
     el.className = 'onb';
     el.setAttribute('role', 'dialog');
     el.setAttribute('aria-modal', 'true');
-    el.setAttribute('aria-label', 'Tutorial de Libreta');
+    el.setAttribute('aria-label', 'Tutorial de Folia');
     el.innerHTML = `<canvas class="onb-aurora" aria-hidden="true"></canvas><div class="onb-stages"></div>
       <button class="onb-glass onb-skip" data-onb="skip">Omitir tutorial</button>`;
     document.body.appendChild(el);
@@ -7240,7 +7240,7 @@ const Onboarding = {
         <div class="onb-logo" aria-hidden="true"><div class="onb-cover"></div>
           <svg viewBox="0 0 180 200" class="onb-sign"><path d="M40 125 C 52 76, 64 148, 76 88 C 88 50, 100 150, 114 110 C 128 70, 142 140, 158 92" /></svg>
           <span class="onb-nib">${icon('pen')}</span></div>
-        <h1 class="onb-word" aria-label="Libreta">${[...'Libreta'].map((c, i) => `<span style="--i:${i}">${c}</span>`).join('')}</h1>
+        <h1 class="onb-word" aria-label="Folia">${[...'Folia'].map((c, i) => `<span style="--i:${i}">${c}</span>`).join('')}</h1>
         <p class="onb-sub onb-late">Tus apuntes, a mano y a tu manera.</p>
         <div class="onb-langs onb-late" role="group" aria-label="Idioma">${languageButtons('onb-glass')}</div>
         <div class="onb-late2">${glass(`Empezar ${arrow}`, 'start', true)}</div></div>`;
@@ -7256,7 +7256,7 @@ const Onboarding = {
       const card = (act, sym, colors, t, sub, prominent) => `<button class="onb-choice ${prominent ? 'prominent' : ''}" data-onb="${act}" style="--c1:${colors[0]};--c2:${colors[1]}">
         <span class="onb-tile">${icon(sym)}</span><b>${t}</b><span>${sub}</span></button>`;
       return `<div class="onb-center">
-        ${title(name ? `Encantado, ${name}` : '¡Encantado!', '¿Te enseño cómo funciona Libreta? Son un par de minutos y eliges qué ver.')}
+        ${title(name ? `Encantado, ${name}` : '¡Encantado!', '¿Te enseño cómo funciona Folia? Son un par de minutos y eliges qué ver.')}
         <div class="onb-row onb-rise">${card('yes', 'sparkles', ['#AF52DE', '#007AFF'], 'Sí, enséñame', 'Un recorrido rápido por lo que tú elijas.', true)}
         ${card('no', 'compass', ['#8E8E93', 'rgba(142,142,147,.6)'], 'Ahora no', 'Prefiero explorarla yo. Podré verlo más tarde.', false)}</div></div>`;
     }
@@ -7483,6 +7483,14 @@ function fixExampleHighlights(nb) {
   }
   if (changed) { touch(nb); Store.put(nb); }
 }
+/** La app se llamaba Libreta: la libreta de bienvenida pasa a llamarse con el nombre nuevo (si no se le cambió el título). */
+function renameWelcome(nb) {
+  const titles = { 'Bienvenida a Libreta': 'Bienvenida a Folia', 'Benvenuto in Libreta': 'Benvenuto in Folia' };
+  if (!titles[nb.title]) return;
+  nb.title = titles[nb.title];
+  for (const page of nb.pages) for (const it of page.items) if (it.html) it.html = it.html.replace('esto es Libreta', 'esto es Folia').replace('questa è Libreta', 'questa è Folia');
+  Store.put(nb);
+}
 /** Las libretas de ejemplo que aún no se han abierto se cambian al idioma elegido (y su carpeta). */
 function translateExamples() {
   const old = S.notebooks.filter((n) => n.example);
@@ -7516,13 +7524,13 @@ function exampleNotebooks() {
   t2.strokes.push({ id: uid(), tool: 'pen', kind: 'pen', color: '#1E5BD8', width: 3, points: circle });
   temas.outline = [{ id: uid(), title: L('La célula', 'La cellula'), pageId: t1.id, level: 0 }, { id: uid(), title: L('Esquema', 'Schema'), pageId: t2.id, level: 1 }];
 
-  const nb = newNotebook(L('Bienvenida a Libreta', 'Benvenuto in Libreta'), '#1F7A8C', 'dots', 'white');
+  const nb = newNotebook(L('Bienvenida a Folia', 'Benvenuto in Folia'), '#1F7A8C', 'dots', 'white');
   nb.space = L('Ejemplos', 'Esempi');
   nb.example = true;
   const page = nb.pages[0];
   const link = `<a data-link='${JSON.stringify({ nb: temas.id, page: t2.id })}'>${L('esquema del orgánulo', 'schema dell’organello')}</a>`;
   page.items.push(
-    text(64, 70, 640, L('Hola, esto es Libreta', 'Ciao, questa è Libreta'), { font: 'serif', size: 40, bold: true }),
+    text(64, 70, 640, L('Hola, esto es Folia', 'Ciao, questa è Folia'), { font: 'serif', size: 40, bold: true }),
     text(64, 150, 660, L('Prueba el bolígrafo (P) y escribe aquí debajo. Con el subrayador (H) en «H / V», tus subrayados quedan <span style="background-color:#FFE66B"><b>perfectamente rectos</b></span>.', 'Prova la penna (P) e scrivi qui sotto. Con l’evidenziatore (H) in «H / V», le tue sottolineature restano <span style="background-color:#FFE66B"><b>perfettamente dritte</b></span>.'), { size: 21 }),
     text(64, 300, 300, L('Dibuja un círculo y mantén el ratón quieto al final: se vuelve perfecto.', 'Disegna un cerchio e tieni fermo il mouse alla fine: diventa perfetto.'), { font: 'hand', size: 26, color: '#1E5BD8' }),
     text(64, 560, 660, L(`Los enlaces llevan a otras libretas o páginas: haz clic en el ${link} para verlo. Activa el <b>Modo dinámico</b> en la biblioteca para ver cómo se relacionan tus libretas.`, `I collegamenti portano ad altri quaderni o pagine: fai clic sullo ${link} per vederlo. Attiva la <b>Modalità dinamica</b> nella libreria per vedere come si collegano i tuoi quaderni.`), { size: 19 }),
@@ -7543,6 +7551,7 @@ async function start() {
   await Store.open();
   S.notebooks = (await Store.all()).map(normalizeNotebook);
   S.notebooks.forEach(fixExampleHighlights);
+  S.notebooks.forEach(renameWelcome);
   const seeded = Prefs.load().seeded;
   if (!S.notebooks.length && !seeded) {
     for (const nb of exampleNotebooks()) { S.notebooks.push(nb); Store.put(nb); }
@@ -7577,7 +7586,7 @@ if ('serviceWorker' in navigator && location.protocol !== 'file:' && document.qu
       if (!worker || !navigator.serviceWorker.controller) return;
       const bar = document.createElement('div');
       bar.className = 'toast';
-      bar.innerHTML = 'Hay una versión nueva de Libreta. <button class="btn primary" style="margin-left:10px">Actualizar</button>';
+      bar.innerHTML = 'Hay una versión nueva de Folia. <button class="btn primary" style="margin-left:10px">Actualizar</button>';
       bar.querySelector('button').onclick = () => { flushAll(); worker.postMessage('skipWaiting'); };
       document.body.appendChild(bar);
     };
@@ -7590,7 +7599,7 @@ if ('serviceWorker' in navigator && location.protocol !== 'file:' && document.qu
   let reloading = false;
   navigator.serviceWorker.addEventListener('controllerchange', () => { if (!reloading) { reloading = true; location.reload(); } });
 }
-// «Instalar Libreta en este ordenador» (Chrome y Edge): aparece en el menú + de la biblioteca.
+// «Instalar Folia en este ordenador» (Chrome y Edge): aparece en el menú + de la biblioteca.
 addEventListener('beforeinstallprompt', (event) => {
   event.preventDefault();
   window.libretaInstall = async () => {
@@ -7599,7 +7608,7 @@ addEventListener('beforeinstallprompt', (event) => {
     window.libretaInstall = null;
   };
 });
-addEventListener('appinstalled', () => { window.libretaInstall = null; toast('Libreta instalada. Ábrela desde el menú Inicio o el Dock.'); });
+addEventListener('appinstalled', () => { window.libretaInstall = null; toast('Folia instalada. Ábrela desde el menú Inicio o el Dock.'); });
 // Que el navegador no borre las libretas para hacer sitio.
 navigator.storage?.persist?.().catch(() => {});
 
