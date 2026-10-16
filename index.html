@@ -1495,6 +1495,26 @@ function pointInPolygon(p, poly) {
   return inside;
 }
 
+/** ¿Toca el trazo el lazo? Basta con que una parte quede dentro o lo cruce. */
+function strokeTouchesPolygon(points, poly) {
+  if (!points.length || poly.length < 3) return false;
+  let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+  for (const [x, y] of poly) { if (x < minX) minX = x; if (x > maxX) maxX = x; if (y < minY) minY = y; if (y > maxY) maxY = y; }
+  const near = (q) => q[0] >= minX && q[0] <= maxX && q[1] >= minY && q[1] <= maxY;
+  if (points.some((q) => near(q) && pointInPolygon(q, poly))) return true;
+  // Trazos con pocos puntos (rectas): comprobar si algún segmento cruza el borde del lazo.
+  const cross = (a, b, c, d) => {
+    const o = (p, q, r) => (q[0] - p[0]) * (r[1] - p[1]) - (q[1] - p[1]) * (r[0] - p[0]);
+    return o(a, b, c) * o(a, b, d) < 0 && o(c, d, a) * o(c, d, b) < 0;
+  };
+  for (let i = 1; i < points.length; i++) {
+    const a = points[i - 1], b = points[i];
+    if (Math.max(a[0], b[0]) < minX || Math.min(a[0], b[0]) > maxX || Math.max(a[1], b[1]) < minY || Math.min(a[1], b[1]) > maxY) continue;
+    for (let j = 0, k = poly.length - 1; j < poly.length; k = j++) if (cross(a, b, poly[k], poly[j])) return true;
+  }
+  return false;
+}
+
 // =============================================================================
 // Grafo de enlaces (distribución por fuerzas y colocación en pantalla)
 // =============================================================================
@@ -5448,7 +5468,7 @@ function attachInk(page, v) {
       ctxFor(v.live).clearRect(0, 0, page.w, page.h);
       const poly = lassoPath.map((q) => [q[0], q[1]]);
       lassoPath = null;
-      const ids = page.strokes.filter((s) => s.points.filter((q) => pointInPolygon(q, poly)).length >= s.points.length * 0.6).map((s) => s.id);
+      const ids = page.strokes.filter((s) => strokeTouchesPolygon(s.points, poly)).map((s) => s.id);
       if (ids.length) setLasso(page, ids);
       return;
     }
