@@ -302,6 +302,7 @@ svg { display: block; }
 .item.link .tag { position: absolute; left: -1px; top: -22px; background: #1E5BD8; color: #fff; font-size: 11px; font-weight: 600; padding: 2px 6px; border-radius: 4px; white-space: nowrap; }
 .resize { position: absolute; right: -11px; bottom: -11px; width: 22px; height: 22px; border-radius: 50%; background: #007AFF; border: 2px solid #fff; cursor: nwse-resize; display: none; box-shadow: 0 1px 3px rgba(0,0,0,.3); }
 .item.selected .resize { display: block; }
+.item.lassoed .resize { display: none; }
 .pin { position: absolute; width: 34px; height: 34px; border-radius: 50%; color: #fff; display: grid; place-items: center; font-weight: 700; font-size: 15px; border: 2px solid #fff; box-shadow: 0 1px 3px rgba(0,0,0,.3); cursor: pointer; background: var(--c); }
 .pin .name { position: absolute; left: 40px; top: 7px; white-space: nowrap; color: var(--c); font-size: 13px; font-weight: 600; }
 .pin.selected { box-shadow: 0 0 0 3px #007AFF; }
@@ -1513,6 +1514,15 @@ function strokeTouchesPolygon(points, poly) {
     for (let j = 0, k = poly.length - 1; j < poly.length; k = j++) if (cross(a, b, poly[k], poly[j])) return true;
   }
   return false;
+}
+
+/** ¿Toca el rectángulo (elemento) el lazo? Basta con rozarlo. */
+function rectTouchesPolygon(r, poly) {
+  if (poly.length < 3) return false;
+  const corners = [[r.x, r.y], [r.x + r.w, r.y], [r.x + r.w, r.y + r.h], [r.x, r.y + r.h], [r.x, r.y]];
+  if (strokeTouchesPolygon(corners, poly)) return true;
+  // El lazo dibujado entero dentro del elemento.
+  return poly.some(([x, y]) => x >= r.x && x <= r.x + r.w && y >= r.y && y <= r.y + r.h);
 }
 
 // =============================================================================
@@ -5155,8 +5165,10 @@ function renderOptions() {
   const item = found?.item;
   let html = '';
   if (S.lasso) {
-    html = `<span class="hint">${S.lasso.ids.length} ${S.lasso.ids.length === 1 ? 'trazo seleccionado' : 'trazos seleccionados'}: arrastra el recuadro para moverlos.</span>
-      ${swatches(PEN_COLORS, '', 'lasso-color')}
+    const nItems = S.lasso.itemIds?.length || 0, n = S.lasso.ids.length + nItems;
+    const what = nItems ? (n === 1 ? 'elemento seleccionado' : 'elementos seleccionados') : (n === 1 ? 'trazo seleccionado' : 'trazos seleccionados');
+    html = `<span class="hint">${n} ${what}: arrastra el recuadro para ${n === 1 ? 'moverlo' : 'moverlos'}.</span>
+      ${S.lasso.ids.length ? swatches(PEN_COLORS, '', 'lasso-color') : ''}
       <div class="sep"></div><button class="btn" data-act="copy">Copiar</button><button class="btn" data-act="cut">Cortar</button><button class="btn" data-act="duplicate">Duplicar</button>
       <button class="icon-btn" data-act="delete" aria-label="Eliminar" title="Eliminar (Supr)">${icon('trash')}</button>`;
   } else if (item && item.type === 'comment') {
@@ -5469,7 +5481,8 @@ function attachInk(page, v) {
       const poly = lassoPath.map((q) => [q[0], q[1]]);
       lassoPath = null;
       const ids = page.strokes.filter((s) => strokeTouchesPolygon(s.points, poly)).map((s) => s.id);
-      if (ids.length) setLasso(page, ids);
+      const itemIds = page.items.filter((it) => rectTouchesPolygon(itemRect(page, it), poly)).map((it) => it.id);
+      if (ids.length || itemIds.length) setLasso(page, ids, itemIds);
       return;
     }
     if (!stroke) return;
@@ -5518,9 +5531,10 @@ function eraseAt(page, p) {
   if (changed) renderInk(page);
   return changed;
 }
-function setLasso(page, ids) {
-  S.lasso = { pageId: page.id, ids };
+function setLasso(page, ids, itemIds = []) {
+  S.lasso = { pageId: page.id, ids, itemIds };
   select(null, false);
+  renderItems(page);
   drawLassoBox();
   renderInk(page);
   renderOptions();
@@ -5530,14 +5544,25 @@ function lassoStrokes() {
   const page = activeNb().pages.find((p) => p.id === S.lasso.pageId);
   return page ? page.strokes.filter((s) => S.lasso.ids.includes(s.id)) : [];
 }
+function lassoItems() {
+  if (!S.lasso?.itemIds?.length) return [];
+  const page = activeNb().pages.find((p) => p.id === S.lasso.pageId);
+  return page ? page.items.filter((i) => S.lasso.itemIds.includes(i.id)) : [];
+}
+/** Rectángulo de un elemento en coordenadas de página (los textos crecen con su contenido). */
+function itemRect(page, item) {
+  const el = views.get(page.id)?.wrap.querySelector(`[data-id="${item.id}"]`);
+  return { x: item.x, y: item.y, w: el?.offsetWidth || item.w || 30, h: el?.offsetHeight || item.h || 30 };
+}
 function drawLassoBox() {
   $$('.lasso-box').forEach((x) => x.remove());
   if (!S.lasso) return;
   const page = activeNb().pages.find((p) => p.id === S.lasso.pageId), v = views.get(page.id);
-  const strokes = lassoStrokes();
-  if (!strokes.length) return clearLasso();
-  const b = Shapes.bounds(strokes.flatMap((s) => s.points));
-  const pad = 8 + Math.max(...strokes.map((s) => s.width)) / 2;
+  const strokes = lassoStrokes(), items = lassoItems();
+  if (!strokes.length && !items.length) return clearLasso();
+  const corners = items.flatMap((it) => { const r = itemRect(page, it); return [[r.x, r.y], [r.x + r.w, r.y + r.h]]; });
+  const b = Shapes.bounds([...strokes.flatMap((s) => s.points), ...corners]);
+  const pad = 8 + Math.max(0, ...strokes.map((s) => s.width)) / 2;
   const box = document.createElement('div');
   box.className = 'lasso-box';
   box.style.cssText = `left:${b.x - pad}px;top:${b.y - pad}px;width:${b.w + pad * 2}px;height:${b.h + pad * 2}px`;
@@ -5546,15 +5571,21 @@ function drawLassoBox() {
     e.preventDefault(); e.stopPropagation();
     try { box.setPointerCapture(e.pointerId); } catch (err) { /* puntero sintético */ }
     const before = snapshotPage(page), start = [e.clientX, e.clientY], orig = strokes.map((s) => s.points.map((q) => [...q]));
+    const origItems = items.map((it) => [it.x, it.y]);
+    const els = items.map((it) => v.wrap.querySelector(`[data-id="${it.id}"]`));
     let moved = false;
     const move = (ev) => {
       const dx = (ev.clientX - start[0]) / S.zoom, dy = (ev.clientY - start[1]) / S.zoom;
       moved = moved || Math.abs(dx) + Math.abs(dy) > 1;
       strokes.forEach((s, i) => { s.points = orig[i].map(([x, y, p]) => [x + dx, y + dy, p]); });
+      items.forEach((it, i) => {
+        it.x = origItems[i][0] + dx; it.y = origItems[i][1] + dy;
+        if (els[i]) { els[i].style.left = it.x + 'px'; els[i].style.top = it.y + 'px'; }
+      });
       box.style.left = b.x - pad + dx + 'px'; box.style.top = b.y - pad + dy + 'px';
       renderInk(page);
     };
-    const up = () => { box.removeEventListener('pointermove', move); box.removeEventListener('pointerup', up); if (moved) { commit(page, before); drawLassoBox(); } };
+    const up = () => { box.removeEventListener('pointermove', move); box.removeEventListener('pointerup', up); if (moved) { commit(page, before); if (items.length) renderItems(page); else drawLassoBox(); } };
     box.addEventListener('pointermove', move);
     box.addEventListener('pointerup', up);
   });
@@ -5562,9 +5593,10 @@ function drawLassoBox() {
 function clearLasso() {
   if (!S.lasso) return;
   const page = activeNb()?.pages.find((p) => p.id === S.lasso.pageId);
+  const hadItems = S.lasso.itemIds?.length;
   S.lasso = null;
   $$('.lasso-box').forEach((x) => x.remove());
-  if (page) renderInk(page);
+  if (page) { renderInk(page); if (hadItems) renderItems(page); }
   renderOptions();
 }
 function recolorLasso(color) {
@@ -5651,7 +5683,7 @@ function richElement(page, item, editable) {
   return rich;
 }
 function itemElement(page, item) {
-  const isSel = (S.selected?.itemId === item.id) || (S.editing?.itemId === item.id);
+  const isSel = (S.selected?.itemId === item.id) || (S.editing?.itemId === item.id) || !!S.lasso?.itemIds?.includes(item.id);
   if (item.type === 'comment') {
     const pin = document.createElement('div');
     pin.className = 'pin' + (isSel ? ' selected' : '');
@@ -5666,7 +5698,7 @@ function itemElement(page, item) {
     return pin;
   }
   const el = document.createElement('div');
-  el.className = `item ${item.type}` + (isSel ? ' selected' : '');
+  el.className = `item ${item.type}` + (isSel ? ' selected' : '') + (S.lasso?.itemIds?.includes(item.id) ? ' lassoed' : '');
   el.dataset.id = item.id;
   el.style.cssText = `left:${item.x}px;top:${item.y}px;width:${item.w}px;${item.type === 'text' ? '' : `height:${item.h}px;`}`;
   if (item.type === 'text' || item.type === 'sticky') {
@@ -6161,7 +6193,9 @@ function openSearchPanel() {
 // ---------- Copiar, cortar y pegar ----------
 function copySelection() {
   if (S.lasso) {
-    S.clipboard = { kind: 'strokes', data: clone(lassoStrokes()), pageId: S.lasso.pageId, text: ' ' };
+    const items = lassoItems();
+    S.clipboard = { kind: 'strokes', data: clone(lassoStrokes()), items: clone(items), pageId: S.lasso.pageId, text: items.filter((i) => RICH_TYPES.includes(i.type)).map(itemText).join('\n') || ' ' };
+    S.clipboard.recordings = items.filter((i) => i.type === 'voice').map((i) => clone(Voice.find(activeNb(), i.rec))).filter(Boolean);
   } else {
     const found = findItem(S.selected);
     if (!found) return false;
@@ -6176,8 +6210,10 @@ function copySelection() {
 function deleteSelection() {
   if (S.lasso) {
     const page = activeNb().pages.find((p) => p.id === S.lasso.pageId), before = snapshotPage(page);
+    const itemIds = S.lasso.itemIds || [];
     page.strokes = page.strokes.filter((s) => !S.lasso.ids.includes(s.id));
-    commit(page, before); clearLasso(); return;
+    page.items = page.items.filter((i) => !itemIds.includes(i.id));
+    commit(page, before); clearLasso(); if (itemIds.length) renderItems(page); return;
   }
   const found = findItem(S.selected || S.editing);
   if (!found) return;
@@ -6198,11 +6234,13 @@ function pasteInternal() {
   const offset = cb.pageId === page.id ? 24 : 0;
   if (cb.kind === 'strokes') {
     const strokes = clone(cb.data).map((s) => ({ ...s, id: uid(), points: s.points.map(([x, y, p]) => [x + offset, y + offset, p]) }));
-    page.strokes.push(...strokes);
-    cb.data = clone(strokes); cb.pageId = page.id;
-    commit(page, before); renderInk(page);
+    const items = clone(cb.items || []).map((it) => ({ ...it, id: uid(), x: it.x + offset, y: it.y + offset, ...(it.type === 'comment' ? { expanded: false } : {}) }));
+    if (items.some((it) => it.type === 'voice')) { (cb.recordings || []).forEach((r) => Voice.receive(activeNb(), r)); if (!S.showVoiceNotes) Voice.setShown(true); }
+    page.strokes.push(...strokes); page.items.push(...items);
+    cb.data = clone(strokes); cb.items = clone(items); cb.pageId = page.id;
+    commit(page, before); renderInk(page); renderItems(page);
     if (S.tool !== 'lasso') setTool('lasso');
-    setLasso(page, strokes.map((s) => s.id));
+    setLasso(page, strokes.map((s) => s.id), items.map((it) => it.id));
     return true;
   }
   const item = clone(cb.data);
