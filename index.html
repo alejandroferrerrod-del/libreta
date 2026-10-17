@@ -167,6 +167,17 @@ svg { display: block; }
 .popover button:hover:not(:disabled) { background: var(--accent); color: #fff; }
 .popover hr { border: 0; border-top: 1px solid var(--hairline); margin: 5px 6px; }
 .popover .label { font-size: 11.5px; color: var(--muted); padding: 6px 10px 2px; font-weight: 600; }
+.popover .pf-row .pf-name { flex: none; }
+.popover .pf-row .pf-val { margin-left: auto; padding-left: 14px; color: var(--muted); }
+.popover .pf-row > svg:last-child { width: 14px; height: 14px; color: var(--muted); transition: transform .15s; }
+.popover .pf-row[aria-expanded="true"] > svg:last-child { transform: rotate(180deg); }
+.popover .pf-row:hover:not(:disabled) .pf-val, .popover .pf-row:hover:not(:disabled) > svg:last-child { color: rgba(255,255,255,.85); }
+.popover .pf-sub { display: flex; flex-direction: column; margin: 0 0 4px 18px; padding-left: 6px; border-left: 1px solid var(--hairline); }
+.popover .pf-sub[hidden] { display: none; }
+.popover .pf-sw { width: 17px; height: 17px; border-radius: 50%; flex: none; box-shadow: 0 0 0 1px rgba(0,0,0,.18) inset; }
+.popover .pf-papers { flex-direction: row; flex-wrap: wrap; gap: 4px; padding: 4px 6px 2px; }
+.popover .pf-papers button { flex: 1 1 40%; padding: 6px 8px; border: 1px solid var(--hairline); font-size: 13px; }
+.popover .pf-papers button[aria-pressed="true"] { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent) inset; }
 .scrim { position: fixed; inset: 0; background: rgba(0, 0, 0, .35); z-index: 60; display: grid; place-items: center; padding: 16px; animation: fade .15s ease-out; }
 @keyframes fade { from { opacity: 0; } }
 .dialog { background: var(--surface); border-radius: 14px; box-shadow: 0 20px 60px rgba(0,0,0,.35); width: min(560px, 100%); max-height: 100%; overflow: auto; padding: 22px; display: flex; flex-direction: column; gap: 16px; animation: rise .2s cubic-bezier(.2,.8,.3,1); }
@@ -1144,7 +1155,7 @@ I18N.dict.it = {
   'Sin páginas guardadas. Pulsa el marcador de una página (arriba o en Miniaturas) para guardarla aquí.': 'Nessuna pagina salvata. Premi il segnalibro di una pagina (in alto o in Miniature) per salvarla qui.',
   'Página guardada en marcadores': 'Pagina salvata nei segnalibri', 'Página quitada de marcadores': 'Pagina tolta dai segnalibri',
   '+ Añadir página': '+ Aggiungi pagina', 'Añadir página': 'Aggiungi pagina', 'Añadir página…': 'Aggiungi pagina…', 'Duplicar esta página': 'Duplica questa pagina',
-  'Plantilla': 'Modello', 'Color del papel': 'Colore della carta', 'Aplicar a todas las páginas': 'Applica a tutte le pagine',
+  'Plantilla': 'Modello', 'Plantilla: página de PDF': 'Modello: pagina del PDF', 'Color del papel': 'Colore della carta', 'Aplicar a todas las páginas': 'Applica a tutte le pagine',
   'Borrar el contenido de esta página…': 'Cancella il contenuto di questa pagina…', 'Eliminar esta página…': 'Elimina questa pagina…', 'Eliminar página': 'Elimina pagina',
   'Zoom (también con Ctrl + rueda)': 'Zoom (anche con Ctrl + rotella)', 'Acercar': 'Ingrandisci', 'Alejar': 'Riduci', 'Ajustar al ancho': 'Adatta alla larghezza',
   'Mostrar el temporizador en la barra': 'Mostra il timer nella barra', 'Mantener quieto al final: forma perfecta o recta': 'Tieni fermo alla fine: forma perfetta o dritta',
@@ -5218,9 +5229,11 @@ function pageFormatMenu(anchor) {
   popover(anchor, `
     <button data-act="add">${icon('addPage')} Añadir página… <span class="kbd-hint">${onbKey('newPage')}</span></button>
     <button data-act="dup">${icon('copy')} Duplicar esta página</button>
-    <hr><div class="label">Plantilla${page.bg ? ': página de PDF' : ''}</div>
-    ${page.bg ? '' : Object.entries(TEMPLATES).map(([k, n]) => `<button data-act="tpl:${k}">${mark(page.template === k)} ${n}</button>`).join('')}
-    ${page.bg ? '' : `<hr><div class="label">Color del papel</div>${Object.entries(PAPERS).map(([k, p]) => `<button data-act="paper:${k}">${mark(page.paper === k)} ${p.name}</button>`).join('')}
+    <hr>${page.bg ? '<div class="label">Plantilla: página de PDF</div>' : `
+    <button class="pf-row" data-sub="tpl" aria-expanded="false">${icon('pageFormat')} <span class="pf-name">Plantilla</span> <span class="pf-val">${TEMPLATES[page.template] || TEMPLATES.blank}</span>${icon('chevronDown')}</button>
+    <div class="pf-sub" data-for="tpl" hidden>${Object.entries(TEMPLATES).map(([k, n]) => `<button data-act="tpl:${k}">${mark(page.template === k)} ${n}</button>`).join('')}</div>
+    <button class="pf-row" data-sub="paper" aria-expanded="false"><span class="pf-sw" style="background:${(PAPERS[page.paper] || PAPERS.white).fill}"></span> <span class="pf-name">Color del papel</span> <span class="pf-val">${(PAPERS[page.paper] || PAPERS.white).name}</span>${icon('chevronDown')}</button>
+    <div class="pf-sub pf-papers" data-for="paper" hidden>${Object.entries(PAPERS).map(([k, p]) => `<button data-act="paper:${k}" title="${p.name}" aria-label="${p.name}" aria-pressed="${page.paper === k}"><span class="pf-sw" style="background:${p.fill}"></span>${p.name}</button>`).join('')}</div>
     <button data-act="all">${icon('layers')} Aplicar a todas las páginas</button>`}
     <hr><button data-act="clear">${icon('eraser')} Borrar el contenido de esta página…</button>
     <button data-act="delete" class="danger" ${nb.pages.length < 2 ? 'disabled' : ''}>${icon('trash')} Eliminar esta página…</button>`, (act) => {
@@ -5242,6 +5255,24 @@ function pageFormatMenu(anchor) {
       S.undo[nb.id] = []; S.redo[nb.id] = [];
       touch(); buildPages(); renderSidebar();
     });
+  });
+  if (openPopover) bindSubmenus(openPopover.el);
+}
+/** Filas desplegables de un menú (Plantilla, Color del papel): un toque abre su lista y cierra la otra. */
+function bindSubmenus(el) {
+  el.addEventListener('click', (e) => {
+    const row = e.target.closest('.pf-row');
+    if (!row) return;
+    const open = row.getAttribute('aria-expanded') !== 'true';
+    el.querySelectorAll('.pf-row').forEach((r) => {
+      const on = r === row && open;
+      r.setAttribute('aria-expanded', on);
+      el.querySelector(`.pf-sub[data-for="${r.dataset.sub}"]`).hidden = !on;
+    });
+    // El menú creció: si ya no cabe por abajo, se sube; y la lista abierta se deja a la vista.
+    const r = el.getBoundingClientRect();
+    if (r.bottom > innerHeight - 8) el.style.top = Math.max(8, innerHeight - 8 - r.height) + 'px';
+    el.querySelector('.pf-sub:not([hidden])')?.scrollIntoView({ block: 'nearest' });
   });
 }
 function pageMenu(anchor) {
@@ -5869,7 +5900,7 @@ function attachPenTouch(desk) {
 function attachInk(page, v) {
   let stroke = null, lastMove = 0, lastPoint = null, before = null, erased = false, lassoPath = null, pointerType = 'mouse';
   let activeId = null;   // el puntero que está escribiendo: los demás (palma, otro dedo) no cuentan
-  let linkTap = null;    // empezó encima de un enlace: si es un toque (sin moverse), abre el enlace en vez de pintar
+  let linkTap = null;    // empezó encima de un enlace o un post-it: si es un toque (sin moverse), lo abre en vez de pintar
   /** Descarta lo que se estaba haciendo sin guardarlo (el lápiz llegó mientras escribía un dedo). */
   const cancel = () => {
     try { v.ink.releasePointerCapture(activeId); } catch (err) { /* ya suelto */ }
@@ -5896,7 +5927,7 @@ function attachInk(page, v) {
     currentPageIndex = activeNb().pages.indexOf(page);
     stopEditing();
     before = snapshotPage(page);
-    linkTap = linkAt(page, v, e.clientX, e.clientY);
+    linkTap = linkAt(page, v, e.clientX, e.clientY) || (performance.now() - lastInkAt < 1500 ? null : noteAt(page, v, e.clientX, e.clientY));   // escribiendo encima: el punto de la «i» no abre el post-it
     if (linkTap) linkTap.at = [e.clientX, e.clientY];
     const p = point(e);
     if (S.tool === 'eraser') { erased = eraseAt(page, p); return; }
@@ -5930,11 +5961,11 @@ function attachInk(page, v) {
     const tap = linkTap;
     linkTap = null;
     if (tap && e.type === 'pointerup') {
-      // Un toque sobre un enlace con cualquier herramienta: se descarta lo empezado y se abre el enlace.
+      // Un toque sobre un enlace o un post-it con cualquier herramienta: se descarta lo empezado y se abre.
       if (erased && before) { page.strokes = before.strokes; renderInk(page); }
       stroke = null; lassoPath = null; erased = false;
       ctxFor(v.live).clearRect(0, 0, page.w, page.h);
-      return showLinkPreview(tap.target, tap.source);
+      return tap.note ? editStickyAt(page, tap.note, tap.at) : showLinkPreview(tap.target, tap.source);
     }
     if (S.tool === 'eraser') { if (erased) commit(page, before); erased = false; return; }
     if (lassoPath) {
@@ -5959,6 +5990,7 @@ function attachInk(page, v) {
     stroke.points = (snapped ? snapped.map(([x, y]) => [x, y, pressure]) : stroke.points).map(([x, y, pr]) => [Math.round(x * 10) / 10, Math.round(y * 10) / 10, pr]);
     page.strokes.push(stroke);
     stroke = null;
+    lastInkAt = performance.now();
     ctxFor(v.live).clearRect(0, 0, page.w, page.h);
     renderInk(page);
     commit(page, before);
@@ -5982,6 +6014,25 @@ function linkAt(page, v, cx, cy) {
     if (item?.target && inside(el.getBoundingClientRect())) return { target: item.target, source: { item, page } };
   }
   return null;
+}
+let lastInkAt = 0;   // cuándo se terminó el último trazo
+/** El post-it bajo un punto de la pantalla, si es el elemento de encima (no uno tapado por un texto o una imagen).
+ *  Los comentarios no hacen falta: van en la capa de encima de la tinta y reciben el toque ellos mismos. */
+function noteAt(page, v, cx, cy) {
+  const els = [...v.items.querySelectorAll('.item')].reverse();
+  const el = els.find((x) => { const r = x.getBoundingClientRect(); return cx >= r.left && cx <= r.right && cy >= r.top && cy <= r.bottom; });
+  const item = el?.classList.contains('sticky') && page.items.find((i) => i.id === el.dataset.id);
+  return item ? { note: item } : null;
+}
+/** Pasa a la herramienta Post-it y deja el cursor en el punto tocado para escribir en él. */
+function editStickyAt(page, item, [cx, cy]) {
+  setTool('sticky');
+  select({ pageId: page.id, itemId: item.id }, false);
+  const rich = richFor(page.id, item.id);
+  if (!rich) return;
+  rich.focus({ preventScroll: true });
+  const range = document.caretRangeFromPoint?.(cx, cy);
+  if (range && rich.contains(range.startContainer)) { const sel = getSelection(); sel.removeAllRanges(); sel.addRange(range); }
 }
 function eraseAt(page, p) {
   const r = S.eraserSize / Math.max(S.zoom, 0.5);
