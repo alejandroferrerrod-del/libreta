@@ -1990,13 +1990,10 @@ function drawStroke(ctx, s, paper, faded = false) {
   } else if (p.length === 1) {
     ctx.beginPath(); ctx.arc(p[0][0], p[0][1], s.width * 0.6, 0, Math.PI * 2); ctx.fill();
   } else if (s.kind === 'pencil') {
-    ctx.globalAlpha *= 0.78;
+    // Lápiz: una sola pasada algo translúcida. Antes había una segunda pasada interior más fina que, con
+    // grosor alto, se veía como un núcleo más oscuro con un borde claro (dos tonos).
+    ctx.globalAlpha *= 0.8;
     ctx.lineWidth = Math.max(0.8, s.width * 0.75);
-    strokePath(ctx, p);
-    ctx.stroke();
-    ctx.globalAlpha *= 0.35;
-    ctx.lineWidth = Math.max(0.6, s.width * 0.35);
-    ctx.translate(0.6, 0.4);
     strokePath(ctx, p);
     ctx.stroke();
   } else {
