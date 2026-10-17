@@ -4728,11 +4728,15 @@ function renderEditor() {
   $('#page-menu').addEventListener('click', (e) => pageMenu(e.currentTarget));
   const desk = $('#desk');
   let redrawQueued = false;
+  const queueRedraw = () => { if (!redrawQueued) { redrawQueued = true; requestAnimationFrame(() => { redrawQueued = false; redrawPages(); }); } };
   desk.addEventListener('scroll', () => {
     updateCurrentPage(); PdfText.place();
-    // Al saltar lejos, se pintan primero las páginas que aparecen.
-    if (!redrawQueued) { redrawQueued = true; requestAnimationFrame(() => { redrawQueued = false; redrawPages(Math.min(window.devicePixelRatio || 1, 2)); }); }
+    queueRedraw();   // se montan las páginas que entran y se liberan las que se alejan
   }, { passive: true });
+  // Si el escritorio cambia de tamaño o pasa de oculto a visible, se revisa qué páginas se ven.
+  // Uno solo: el del editor anterior se apaga (cada renderEditor crea un #desk nuevo).
+  renderEditor.ro?.disconnect();
+  if (window.ResizeObserver) (renderEditor.ro = new ResizeObserver(queueRedraw)).observe(desk);
   desk.addEventListener('wheel', (e) => { if (e.ctrlKey || e.metaKey) { e.preventDefault(); setZoom(S.zoom * (e.deltaY < 0 ? 1.1 : 1 / 1.1)); } }, { passive: false });
   desk.addEventListener('dragover', (e) => { if ([...(e.dataTransfer?.items || [])].some((i) => i.kind === 'file')) e.preventDefault(); });
   desk.addEventListener('drop', (e) => {
@@ -4792,12 +4796,14 @@ function buildPages() {
     const wrap = document.createElement('div');
     wrap.className = 'page';
     wrap.dataset.id = page.id;
-    wrap.innerHTML = `<div class="page-inner" style="width:${page.w}px;height:${page.h}px">
-        <canvas class="paper"></canvas>${page.bg ? `<img class="bg" src="${page.bg}" alt="">` : ''}
-        <div class="layer items"></div><canvas class="ink"></canvas><canvas class="live" style="pointer-events:none"></canvas><div class="layer over"></div>
+    // Los lienzos nacen vacíos (0×0) y el fondo sin src: solo se montan las páginas cercanas (ver redrawPages).
+    const size = `width:${page.w}px;height:${page.h}px`;
+    wrap.innerHTML = `<div class="page-inner" style="${size}">
+        <canvas class="paper" width="0" height="0" style="${size}"></canvas>${page.bg ? '<img class="bg" alt="">' : ''}
+        <div class="layer items"></div><canvas class="ink" width="0" height="0" style="${size}"></canvas><canvas class="live" width="0" height="0" style="${size};pointer-events:none"></canvas><div class="layer over"></div>
       </div><div class="page-number">${index + 1} / ${nb.pages.length}</div>`;
     container.appendChild(wrap);
-    const v = { wrap, inner: $('.page-inner', wrap), paper: $('.paper', wrap), ink: $('.ink', wrap), live: $('.live', wrap), items: $('.layer.items', wrap), over: $('.layer.over', wrap) };
+    const v = { wrap, inner: $('.page-inner', wrap), paper: $('.paper', wrap), ink: $('.ink', wrap), live: $('.live', wrap), bg: $('.bg', wrap), items: $('.layer.items', wrap), over: $('.layer.over', wrap) };
     views.set(page.id, v);
     attachInk(page, v);
     attachItemsLayer(page, v);
@@ -4809,10 +4815,9 @@ function buildPages() {
   container.appendChild(add);
   layoutPages();
 }
-function layoutPages() {
+function layoutPages(redraw = true) {
   const nb = activeNb();
   if (!nb) return;
-  const dpr = Math.min(window.devicePixelRatio || 1, 2);
   for (const page of nb.pages) {
     const v = views.get(page.id);
     if (!v) continue;
@@ -4821,42 +4826,50 @@ function layoutPages() {
     v.inner.style.transform = `scale(${S.zoom})`;
     if (!v.laidOut) { v.laidOut = true; renderItems(page); }
   }
-  redrawPages(dpr);
+  if (redraw) redrawPages(pageDpr());
   const label = $('#zoom-fit');
   if (label) label.textContent = Math.round(S.zoom * 100) + '%';
 }
-/** Vuelve a pintar a la nueva resolución las páginas que lo necesitan: las que se ven, al momento;
- *  el resto, poco a poco (con muchas páginas, cambiar el zoom ya no deja la libreta trabada). */
-function redrawPages(dpr) {
+const pageDpr = () => Math.min(window.devicePixelRatio || 1, 2);
+const pageScale = (dpr = pageDpr()) => Math.min(S.zoom * dpr, 3);
+/** Monta una página: da a sus 3 lienzos el tamaño real, pone el fondo del PDF y la pinta. */
+function mountPage(page, v, scale = pageScale()) {
+  if (v.ink._scale === scale) return;
+  for (const c of [v.paper, v.ink, v.live]) {
+    c.width = Math.round(page.w * scale); c.height = Math.round(page.h * scale); c._scale = scale;
+  }
+  if (v.bg && page.bg && v.bg.getAttribute('src') !== page.bg) v.bg.src = page.bg;
+  renderPaper(page); renderInk(page);
+}
+/** Desmonta una página lejana: lienzos a 0×0 y fondo sin src para que el navegador libere la memoria.
+ *  El marco (wrap) conserva su tamaño, así el desplazamiento y los números de página no cambian. */
+function unmountPage(v) {
+  if (!v.ink._scale && !v.ink.width) return;
+  for (const c of [v.paper, v.ink, v.live]) { c.width = 0; c.height = 0; c._scale = 0; }
+  if (v.bg) v.bg.removeAttribute('src');
+}
+/** Solo las páginas visibles y una pantalla por arriba y por abajo tienen lienzos de verdad (en iPad, pintar
+ *  todas a zoom×pantalla agotaba la memoria con PDFs largos). Se llama al desplazarse y al cambiar el zoom.
+ *  Hasta dos pantallas de distancia se conservan si ya están a la escala buena (evita repintar al ir y venir). */
+function redrawPages(dpr = pageDpr()) {
   const nb = activeNb(), desk = $('#desk');
-  if (!nb || !desk) return;
-  const scale = Math.min(S.zoom * dpr, 3);
-  const top = desk.scrollTop - desk.clientHeight, bottom = desk.scrollTop + desk.clientHeight * 2;
-  const todo = nb.pages.map((page) => ({ page, v: views.get(page.id) })).filter(({ v }) => v && v.ink._scale !== scale);
-  const paint = ({ page, v }) => {
-    if (!document.contains(v.wrap) || v.ink._scale === scale) return;
-    for (const c of [v.paper, v.ink, v.live]) {
-      c.width = Math.round(page.w * scale); c.height = Math.round(page.h * scale);
-      c.style.width = page.w + 'px'; c.style.height = page.h + 'px'; c._scale = scale;
-    }
-    renderPaper(page); renderInk(page);
-  };
-  const near = todo.filter(({ v }) => v.wrap.offsetTop + v.wrap.offsetHeight > top && v.wrap.offsetTop < bottom);
-  near.forEach(paint);
-  const rest = todo.filter((x) => !near.includes(x));
-  const run = (redrawPages.run = (redrawPages.run || 0) + 1);
-  const step = () => {
-    if (redrawPages.run !== run) return;
-    rest.splice(0, 2).forEach(paint);
-    if (rest.length) setTimeout(step, 16);
-  };
-  if (rest.length) setTimeout(step, 50);
+  if (!nb || !desk || !desk.clientHeight) return;   // escritorio oculto: no se sabe qué se ve, no se toca nada
+  const scale = pageScale(dpr), top = desk.scrollTop, h = desk.clientHeight;
+  for (const page of nb.pages) {
+    const v = views.get(page.id);
+    if (!v || !document.contains(v.wrap)) continue;
+    const y0 = v.wrap.offsetTop, y1 = y0 + v.wrap.offsetHeight;
+    const gap = y1 < top ? top - y1 : y0 > top + h ? y0 - top - h : 0;   // distancia a la zona visible
+    if (gap <= h) mountPage(page, v, scale);
+    else if (gap > h * 2 || v.ink._scale !== scale) unmountPage(v);
+  }
 }
 function ctxFor(canvas) { const ctx = canvas.getContext('2d'); ctx.setTransform(canvas._scale, 0, 0, canvas._scale, 0, 0); return ctx; }
-function renderPaper(page) { const v = views.get(page.id); if (v) drawPaper(ctxFor(v.paper), page); }
+// Una página desmontada no se pinta: se pintará entera al volver a montarse.
+function renderPaper(page) { const v = views.get(page.id); if (v && v.paper._scale) drawPaper(ctxFor(v.paper), page); }
 function renderInk(page) {
   const v = views.get(page.id);
-  if (!v) return;
+  if (!v || !v.ink._scale) return;
   const ctx = ctxFor(v.ink);
   ctx.clearRect(0, 0, page.w, page.h);
   const sel = S.lasso && S.lasso.pageId === page.id ? new Set(S.lasso.ids) : null;
@@ -4868,8 +4881,9 @@ function setZoom(z) {
   if (!desk) return;
   const ratio = desk.scrollTop / Math.max(1, desk.scrollHeight);
   S.zoom = Math.max(0.3, Math.min(3, z));
-  layoutPages();
+  layoutPages(false);
   desk.scrollTop = ratio * desk.scrollHeight;
+  redrawPages();   // ya en la posición nueva: se montan las que se ven
 }
 function fitZoom() {
   const desk = $('#desk'), nb = activeNb();
@@ -5448,6 +5462,7 @@ function attachInk(page, v) {
     e.preventDefault();
     pointerType = e.pointerType;
     try { v.ink.setPointerCapture(e.pointerId); } catch (err) { /* puntero sintético */ }
+    mountPage(page, v);   // por si aún no estaba montada (no debería: está a la vista)
     currentPageIndex = activeNb().pages.indexOf(page);
     stopEditing();
     before = snapshotPage(page);
