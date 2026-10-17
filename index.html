@@ -310,10 +310,27 @@ html.pen-mode .ink { touch-action: pan-x pan-y; }
 .pin { position: absolute; width: 34px; height: 34px; border-radius: 50%; color: #fff; display: grid; place-items: center; font-weight: 700; font-size: 15px; border: 2px solid #fff; box-shadow: 0 1px 3px rgba(0,0,0,.3); cursor: pointer; background: var(--c); }
 .pin .name { position: absolute; left: 40px; top: 7px; white-space: nowrap; color: var(--c); font-size: 13px; font-weight: 600; }
 .pin.selected { box-shadow: 0 0 0 3px #007AFF; }
-.comment-panel { position: absolute; width: 380px; background: #fff; color: #1C1C1E; border-radius: 12px; border: 1.5px solid var(--c); box-shadow: 0 4px 10px rgba(0,0,0,.2); overflow: hidden; }
-.comment-panel header { background: var(--c); color: #fff; font-weight: 600; font-size: 14px; padding: 9px 12px; display: flex; align-items: center; gap: 8px; }
-.comment-panel header button { margin-left: auto; border: 0; background: transparent; color: #fff; }
-.comment-panel .rich { padding: 10px 12px; max-height: 360px; overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain; min-height: 60px; }
+/* Globo del comentario (junto a su círculo, con flecha): a escala 1/zoom desde editor.js, mismo tamaño en pantalla. */
+.comment-panel { position: absolute; z-index: 3; width: 280px; transform-origin: 0 0; background: var(--surface); color: var(--ink); border-radius: 12px;
+  border: 1px solid color-mix(in srgb, var(--c) 55%, var(--hairline)); box-shadow: 0 6px 22px rgba(0,0,0,.18), 0 1px 3px rgba(0,0,0,.12); color-scheme: inherit; }
+.comment-panel::before { content: ""; position: absolute; width: 12px; height: 12px; background: var(--surface); transform: rotate(45deg);
+  border: 1px solid color-mix(in srgb, var(--c) 55%, var(--hairline)); }
+.comment-panel[data-side="r"]::before { left: -7px; top: calc(var(--ay, 22px) - 6px); border-right: 0; border-top: 0; }
+.comment-panel[data-side="l"]::before { right: -7px; top: calc(var(--ay, 22px) - 6px); border-left: 0; border-bottom: 0; }
+.comment-panel[data-side="b"]::before { top: -7px; left: calc(var(--ax, 28px) - 6px); border-right: 0; border-bottom: 0; }
+.comment-panel[data-side="t"]::before { bottom: -7px; left: calc(var(--ax, 28px) - 6px); border-left: 0; border-top: 0; }
+.comment-panel header { display: flex; align-items: center; gap: 6px; padding: 4px 4px 4px 12px; border-bottom: 1px solid var(--hairline); }
+.comment-panel .cp-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--c); flex: none; }
+.comment-panel .cp-title { flex: 1; min-width: 0; border: 0; background: transparent; font-weight: 600; font-size: 14px; padding: 5px 4px; border-radius: 6px; color: var(--ink); text-overflow: ellipsis; }
+.comment-panel .cp-title:hover, .comment-panel .cp-title:focus { background: var(--fill); outline: none; }
+.comment-panel .cp-done { width: 30px; height: 30px; flex: none; border: 0; border-radius: 50%; background: transparent; color: var(--accent); display: grid; place-items: center; padding: 0; }
+.comment-panel .cp-done:hover { background: var(--fill); }
+.comment-panel .cp-done svg { width: 19px; height: 19px; stroke-width: 2.4; }
+.comment-panel .cp-body { position: relative; }
+.comment-panel .rich { padding: 8px 12px 8px; min-height: calc(2.8em + 16px); max-height: 220px; overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain; outline: none; line-height: 1.4; }
+.comment-panel .cp-ph { display: none; position: absolute; left: 12px; top: 9px; right: 12px; color: var(--muted); font-size: 15px; pointer-events: none; }
+.comment-panel.cp-empty .cp-ph { display: block; }
+.comment-panel .cp-date { padding: 0 12px 8px; margin-top: -2px; font-size: 11.5px; color: var(--muted); font-variant-numeric: tabular-nums; }
 .lasso-box { position: absolute; border: 1.5px dashed #007AFF; background: rgba(0, 122, 255, .06); cursor: move; border-radius: 4px; }
 .ink-on .layer.items { pointer-events: none; }
 .add-page { border: 2px dashed var(--line); background: transparent; color: var(--muted); border-radius: 10px; padding: 14px 22px; }
@@ -641,6 +658,52 @@ body:not(.kbd-nav) select:focus-visible, body:not(.kbd-nav) .options :focus-visi
 .popover.size-pop .sz-quick button { justify-content: center; padding: 7px 0; border-radius: 8px; background: var(--fill); color: var(--ink); font-size: 14px; font-variant-numeric: tabular-nums; }
 .popover.size-pop .sz-quick button:hover:not(:disabled) { background: var(--fill-strong); color: var(--ink); }
 .popover.size-pop .sz-quick button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); font-weight: 600; }
+
+/* Lista de comentarios de la libreta (botón de comentario con la herramienta ya elegida). */
+.popover.comments-pop { padding: 0; overflow: hidden; }
+.comments-pop .cl-wrap { width: min(340px, calc(100vw - 32px)); display: flex; flex-direction: column; max-height: min(70vh, 520px); }
+.comments-pop .cl-head { display: flex; align-items: center; gap: 8px; padding: 12px 14px 8px; font-size: 15px; }
+.comments-pop .cl-count { font-size: 12px; color: var(--muted); background: var(--fill); border-radius: 999px; padding: 1px 8px; font-variant-numeric: tabular-nums; }
+.comments-pop .cl-search { display: flex; align-items: center; gap: 6px; margin: 0 10px 6px; padding: 0 10px; height: 34px; border-radius: 9px; background: var(--fill); color: var(--muted); }
+.comments-pop .cl-search svg { width: 16px; height: 16px; flex: none; }
+.comments-pop .cl-search input { flex: 1; min-width: 0; border: 0; background: transparent; color: var(--ink); font-size: 14px; outline: none; }
+.comments-pop .cl-list { overflow-y: auto; overscroll-behavior: contain; padding: 2px 5px 6px; }
+.popover .cl-row { width: 100%; align-items: flex-start; gap: 10px; padding: 8px 9px; border-radius: 9px; }
+.popover .cl-row[hidden] { display: none; }
+.popover .cl-row:hover:not(:disabled) { background: var(--fill); color: inherit; }
+.comments-pop .cl-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--c); flex: none; margin-top: 5px; }
+.comments-pop .cl-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.comments-pop .cl-top { display: flex; align-items: baseline; gap: 8px; }
+.comments-pop .cl-top b { font-weight: 600; font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+.comments-pop .cl-meta { margin-left: auto; flex: none; font-size: 11.5px; color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.comments-pop .cl-text { font-size: 13px; color: var(--ink-2); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.35; }
+.comments-pop .cl-empty { margin: 4px 14px 16px; color: var(--muted); font-size: 13.5px; line-height: 1.45; }
+
+/* Pantalla completa: botón junto al «+» de las pestañas y en la biblioteca (arriba a la derecha). Modo propio
+   (sin API de pantalla completa, p. ej. Safari del iPhone): sin franja de pestañas y un botón flotante para salir. */
+.tabs .fs-btn { align-self: center; width: 30px; height: 30px; margin-left: 2px; color: var(--ink-2); }
+.fs-btn svg { width: 17px; height: 17px; }
+.lib-header .lib-fs { position: absolute; top: 0; right: 6px; width: 26px; height: 24px; color: var(--muted); }
+.lib-header .lib-fs svg { width: 15px; height: 15px; }
+.lib-header:has(.lib-fs) .lib-clock { right: 38px; }
+@media (max-width: 520px) { .tabs .clock { display: none; } }   /* en el móvil no cabe junto a las pestañas */
+html.app-full .tabs { display: none; }
+html.app-full .lib-fs { visibility: hidden; }
+html.app-full header.bar { margin-right: 46px; }   /* el botón flotante va en la esquina, fuera de la barra */
+.fs-float { position: fixed; top: 8px; right: 8px; z-index: 65; width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--hairline); display: grid; place-items: center; padding: 0;
+  background: color-mix(in srgb, var(--surface) 80%, transparent); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); color: var(--ink-2); box-shadow: 0 2px 8px rgba(0,0,0,.15); opacity: .7; }
+.fs-float:hover, .fs-float:focus-visible { opacity: 1; }
+.fs-float svg { width: 16px; height: 16px; }
+
+/* Interruptor en los menús («Dibujar con el dedo»). */
+.popover .switch { margin-left: auto; position: relative; width: 36px; height: 21px; border-radius: 999px; background: var(--fill-strong); flex: none; transition: background .15s; }
+.popover .switch::after { content: ""; position: absolute; top: 2px; left: 2px; width: 17px; height: 17px; border-radius: 50%; background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,.3); transition: left .15s; }
+.popover [aria-checked="true"] .switch { background: #34C759; }
+.popover [aria-checked="true"] .switch::after { left: 17px; }
+
+/* Modo lápiz: el dedo desplaza también sobre post-its, textos, imágenes y comentarios; el lápiz los arrastra sin
+   desplazar (su toque se anula en attachPenTouch). touch-action no distingue dedo y lápiz: por eso va en editor.js. */
+html.pen-mode .item, html.pen-mode .pin, html.pen-mode .lasso-box { touch-action: pan-x pan-y; }
 /* =============================================================================
    Tutorial de la primera vez (siempre en oscuro, como en la app nativa)
    ============================================================================= */
@@ -806,6 +869,8 @@ const ICONS = {
  "lightbulb": "<path d=\"M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5\" /> <path d=\"M9 18h6\" /> <path d=\"M10 22h4\" />",
  "bell": "<path d=\"M10.268 21a2 2 0 0 0 3.464 0\" /> <path d=\"M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326\" />",
  "maximize": "<path d=\"M8 3H5a2 2 0 0 0-2 2v3\" /> <path d=\"M21 8V5a2 2 0 0 0-2-2h-3\" /> <path d=\"M3 16v3a2 2 0 0 0 2 2h3\" /> <path d=\"M16 21h3a2 2 0 0 0 2-2v-3\" />",
+ "expand": "<path d=\"M15 3h6v6\" /> <path d=\"m21 3-7 7\" /> <path d=\"m3 21 7-7\" /> <path d=\"M9 21H3v-6\" />",
+ "shrink": "<path d=\"m14 10 7-7\" /> <path d=\"M20 10h-6V4\" /> <path d=\"m3 21 7-7\" /> <path d=\"M4 14h6v6\" />",
  "pageFormat": "<path d=\"M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z\" /> <path d=\"M14 2v4a2 2 0 0 0 2 2h4\" /> <path d=\"M8 12h8\" /> <path d=\"M10 11v2\" /> <path d=\"M8 17h8\" /> <path d=\"M14 16v2\" />",
  "penOff": "<path d=\"m10 10-6.157 6.162a2 2 0 0 0-.5.833l-1.322 4.36a.5.5 0 0 0 .622.624l4.358-1.323a2 2 0 0 0 .83-.5L14 13.982\" /> <path d=\"m12.829 7.172 4.359-4.346a1 1 0 1 1 3.986 3.986l-4.353 4.353\" /> <path d=\"m2 2 20 20\" />",
  "checkCircle": "<circle cx=\"12\" cy=\"12\" r=\"10\" /> <path d=\"m9 12 2 2 4-4\" />",
@@ -1108,7 +1173,11 @@ I18N.dict.it = {
   'Elegir destino': 'Scegli destinazione', 'Cambiar destino': 'Cambia destinazione', 'Vista previa': 'Anteprima', 'Sin destino': 'Senza destinazione', 'Elige destino': 'Scegli destinazione',
   'Enlazar con…': 'Collega a…', 'Enlazar con toda la libreta': 'Collega all’intero quaderno', 'O con una página concreta:': 'O a una pagina precisa:', 'Texto enlazado': 'Testo collegato',
   'Ir →': 'Vai →', 'Vista previa del enlace': 'Anteprima del collegamento', 'Esa libreta ya no existe.': 'Quel quaderno non esiste più.', 'Enlace a': 'Collegamento a',
-  'Cerrar comentario': 'Chiudi commento', 'Nombre del comentario': 'Nome del commento', 'Profe': 'Prof',
+  'Cerrar comentario': 'Chiudi commento', 'Hecho': 'Fatto', 'Escribe aquí tu comentario…': 'Scrivi qui il tuo commento…',
+  'Buscar en los comentarios': 'Cerca nei commenti', 'Ningún comentario coincide con la búsqueda.': 'Nessun commento corrisponde alla ricerca.',
+  'Aún no hay comentarios en esta libreta. Toca la página con esta herramienta para añadir uno.': 'Non ci sono ancora commenti in questo quaderno. Tocca la pagina con questo strumento per aggiungerne uno.',
+  'Dibujar con el dedo': 'Disegna con il dito', 'Apagado: el dedo desplaza la página y solo el lápiz escribe': 'Spento: il dito scorre la pagina e solo la penna scrive',
+  'El dedo dibuja, aunque uses lápiz': 'Il dito disegna, anche se usi la penna', 'Modo lápiz: el dedo desplaza la página y el lápiz escribe': 'Modalità penna: il dito scorre la pagina e la penna scrive', 'Nombre del comentario': 'Nome del commento', 'Profe': 'Prof',
   'Reproducir': 'Riproduci', 'Grabaciones': 'Registrazioni', 'Renombrar': 'Rinomina',
   // --- Buscar ---
   'Cerrar búsqueda': 'Chiudi ricerca', 'Buscar en esta libreta': 'Cerca in questo quaderno',
@@ -1208,7 +1277,7 @@ I18N.patterns.it = [
   [/^Importando el PDF… (\d+) de (\d+)$/, 'Importazione del PDF… $1 di $2'], [/^Recuperadas (\d+) libretas$/, 'Recuperati $1 quaderni'],
   [/^Exportando (\d+) libretas? en PDF…$/, (m) => `Esportazione di ${m[1]} ${m[1] === '1' ? 'quaderno' : 'quaderni'} in PDF…`],
   [/^(\d+) elementos duplicados$/, '$1 elementi duplicati'], [/^Grosor ([\d.]+)$/, 'Spessore $1'], [/^Color (#\w+)$/, 'Colore $1'], [/^Portada (#\w+)$/, 'Copertina $1'],
-  [/^Página (\d+)$/, 'Pagina $1'], [/^Página (\d+) \/ (\d+)$/, 'Pagina $1 / $2'], [/^Continúas en la página (\d+)$/, 'Riprendi dalla pagina $1'],
+  [/^Pág\. (\d+)$/, 'Pag. $1'], [/^Página (\d+)$/, 'Pagina $1'], [/^Página (\d+) \/ (\d+)$/, 'Pagina $1 / $2'], [/^Continúas en la página (\d+)$/, 'Riprendi dalla pagina $1'],
   [/^Portada de «(.+)»$/, 'Copertina di «$1»'], [/^Color de «(.+)»$/, 'Colore di «$1»'], [/^Mover «(.+)» a$/, 'Sposta «$1» in'],
   [/^Copiada a «(.+)», en su primera página\.$/, 'Copiata in «$1», nella sua prima pagina.'],
   [/^Grabación guardada \((.+)\)\. Está en el menú del micrófono › Grabaciones\.$/, 'Registrazione salvata ($1). È nel menu del microfono › Registrazioni.'],
@@ -1314,15 +1383,51 @@ function setAppearance(value) {
 applyAppearance();
 
 const clockFormat = () => new Intl.DateTimeFormat(LOCALE(), { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
-/** Fecha y hora («mié, 14 oct, 10:29») en todos los relojes de la pantalla. */
-/** Pantalla completa (toda la app, sin la barra del navegador). */
+/** Pantalla completa (toda la app, sin la barra del navegador). Donde el navegador no la permite (Safari del iPhone,
+ *  iPad antiguos, ventanas incrustadas), modo propio de la app: se oculta la franja de pestañas (clase html.app-full). */
+const isFullscreen = () => !!(document.fullscreenElement || document.webkitFullscreenElement) || document.documentElement.classList.contains('app-full');
 function toggleFullscreen() {
-  const d = document;
-  try {
-    if (d.fullscreenElement || d.webkitFullscreenElement) (d.exitFullscreen || d.webkitExitFullscreen).call(d);
-    else { const el = d.documentElement; (el.requestFullscreen || el.webkitRequestFullscreen).call(el); }
-  } catch (e) { toast('Este navegador no deja poner la página en pantalla completa.'); }
+  const d = document, el = d.documentElement;
+  if (el.classList.contains('app-full')) return setAppFull(false);
+  if (d.fullscreenElement || d.webkitFullscreenElement) {
+    try { (d.exitFullscreen || d.webkitExitFullscreen).call(d); } catch (e) { /* ya fuera */ }
+    return;
+  }
+  const req = el.requestFullscreen || el.webkitRequestFullscreen;
+  if (!req) return setAppFull(true);
+  try { const p = req.call(el); if (p?.catch) p.catch(() => setAppFull(true)); } catch (e) { setAppFull(true); }
 }
+function setAppFull(on) {
+  document.documentElement.classList.toggle('app-full', on);
+  // Botón flotante para salir: la franja de arriba (con su botón) queda oculta.
+  let float = document.getElementById('fs-float');
+  if (on && !float) {
+    float = document.createElement('button');
+    float.id = 'fs-float'; float.className = 'fs-float'; float.dataset.fs = '';
+    document.body.appendChild(float);
+  }
+  if (!on) float?.remove();
+  updateFullscreenButtons();
+  dispatchEvent(new Event('resize'));   // el editor recoloca las páginas en el espacio nuevo
+}
+/** Los botones de pantalla completa (con data-fs) muestran entrar o salir. */
+function updateFullscreenButtons() {
+  const on = isFullscreen(), label = on ? 'Salir de pantalla completa' : 'Pantalla completa';
+  document.querySelectorAll('[data-fs]').forEach((b) => {
+    b.innerHTML = icon(on ? 'shrink' : 'expand');
+    b.setAttribute('aria-label', label); b.title = label;
+    b.setAttribute('aria-pressed', String(on));
+  });
+}
+/** Botón de pantalla completa para las barras de arriba. */
+function fullscreenButton(cls = '') {
+  const on = isFullscreen(), label = on ? 'Salir de pantalla completa' : 'Pantalla completa';
+  return `<button class="icon-btn fs-btn ${cls}" data-fs aria-pressed="${on}" aria-label="${label}" title="${label}">${icon(on ? 'shrink' : 'expand')}</button>`;
+}
+document.addEventListener('fullscreenchange', updateFullscreenButtons);
+document.addEventListener('webkitfullscreenchange', updateFullscreenButtons);
+document.addEventListener('click', (e) => { if (e.target.closest?.('[data-fs]')) toggleFullscreen(); });
+/** Fecha y hora («mié, 14 oct, 10:29») en todos los relojes de la pantalla. */
 function updateClocks() {
   const text = clockFormat().format(new Date());
   document.querySelectorAll('[data-clock]').forEach((el) => { if (el.textContent !== text) el.textContent = text; });
@@ -2309,7 +2414,7 @@ function renderLibrary() {
         <button id="select-btn" title="Seleccionar varias libretas o carpetas" aria-label="Seleccionar" ${S.dynamic ? 'disabled' : ''}>${icon('checkCircle')}</button>
         <button id="settings-btn" aria-haspopup="menu" title="Ajustes: apariencia, atajos, copias de seguridad…" aria-label="Ajustes">${icon('settings')}</button>
       </div>
-      <div class="clock lib-clock" data-clock></div>
+      <div class="clock lib-clock" data-clock></div>${fullscreenButton('lib-fs')}
     </header>`;
   const breadcrumb = crumbs.length ? `<nav class="crumbs" aria-label="Ruta"><button data-go-folder="">Libretas</button>${crumbs.slice(0, -1).map((f) => `<span>›</span><button data-go-folder="${f.id}" translate="no">${esc(f.name)}</button>`).join('')}<span>›</span></nav>` : '';
   $('#app').innerHTML = `<div class="${dark ? 'dark-zone' : ''}" style="display:contents">${header}
@@ -2399,7 +2504,8 @@ function settingsMenu(anchor) {
     <button data-act="ap:system">${mark('system')} Automática</button>
     <button data-act="ap:light">${mark('light')} Clara</button>
     <button data-act="ap:dark">${mark('dark')} Oscura</button>
-    <hr><button data-act="fullscreen">${icon('maximize')} ${document.fullscreenElement ? 'Salir de pantalla completa' : 'Pantalla completa'} <span class="kbd-hint">${onbKey('fullscreen')}</span></button>
+    <hr><button data-act="fullscreen">${icon(isFullscreen() ? 'shrink' : 'expand')} ${isFullscreen() ? 'Salir de pantalla completa' : 'Pantalla completa'} <span class="kbd-hint">${onbKey('fullscreen')}</span></button>
+    ${fingerSwitch()}
     <button data-act="shortcuts">${icon('keyboard')} Atajos de teclado…</button>
     <button data-act="tutorial">${icon('tutorial')} Ver el tutorial</button>
     <hr><div class="label">Copia de seguridad</div>
@@ -2411,6 +2517,7 @@ function settingsMenu(anchor) {
     if (act === 'load') loadBackup();
     if (act === 'shortcuts') shortcutsDialog();
     if (act === 'fullscreen') toggleFullscreen();
+    if (act === 'finger') toggleFinger();
     if (act === 'tutorial') Onboarding.open();
     if (act === 'install') window.libretaInstall?.();
   });
@@ -4528,6 +4635,8 @@ const TOOLS = [
 const INK_TOOLS = ['pen', 'highlighter', 'eraser', 'lasso'];
 const RICH_TYPES = ['text', 'sticky', 'comment'];
 
+/** La app se ve en modo oscuro (elegido o automático con el sistema en oscuro). */
+const isDarkTheme = () => document.documentElement.dataset.theme === 'dark' || (!document.documentElement.dataset.theme && matchMedia('(prefers-color-scheme: dark)').matches);
 // ---------- Abrir, cerrar y pestañas ----------
 function openNotebook(id, opts = {}) {
   const nb = nbById(id);
@@ -4621,7 +4730,7 @@ function renderTabs() {
         <button class="x" data-close="${id}" aria-label="Cerrar ${esc(nb.title)}">${icon('close')}</button>
         ${chips ? '<span class="gline"></span>' : ''}</div>`;
     }).join('')) + '</div>';
-  }).join('') + `<span class="clock" data-clock></span><button class="icon-btn plus" id="tab-plus" aria-label="Abrir otra libreta" title="Abrir otra libreta">${icon('plus')}</button>`;
+  }).join('') + `<span class="clock" data-clock></span><button class="icon-btn plus" id="tab-plus" aria-label="Abrir otra libreta" title="Abrir otra libreta">${icon('plus')}</button>${fullscreenButton()}`;
   updateClocks();
   el.onclick = (e) => {
     const close = e.target.closest('[data-close]');
@@ -4735,7 +4844,7 @@ function renderEditor() {
   $('#back').addEventListener('click', backToLibrary);
   $('#side-btn').addEventListener('click', () => setSidebar(!S.sidebar));
   $('#title').addEventListener('change', (e) => { nb.title = e.target.value.trim() || 'Sin título'; touch(); renderTabs(); });
-  $$('[data-tool]').forEach((b) => b.addEventListener('click', () => setTool(b.dataset.tool)));
+  $$('[data-tool]').forEach(bindToolButton);
   $('#add-image').addEventListener('click', () => { saveRange(); pickFile('image/*', (f) => insertImageFile(f), true); });
   $('#bm-btn').addEventListener('click', () => { updateCurrentPage(); toggleBookmark(nb.pages[currentPageIndex]); });
   $('#find-btn').addEventListener('click', () => ($('.search-panel') ? closeSearchPanel() : openSearchPanel()));
@@ -4803,7 +4912,7 @@ function renderEditor() {
 function toolButton(tool, title) {
   const color = tool === 'pen' ? S.penColor : tool === 'highlighter' ? S.hlColor : null;
   // El icono va del color de la tinta salvo que no se vea sobre el fondo de la barra.
-  const dark = document.documentElement.dataset.theme === 'dark' || (!document.documentElement.dataset.theme && matchMedia('(prefers-color-scheme: dark)').matches);
+  const dark = isDarkTheme();
   const visible = color && (dark ? luminance(color) > 0.25 : luminance(color) < 0.85);
   return `<button class="tool ${color ? 'colored' : ''}" data-tool="${tool}" aria-label="${title}" title="${title}" aria-pressed="${S.tool === tool}"
     style="${color ? `--c:${color};` : ''}${visible ? `color:${color};` : ''}">${icon(tool)}${color ? '<span class="ink-bar"></span>' : ''}</button>`;
@@ -4818,9 +4927,30 @@ function refreshToolButtons() {
     const tpl = document.createElement('template');
     tpl.innerHTML = toolButton(tool, title).trim();
     const fresh = tpl.content.firstChild;
-    fresh.addEventListener('click', () => setTool(tool));
+    bindToolButton(fresh);
     old.replaceWith(fresh);
   }
+}
+/** Un toque elige la herramienta. En el comentario, si ya está elegido (o con clic derecho o pulsación larga),
+ *  abre la lista de comentarios de la libreta; otro toque la cierra. */
+function bindToolButton(b) {
+  const tool = b.dataset.tool;
+  let long = false, timer = 0;
+  b.addEventListener('click', () => {
+    if (long) { long = false; return; }   // la pulsación larga ya abrió la lista
+    if (tool === 'comment' && S.tool === 'comment') return commentsMenu(b);
+    setTool(tool);
+  });
+  if (tool !== 'comment') return;
+  const openList = () => { if (openPopover?.anchor !== b) commentsMenu(b); };
+  b.addEventListener('contextmenu', (e) => { e.preventDefault(); if (!long) openList(); });
+  b.addEventListener('pointerdown', (e) => {
+    long = false;
+    if (e.pointerType === 'mouse') return;
+    clearTimeout(timer);
+    timer = setTimeout(() => { long = true; openList(); }, 500);
+  });
+  for (const t of ['pointerup', 'pointercancel', 'pointerleave']) b.addEventListener(t, () => clearTimeout(timer));
 }
 function updatePageIndicator() {
   const nb = activeNb(), count = $('#page-count');
@@ -4869,6 +4999,7 @@ function layoutPages(redraw = true) {
     v.inner.style.transform = `scale(${S.zoom})`;
     if (!v.laidOut) { v.laidOut = true; renderItems(page); }
   }
+  $$('.comment-panel').forEach(placeCommentPanel);   // los globos de comentario no cambian de tamaño con el zoom
   if (redraw) redrawPages(pageDpr());
   const label = $('#zoom-fit');
   if (label) label.textContent = Math.round(S.zoom * 100) + '%';
@@ -5119,20 +5250,32 @@ function pageMenu(anchor) {
     <button data-act="zoom-in">${icon('plus')} Acercar</button><button data-act="zoom-out">${icon('minus')} Alejar</button><button data-act="zoom-fit">${icon('pages')} Ajustar al ancho</button>
     <hr><button data-act="pomo-visible">${mark(Pomo.visible)} Mostrar el temporizador en la barra</button>
     <button data-act="hold">${mark(S.holdToSnap)} Mantener quieto al final: forma perfecta o recta</button>
-    <button data-act="fullscreen">${icon('maximize')} ${document.fullscreenElement ? 'Salir de pantalla completa' : 'Pantalla completa'} <span class="kbd-hint">${onbKey('fullscreen')}</span></button>
+    <button data-act="fullscreen">${icon(isFullscreen() ? 'shrink' : 'expand')} ${isFullscreen() ? 'Salir de pantalla completa' : 'Pantalla completa'} <span class="kbd-hint">${onbKey('fullscreen')}</span></button>
+    ${fingerSwitch()}
     <button data-act="shortcuts">${icon('keyboard')} Atajos de teclado…</button>
     <hr><div class="label">Apariencia</div>
     ${[['system', 'Automática'], ['light', 'Clara'], ['dark', 'Oscura']].map(([k, n]) => `<button data-act="ap:${k}">${mark(currentAppearance() === k)} ${n}</button>`).join('')}`, (act) => {
     const [kind, value] = act.split(':');
     if (act === 'shortcuts') return shortcutsDialog();
     if (act === 'fullscreen') return toggleFullscreen();
+    if (act === 'finger') return toggleFinger();
     if (act === 'pomo-visible') { Pomo.visible = !Pomo.visible; return Pomo.changed(); }
     if (act === 'hold') { S.holdToSnap = !S.holdToSnap; savePrefs(); return toast(S.holdToSnap ? 'Mantener quieto al final de un trazo lo convierte en forma o recta' : 'Los trazos quedan siempre tal como los dibujas'); }
     if (act === 'zoom-in') return setZoom(S.zoom * 1.2);
     if (act === 'zoom-out') return setZoom(S.zoom / 1.2);
     if (act === 'zoom-fit') return fitZoom();
-    if (kind === 'ap') { setAppearance(value); return refreshToolButtons(); }
+    if (kind === 'ap') { setAppearance(value); refreshToolButtons(); return nb.pages.forEach((p) => views.has(p.id) && renderItems(p)); }
   });
+}
+/** Interruptor «Dibujar con el dedo» (Ajustes y menú «…»): encendido, el dedo escribe aunque haya lápiz;
+ *  apagado, modo lápiz (el dedo desplaza la página). Se ve siempre: así también se puede volver atrás. */
+function fingerSwitch() {
+  return `<button data-act="finger" role="menuitemcheckbox" aria-checked="${!PenInput.seen}" title="Apagado: el dedo desplaza la página y solo el lápiz escribe">${icon('select')} Dibujar con el dedo <span class="switch" aria-hidden="true"></span></button>`;
+}
+function toggleFinger() {
+  const on = PenInput.seen;   // estaba apagado: se enciende
+  PenInput.setFinger(on);
+  toast(on ? 'El dedo dibuja, aunque uses lápiz' : 'Modo lápiz: el dedo desplaza la página y el lápiz escribe');
 }
 function shareMenu(anchor) {
   updateCurrentPage();
@@ -5649,13 +5792,14 @@ function linkSelection(target) {
 const PenInput = {
   KEY: 'libreta-pen',
   seen: (() => { try { return localStorage.getItem('libreta-pen') === '1'; } catch (e) { return false; } })(),
+  finger: (() => { try { return localStorage.getItem('libreta-finger') === '1'; } catch (e) { return false; } })(),   // «Dibujar con el dedo»
   down: new Set(),   // lápices apoyados ahora (pointerId)
   at: null,          // dónde se apoyó el lápiz (para reconocer su toque)
   live: null,        // tinta en curso: { type, cancel } (para descartar el trazo de un dedo cuando llega el lápiz)
   /** El dedo no escribe si ya se vio un lápiz o si hay uno apoyado. */
   fingerBlocked() { return this.seen || this.down.size > 0; },
   mark() {
-    if (this.seen) return;
+    if (this.seen || this.finger) return;
     this.seen = true;
     try { localStorage.setItem(this.KEY, '1'); } catch (e) { /* solo esta sesión */ }
     this.apply();
@@ -5663,6 +5807,16 @@ const PenInput = {
   },
   /** La clase pen-mode deja que el dedo desplace la página sobre la tinta (touch-action en style.css). */
   apply() { document.documentElement.classList.toggle('pen-mode', this.seen); },
+  /** «Dibujar con el dedo» (Ajustes): encendido, el dedo escribe aunque haya lápiz y no se vuelve solo al modo lápiz;
+   *  apagado, modo lápiz. Es una preferencia de este dispositivo (localStorage). */
+  setFinger(on) {
+    this.finger = !!on;
+    try { if (on) localStorage.setItem('libreta-finger', '1'); else localStorage.removeItem('libreta-finger'); } catch (e) { /* solo esta sesión */ }
+    if (on) return this.forget();
+    this.seen = true;
+    try { localStorage.setItem(this.KEY, '1'); } catch (e) { /* solo esta sesión */ }
+    this.apply();
+  },
   /** Vuelve a «sin lápiz» (lo usan las pruebas). */
   forget() {
     this.seen = false; this.down.clear(); this.live = null; this.at = null;
@@ -5699,9 +5853,12 @@ function attachPenTouch(desk) {
     // El toque del lápiz: touchType 'stylus' (Safari) o en el mismo sitio que el pointerdown del lápiz (otros navegadores).
     const at = PenInput.at, isPen = (t) => t.touchType === 'stylus' || (at && Math.hypot(t.clientX - at[0], t.clientY - at[1]) < 3);
     const stylus = [...e.changedTouches].some(isPen);
-    // Sobre la tinta se anula el lápiz (no desplaza) y la palma; fuera, solo la palma: el lápiz sigue pulsando
-    // botones, enlaces y cuadros de texto.
-    if (e.target.closest?.('.ink') ? stylus || PenInput.down.size : !stylus && PenInput.down.size) e.preventDefault();
+    // Sobre la tinta y sobre los elementos que se arrastran (post-it, texto, imagen, comentario, lazo) se anula el
+    // lápiz (no desplaza) y la palma; fuera, solo la palma: el lápiz sigue pulsando botones, enlaces y cuadros de texto
+    // en los que se escribe. El dedo sí desplaza sobre los elementos (touch-action en style.css).
+    const t = e.target.closest ? e.target : null;
+    const drags = t && (t.closest('.ink') || (t.closest('.item, .pin, .lasso-box') && !t.closest('.rich[contenteditable="true"], a[data-link]')));
+    if (drags ? stylus || PenInput.down.size : !stylus && PenInput.down.size) e.preventDefault();
   };
   desk.addEventListener('touchstart', block, { passive: false });
 }
@@ -5710,6 +5867,7 @@ function attachPenTouch(desk) {
 function attachInk(page, v) {
   let stroke = null, lastMove = 0, lastPoint = null, before = null, erased = false, lassoPath = null, pointerType = 'mouse';
   let activeId = null;   // el puntero que está escribiendo: los demás (palma, otro dedo) no cuentan
+  let linkTap = null;    // empezó encima de un enlace: si es un toque (sin moverse), abre el enlace en vez de pintar
   /** Descarta lo que se estaba haciendo sin guardarlo (el lápiz llegó mientras escribía un dedo). */
   const cancel = () => {
     try { v.ink.releasePointerCapture(activeId); } catch (err) { /* ya suelto */ }
@@ -5736,6 +5894,8 @@ function attachInk(page, v) {
     currentPageIndex = activeNb().pages.indexOf(page);
     stopEditing();
     before = snapshotPage(page);
+    linkTap = linkAt(page, v, e.clientX, e.clientY);
+    if (linkTap) linkTap.at = [e.clientX, e.clientY];
     const p = point(e);
     if (S.tool === 'eraser') { erased = eraseAt(page, p); return; }
     if (S.tool === 'lasso') { clearLasso(); lassoPath = [p]; return; }
@@ -5745,6 +5905,7 @@ function attachInk(page, v) {
   });
   v.ink.addEventListener('pointermove', (e) => {
     if (e.pointerId !== activeId) return;
+    if (linkTap && Math.hypot(e.clientX - linkTap.at[0], e.clientY - linkTap.at[1]) > 6) linkTap = null;
     if (S.tool === 'eraser') { if (e.buttons) erased = eraseAt(page, point(e)) || erased; return; }
     if (lassoPath) {
       lassoPath.push(point(e));
@@ -5764,6 +5925,15 @@ function attachInk(page, v) {
     if (e.pointerId !== activeId) return;
     activeId = null;
     if (PenInput.live?.cancel === cancel) PenInput.live = null;
+    const tap = linkTap;
+    linkTap = null;
+    if (tap && e.type === 'pointerup') {
+      // Un toque sobre un enlace con cualquier herramienta: se descarta lo empezado y se abre el enlace.
+      if (erased && before) { page.strokes = before.strokes; renderInk(page); }
+      stroke = null; lassoPath = null; erased = false;
+      ctxFor(v.live).clearRect(0, 0, page.w, page.h);
+      return showLinkPreview(tap.target, tap.source);
+    }
     if (S.tool === 'eraser') { if (erased) commit(page, before); erased = false; return; }
     if (lassoPath) {
       ctxFor(v.live).clearRect(0, 0, page.w, page.h);
@@ -5795,6 +5965,21 @@ function attachInk(page, v) {
   v.ink.addEventListener('pointercancel', finish);
   v.ink.addEventListener('lostpointercapture', (e) => { if (e.pointerId === activeId) finish(e); });   // sin pointerup: no se queda bloqueado
   function drawLive() { const ctx = ctxFor(v.live); ctx.clearRect(0, 0, page.w, page.h); drawStroke(ctx, stroke, page.paper); }
+}
+/** El enlace bajo un punto de la pantalla (zona de enlace o enlace dentro de un texto). Con una herramienta de tinta
+ *  los elementos no reciben el puntero, así que se busca por posición. */
+function linkAt(page, v, cx, cy) {
+  const inside = (r) => cx >= r.left && cx <= r.right && cy >= r.top && cy <= r.bottom;
+  for (const a of v.items.querySelectorAll('a[data-link]')) {
+    if (![...a.getClientRects()].some(inside)) continue;
+    const item = page.items.find((i) => i.id === a.closest('[data-id]')?.dataset.id);
+    try { if (item) return { target: JSON.parse(a.dataset.link), source: { item, page, anchor: a } }; } catch (err) { /* enlace dañado */ }
+  }
+  for (const el of v.items.querySelectorAll('.item.link')) {
+    const item = page.items.find((i) => i.id === el.dataset.id);
+    if (item?.target && inside(el.getBoundingClientRect())) return { target: item.target, source: { item, page } };
+  }
+  return null;
 }
 function eraseAt(page, p) {
   const r = S.eraserSize / Math.max(S.zoom, 0.5);
@@ -5918,7 +6103,7 @@ function refreshItem(found) {
   const fresh = itemElement(found.page, found.item);
   el.replaceWith(fresh);
   if (S.editing?.itemId === found.item.id) focusRichEnd(richFor(found.page.id, found.item.id));
-  if (found.item.type === 'comment') { v.over.querySelector(`[data-panel="${found.item.id}"]`)?.remove(); if (found.item.expanded) v.over.appendChild(commentPanel(found.page, found.item)); }
+  if (found.item.type === 'comment') { v.over.querySelector(`[data-panel="${found.item.id}"]`)?.remove(); if (found.item.expanded) showCommentPanel(found.page, found.item); }
 }
 function renderItems(page) {
   const v = views.get(page.id);
@@ -5928,7 +6113,7 @@ function renderItems(page) {
   for (const item of page.items) {
     if (item.type === 'comment') {
       v.over.appendChild(itemElement(page, item));
-      if (item.expanded) v.over.appendChild(commentPanel(page, item));
+      if (item.expanded) showCommentPanel(page, item);
     } else v.items.appendChild(itemElement(page, item));
   }
   if (page.id === resumePageId) { const r = document.createElement('div'); r.className = 'ribbon'; r.title = 'Aquí lo dejaste la última vez'; v.over.appendChild(r); }
@@ -5944,7 +6129,8 @@ function richElement(page, item, editable) {
   const rich = document.createElement('div');
   rich.className = 'rich';
   rich.innerHTML = item.html || '';
-  applyBase(rich, item.base, item.type === 'text' ? page.paper : 'white');
+  // El texto de un comentario va sobre el globo, que en modo oscuro es oscuro.
+  applyBase(rich, item.base, item.type === 'text' ? page.paper : item.type === 'comment' && isDarkTheme() ? 'dark' : 'white');
   rich.contentEditable = editable && !S.reading ? 'true' : 'false';
   rich.spellcheck = true;
   rich.setAttribute('role', 'textbox');
@@ -6021,17 +6207,144 @@ function itemElement(page, item) {
   el.addEventListener('dblclick', (e) => { if (RICH_TYPES.includes(item.type) && S.tool === 'select') { setTool(item.type === 'sticky' ? 'sticky' : 'text'); const r = richFor(page.id, item.id); r?.focus(); } });
   return el;
 }
+// ---------- Comentarios: globo junto a su círculo y lista de la libreta ----------
+const CP_W = 280;   // ancho del globo en la pantalla (px), sea cual sea el zoom
+/** Fecha y hora cortas de un comentario («17 oct, 15:48»); '' en los antiguos, que no la guardaban. */
+function commentDate(item) {
+  if (!item.created) return '';
+  try { return new Date(item.created).toLocaleString(LOCALE(), { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }); } catch (e) { return ''; }
+}
+/** Globo del comentario: cabecera fina con el título (se puede cambiar) y ✓ «Hecho», el texto y la fecha. */
 function commentPanel(page, item) {
   const panel = document.createElement('div');
   panel.className = 'comment-panel';
   panel.dataset.panel = item.id;
-  const x = Math.min(Math.max(4, item.x - 8), page.w - 304);
-  const below = item.y + 44;
-  panel.style.cssText = `left:${x}px;top:${below + 220 > page.h ? Math.max(4, item.y - 230) : below}px;--c:${item.color}`;
-  panel.innerHTML = `<header><span>${esc(item.title)}</span><button aria-label="Cerrar comentario">✕</button></header>`;
-  panel.appendChild(richElement(page, item, true));
-  $('header button', panel).addEventListener('click', () => toggleComment({ page, item }));
+  panel._ref = { page, item };
+  panel.style.setProperty('--c', item.color);
+  const date = commentDate(item);
+  // Va dentro de la página (que el traductor no toca): los textos de la interfaz se traducen aquí.
+  panel.innerHTML = `<header><span class="cp-dot" aria-hidden="true"></span>
+    <input class="cp-title" type="text" value="${esc(item.title)}" aria-label="${tr('Nombre del comentario')}" translate="no" enterkeyhint="done">
+    <button class="cp-done" aria-label="${tr('Hecho')}" title="${tr('Hecho')}">${icon('check')}</button></header>
+    <div class="cp-body"><span class="cp-ph" aria-hidden="true">${tr('Escribe aquí tu comentario…')}</span></div>
+    ${date ? `<footer class="cp-date" translate="no">${esc(date)}</footer>` : ''}`;
+  const rich = richElement(page, item, true);
+  $('.cp-body', panel).prepend(rich);
+  const empty = () => panel.classList.toggle('cp-empty', !htmlText(item.html) && !/<img/i.test(item.html || ''));
+  empty();
+  rich.addEventListener('input', () => { empty(); placeCommentPanel(panel); });
+  $('.cp-done', panel).addEventListener('click', () => toggleComment({ page, item }));
+  // Título: se cambia aquí o en la barra de opciones; un solo «deshacer» por cambio.
+  const title = $('.cp-title', panel);
+  let before = null;
+  title.addEventListener('focus', () => { before = snapshotPage(page); });
+  title.addEventListener('input', () => {
+    item.title = title.value;
+    const bar = $('#comment-title');
+    if (bar) bar.value = item.title;
+    touch();
+  });
+  title.addEventListener('change', () => {
+    if (!item.title.trim()) { item.title = before?.items.find((i) => i.id === item.id)?.title || 'Comentario'; title.value = item.title; }
+    if (before && JSON.stringify(before.items) !== JSON.stringify(page.items)) commit(page, before);
+    before = null;
+    const pin = views.get(page.id)?.over.querySelector(`.pin[data-id="${item.id}"]`);
+    pin?.replaceWith(itemElement(page, item));
+  });
+  title.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); focusRichEnd(rich); } });
   return panel;
+}
+/** Pone el globo en la página y lo coloca junto a su círculo. */
+function showCommentPanel(page, item) {
+  const v = views.get(page.id);
+  if (!v) return;
+  const panel = commentPanel(page, item);
+  v.over.appendChild(panel);
+  placeCommentPanel(panel);
+}
+/** Coloca el globo: a la derecha del círculo; si no cabe, a la izquierda; si tampoco, debajo o encima.
+ *  Va a escala 1/zoom (mismo tamaño en la pantalla con cualquier zoom) y siempre dentro de la página. */
+function placeCommentPanel(panel) {
+  const { page, item } = panel._ref || {};
+  if (!page || !panel.isConnected) return;
+  const z = S.zoom, k = 1 / z, pin = 34, gap = 12 * k, pad = 6 * k;
+  const w = Math.max(160, Math.min(CP_W, page.w * z - 16));
+  panel.style.width = w + 'px';
+  panel.style.transform = `scale(${k})`;
+  const W = w * k, H = panel.offsetHeight * k;   // tamaño en px de página
+  const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+  const cx = item.x + pin / 2, cy = item.y + pin / 2;
+  let side, left, top;
+  if (item.x + pin + gap + W <= page.w - pad) side = 'r';
+  else if (item.x - gap - W >= pad) side = 'l';
+  else side = item.y + pin + gap + H <= page.h - pad || item.y - gap - H < pad ? 'b' : 't';
+  if (side === 'r' || side === 'l') {
+    left = side === 'r' ? item.x + pin + gap : item.x - gap - W;
+    top = clamp(cy - 22 * k, pad, page.h - pad - H);
+  } else {
+    left = clamp(cx - 28 * k, pad, page.w - pad - W);
+    top = clamp(side === 'b' ? item.y + pin + gap : item.y - gap - H, pad, page.h - pad - H);
+  }
+  panel.style.left = left + 'px';
+  panel.style.top = top + 'px';
+  panel.dataset.side = side;
+  // Flecha hacia el círculo (en px del globo).
+  panel.style.setProperty('--ax', clamp((cx - left) * z, 16, w - 16) + 'px');
+  panel.style.setProperty('--ay', clamp((cy - top) * z, 16, panel.offsetHeight - 16) + 'px');
+}
+/** Lista de comentarios de la libreta (botón de comentario): buscar, ir a su página y abrirlo. */
+function commentsMenu(anchor) {
+  const nb = activeNb();
+  if (!nb) return;
+  const all = nb.pages.flatMap((page, i) => page.items.filter((it) => it.type === 'comment').map((item) => ({ page, n: i + 1, item })));
+  const row = ({ n, item }) => {
+    const text = htmlText(item.html || '').replace(/\s+/g, ' ').trim(), date = commentDate(item);
+    return `<button class="cl-row" data-act="${esc(item.id)}" data-q="${esc(fold(`${item.title} ${text}`))}" style="--c:${esc(item.color)}">
+      <span class="cl-dot" aria-hidden="true"></span><span class="cl-main"><span class="cl-top"><b translate="no">${esc(item.title)}</b>
+      <span class="cl-meta"><span>Pág. ${n}</span>${date ? `<span translate="no"> · ${esc(date)}</span>` : ''}</span></span>
+      ${text ? `<span class="cl-text" translate="no">${esc(text.slice(0, 160))}</span>` : ''}</span></button>`;
+  };
+  popover(anchor, `<div class="cl-wrap"><div class="cl-head"><b>Comentarios</b>${all.length ? `<span class="cl-count">${all.length}</span>` : ''}</div>
+    ${all.length ? `<label class="cl-search">${icon('search')}<input type="search" placeholder="Buscar en los comentarios" aria-label="Buscar en los comentarios" autocomplete="off"></label>
+      <div class="cl-list">${all.map(row).join('')}</div><p class="cl-empty" hidden>Ningún comentario coincide con la búsqueda.</p>`
+    : '<p class="cl-empty">Aún no hay comentarios en esta libreta. Toca la página con esta herramienta para añadir uno.</p>'}</div>`, (id) => goToComment(id));
+  if (openPopover?.anchor !== anchor) return;   // era el mismo botón: la lista se ha cerrado
+  const el = openPopover.el, input = $('.cl-search input', el);
+  el.classList.add('comments-pop');
+  el.setAttribute('role', 'dialog');
+  el.setAttribute('aria-label', 'Comentarios');
+  // Con su estilo ya puesto cambia de tamaño: se vuelve a colocar bajo el botón (como hace popover()).
+  const r = anchor.getBoundingClientRect(), w = el.offsetWidth, h = el.offsetHeight;
+  el.style.left = Math.max(8, Math.min(innerWidth - w - 8, r.right - w)) + 'px';
+  el.style.top = (r.bottom + h + 8 > innerHeight ? Math.max(8, r.top - h - 6) : r.bottom + 6) + 'px';
+  if (!input) return;
+  input.addEventListener('input', () => {
+    const q = fold(input.value.trim());
+    let shown = 0;
+    $$('.cl-row', el).forEach((r) => { r.hidden = !!q && !r.dataset.q.includes(q); if (!r.hidden) shown++; });
+    $('.cl-empty', el).hidden = shown > 0;
+  });
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closePopover();
+    if (e.key === 'Enter') $('.cl-row:not([hidden])', el)?.click();
+  });
+  if (matchMedia('(pointer: fine)').matches) input.focus({ preventScroll: true });   // sin teclado en pantalla
+}
+/** Lleva al comentario: su página, centrado en la pantalla y abierto. */
+function goToComment(itemId) {
+  const nb = activeNb(), page = nb?.pages.find((p) => p.items.some((i) => i.id === itemId));
+  const item = page?.items.find((i) => i.id === itemId), v = page && views.get(page.id), desk = $('#desk');
+  if (!item || !v || !desk) return;
+  stopEditing();
+  clearLasso();
+  if (!item.expanded) { item.expanded = true; touch(); }
+  S.selected = { pageId: page.id, itemId };
+  currentPageIndex = nb.pages.indexOf(page);
+  renderItems(page);
+  renderOptions();
+  updateBookmarkButton();
+  const smooth = reduceMotion() ? 'auto' : 'smooth';
+  desk.scrollTo({ top: v.wrap.offsetTop + (item.y + 17) * S.zoom - desk.clientHeight * 0.4, left: v.wrap.offsetLeft + (item.x + 17) * S.zoom - desk.clientWidth / 2, behavior: smooth });
 }
 function toggleComment(found) {
   if (!found) return;
@@ -6078,7 +6391,7 @@ function onItemPointerDown(e, page, item, el) {
   const up = () => {
     removeEventListener('pointermove', move);
     removeEventListener('pointerup', up);
-    if (moved) { commit(page, before); if (item.type === 'comment' && item.expanded) views.get(page.id).over.appendChild(commentPanel(page, item)); return; }
+    if (moved) { commit(page, before); if (item.type === 'comment' && item.expanded) showCommentPanel(page, item); return; }
     // Clic sin mover
     if (item.type === 'comment') return toggleComment({ page, item });
     if (item.type === 'voice') return Voice.togglePlay(activeNb(), item.rec);
@@ -6150,7 +6463,7 @@ function attachItemsLayer(page, v) {
     if (S.tool === 'comment') {
       e.preventDefault();
       const n = activeNb().pages.flatMap((p) => p.items).filter((i) => i.type === 'comment').length + 1;
-      addRichItem(page, { type: 'comment', x: x - 17, y: y - 17, title: `Comentario ${n}`, color: S.commentColor, expanded: true }, 16);
+      addRichItem(page, { type: 'comment', x: x - 17, y: y - 17, title: `Comentario ${n}`, color: S.commentColor, expanded: true, created: Date.now() }, 16);
     }
     if (S.tool === 'link') {
       const item = { id: uid(), type: 'link', x: Math.max(0, x - 90), y: Math.max(0, y - 24), w: 180, h: 48, target: null };
@@ -6268,31 +6581,50 @@ function linkPicker(onPick) {
   $('#lp-q', scrim).addEventListener('input', (e) => { q = e.target.value; draw(); });
 }
 let previewEl = null;
+function closeLinkPreview() { previewEl?.remove(); previewEl = null; }
+// Un toque fuera de la vista previa del enlace la cierra; sobre la libreta no hace nada más (no pinta por detrás).
+addEventListener('pointerdown', (e) => {
+  if (!previewEl || previewEl.contains(e.target)) return;
+  const onDesk = !!e.target.closest?.('#desk');
+  if (onDesk && e.pointerType === 'touch' && PenInput.fingerBlocked()) return;   // modo lápiz: la palma o el dedo que desplaza no la cierran
+  closeLinkPreview();
+  if (!onDesk || linkUnder(e)) return;   // sobre otro enlace: el toque sigue y abre ese
+  e.stopPropagation(); e.preventDefault();
+}, true);
+/** ¿Hay un enlace bajo este puntero en alguna página montada? */
+function linkUnder(e) {
+  for (const [id, v] of views) {
+    if (!v.wrap.contains(e.target)) continue;
+    const page = activeNb()?.pages.find((p) => p.id === id);
+    return !!page && !!linkAt(page, v, e.clientX, e.clientY);
+  }
+  return false;
+}
 async function showLinkPreview(target, source) {
-  previewEl?.remove();
+  closeLinkPreview();
   const nb = nbById(target.nb);
   const page = nb && (target.page ? nb.pages.find((p) => p.id === target.page) : nb.pages[0]);
-  previewEl = document.createElement('div');
-  previewEl.className = 'preview-card';
-  previewEl.setAttribute('role', 'dialog');
-  previewEl.setAttribute('aria-label', 'Vista previa del enlace');
-  previewEl.innerHTML = `<div class="row"><b style="flex:1">🔗 ${esc(linkTitle(target))}</b><button class="icon-btn" data-x aria-label="Cerrar">${icon('close')}</button></div>
+  const card = previewEl = document.createElement('div');
+  card.className = 'preview-card';
+  card.setAttribute('role', 'dialog');
+  card.setAttribute('aria-label', 'Vista previa del enlace');
+  card.innerHTML = `<div class="row"><b style="flex:1">🔗 ${esc(linkTitle(target))}</b><button class="icon-btn" data-x aria-label="Cerrar">${icon('close')}</button></div>
     ${page ? '<img alt="Vista previa">' : '<p>La libreta o la página enlazada ya no existe.</p>'}
     <div class="row"><button class="btn primary" data-go ${page ? '' : 'disabled'}>Ir →</button><span class="spacer"></span><button class="btn" data-edit>Cambiar</button><button class="btn danger" data-remove>Quitar</button></div>`;
-  document.body.appendChild(previewEl);
-  if (page) $('img', previewEl).src = await pageThumb(page, 320);
-  previewEl.onclick = (e) => {
-    if (e.target.closest('[data-x]')) return previewEl.remove();
-    if (e.target.closest('[data-go]')) { previewEl.remove(); return followLink(target); }
+  document.body.appendChild(card);
+  if (page) $('img', card).src = await pageThumb(page, 320);
+  card.onclick = (e) => {
+    if (e.target.closest('[data-x]')) return closeLinkPreview();
+    if (e.target.closest('[data-go]')) { closeLinkPreview(); return followLink(target); }
     if (e.target.closest('[data-edit]')) {
-      previewEl.remove();
+      closeLinkPreview();
       return linkPicker((t) => {
         if (source.anchor) { const f = { page: source.page, item: source.item }; const before = snapshotPage(f.page); source.anchor.dataset.link = JSON.stringify(t); syncRich(f); commit(f.page, before); }
         else editItem({ page: source.page, item: source.item }, (it) => { it.target = t; });
       });
     }
     if (e.target.closest('[data-remove]')) {
-      previewEl.remove();
+      closeLinkPreview();
       if (source.anchor) { const f = { page: source.page, item: source.item }; const before = snapshotPage(f.page); source.anchor.replaceWith(...source.anchor.childNodes); syncRich(f); commit(f.page, before); }
       else { const before = snapshotPage(source.page); source.page.items = source.page.items.filter((i) => i !== source.item); commit(source.page, before); renderItems(source.page); select(null); }
     }
@@ -6533,7 +6865,7 @@ function pasteInternal() {
   const offset = cb.pageId === page.id ? 24 : 0;
   if (cb.kind === 'strokes') {
     const strokes = clone(cb.data).map((s) => ({ ...s, id: uid(), points: s.points.map(([x, y, p]) => [x + offset, y + offset, p]) }));
-    const items = clone(cb.items || []).map((it) => ({ ...it, id: uid(), x: it.x + offset, y: it.y + offset, ...(it.type === 'comment' ? { expanded: false } : {}) }));
+    const items = clone(cb.items || []).map((it) => ({ ...it, id: uid(), x: it.x + offset, y: it.y + offset, ...(it.type === 'comment' ? { expanded: false, created: Date.now() } : {}) }));
     if (items.some((it) => it.type === 'voice')) { (cb.recordings || []).forEach((r) => Voice.receive(activeNb(), r)); if (!S.showVoiceNotes) Voice.setShown(true); }
     page.strokes.push(...strokes); page.items.push(...items);
     cb.data = clone(strokes); cb.items = clone(items); cb.pageId = page.id;
@@ -6544,7 +6876,7 @@ function pasteInternal() {
   }
   const item = clone(cb.data);
   item.id = uid(); item.x += offset; item.y += offset;
-  if (item.type === 'comment') item.expanded = false;
+  if (item.type === 'comment') { item.expanded = false; item.created = Date.now(); }   // la copia es un comentario nuevo
   if (item.type === 'voice' && cb.recording) { Voice.receive(activeNb(), cb.recording); if (!S.showVoiceNotes) Voice.setShown(true); }
   cb.data = clone(item); cb.pageId = page.id;
   page.items.push(item);
@@ -6634,7 +6966,7 @@ document.addEventListener('keydown', (e) => {
     return;
   }
   if ((e.key === 'Delete' || e.key === 'Backspace') && (S.selected || S.lasso)) { e.preventDefault(); return deleteSelection(); }
-  if (e.key === 'Escape') { PdfText.clear(); closePopover(); previewEl?.remove(); closeSearchPanel(); $('#pomo-panel')?.remove(); clearLasso(); return select(null); }
+  if (e.key === 'Escape') { PdfText.clear(); closePopover(); closeLinkPreview(); closeSearchPanel(); $('#pomo-panel')?.remove(); clearLasso(); return select(null); }
 });
 
 // =============================================================================
