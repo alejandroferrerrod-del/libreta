@@ -273,6 +273,8 @@ svg { display: block; }
 .layer.over { pointer-events: none; }
 .layer.over > * { pointer-events: auto; }
 .ink { touch-action: none; }
+/* Modo lápiz (se vio un lápiz): el dedo desplaza la página sobre la tinta; el lápiz no (editor.js, attachPenTouch). */
+html.pen-mode .ink { touch-action: pan-x pan-y; }
 .page-number { display: none; }
 /* Indicador de página abajo en el centro: «‹ 1 / 3 ›». */
 .page-indicator { position: absolute; left: 50%; bottom: 18px; transform: translateX(-50%); z-index: 6; display: flex; align-items: center; gap: 12px; padding: 7px 14px;
@@ -1040,6 +1042,7 @@ I18N.dict.it = {
   'Modo lectura: moverte sin escribir por accidente': 'Modalità lettura: muoversi senza scrivere per sbaglio',
   'Modo lectura: muévete con tranquilidad, no se escribe nada': 'Modalità lettura: muoviti tranquillo, non si scrive nulla',
   'Modo lectura desactivado: ya puedes escribir': 'Modalità lettura disattivata: ora puoi scrivere',
+  'Lápiz detectado: ahora el dedo desplaza la página y el lápiz escribe': 'Penna rilevata: ora il dito scorre la pagina e la penna scrive',
   'Estás en modo lectura': 'Sei in modalità lettura', 'Estás en modo lectura. Sal con el lápiz tachado de arriba para escribir.': 'Sei in modalità lettura. Esci con la matita barrata in alto per scrivere.',
   'Página anterior': 'Pagina precedente', 'Página siguiente': 'Pagina successiva', 'Página': 'Pagina', 'Páginas': 'Pagine',
   'Miniaturas': 'Miniature', 'Marcadores': 'Segnalibri', 'Vista de la barra lateral': 'Vista della barra laterale',
@@ -4748,6 +4751,8 @@ function renderEditor() {
     files.forEach((f, i) => insertImageFile(f, hit && { page: hit.page, x: hit.x + i * 24, y: hit.y + i * 24 }, files.length - 1 - i));
   });
   attachReadingPan($('#desk'));
+  pinchActive = false;   // un pellizco a medias del editor anterior no deja las páginas sin repintar
+  attachPenTouch(desk); attachPinchZoom(desk);
   S.reading = !!nb.reading;
   buildPages();
   renderOptions();
@@ -4860,6 +4865,7 @@ function redrawPages(dpr = pageDpr()) {
     if (!v || !document.contains(v.wrap)) continue;
     const y0 = v.wrap.offsetTop, y1 = y0 + v.wrap.offsetHeight;
     const gap = y1 < top ? top - y1 : y0 > top + h ? y0 - top - h : 0;   // distancia a la zona visible
+    if (pinchActive) { if (gap <= h && !v.ink._scale) mountPage(page, v, scale); continue; }
     if (gap <= h) mountPage(page, v, scale);
     else if (gap > h * 2 || v.ink._scale !== scale) unmountPage(v);
   }
@@ -4884,6 +4890,60 @@ function setZoom(z) {
   layoutPages(false);
   desk.scrollTop = ratio * desk.scrollHeight;
   redrawPages();   // ya en la posición nueva: se montan las que se ven
+}
+/** Zoom que deja el punto `anchor` ({page, x, y} en px de página) bajo el punto de pantalla (cx, cy). */
+function zoomAt(z, anchor, cx, cy) {
+  const desk = $('#desk'), v = anchor && views.get(anchor.page.id);
+  if (!desk || !v) return setZoom(z);
+  S.zoom = Math.max(0.3, Math.min(3, z));
+  layoutPages(false);
+  const r = desk.getBoundingClientRect();
+  desk.scrollLeft = v.wrap.offsetLeft + anchor.x * S.zoom - (cx - r.left);
+  desk.scrollTop = v.wrap.offsetTop + anchor.y * S.zoom - (cy - r.top);
+  redrawPages();
+}
+/** Punto de página bajo (cx, cy); fuera de las páginas, se toma la página actual (coordenadas fuera de su borde). */
+function anchorAt(cx, cy) {
+  const hit = pageAtPoint(cx, cy);
+  if (hit) return hit;
+  const page = activeNb()?.pages[currentPageIndex], v = page && views.get(page.id);
+  if (!v) return null;
+  const r = v.wrap.getBoundingClientRect();
+  return { page, x: (cx - r.left) / S.zoom, y: (cy - r.top) / S.zoom };
+}
+// Mientras se pellizca no se repintan a la escala nueva las páginas ya montadas (se ven estiradas un momento):
+// al soltar se pintan una sola vez. Las que entran en pantalla sí se montan.
+let pinchActive = false;
+/** Modo lápiz: dos dedos hacen zoom con pellizco sobre setZoom, con el punto entre los dedos quieto.
+ *  Se usan eventos touch (Safari y Chrome) y se anula el zoom de toda la web (gesture* de Safari). */
+function attachPinchZoom(desk) {
+  let pinch = null;
+  const on = () => PenInput.seen && !S.reading;
+  const mid = (a, b) => [(a.clientX + b.clientX) / 2, (a.clientY + b.clientY) / 2];
+  const dist = (a, b) => Math.max(1, Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY));
+  desk.addEventListener('touchstart', (e) => {
+    if (e.touches.length !== 2 || !on() || PenInput.down.size) return;
+    const [a, b] = e.touches, [x, y] = mid(a, b);
+    pinch = { d: dist(a, b), zoom: S.zoom, anchor: anchorAt(x, y), raf: 0 };
+    pinchActive = true;
+  }, { passive: false });
+  desk.addEventListener('touchmove', (e) => {
+    if (!pinch || e.touches.length < 2) return;
+    if (e.cancelable) e.preventDefault();
+    const [a, b] = e.touches, [x, y] = mid(a, b);
+    pinch.next = [pinch.zoom * dist(a, b) / pinch.d, x, y];
+    if (!pinch.raf) pinch.raf = requestAnimationFrame(() => { if (!pinch) return; pinch.raf = 0; zoomAt(pinch.next[0], pinch.anchor, pinch.next[1], pinch.next[2]); });
+  }, { passive: false });
+  const end = (e) => {
+    if (!pinch || e.touches.length >= 2) return;
+    cancelAnimationFrame(pinch.raf);
+    if (pinch.next) zoomAt(pinch.next[0], pinch.anchor, pinch.next[1], pinch.next[2]);
+    pinch = null; pinchActive = false;
+    redrawPages();
+  };
+  desk.addEventListener('touchend', end);
+  desk.addEventListener('touchcancel', end);
+  for (const type of ['gesturestart', 'gesturechange']) desk.addEventListener(type, (e) => { if (on()) e.preventDefault(); }, { passive: false });
 }
 function fitZoom() {
   const desk = $('#desk'), nb = activeNb();
@@ -5449,9 +5509,82 @@ function linkSelection(target) {
   toast('Texto enlazado');
 }
 
+// ---------- Tinta: lápiz y dedo (como en Goodnotes) ----------
+// En cuanto se ve un lápiz (pointerType 'pen'), el dedo deja de escribir: un dedo desplaza la página y dos hacen zoom.
+// Se recuerda en este dispositivo (localStorage). Sin lápiz (móvil, tableta sin lápiz) el dedo sigue escribiendo.
+// Rechazo de palma: con el lápiz apoyado no cuenta ningún toque, y el trazo de un dedo que ya estaba escribiendo se descarta.
+const PenInput = {
+  KEY: 'libreta-pen',
+  seen: (() => { try { return localStorage.getItem('libreta-pen') === '1'; } catch (e) { return false; } })(),
+  down: new Set(),   // lápices apoyados ahora (pointerId)
+  at: null,          // dónde se apoyó el lápiz (para reconocer su toque)
+  live: null,        // tinta en curso: { type, cancel } (para descartar el trazo de un dedo cuando llega el lápiz)
+  /** El dedo no escribe si ya se vio un lápiz o si hay uno apoyado. */
+  fingerBlocked() { return this.seen || this.down.size > 0; },
+  mark() {
+    if (this.seen) return;
+    this.seen = true;
+    try { localStorage.setItem(this.KEY, '1'); } catch (e) { /* solo esta sesión */ }
+    this.apply();
+    toast('Lápiz detectado: ahora el dedo desplaza la página y el lápiz escribe');
+  },
+  /** La clase pen-mode deja que el dedo desplace la página sobre la tinta (touch-action en style.css). */
+  apply() { document.documentElement.classList.toggle('pen-mode', this.seen); },
+  /** Vuelve a «sin lápiz» (lo usan las pruebas). */
+  forget() {
+    this.seen = false; this.down.clear(); this.live = null; this.at = null;
+    try { localStorage.removeItem(this.KEY); } catch (e) { /* nada */ }
+    this.apply();
+  },
+};
+PenInput.apply();
+// En captura y en la ventana: se entera antes que nadie (también si el lápiz toca la barra o un elemento).
+addEventListener('pointerdown', (e) => {
+  // Palma: con el lápiz apoyado, un toque no llega a nada (ni tinta ni elementos).
+  if (e.pointerType === 'touch' && PenInput.down.size && e.target.closest?.('#desk')) { e.stopPropagation(); return; }
+  if (e.pointerType !== 'pen') return;
+  PenInput.down.clear();   // solo hay un lápiz: si se perdió un pointerup, no se queda «apoyado» para siempre
+  PenInput.down.add(e.pointerId);
+  PenInput.at = [e.clientX, e.clientY];
+  PenInput.mark();
+  if (PenInput.live?.type === 'touch') PenInput.live.cancel();
+}, true);
+const penLifted = (e) => { if (e.pointerType === 'pen') { PenInput.down.delete(e.pointerId); PenInput.at = null; } };
+addEventListener('pointerup', penLifted, true);
+addEventListener('pointercancel', penLifted, true);
+// Si se pierde el pointerup del lápiz (cambio de app, pestaña oculta…), no se queda «apoyado» bloqueando el dedo.
+const penReset = () => { PenInput.down.clear(); PenInput.at = null; };
+addEventListener('blur', penReset);
+addEventListener('pagehide', penReset);
+document.addEventListener('visibilitychange', penReset);
+/** Con el modo lápiz la tinta deja desplazar con el dedo (touch-action), pero el lápiz no debe desplazar: en Safari el
+ *  Apple Pencil también es un «touch». Se anula el toque del lápiz (touchType 'stylus', o mientras hay un pointerdown
+ *  de lápiz) y, con el lápiz apoyado, también la palma. Los Pointer Events siguen llegando. */
+function attachPenTouch(desk) {
+  const block = (e) => {
+    if (S.reading || !e.cancelable) return;
+    // El toque del lápiz: touchType 'stylus' (Safari) o en el mismo sitio que el pointerdown del lápiz (otros navegadores).
+    const at = PenInput.at, isPen = (t) => t.touchType === 'stylus' || (at && Math.hypot(t.clientX - at[0], t.clientY - at[1]) < 3);
+    const stylus = [...e.changedTouches].some(isPen);
+    // Sobre la tinta se anula el lápiz (no desplaza) y la palma; fuera, solo la palma: el lápiz sigue pulsando
+    // botones, enlaces y cuadros de texto.
+    if (e.target.closest?.('.ink') ? stylus || PenInput.down.size : !stylus && PenInput.down.size) e.preventDefault();
+  };
+  desk.addEventListener('touchstart', block, { passive: false });
+}
+
 // ---------- Tinta: bolígrafo, subrayador, goma y lazo ----------
 function attachInk(page, v) {
   let stroke = null, lastMove = 0, lastPoint = null, before = null, erased = false, lassoPath = null, pointerType = 'mouse';
+  let activeId = null;   // el puntero que está escribiendo: los demás (palma, otro dedo) no cuentan
+  /** Descarta lo que se estaba haciendo sin guardarlo (el lápiz llegó mientras escribía un dedo). */
+  const cancel = () => {
+    try { v.ink.releasePointerCapture(activeId); } catch (err) { /* ya suelto */ }
+    activeId = null; PenInput.live = null;
+    if (erased && before) { page.strokes = before.strokes; renderInk(page); }
+    stroke = null; lassoPath = null; erased = false;
+    if (v.live._scale) ctxFor(v.live).clearRect(0, 0, page.w, page.h);
+  };
   const point = (e) => {
     const r = v.ink.getBoundingClientRect();
     const pressure = e.pointerType === 'mouse' ? 0.5 : (e.pressure || 0.5);
@@ -5459,8 +5592,12 @@ function attachInk(page, v) {
   };
   v.ink.addEventListener('pointerdown', (e) => {
     if (e.button !== 0 && e.pointerType === 'mouse') return;
+    if (e.pointerType === 'touch' && PenInput.fingerBlocked()) return;   // sin preventDefault: el dedo desplaza
+    if (activeId !== null) return;   // ya escribe otro puntero
     e.preventDefault();
     pointerType = e.pointerType;
+    activeId = e.pointerId;
+    PenInput.live = { type: pointerType, cancel };
     try { v.ink.setPointerCapture(e.pointerId); } catch (err) { /* puntero sintético */ }
     mountPage(page, v);   // por si aún no estaba montada (no debería: está a la vista)
     currentPageIndex = activeNb().pages.indexOf(page);
@@ -5474,6 +5611,7 @@ function attachInk(page, v) {
     drawLive();
   });
   v.ink.addEventListener('pointermove', (e) => {
+    if (e.pointerId !== activeId) return;
     if (S.tool === 'eraser') { if (e.buttons) erased = eraseAt(page, point(e)) || erased; return; }
     if (lassoPath) {
       lassoPath.push(point(e));
@@ -5489,7 +5627,10 @@ function attachInk(page, v) {
     if (Math.hypot(e.clientX - lastPoint[0], e.clientY - lastPoint[1]) > 4) { lastMove = performance.now(); lastPoint = [e.clientX, e.clientY]; }
     drawLive();
   });
-  const finish = () => {
+  const finish = (e) => {
+    if (e.pointerId !== activeId) return;
+    activeId = null;
+    if (PenInput.live?.cancel === cancel) PenInput.live = null;
     if (S.tool === 'eraser') { if (erased) commit(page, before); erased = false; return; }
     if (lassoPath) {
       ctxFor(v.live).clearRect(0, 0, page.w, page.h);
@@ -5519,6 +5660,7 @@ function attachInk(page, v) {
   };
   v.ink.addEventListener('pointerup', finish);
   v.ink.addEventListener('pointercancel', finish);
+  v.ink.addEventListener('lostpointercapture', (e) => { if (e.pointerId === activeId) finish(e); });   // sin pointerup: no se queda bloqueado
   function drawLive() { const ctx = ctxFor(v.live); ctx.clearRect(0, 0, page.w, page.h); drawStroke(ctx, stroke, page.paper); }
 }
 function eraseAt(page, p) {
