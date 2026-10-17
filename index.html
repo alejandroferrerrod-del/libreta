@@ -717,6 +717,37 @@ html.app-full header.bar { margin-right: 46px; }   /* el botón flotante va en l
 /* Modo lápiz: el dedo desplaza también sobre post-its, textos, imágenes y comentarios; el lápiz los arrastra sin
    desplazar (su toque se anula en attachPenTouch). touch-action no distingue dedo y lápiz: por eso va en editor.js. */
 html.pen-mode .item, html.pen-mode .pin, html.pen-mode .lasso-box { touch-action: pan-x pan-y; }
+
+/* ---------- Paleta flotante (palette.js): cápsula fija, fila de colores tras un trazo y aviso del lápiz ---------- */
+.float-pal, .fp-strip { position: fixed; z-index: 45; background: color-mix(in srgb, var(--bar) 92%, transparent); backdrop-filter: blur(20px) saturate(1.6); -webkit-backdrop-filter: blur(20px) saturate(1.6);
+  box-shadow: 0 0 0 .5px var(--hairline), 0 6px 24px rgba(0,0,0,.18); touch-action: none; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; animation: pop .14s ease-out; }
+.float-pal { display: flex; align-items: stretch; gap: 2px; padding: 4px 6px 4px 2px; border-radius: 18px; }
+.float-pal .fp-grip { width: 22px; border: 0; background: transparent; color: var(--muted); padding: 0; display: grid; place-items: center; cursor: grab; border-radius: 10px; flex: none; }
+.float-pal .fp-grip svg { width: 16px; height: 16px; }
+.float-pal .fp-grip:hover { background: var(--fill); }
+.float-pal.dragging, .float-pal.dragging .fp-grip { cursor: grabbing; }
+.float-pal .fp-body { display: flex; flex-direction: column; gap: 2px; }
+.float-pal .fp-row { display: flex; align-items: center; gap: 1px; }
+.float-pal .fp-sep { width: 1px; align-self: stretch; margin: 7px 4px; background: var(--sep); flex: none; }
+.float-pal .icon-btn { color: var(--ink); }
+.float-pal .icon-btn:hover, .float-pal .width-dots button:hover:not([aria-pressed="true"]) { background: var(--fill); }
+.float-pal .width-dots { gap: 0; }
+.float-pal .width-dots button { width: 30px; height: 30px; }
+.float-pal .fp-colors { gap: 6px; padding: 2px 4px 4px; }
+.float-pal .swatch, .fp-strip .swatch { width: 24px; height: 24px; }
+.float-pal .custom-color { width: 32px; height: 24px; }
+.float-pal.folded { padding: 3px; border-radius: 50%; }
+.float-pal.folded .fp-grip { width: 42px; height: 42px; border-radius: 50%; color: var(--ink); cursor: pointer; }
+.float-pal.folded .fp-grip svg { width: 20px; height: 20px; }
+.fp-strip { display: flex; gap: 8px; padding: 7px 10px; border-radius: 999px; }
+.fp-strip .swatch[aria-pressed="true"], .float-pal .swatch[aria-pressed="true"] { box-shadow: 0 0 0 2px var(--bar), 0 0 0 4px var(--accent); }
+#app.reading .float-pal, #app.reading .fp-strip { display: none; }
+.fp-offer { position: fixed; left: 50%; bottom: 28px; transform: translateX(-50%); z-index: 90; width: min(440px, calc(100% - 32px)); padding: 14px 16px; border-radius: 18px;
+  background: color-mix(in srgb, var(--surface) 94%, transparent); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); color: var(--ink);
+  border: 1px solid var(--hairline); box-shadow: 0 6px 24px rgba(0,0,0,.2); font-size: 14px; animation: rise .2s ease-out; }
+.fp-offer p { margin: 0 0 4px; }
+.fp-offer .fp-offer-q { color: var(--ink-2); margin-bottom: 10px; }
+.fp-offer-acts { display: flex; flex-wrap: wrap; gap: 8px; }
 /* =============================================================================
    Tutorial de la primera vez (siempre en oscuro, como en la app nativa)
    ============================================================================= */
@@ -949,6 +980,7 @@ const ICONS = {
  "pen": "<path d=\"M12 3 6.5 20\"/><path d=\"M12 3l5.5 17\"/><path d=\"M8.2 15h7.6\"/><circle cx=\"12\" cy=\"10.5\" r=\"1.1\" fill=\"currentColor\" stroke=\"none\"/>",
  "text": "<text x=\"12\" y=\"18.6\" text-anchor=\"middle\" font-size=\"20\" font-weight=\"500\" font-family=\"-apple-system, 'Segoe UI', system-ui, sans-serif\" fill=\"currentColor\" stroke=\"none\">Aa</text>",
  "bookmarkFill": "<path fill=\"currentColor\" d=\"m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z\" />",
+ "grip": "<circle cx=\"9\" cy=\"6\" r=\"1.3\" fill=\"currentColor\" stroke=\"none\"/><circle cx=\"15\" cy=\"6\" r=\"1.3\" fill=\"currentColor\" stroke=\"none\"/><circle cx=\"9\" cy=\"12\" r=\"1.3\" fill=\"currentColor\" stroke=\"none\"/><circle cx=\"15\" cy=\"12\" r=\"1.3\" fill=\"currentColor\" stroke=\"none\"/><circle cx=\"9\" cy=\"18\" r=\"1.3\" fill=\"currentColor\" stroke=\"none\"/><circle cx=\"15\" cy=\"18\" r=\"1.3\" fill=\"currentColor\" stroke=\"none\"/>",
  "book": "<path d=\"M6 3h12a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z\" fill=\"currentColor\" stroke=\"none\"/><path d=\"M7.5 3v18\" stroke=\"rgba(0,0,0,.25)\" stroke-width=\"1.5\"/>"
 };
 const icon = (name, extra = '') => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" ${extra}>${ICONS[name] || ''}</svg>`;
@@ -1189,6 +1221,14 @@ I18N.dict.it = {
   'Cerrar comentario': 'Chiudi commento', 'Hecho': 'Fatto', 'Escribe aquí tu comentario…': 'Scrivi qui il tuo commento…',
   'Buscar en los comentarios': 'Cerca nei commenti', 'Ningún comentario coincide con la búsqueda.': 'Nessun commento corrisponde alla ricerca.',
   'Aún no hay comentarios en esta libreta. Toca la página con esta herramienta para añadir uno.': 'Non ci sono ancora commenti in questo quaderno. Tocca la pagina con questo strumento per aggiungerne uno.',
+  // --- Paleta flotante (palette.js) ---
+  'Paleta flotante': 'Tavolozza mobile', 'Desactivada': 'Disattivata', 'Fija': 'Fissa', 'Al terminar el trazo': 'Alla fine del tratto',
+  'Mover o plegar la paleta': 'Sposta o chiudi la tavolozza', 'Arrástrala para moverla; toca para plegarla': 'Trascinala per spostarla; toccala per chiuderla',
+  'Abrir la paleta': 'Apri la tavolozza', 'Toca para abrirla; arrástrala para moverla': 'Toccala per aprirla; trascinala per spostarla', 'Color del trazo': 'Colore del tratto',
+  '¿Quieres una paleta flotante para tener las herramientas junto al lápiz?': 'Vuoi una tavolozza mobile per avere gli strumenti vicino alla penna?',
+  'Puedes activarla cuando quieras en «…» › Paleta flotante': 'Puoi attivarla quando vuoi in «…» › Tavolozza mobile',
+  'Paleta fija: arrástrala por el asa a donde quieras; un toque en el asa la pliega': 'Tavolozza fissa: trascinala dalla maniglia dove vuoi; un tocco sulla maniglia la chiude',
+  'Al acabar un trazo saldrán sus colores para cambiarlo': 'Alla fine di un tratto compariranno i suoi colori per cambiarlo', 'Paleta flotante desactivada': 'Tavolozza mobile disattivata',
   'Dibujar con el dedo': 'Disegna con il dito', 'Apagado: el dedo desplaza la página y solo el lápiz escribe': 'Spento: il dito scorre la pagina e solo la penna scrive',
   'El dedo dibuja, aunque uses lápiz': 'Il dito disegna, anche se usi la penna', 'Modo lápiz: el dedo desplaza la página y el lápiz escribe': 'Modalità penna: il dito scorre la pagina e la penna scrive', 'Nombre del comentario': 'Nome del commento', 'Profe': 'Prof',
   'Reproducir': 'Riproduci', 'Grabaciones': 'Registrazioni', 'Renombrar': 'Rinomina',
@@ -4919,6 +4959,7 @@ function renderEditor() {
   renderSidebar();
   applyReading();
   updateBookmarkButton();
+  Palette.mount();
 }
 
 /** Botón de herramienta: el bolígrafo y el subrayador llevan su color en el icono y en una barrita. */
@@ -4932,6 +4973,7 @@ function toolButton(tool, title) {
 }
 /** Vuelve a pintar los botones de herramienta (al cambiar de herramienta o de color). */
 function refreshToolButtons() {
+  Palette.sync();   // la paleta flotante enseña lo mismo que la barra
   const group = $('.group[role="toolbar"]');
   if (!group) return;
   for (const [tool, title] of TOOLS) {
@@ -5285,6 +5327,7 @@ function pageMenu(anchor) {
     <button data-act="hold">${mark(S.holdToSnap)} Mantener quieto al final: forma perfecta o recta</button>
     <button data-act="fullscreen">${icon(isFullscreen() ? 'shrink' : 'expand')} ${isFullscreen() ? 'Salir de pantalla completa' : 'Pantalla completa'} <span class="kbd-hint">${onbKey('fullscreen')}</span></button>
     ${fingerSwitch()}
+    ${paletteRow()}
     <button data-act="shortcuts">${icon('keyboard')} Atajos de teclado…</button>
     <hr><div class="label">Apariencia</div>
     ${[['system', 'Automática'], ['light', 'Clara'], ['dark', 'Oscura']].map(([k, n]) => `<button data-act="ap:${k}">${mark(currentAppearance() === k)} ${n}</button>`).join('')}`, (act) => {
@@ -5292,6 +5335,7 @@ function pageMenu(anchor) {
     if (act === 'shortcuts') return shortcutsDialog();
     if (act === 'fullscreen') return toggleFullscreen();
     if (act === 'finger') return toggleFinger();
+    if (kind === 'pal') return setPaletteMode(value);
     if (act === 'pomo-visible') { Pomo.visible = !Pomo.visible; return Pomo.changed(); }
     if (act === 'hold') { S.holdToSnap = !S.holdToSnap; savePrefs(); return toast(S.holdToSnap ? 'Mantener quieto al final de un trazo lo convierte en forma o recta' : 'Los trazos quedan siempre tal como los dibujas'); }
     if (act === 'zoom-in') return setZoom(S.zoom * 1.2);
@@ -5299,6 +5343,17 @@ function pageMenu(anchor) {
     if (act === 'zoom-fit') return fitZoom();
     if (kind === 'ap') { setAppearance(value); refreshToolButtons(); return nb.pages.forEach((p) => views.has(p.id) && renderItems(p)); }
   });
+  if (openPopover) bindSubmenus(openPopover.el);
+}
+/** Fila desplegable «Paleta flotante» del menú «…»: Desactivada, Fija o Al terminar el trazo (palette.js). */
+function paletteRow() {
+  return `<button class="pf-row" data-sub="pal" aria-expanded="false">${icon('palette')} <span class="pf-name">Paleta flotante</span> <span class="pf-val">${Palette.modeName()}</span>${icon('chevronDown')}</button>
+    <div class="pf-sub" data-for="pal" hidden>${PALETTE_MODES.map(([k, n]) => `<button data-act="pal:${k}" role="menuitemradio" aria-checked="${Palette.mode === k}">${mark(Palette.mode === k)} ${n}</button>`).join('')}</div>`;
+}
+function setPaletteMode(mode) {
+  Palette.setMode(mode);
+  toast(mode === 'fixed' ? 'Paleta fija: arrástrala por el asa a donde quieras; un toque en el asa la pliega'
+    : mode === 'stroke' ? 'Al acabar un trazo saldrán sus colores para cambiarlo' : 'Paleta flotante desactivada');
 }
 /** Interruptor «Dibujar con el dedo» (Ajustes y menú «…»): encendido, el dedo escribe aunque haya lápiz;
  *  apagado, modo lápiz (el dedo desplaza la página). Se ve siempre: así también se puede volver atrás. */
@@ -5514,6 +5569,7 @@ function renderOptions() {
   el.onclick = onOptionsClick;
   el.oninput = onOptionsInput;
   el.onchange = onOptionsInput;
+  Palette.sync();
 }
 /** Barra de estilo de texto. Con texto seleccionado se aplica a la selección; si no, a todo el cuadro. */
 function textBar(item) {
@@ -5684,6 +5740,7 @@ function onOptionsInput(e) {
   if (t.id === 'pen-width') { S.penWidth = Number(t.value); t.nextElementSibling.textContent = Number(t.value).toFixed(1).replace('.', ','); }
   if (t.id === 'hl-width') { S.hlWidth = Number(t.value); t.nextElementSibling.textContent = Number(t.value).toFixed(1).replace('.', ','); }
   if (t.id === 'er-size') { S.eraserSize = Number(t.value); t.nextElementSibling.textContent = t.value; }
+  if (t.id === 'pen-width' || t.id === 'hl-width') Palette.sync();
   if (t.id === 'comment-title' && e.type === 'input') {
     const found = findItem(S.selected || S.editing);
     if (found) { found.item.title = t.value; refreshItem(found); touch(); }
@@ -5836,7 +5893,7 @@ const PenInput = {
     this.seen = true;
     try { localStorage.setItem(this.KEY, '1'); } catch (e) { /* solo esta sesión */ }
     this.apply();
-    toast('Lápiz detectado: ahora el dedo desplaza la página y el lápiz escribe');
+    if (!Palette.offer()) toast('Lápiz detectado: ahora el dedo desplaza la página y el lápiz escribe');   // la 1.ª vez ofrece la paleta flotante
   },
   /** La clase pen-mode deja que el dedo desplace la página sobre la tinta (touch-action en style.css). */
   apply() { document.documentElement.classList.toggle('pen-mode', this.seen); },
@@ -6665,7 +6722,7 @@ let previewEl = null;
 function closeLinkPreview() { previewEl?.remove(); previewEl = null; }
 // Un toque fuera de la vista previa del enlace la cierra; sobre la libreta no hace nada más (no pinta por detrás).
 addEventListener('pointerdown', (e) => {
-  if (!previewEl || previewEl.contains(e.target)) return;
+  if (!previewEl || previewEl.contains(e.target) || e.target.closest?.('.float-pal, .fp-strip')) return;   // la paleta no la cierra
   const onDesk = !!e.target.closest?.('#desk');
   if (onDesk && e.pointerType === 'touch' && PenInput.fingerBlocked()) return;   // modo lápiz: la palma o el dedo que desplaza no la cierran
   closeLinkPreview();
@@ -7049,6 +7106,267 @@ document.addEventListener('keydown', (e) => {
   if ((e.key === 'Delete' || e.key === 'Backspace') && (S.selected || S.lasso)) { e.preventDefault(); return deleteSelection(); }
   if (e.key === 'Escape') { PdfText.clear(); closePopover(); closeLinkPreview(); closeSearchPanel(); $('#pomo-panel')?.remove(); clearLasso(); return select(null); }
 });
+
+// =============================================================================
+// Paleta flotante (pensada para el lápiz en el iPad): las herramientas a mano sin subir hasta la barra.
+// Dos modos (menú «⋯» › Paleta flotante):
+//  · «Fija»: cápsula con bolígrafo, subrayador, goma, lazo, deshacer, rehacer, colores y grosor. Se arrastra
+//    por su asa a cualquier sitio (y se recuerda); un toque en el asa la pliega en un círculo y otro la abre.
+//  · «Al terminar el trazo»: al acabar un trazo de bolígrafo o subrayador sale una fila de colores a su lado.
+//    Un color cambia ese trazo (se puede deshacer) y queda elegido para los siguientes. Se va sola.
+// Preferencia de este dispositivo: localStorage 'libreta-palette' = { mode, x, y, folded, offered }.
+// Está sincronizada con la barra: refreshToolButtons() y renderOptions() llaman a Palette.sync().
+// =============================================================================
+const PALETTE_MODES = [['off', 'Desactivada'], ['fixed', 'Fija'], ['stroke', 'Al terminar el trazo']];
+const PALETTE_TOOLS = ['pen', 'highlighter', 'eraser', 'lasso'];
+const PALETTE_STRIP_MS = 3000;   // la fila de colores se va sola a los 3 s
+const Palette = {
+  KEY: 'libreta-palette',
+  prefs: (() => { try { const p = JSON.parse(localStorage.getItem('libreta-palette') || '{}'); return p && typeof p === 'object' && !Array.isArray(p) ? p : {}; } catch (e) { return {}; } })(),
+  el: null,        // la cápsula fija (dentro de #app: se va con el editor)
+  strip: null,     // fila de colores tras un trazo: { el, pageId, strokeId, tool, timer }
+  palm: false,     // el último toque en la paleta fue la palma (con el lápiz apoyado): no cuenta
+  inkSeen: 0,      // último trazo al que ya se ofreció la fila de colores (lastInkAt)
+
+  get mode() { return ['fixed', 'stroke'].includes(this.prefs.mode) ? this.prefs.mode : 'off'; },
+  modeName(m = this.mode) { return PALETTE_MODES.find(([k]) => k === m)[1]; },
+  save() { try { localStorage.setItem(this.KEY, JSON.stringify(this.prefs)); } catch (e) { /* solo esta sesión */ } },
+  setMode(mode) {
+    this.prefs.mode = PALETTE_MODES.some(([k]) => k === mode) ? mode : 'off';
+    this.prefs.offered = true;
+    this.save();
+    this.hideStrip();
+    this.mount();
+  },
+
+  // ---------- Cápsula fija ----------
+  /** La pone (o la quita) según el modo. La llama renderEditor al montar el editor. */
+  mount() {
+    this.el?.remove();
+    this.el = null;
+    const app = $('#app');
+    if (this.mode !== 'fixed' || S.view !== 'editor' || !app?.querySelector('.desk-wrap')) return;
+    const el = document.createElement('div');
+    el.className = 'float-pal';
+    el.setAttribute('role', 'toolbar');
+    el.setAttribute('aria-label', 'Paleta flotante');
+    app.appendChild(el);
+    this.el = el;
+    el.addEventListener('pointerdown', (e) => this.onDown(e), true);
+    el.addEventListener('mousedown', (e) => { if (e.target.closest('button')) e.preventDefault(); });
+    el.addEventListener('click', (e) => this.onClick(e));
+    el.addEventListener('change', (e) => this.onChange(e));
+    el.addEventListener('contextmenu', (e) => e.preventDefault());
+    this.render();
+  },
+  /** Vuelve a pintar la paleta con la herramienta, el color y el grosor de ahora (y quita la fila si cambió la herramienta). */
+  sync() {
+    if (this.el && !this.el.isConnected) this.el = null;
+    if (this.el) this.render();
+    if (this.strip && (S.tool !== this.strip.tool || !this.strip.el.isConnected)) this.hideStrip();
+  },
+  render() {
+    const el = this.el;
+    if (!el) return;
+    const folded = !!this.prefs.folded, tool = S.tool;
+    const color = tool === 'pen' ? S.penColor : tool === 'highlighter' ? S.hlColor : null;
+    el.classList.toggle('folded', folded);
+    if (folded) {
+      // Plegada: un círculo con la herramienta de ahora (y su color).
+      el.innerHTML = `<button class="fp-grip tool ${color ? 'colored' : ''}" data-fp="grip" aria-label="Abrir la paleta" title="Toca para abrirla; arrástrala para moverla"
+        style="${color ? `--c:${color};` : ''}">${icon(PALETTE_TOOLS.includes(tool) ? tool : 'palette')}${color ? '<span class="ink-bar"></span>' : ''}</button>`;
+      return this.place();
+    }
+    // Los botones de herramienta son los de la barra (mismo color en el icono), con otro atributo para no confundirlos.
+    const tools = PALETTE_TOOLS.map((t) => toolButton(t, TOOLS.find(([k]) => k === t)[1]).replace('data-tool=', 'data-fptool=')).join('');
+    let width = '', colors = '';
+    if (color) {
+      const [min, max, step, value] = tool === 'pen' ? [1, 14, 0.5, S.penWidth] : [8, 40, 1, S.hlWidth];
+      const presets = [0.08, 0.25, 0.55].map((f) => Math.round((min + (max - min) * f) / step) * step);
+      const dot = (w) => Math.max(4, Math.min(14, 4 + (w - min) / (max - min) * 20));
+      width = `<span class="fp-sep" aria-hidden="true"></span><div class="width-dots" style="--c:${color}">${presets.map((w) => `<button data-fp="width" data-v="${w}" aria-label="Grosor ${w}" aria-pressed="${Math.abs(value - w) < step / 2}"><span style="width:${dot(w)}px;height:${dot(w)}px"></span></button>`).join('')}</div>`;
+      colors = `<div class="fp-row fp-colors">${swatches(tool === 'pen' ? PEN_COLORS : HL_COLORS, color, 'fp-color')}</div>`;
+    }
+    el.innerHTML = `<button class="fp-grip" data-fp="grip" aria-label="Mover o plegar la paleta" title="Arrástrala para moverla; toca para plegarla">${icon('grip')}</button>
+      <div class="fp-body"><div class="fp-row">${tools}<span class="fp-sep" aria-hidden="true"></span>
+        <button class="icon-btn" data-fp="undo" aria-label="Deshacer" title="Deshacer">${icon('undo')}</button>
+        <button class="icon-btn" data-fp="redo" aria-label="Rehacer" title="Rehacer">${icon('redo')}</button>${width}</div>${colors}</div>`;
+    this.place();
+  },
+  /** Coloca la paleta en su sitio guardado, siempre dentro de la ventana (por defecto, abajo a la derecha). */
+  place() {
+    const el = this.el;
+    if (!el) return;
+    const w = el.offsetWidth, h = el.offsetHeight, m = 8;
+    let { x, y } = this.prefs;
+    if (typeof x !== 'number' || typeof y !== 'number') { x = innerWidth - w - 24; y = innerHeight - h - 70; }
+    el.style.left = Math.max(m, Math.min(innerWidth - w - m, x)) + 'px';
+    el.style.top = Math.max(m, Math.min(innerHeight - h - m, y)) + 'px';
+  },
+  fold(on) { this.prefs.folded = !!on; this.save(); this.render(); },
+  onDown(e) {
+    // Palma: con el lápiz apoyado, un toque de la mano en la paleta no pulsa nada.
+    this.palm = e.pointerType === 'touch' && PenInput.down.size > 0;
+    if (this.palm) { e.preventDefault(); e.stopPropagation(); return; }
+    const grip = e.target.closest('[data-fp="grip"]');
+    if (grip) return this.grab(e, grip);
+    if (e.target.closest('button')) e.preventDefault();   // el texto en edición no pierde el foco
+  },
+  /** Arrastrar el asa mueve la paleta; un toque sin moverse la pliega o la abre. */
+  grab(e, grip) {
+    if (e.pointerType === 'mouse' && e.button !== 0) return;
+    e.preventDefault();
+    const el = this.el, r = { left: parseFloat(el.style.left) || 0, top: parseFloat(el.style.top) || 0 }, start = [e.clientX, e.clientY], id = e.pointerId;
+    let moved = false;
+    try { grip.setPointerCapture(id); } catch (err) { /* puntero sintético */ }
+    const move = (ev) => {
+      if (ev.pointerId !== id) return;
+      const dx = ev.clientX - start[0], dy = ev.clientY - start[1];
+      if (!moved && Math.hypot(dx, dy) < 5) return;
+      moved = true;
+      el.classList.add('dragging');
+      this.prefs.x = r.left + dx; this.prefs.y = r.top + dy;
+      this.place();
+    };
+    const up = (ev) => {
+      if (ev.pointerId !== id) return;
+      grip.removeEventListener('pointermove', move); grip.removeEventListener('pointerup', up); grip.removeEventListener('pointercancel', up);
+      el.classList.remove('dragging');
+      if (moved) {
+        // Se guarda donde se ve (ya dentro de la ventana).
+        this.prefs.x = parseFloat(el.style.left); this.prefs.y = parseFloat(el.style.top);
+        this.save();
+      } else if (ev.type === 'pointerup') this.fold(!this.prefs.folded);
+    };
+    grip.addEventListener('pointermove', move); grip.addEventListener('pointerup', up); grip.addEventListener('pointercancel', up);
+  },
+  onClick(e) {
+    if (this.palm) { this.palm = false; return; }
+    const b = e.target.closest('button');
+    if (!b || b.tagName === 'INPUT') return;
+    if (b.dataset.fp === 'grip') { if (e.detail === 0) this.fold(!this.prefs.folded); return; }   // con el teclado (con el puntero, en grab)
+    if (b.dataset.fptool) return setTool(b.dataset.fptool);
+    const act = b.dataset.fp || b.dataset.act, v = b.dataset.v;
+    if (act === 'undo') return undo();
+    if (act === 'redo') return redo();
+    if (act === 'fp-color') return this.setColor(v);
+    if (act === 'width') {
+      if (S.tool === 'pen') S.penWidth = Number(v); else if (S.tool === 'highlighter') S.hlWidth = Number(v);
+      savePrefs(); renderOptions();
+    }
+  },
+  onChange(e) {
+    if (e.target.type === 'color' && e.target.dataset.act === 'fp-color') this.setColor(e.target.value);
+  },
+  /** Color de la herramienta de ahora (bolígrafo o subrayador), igual que en la barra de opciones. */
+  setColor(c) {
+    if (S.tool === 'pen') S.penColor = c; else if (S.tool === 'highlighter') S.hlColor = c; else return;
+    savePrefs(); refreshToolButtons(); renderOptions();
+  },
+
+  // ---------- Al terminar el trazo: fila de colores ----------
+  showStrip(page, stroke) {
+    this.hideStrip();
+    const v = views.get(page.id), app = $('#app');
+    if (!v || !app) return;
+    const el = document.createElement('div');
+    el.className = 'fp-strip';
+    el.setAttribute('role', 'toolbar');
+    el.setAttribute('aria-label', 'Color del trazo');
+    el.innerHTML = this.stripColors(stroke.tool, stroke.color);
+    app.appendChild(el);
+    el.addEventListener('pointerdown', (e) => {
+      this.palm = e.pointerType === 'touch' && PenInput.down.size > 0;
+      e.preventDefault();
+      if (this.palm) e.stopPropagation();
+    }, true);
+    el.addEventListener('click', (e) => {
+      if (this.palm) { this.palm = false; return; }
+      const b = e.target.closest('[data-v]');
+      if (b) this.recolor(b.dataset.v);
+    });
+    // Junto al final del trazo, debajo de él (o encima si no cabe), sin taparlo y dentro de la libreta.
+    const r = v.ink.getBoundingClientRect(), box = Shapes.bounds(stroke.points), end = stroke.points[stroke.points.length - 1];
+    const d = $('#desk')?.getBoundingClientRect() || { left: 0, top: 0, right: innerWidth, bottom: innerHeight };
+    const pad = (stroke.width / 2) * S.zoom + 8, w = el.offsetWidth, h = el.offsetHeight, m = 8;
+    const top = r.top + box.y * S.zoom - pad, bottom = r.top + (box.y + box.h) * S.zoom + pad;
+    const minY = Math.max(m, d.top + m), maxY = Math.min(innerHeight, d.bottom) - h - m;
+    const y = Math.min(maxY, bottom <= maxY ? bottom : top - h >= minY ? top - h : maxY);
+    const x = r.left + end[0] * S.zoom - w / 2;
+    el.style.left = Math.max(Math.max(m, d.left + m), Math.min(Math.min(innerWidth, d.right) - w - m, x)) + 'px';
+    el.style.top = Math.max(minY, y) + 'px';
+    this.strip = { el, pageId: page.id, strokeId: stroke.id, tool: S.tool, timer: 0 };
+    this.armStrip();
+  },
+  stripColors(tool, current) {
+    return (tool === 'highlighter' ? HL_COLORS : PEN_COLORS).map((c) => `<button class="swatch" data-v="${c}" style="background:${c}" aria-label="Color ${c}" aria-pressed="${String(c).toLowerCase() === String(current).toLowerCase()}"></button>`).join('');
+  },
+  armStrip() {
+    clearTimeout(this.strip.timer);
+    this.strip.timer = setTimeout(() => this.hideStrip(), PALETTE_STRIP_MS);
+  },
+  hideStrip() {
+    if (!this.strip) return;
+    clearTimeout(this.strip.timer);
+    this.strip.el.remove();
+    this.strip = null;
+  },
+  /** Cambia el color del trazo recién hecho (con su paso de deshacer) y lo deja elegido para los siguientes. */
+  recolor(c) {
+    const st = this.strip;
+    if (!st) return;
+    const page = activeNb()?.pages.find((p) => p.id === st.pageId), s = page?.strokes.find((x) => x.id === st.strokeId);
+    if (!s) return this.hideStrip();   // el trazo ya no está (se deshizo con el teclado)
+    if (s.color.toLowerCase() !== c.toLowerCase()) {
+      const before = snapshotPage(page);
+      s.color = c;
+      commit(page, before); renderInk(page);
+    }
+    if (st.tool === 'highlighter') S.hlColor = c; else S.penColor = c;
+    savePrefs(); refreshToolButtons(); renderOptions();
+    if (!this.strip) return;
+    st.el.innerHTML = this.stripColors(st.tool, c);
+    this.armStrip();
+  },
+
+  // ---------- Aviso «Lápiz detectado» ----------
+  /** La primera vez que se ve un lápiz, ofrece activar la paleta. Devuelve si se mostró el aviso. */
+  offer() {
+    if (this.mode !== 'off' || this.prefs.offered) return false;
+    this.prefs.offered = true; this.save();
+    $('.fp-offer')?.remove();
+    const el = document.createElement('div');
+    el.className = 'fp-offer';
+    el.setAttribute('role', 'status');
+    el.innerHTML = `<p>Lápiz detectado: ahora el dedo desplaza la página y el lápiz escribe</p>
+      <p class="fp-offer-q">¿Quieres una paleta flotante para tener las herramientas junto al lápiz?</p>
+      <div class="fp-offer-acts"><button class="btn primary" data-m="fixed">Fija</button><button class="btn" data-m="stroke">Al terminar el trazo</button><button class="btn" data-m="no">Ahora no</button></div>`;
+    document.body.appendChild(el);
+    const timer = setTimeout(() => el.remove(), 15000);
+    el.addEventListener('click', (e) => {
+      const b = e.target.closest('[data-m]');
+      if (!b) return;
+      clearTimeout(timer); el.remove();
+      if (b.dataset.m === 'no') return toast('Puedes activarla cuando quieras en «…» › Paleta flotante');
+      setPaletteMode(b.dataset.m);
+    });
+    return true;
+  },
+};
+
+// Al terminar un trazo de bolígrafo o subrayador (el pointerup llega aquí después de que la tinta lo guarde).
+addEventListener('pointerup', (e) => {
+  if (Palette.mode !== 'stroke' || !['pen', 'highlighter'].includes(S.tool) || !e.target?.matches?.('canvas.ink')) return;
+  if (lastInkAt === Palette.inkSeen || performance.now() - lastInkAt > 300) return;
+  Palette.inkSeen = lastInkAt;
+  const id = [...views].find(([, v]) => v.ink === e.target)?.[0];
+  const page = activeNb()?.pages.find((p) => p.id === id), stroke = page?.strokes[page.strokes.length - 1];
+  if (stroke && stroke.tool === (S.tool === 'highlighter' ? 'highlighter' : 'pen')) Palette.showStrip(page, stroke);
+});
+// Volver a escribir (o tocar cualquier otra cosa) quita la fila de colores; también al desplazar la libreta.
+addEventListener('pointerdown', (e) => { if (Palette.strip && !Palette.strip.el.contains(e.target)) Palette.hideStrip(); }, true);
+document.addEventListener('scroll', () => Palette.hideStrip(), true);
+addEventListener('resize', () => { Palette.hideStrip(); Palette.place(); });
 
 // =============================================================================
 // Atajos de teclado personalizables (como en la app nativa).
