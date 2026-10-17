@@ -300,6 +300,8 @@ html.pen-mode .ink { touch-action: pan-x pan-y; }
 .item.sticky { padding: 16px 14px; box-shadow: 0 3px 6px rgba(0,0,0,.22); border-radius: 0; color-scheme: light; }
 /* El post-it no se desplaza nunca a los lados: solo su texto, en vertical y cuando de verdad no cabe. */
 .item.sticky .rich { height: 100%; overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; }
+/* Modo lápiz: el dedo que empieza en un post-it desplaza la libreta (contain lo frenaba). */
+.pen-mode .item.sticky .rich { overscroll-behavior: auto; }
 .item.image img { display: block; width: 100%; height: 100%; object-fit: contain; pointer-events: none; user-select: none; }
 .item.image { cursor: move; }
 .item.link { background: rgba(30, 91, 216, .1); border: 1.5px solid rgba(30, 91, 216, .6); border-radius: 6px; cursor: pointer; }
@@ -6043,6 +6045,7 @@ function drawLassoBox() {
   box.style.cssText = `left:${b.x - pad}px;top:${b.y - pad}px;width:${b.w + pad * 2}px;height:${b.h + pad * 2}px`;
   v.over.appendChild(box);
   box.addEventListener('pointerdown', (e) => {
+    if (e.pointerType === 'touch' && PenInput.fingerBlocked()) return;   // modo lápiz: el dedo desplaza, no arrastra
     e.preventDefault(); e.stopPropagation();
     try { box.setPointerCapture(e.pointerId); } catch (err) { /* puntero sintético */ }
     const before = snapshotPage(page), start = [e.clientX, e.clientY], orig = strokes.map((s) => s.points.map((q) => [...q]));
@@ -6060,9 +6063,10 @@ function drawLassoBox() {
       box.style.left = b.x - pad + dx + 'px'; box.style.top = b.y - pad + dy + 'px';
       renderInk(page);
     };
-    const up = () => { box.removeEventListener('pointermove', move); box.removeEventListener('pointerup', up); if (moved) { commit(page, before); if (items.length) renderItems(page); else drawLassoBox(); } };
+    const up = () => { box.removeEventListener('pointermove', move); box.removeEventListener('pointerup', up); box.removeEventListener('pointercancel', up); if (moved) { commit(page, before); if (items.length) renderItems(page); else drawLassoBox(); } };
     box.addEventListener('pointermove', move);
     box.addEventListener('pointerup', up);
+    box.addEventListener('pointercancel', up);
   });
 }
 function clearLasso() {
@@ -6362,6 +6366,7 @@ function onItemPointerDown(e, page, item, el) {
   const onResize = e.target.classList.contains('resize');
   const inRich = e.target.closest('.rich') && e.target.closest('.rich').isContentEditable;
   if (inRich && !onResize) return; // clic dentro del texto: colocar el cursor
+  if (e.pointerType === 'touch' && PenInput.fingerBlocked()) return fingerTapItem(e, page, item);
   e.preventDefault();
   e.stopPropagation();
   clearLasso();
@@ -6388,23 +6393,48 @@ function onItemPointerDown(e, page, item, el) {
       if (item.type === 'comment') views.get(page.id).over.querySelector(`[data-panel="${item.id}"]`)?.remove();
     }
   };
-  const up = () => {
+  const up = (ev) => {
     removeEventListener('pointermove', move);
     removeEventListener('pointerup', up);
+    removeEventListener('pointercancel', up);
     if (moved) { commit(page, before); if (item.type === 'comment' && item.expanded) showCommentPanel(page, item); return; }
-    // Clic sin mover
-    if (item.type === 'comment') return toggleComment({ page, item });
-    if (item.type === 'voice') return Voice.togglePlay(activeNb(), item.rec);
-    if (item.type === 'link' && (item.target ? !['select'].includes(S.tool) || wasSelected : false)) return showLinkPreview(item.target, { item, page });
-    if (item.type === 'link' && !item.target) return linkPicker((target) => editItem({ page, item }, (it) => { it.target = target; }));
-    if (RICH_TYPES.includes(item.type) && (S.tool === 'text' || S.tool === 'sticky' || wasSelected)) {
-      if (S.tool === 'select') setTool(item.type === 'sticky' ? 'sticky' : 'text');
-      const rich = richFor(page.id, item.id);
-      rich?.focus();
-    }
+    if (ev.type !== 'pointercancel') itemTap(page, item, wasSelected);
   };
   addEventListener('pointermove', move);
   addEventListener('pointerup', up);
+  addEventListener('pointercancel', up);
+}
+/** Modo lápiz: el dedo desplaza la libreta sobre los elementos (no los arrastra). Un toque sin moverse sí hace lo
+ *  de un clic: abre el comentario, el enlace o la nota de voz, o selecciona. Si el navegador se lo lleva para
+ *  desplazar, llega pointercancel y no se hace nada. */
+function fingerTapItem(e, page, item) {
+  e.preventDefault();   // sin los eventos de ratón de compatibilidad, que quitarían el foco al empezar a escribir
+  e.stopPropagation();
+  const start = [e.clientX, e.clientY];
+  let moved = false;
+  const move = (ev) => { if (ev.pointerId === e.pointerId && Math.hypot(ev.clientX - start[0], ev.clientY - start[1]) > 8) moved = true; };
+  const end = (ev) => {
+    if (ev.pointerId !== e.pointerId) return;
+    removeEventListener('pointermove', move); removeEventListener('pointerup', end); removeEventListener('pointercancel', end);
+    if (moved || ev.type === 'pointercancel') return;
+    clearLasso();
+    if (S.editing && S.editing.itemId !== item.id) stopEditing();
+    const wasSelected = S.selected?.itemId === item.id;
+    select({ pageId: page.id, itemId: item.id }, false);
+    itemTap(page, item, wasSelected);
+  };
+  addEventListener('pointermove', move); addEventListener('pointerup', end); addEventListener('pointercancel', end);
+}
+/** Lo que hace un clic (sin mover) sobre un elemento. */
+function itemTap(page, item, wasSelected) {
+  if (item.type === 'comment') return toggleComment({ page, item });
+  if (item.type === 'voice') return Voice.togglePlay(activeNb(), item.rec);
+  if (item.type === 'link' && (item.target ? !['select'].includes(S.tool) || wasSelected : false)) return showLinkPreview(item.target, { item, page });
+  if (item.type === 'link' && !item.target) return linkPicker((target) => editItem({ page, item }, (it) => { it.target = target; }));
+  if (RICH_TYPES.includes(item.type) && (S.tool === 'text' || S.tool === 'sticky' || wasSelected)) {
+    if (S.tool === 'select') setTool(item.type === 'sticky' ? 'sticky' : 'text');
+    richFor(page.id, item.id)?.focus();
+  }
 }
 function select(ref, render = true) {
   S.selected = ref;
