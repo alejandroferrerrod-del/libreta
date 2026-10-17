@@ -297,7 +297,9 @@ html.pen-mode .ink { touch-action: pan-x pan-y; }
 .rich img { max-width: 100%; height: auto; vertical-align: bottom; border-radius: 3px; }
 .rich a[data-link] { color: #1E5BD8; text-decoration: underline; cursor: pointer; }
 .tool-select .rich, .tool-select .item { cursor: move; }
-.item.sticky { padding: 16px 14px; box-shadow: 0 3px 6px rgba(0,0,0,.22); border-radius: 0; overflow: auto; }
+.item.sticky { padding: 16px 14px; box-shadow: 0 3px 6px rgba(0,0,0,.22); border-radius: 0; color-scheme: light; }
+/* El post-it no se desplaza nunca a los lados: solo su texto, en vertical y cuando de verdad no cabe. */
+.item.sticky .rich { height: 100%; overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; }
 .item.image img { display: block; width: 100%; height: 100%; object-fit: contain; pointer-events: none; user-select: none; }
 .item.image { cursor: move; }
 .item.link { background: rgba(30, 91, 216, .1); border: 1.5px solid rgba(30, 91, 216, .6); border-radius: 6px; cursor: pointer; }
@@ -311,7 +313,7 @@ html.pen-mode .ink { touch-action: pan-x pan-y; }
 .comment-panel { position: absolute; width: 380px; background: #fff; color: #1C1C1E; border-radius: 12px; border: 1.5px solid var(--c); box-shadow: 0 4px 10px rgba(0,0,0,.2); overflow: hidden; }
 .comment-panel header { background: var(--c); color: #fff; font-weight: 600; font-size: 14px; padding: 9px 12px; display: flex; align-items: center; gap: 8px; }
 .comment-panel header button { margin-left: auto; border: 0; background: transparent; color: #fff; }
-.comment-panel .rich { padding: 10px 12px; max-height: 360px; overflow: auto; min-height: 60px; }
+.comment-panel .rich { padding: 10px 12px; max-height: 360px; overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain; min-height: 60px; }
 .lasso-box { position: absolute; border: 1.5px dashed #007AFF; background: rgba(0, 122, 255, .06); cursor: move; border-radius: 4px; }
 .ink-on .layer.items { pointer-events: none; }
 .add-page { border: 2px dashed var(--line); background: transparent; color: var(--muted); border-radius: 10px; padding: 14px 22px; }
@@ -321,8 +323,13 @@ html.pen-mode .ink { touch-action: pan-x pan-y; }
 .preview-card .row { display: flex; gap: 8px; align-items: center; }
 .resume { position: absolute; top: 12px; left: 50%; transform: translateX(-50%); z-index: 5; background: color-mix(in srgb, var(--surface) 90%, transparent); backdrop-filter: blur(18px); border: 1px solid var(--hairline); box-shadow: var(--shadow); padding: 8px 14px; border-radius: 999px; font-size: 13.5px; pointer-events: none; }
 .search-panel { position: fixed; z-index: 55; top: 100px; right: 20px; width: min(380px, calc(100% - 32px)); max-height: calc(100% - 140px); background: var(--surface); border: 1px solid var(--hairline); border-radius: 14px; box-shadow: var(--shadow); display: flex; flex-direction: column; animation: rise .2s ease-out; }
-.search-panel .search { width: auto; margin: 12px; }
+/* Cabecera compacta: campo y ✕ centrados, mismo margen arriba y abajo; los resultados, debajo y solo si los hay. */
+.search-panel .sp-head { display: flex; align-items: center; gap: 4px; padding: 10px 8px 10px 12px; }
+.search-panel .search { flex: 1; min-width: 0; width: auto; margin: 0; }
+.search-panel .search input { text-align: left; min-width: 0; }
+.search-panel .search input::-webkit-search-cancel-button { display: none; }
 .search-panel .list { overflow: auto; padding: 0 12px 12px; }
+.search-panel .list:empty { display: none; }
 
 /* ---------- Modo dinámico ---------- */
 .dyn { flex: 1; position: relative; overflow: hidden; background: #0A0C16; color: #fff; }
@@ -613,6 +620,27 @@ body:not(.kbd-nav) select:focus-visible, body:not(.kbd-nav) .options :focus-visi
 .popover .lang-btn { flex: 1; border: 1px solid var(--hairline); border-radius: 9px; padding: 7px 10px; justify-content: center; }
 .popover .lang-btn[aria-pressed="true"] { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent) inset; }
 .popover .lang-btn svg { width: 22px; height: 15px; border-radius: 2px; box-shadow: 0 0 0 1px rgba(0,0,0,.12); }
+
+/* Botones que abren un menú o panel: con fondo mientras está abierto (se quita al cerrarlo). */
+.icon-btn[aria-expanded="true"], .menu-btn[aria-expanded="true"], .options .btn[aria-expanded="true"] { background: var(--fill); }
+/* Control «− 16 pt +»: el número abre el menú «Tamaño». */
+.seg .size-btn { min-width: 58px; justify-content: center; font-variant-numeric: tabular-nums; }
+.seg .size-btn[aria-expanded="true"] { background: var(--seg-thumb); box-shadow: 0 1px 3px rgba(0,0,0,.12); }
+/* Menú «Tamaño» (como en Goodnotes): título, deslizador con − / + y tamaños rápidos, con flecha hacia el control. */
+.popover.size-pop { width: 284px; padding: 12px 12px 14px; gap: 10px; overflow: visible; background: var(--surface); }
+.popover.size-pop::before { content: ""; position: absolute; top: -7px; left: calc(var(--arrow-x, 50%) - 7px); width: 13px; height: 13px; background: var(--surface);
+  border-left: 1px solid var(--hairline); border-top: 1px solid var(--hairline); transform: rotate(45deg); border-top-left-radius: 3px; }
+.size-pop .sz-head { display: flex; align-items: baseline; justify-content: space-between; padding: 0 2px; font-weight: 600; font-size: 15px; }
+.size-pop .sz-val { font-weight: 600; font-size: 15px; color: var(--accent); font-variant-numeric: tabular-nums; }
+.size-pop .sz-row { display: flex; align-items: center; gap: 8px; }
+.size-pop .sz-range { flex: 1; min-width: 0; accent-color: var(--accent); height: 28px; }
+.popover.size-pop .sz-step { width: 36px; height: 36px; padding: 0; justify-content: center; border-radius: 50%; background: var(--fill); color: var(--ink); flex: none; }
+.popover.size-pop .sz-step:hover:not(:disabled) { background: var(--fill-strong); color: var(--ink); }
+.popover.size-pop .sz-step:disabled { opacity: .35; }
+.size-pop .sz-quick { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; }
+.popover.size-pop .sz-quick button { justify-content: center; padding: 7px 0; border-radius: 8px; background: var(--fill); color: var(--ink); font-size: 14px; font-variant-numeric: tabular-nums; }
+.popover.size-pop .sz-quick button:hover:not(:disabled) { background: var(--fill-strong); color: var(--ink); }
+.popover.size-pop .sz-quick button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); font-weight: 600; }
 /* =============================================================================
    Tutorial de la primera vez (siempre en oscuro, como en la app nativa)
    ============================================================================= */
@@ -1068,7 +1096,7 @@ I18N.dict.it = {
   'Haz clic en la página para escribir.': 'Fai clic sulla pagina per scrivere.', 'Rodea trazos para seleccionarlos': 'Circonda i tratti per selezionarli',
   'Dibuja un recuadro sobre lo escrito a mano para enlazarlo': 'Disegna un riquadro sopra lo scritto a mano per collegarlo',
   'Tipo de letra': 'Carattere', 'Sistema': 'Sistema', 'Serif': 'Serif', 'Manuscrita': 'Manoscritta', 'Mono': 'Mono',
-  'Letra más grande': 'Testo più grande', 'Letra más pequeña': 'Testo più piccolo', 'Menos': 'Meno', 'Más': 'Più',
+  'Letra más grande': 'Testo più grande', 'Letra más pequeña': 'Testo più piccolo', 'Tamaño de letra': 'Dimensione del testo', 'Tamaños rápidos': 'Dimensioni rapide', 'Menos': 'Meno', 'Más': 'Più',
   'Negrita': 'Grassetto', 'Cursiva': 'Corsivo', 'Subrayado': 'Sottolineato', 'Tachado': 'Barrato', 'Resaltar ▾': 'Evidenzia ▾', 'Fondo ▾': 'Sfondo ▾',
   'Sin resaltar': 'Senza evidenziatura', 'Amarillo': 'Giallo', 'Verde': 'Verde', 'Azul': 'Blu', 'Rosa': 'Rosa', 'Naranja': 'Arancione', 'Sin fondo': 'Senza sfondo', 'Borde': 'Bordo',
   'Predeterminar': 'Predefinito', 'Los textos nuevos tendrán este estilo': 'I testi nuovi avranno questo stile', 'Color de fondo de las letras': 'Colore di sfondo del testo',
@@ -1192,6 +1220,7 @@ I18N.patterns.it = [
   [/^Recorte: (\d+) × (\d+) píxeles\. (.*)$/, 'Ritaglio: $1 × $2 pixel. Trascina gli angoli o i bordi; trascina dentro per spostare il ritaglio.'],
   [/^Insertar imagen \(quedan (\d+) más\)$/, 'Inserisci immagine (ne restano altre $1)'],
   [/^(\d+):(\d+) \/ (\d+):(\d+)$/, '$&'], [/^\w{3}\.? \d{1,2} \w{3}\.?,? \d{1,2}:\d{2}$/, '$&'],
+  [/^Tamaño de letra: (\d+) pt$/, 'Dimensione del testo: $1 pt'], [/^\d+ pt$/, '$&'],
   [/^Pestaña (\d+)$/, 'Scheda $1'], [/^Ir a la pestaña (\d+)$/, 'Vai alla scheda $1'],
   [/^Nota de voz · (.+)$/, 'Nota vocale · $1'], [/^Libreta duplicada$/, 'Quaderno duplicato'],
   [/^(Ahora: )?(.+) terminado\. Ahora: (.+)$/, (m, t) => `${t(m[2]) ?? m[2]} finito. Ora: ${t(m[3]) ?? m[3]}`],
@@ -1779,10 +1808,15 @@ function toast(msg) {
 let openPopover = null;
 function closePopover() { if (openPopover) { openPopover.el.remove(); openPopover.anchor?.setAttribute?.('aria-expanded', 'false'); openPopover = null; } }
 /** Menú flotante junto a `anchor` (un elemento o un punto {x, y}). */
+/** ¿`b` es el botón `a` (o el mismo botón vuelto a pintar: mismo id, data-act, data-mic o data-more)? */
+function sameAnchor(a, b) {
+  if (a === b) return true;
+  if (a?.nodeType !== 1 || b?.nodeType !== 1 || a.isConnected) return false;
+  return !!((a.id && a.id === b.id) || ['act', 'mic', 'more'].some((k) => a.dataset[k] && a.dataset[k] === b.dataset[k]));
+}
 function popover(anchor, html, onAct) {
   // Volver a pulsar el botón que abrió el menú lo cierra (aunque el botón se haya vuelto a pintar).
-  const same = (a, b) => a === b || (a?.nodeType === 1 && b?.nodeType === 1 && !a.isConnected && ((a.id && a.id === b.id) || (a.dataset.act && a.dataset.act === b.dataset.act)));
-  if (openPopover && anchor?.nodeType === 1 && same(openPopover.anchor, anchor)) { closePopover(); return; }
+  if (openPopover && anchor?.nodeType === 1 && sameAnchor(openPopover.anchor, anchor)) { closePopover(); return; }
   closePopover();
   const el = document.createElement('div');
   el.className = 'popover';
@@ -1799,7 +1833,10 @@ function popover(anchor, html, onAct) {
   el.querySelector('button')?.focus({ preventScroll: true });
 }
 document.addEventListener('pointerdown', (e) => {
-  if (openPopover && !openPopover.el.contains(e.target) && !(openPopover.anchor.contains && openPopover.anchor.contains(e.target))) closePopover();
+  // Un toque en el propio botón no cierra aquí: lo cierra su clic (si no, el clic lo volvería a abrir).
+  if (!openPopover || openPopover.el.contains(e.target) || openPopover.anchor.contains?.(e.target)) return;
+  if (sameAnchor(openPopover.anchor, e.target.closest?.('button, [role="button"]'))) return;
+  closePopover();
 }, true);
 
 function dialog(html, onAct, wide = false) {
@@ -4676,7 +4713,7 @@ function renderEditor() {
         <button class="icon-btn" id="redo" aria-label="Rehacer" title="Rehacer (${onbKey('redo')})">${icon('redo')}</button></div>
       <span class="bar-sep" aria-hidden="true"></span>
       <div class="cluster" aria-label="Libreta">
-        <button class="icon-btn" id="find-btn" aria-label="Buscar en la libreta" title="Buscar en la libreta (${onbKey('find')})">${icon('search')}</button>
+        <button class="icon-btn" id="find-btn" aria-expanded="false" aria-label="Buscar en la libreta" title="Buscar en la libreta (${onbKey('find')})">${icon('search')}</button>
         <button class="icon-btn" id="bm-btn" aria-label="Guardar esta página en marcadores" title="Guardar esta página en marcadores">${icon('bookmark')}</button>
         <button class="icon-btn" id="share-btn" aria-label="Compartir" title="Compartir" aria-haspopup="menu">${icon('share')}</button></div>
       <span class="bar-sep" aria-hidden="true"></span>
@@ -4704,7 +4741,7 @@ function renderEditor() {
   $$('[data-tool]').forEach((b) => b.addEventListener('click', () => setTool(b.dataset.tool)));
   $('#add-image').addEventListener('click', () => { saveRange(); pickFile('image/*', (f) => insertImageFile(f), true); });
   $('#bm-btn').addEventListener('click', () => { updateCurrentPage(); toggleBookmark(nb.pages[currentPageIndex]); });
-  $('#find-btn').addEventListener('click', openSearchPanel);
+  $('#find-btn').addEventListener('click', () => ($('.search-panel') ? closeSearchPanel() : openSearchPanel()));
   $('#share-btn').addEventListener('click', (e) => shareMenu(e.currentTarget));
   $('#undo').addEventListener('click', undo);
   $('#redo').addEventListener('click', redo);
@@ -4753,6 +4790,10 @@ function renderEditor() {
   attachReadingPan($('#desk'));
   pinchActive = false;   // un pellizco a medias del editor anterior no deja las páginas sin repintar
   attachPenTouch(desk); attachPinchZoom(desk);
+  // Un toque en el escritorio, fuera de las páginas, suelta el texto o el elemento seleccionado.
+  desk.addEventListener('pointerdown', (e) => {
+    if ((S.editing || S.selected) && e.target.matches('#desk, #pages, .page, .page-number')) deselectAll();
+  });
   S.reading = !!nb.reading;
   buildPages();
   renderOptions();
@@ -5295,7 +5336,8 @@ function renderOptions() {
     html = '<span class="hint">Haz clic en un elemento para seleccionarlo y arrástralo para moverlo. Doble clic en un texto para escribir. Ctrl+C, Ctrl+X y Ctrl+V para copiar, cortar y pegar.</span>';
   }
   el.innerHTML = html;
-  el.onmousedown = (e) => { if (e.target.closest('button')) e.preventDefault(); }; // no perder la selección del texto
+  // Los botones no se quedan el foco: el texto sigue en edición y con su selección (ratón, dedo y lápiz).
+  el.onmousedown = el.onpointerdown = (e) => { if (e.target.closest('button')) e.preventDefault(); };
   el.onclick = onOptionsClick;
   el.oninput = onOptionsInput;
   el.onchange = onOptionsInput;
@@ -5306,7 +5348,7 @@ function textBar(item) {
   const isDefault = item && JSON.stringify(Object.assign({}, base)) === JSON.stringify(Object.assign({}, S.textDefault));
   const state = (cmd, fallback) => (hasTextSelection() ? document.queryCommandState(cmd) : fallback);
   return `<select id="font" aria-label="Tipo de letra">${Object.entries(FONTS).map(([k, f]) => `<option value="${k}" ${base.font === k ? 'selected' : ''}>${f.name}</option>`).join('')}</select>
-    <div class="seg"><button data-act="size" data-v="-2" aria-label="Letra más pequeña">−</button><button disabled style="min-width:52px;opacity:1">${base.size} pt</button><button data-act="size" data-v="2" aria-label="Letra más grande">+</button></div>
+    <div class="seg"><button data-act="size" data-v="-2" aria-label="Letra más pequeña">−</button><button class="size-btn" data-act="size-menu" aria-haspopup="dialog" aria-expanded="${openPopover?.el.classList.contains('size-pop') ? 'true' : 'false'}" aria-label="Tamaño de letra: ${base.size} pt" title="Tamaño de letra">${base.size} pt</button><button data-act="size" data-v="2" aria-label="Letra más grande">+</button></div>
     ${swatches(TEXT_COLORS, base.color, 'text-color')}
     <div class="seg">
       <button data-act="bold" aria-pressed="${state('bold', base.bold)}" style="font-weight:700" title="Negrita">B</button>
@@ -5319,6 +5361,99 @@ function textBar(item) {
     ${item && S.editing ? '<button class="btn" data-act="inline-image" title="Insertar una imagen donde está el cursor">Imagen</button>' : ''}
     ${hasTextSelection() ? '<button class="btn" data-act="text-link" title="Enlazar el texto seleccionado con otra libreta o página">Enlace</button>' : ''}
     ${item ? `<button class="btn ${isDefault ? 'on' : ''}" data-act="default" ${isDefault ? 'disabled' : ''} title="Usar este estilo en todos los textos nuevos">${isDefault ? '✓ Predeterminado' : 'Predeterminar'}</button>` : ''}`;
+}
+// ---------- Tamaño de letra: menú «Tamaño» (como en Goodnotes) ----------
+const SIZE_QUICK = [10, 12, 14, 16, 18, 20, 24, 28, 32, 36, 48, 72];
+const SIZE_MIN = 8, SIZE_MAX = 96;
+/** Tamaño que tiene ahora lo que se va a cambiar: la selección o el cursor si se escribe; si no, el cuadro. */
+function textSizeNow() {
+  const found = findItem(S.editing || S.selected);
+  const base = (found?.item.base || S.textDefault).size;
+  if (!S.editing || !(hasTextSelection() || caretInEditingText())) return base;
+  return Math.round(parseFloat(getComputedStyle(nodeEl(getSelection().anchorNode)).fontSize)) || base;
+}
+/** Pone la letra a `n` puntos con la misma función que − y + (textStyle cambia el tamaño en una diferencia). */
+function setTextSize(n) {
+  n = Math.max(SIZE_MIN, Math.min(SIZE_MAX, Math.round(n)));
+  if (S.editing) restoreRange();   // el foco pudo irse al deslizador
+  const delta = n - textSizeNow();
+  if (delta) textStyle({ size: delta });
+  saveRange();
+  renderOptions();
+  return n;
+}
+function sizeMenu(anchor) {
+  saveRange();
+  const now = textSizeNow();
+  popover(anchor, `<div class="sz-head"><span>Tamaño</span><b class="sz-val">${now} pt</b></div>
+    <div class="sz-row"><button class="sz-step" data-step="-1" aria-label="Letra más pequeña">${icon('minus')}</button>
+      <input class="sz-range" type="range" min="${SIZE_MIN}" max="${SIZE_MAX}" step="1" value="${now}" aria-label="Tamaño de letra">
+      <button class="sz-step" data-step="1" aria-label="Letra más grande">${icon('plus')}</button></div>
+    <div class="sz-quick" role="group" aria-label="Tamaños rápidos">${SIZE_QUICK.map((n) => `<button data-size="${n}" aria-pressed="${n === now}">${n}</button>`).join('')}</div>`, () => {});
+  if (openPopover?.anchor !== anchor) return;   // era el mismo botón: el menú se ha cerrado
+  const el = openPopover.el;
+  el.classList.add('size-pop');
+  el.setAttribute('role', 'dialog');
+  el.setAttribute('aria-label', 'Tamaño de letra');
+  // Centrado bajo el control, con la flecha apuntándole.
+  const r = anchor.getBoundingClientRect(), w = el.offsetWidth;
+  const left = Math.max(8, Math.min(innerWidth - w - 8, r.left + r.width / 2 - w / 2));
+  el.style.left = left + 'px';
+  el.style.top = r.bottom + 10 + 'px';
+  el.style.setProperty('--arrow-x', Math.max(16, Math.min(w - 16, r.left + r.width / 2 - left)) + 'px');
+  if (S.editing) restoreRange();   // el menú no se queda el foco del texto
+  const range = $('.sz-range', el);
+  const show = (n) => {
+    $('.sz-val', el).textContent = `${n} pt`;
+    range.value = n;
+    $$('[data-size]', el).forEach((b) => b.setAttribute('aria-pressed', Number(b.dataset.size) === n));
+    $$('[data-step]', el).forEach((b) => { b.disabled = Number(b.dataset.step) < 0 ? n <= SIZE_MIN : n >= SIZE_MAX; });
+    // La barra se ha vuelto a pintar: el menú sigue colgado de su control nuevo.
+    const a = $('#options [data-act="size-menu"]');
+    if (a && openPopover?.el === el) { openPopover.anchor = a; a.setAttribute('aria-expanded', 'true'); }
+  };
+  show(now);
+  // Botones: sin quitar el foco al texto (ratón, dedo y lápiz).
+  el.addEventListener('pointerdown', (e) => { if (e.target.closest('button')) e.preventDefault(); });
+  el.addEventListener('mousedown', (e) => { if (e.target.closest('button')) e.preventDefault(); });
+  el.addEventListener('click', (e) => {
+    const b = e.target.closest('button');
+    if (!b || b.disabled) return;
+    if (b.dataset.size) show(setTextSize(Number(b.dataset.size)));
+    if (b.dataset.step) show(setTextSize(Number(range.value) + Number(b.dataset.step)));
+  });
+  // Deslizador: en vivo sobre el cuadro entero (un solo «deshacer» por arrastre); escribiendo, al soltarlo.
+  // El paso del arrastre sale un momento de la lista en cada punto: así commit nunca la llena y no echa pasos antiguos.
+  let first = null;
+  range.addEventListener('input', () => {
+    const n = Number(range.value);
+    if (S.editing) { $('.sz-val', el).textContent = `${n} pt`; return; }
+    const id = activeNb().id, u = (S.undo[id] = S.undo[id] || []);
+    const prev = first ? u.pop() : null, len = u.length;
+    setTextSize(n);
+    if (prev) { if (u.length > len) u.pop(); u.push(prev); } else if (u.length > len) first = u[u.length - 1];
+    show(n);
+  });
+  range.addEventListener('change', () => { first = null; show(setTextSize(Number(range.value))); });
+}
+/** El último toque fue en la barra de opciones o en un menú (hace menos de un momento). */
+let uiTap = { t: 0, ui: false };
+addEventListener('pointerdown', (e) => { uiTap = { t: performance.now(), ui: !!e.target.closest?.('#options, .popover') }; }, true);
+addEventListener('keydown', () => { uiTap.ui = false; }, true);   // Escape o Tab sí terminan la edición
+const uiTapRecent = () => uiTap.ui && performance.now() - uiTap.t < 1000;
+/** Devuelve el foco a un cuadro que se ha vuelto a pintar, con el cursor al final. */
+function focusRichEnd(rich) {
+  if (!rich || rich.contentEditable !== 'true') return;
+  rich.focus({ preventScroll: true });
+  const range = document.createRange();
+  range.selectNodeContents(rich); range.collapse(false);
+  const sel = getSelection(); sel.removeAllRanges(); sel.addRange(range);
+}
+/** Suelta el elemento seleccionado o en edición (toque en un hueco de la página o del escritorio). */
+function deselectAll() {
+  if (document.activeElement?.closest?.('.rich')) document.activeElement.blur();
+  stopEditing();
+  select(null);
 }
 function onOptionsClick(e) {
   const b = e.target.closest('[data-act]');
@@ -5345,6 +5480,7 @@ function onOptionsClick(e) {
     case 'comment-color': editItem(found, (it) => { it.color = v; }); S.commentColor = v; break;
     case 'toggle-comment': toggleComment(found); break;
     case 'size': textStyle({ size: Number(v) }); break;
+    case 'size-menu': return sizeMenu(b);
     case 'text-color': textStyle({ color: v }); break;
     case 'bold': case 'italic': case 'underline': case 'strike': textStyle({ [act]: true }); break;
     case 'align': textStyle({ align: v }); break;
@@ -5784,6 +5920,7 @@ function refreshItem(found) {
   if (!el) return renderItems(found.page);
   const fresh = itemElement(found.page, found.item);
   el.replaceWith(fresh);
+  if (S.editing?.itemId === found.item.id) focusRichEnd(richFor(found.page.id, found.item.id));
   if (found.item.type === 'comment') { v.over.querySelector(`[data-panel="${found.item.id}"]`)?.remove(); if (found.item.expanded) v.over.appendChild(commentPanel(found.page, found.item)); }
 }
 function renderItems(page) {
@@ -5821,6 +5958,8 @@ function richElement(page, item, editable) {
   rich.addEventListener('blur', () => setTimeout(() => {
     const a = document.activeElement;
     if (a && (a.closest?.('#options') || a.closest?.('.popover') || a.closest?.('.scrim'))) return; // cambiando el estilo
+    if (uiTapRecent()) return;   // un toque en la barra o en un menú (Safari no da el foco a los botones)
+    if (!rich.isConnected) return;   // el cuadro se volvió a pintar (refreshItem le devuelve el foco)
     if (S.editing?.itemId === item.id && a !== rich) stopEditing();
   }, 0));
   rich.addEventListener('click', (e) => {
@@ -6003,10 +6142,10 @@ function attachItemsLayer(page, v) {
     if (e.target !== v.items) return;
     currentPageIndex = activeNb().pages.indexOf(page);
     clearLasso();
-    if (S.editing) { document.activeElement?.blur?.(); stopEditing(); S.selected = null; select(null); return; }
+    // Con un elemento seleccionado o en edición, el primer toque fuera solo lo suelta (no crea otro cuadro).
+    if (S.editing || S.selected) { e.preventDefault(); deselectAll(); return; }
     // Texto del PDF: con la herramienta de seleccionar, arrastrar sobre él lo selecciona.
-    if (S.tool === 'select' && PdfText.begin(e, page, v)) { if (S.selected) select(null); return; }
-    if (S.selected) { select(null); if (S.tool === 'select') return; }
+    if (S.tool === 'select' && PdfText.begin(e, page, v)) return;
     const r = v.items.getBoundingClientRect();
     const x = (e.clientX - r.left) / S.zoom, y = (e.clientY - r.top) / S.zoom;
     if (S.tool === 'text') { e.preventDefault(); addTextBox(page, x, y); }
@@ -6317,16 +6456,22 @@ function renderOutline(body, nb) {
 }
 
 // ---------- Búsqueda en la libreta ----------
-function openSearchPanel() {
+/** Cierra el panel de búsqueda y quita el fondo «activo» de su botón. */
+function closeSearchPanel() {
   $('.search-panel')?.remove();
+  $('#find-btn')?.setAttribute('aria-expanded', 'false');
+}
+function openSearchPanel() {
+  closeSearchPanel();
   const nb = activeNb();
   const panel = document.createElement('div');
   panel.className = 'search-panel';
   panel.setAttribute('role', 'dialog');
   panel.setAttribute('aria-label', 'Buscar en la libreta');
-  panel.innerHTML = `<div style="display:flex;align-items:center"><label class="search" for="nb-q">${icon('search')}<input id="nb-q" type="search" placeholder="Buscar en «${esc(nb.title)}»" autocomplete="off"></label>
+  panel.innerHTML = `<div class="sp-head"><label class="search" for="nb-q">${icon('search')}<input id="nb-q" type="search" placeholder="Buscar en la libreta" autocomplete="off"></label>
     <button class="icon-btn" data-x aria-label="Cerrar búsqueda">${icon('close')}</button></div><div class="list" id="nb-results"></div>`;
   document.body.appendChild(panel);
+  $('#find-btn')?.setAttribute('aria-expanded', 'true');
   const input = $('#nb-q', panel), list = $('#nb-results', panel);
   input.focus();
   const run = () => {
@@ -6338,13 +6483,13 @@ function openSearchPanel() {
   };
   input.addEventListener('input', run);
   panel.addEventListener('click', (e) => {
-    if (e.target.closest('[data-x]')) return panel.remove();
+    if (e.target.closest('[data-x]')) return closeSearchPanel();
     const r = e.target.closest('.result');
     if (!r) return;
     if (r.dataset.item) flashItem(r.dataset.page, r.dataset.item, input.value.trim());
     else { scrollToPage(r.dataset.page); setTimeout(() => flashRect(r.dataset.page, null), 350); }
   });
-  panel.addEventListener('keydown', (e) => { if (e.key === 'Escape') panel.remove(); });
+  panel.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeSearchPanel(); });
 }
 
 // ---------- Copiar, cortar y pegar ----------
@@ -6492,7 +6637,7 @@ document.addEventListener('keydown', (e) => {
     return;
   }
   if ((e.key === 'Delete' || e.key === 'Backspace') && (S.selected || S.lasso)) { e.preventDefault(); return deleteSelection(); }
-  if (e.key === 'Escape') { PdfText.clear(); closePopover(); previewEl?.remove(); $('.search-panel')?.remove(); $('#pomo-panel')?.remove(); clearLasso(); return select(null); }
+  if (e.key === 'Escape') { PdfText.clear(); closePopover(); previewEl?.remove(); closeSearchPanel(); $('#pomo-panel')?.remove(); clearLasso(); return select(null); }
 });
 
 // =============================================================================
