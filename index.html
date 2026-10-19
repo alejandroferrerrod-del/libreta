@@ -105,10 +105,10 @@ svg { display: block; }
 .tool .ink-bar { position: absolute; left: 9px; right: 9px; bottom: 4px; height: 4px; border-radius: 2px; background: var(--c); box-shadow: inset 0 0 0 .5px var(--sep); }
 .sep { width: 1px; height: 24px; background: var(--line); flex: none; }
 .search { display: flex; align-items: center; gap: 8px; background: var(--surface-2); border: 0; border-radius: 9px; padding: 7px 10px; width: min(380px, 100%); }
-.search input { border: 0; background: transparent; outline: none; width: 100%; text-align: center; font-size: 16px; }
+.search input { border: 0; background: transparent; outline: none; width: 100%; min-width: 0; text-align: left; font-size: 16px; }   /* a la izquierda, junto a la lupa: el cursor empieza donde se escribe */
 .search input::placeholder { color: var(--muted); }
 .search svg { width: 20px; height: 20px; color: var(--muted); flex: none; }
-.search .ghost { width: 20px; flex: none; }
+.search .ghost { display: none; }
 .chip { display: inline-flex; align-items: center; gap: 5px; border-radius: 8px; padding: 5px 10px; font-size: 12px; font-weight: 600; color: #fff; background: var(--c, #6B7280); border: 0; white-space: nowrap; }
 .chip svg { width: 13px; height: 13px; }
 .chip .count { background: rgba(255,255,255,.3); border-radius: 99px; padding: 0 5px; font-size: 10px; }
@@ -210,10 +210,17 @@ svg { display: block; }
   color: var(--ink); padding: 10px 18px; border-radius: 999px; z-index: 90; box-shadow: 0 6px 24px rgba(0,0,0,.2); max-width: calc(100% - 32px); border: 1px solid var(--hairline); font-size: 14px; animation: rise .2s ease-out; }
 
 /* ---------- Pestañas (como las de Chrome) ---------- */
-.tabs { background: var(--strip); display: flex; align-items: flex-end; height: 40px; padding: 0 10px; flex: none; gap: 0; overflow: hidden; }
-.tabs .chip { align-self: center; margin: 0 6px; }
+.tabs { background: var(--strip); display: flex; align-items: flex-end; height: 40px; padding: 0 6px 0 2px; flex: none; gap: 0; overflow: hidden; }
+/* Las pestañas se encogen hasta un ancho legible; si aun así no caben, su franja se desplaza en horizontal. */
+.tabs-scroll { display: flex; align-items: flex-end; align-self: stretch; flex: 0 1 auto; min-width: 0; overflow-x: auto; overflow-y: hidden;
+  padding: 0 8px; scrollbar-width: none; overscroll-behavior-x: contain; -webkit-overflow-scrolling: touch; }
+.tabs-scroll::-webkit-scrollbar { display: none; }
+.tabs-scroll.more-l { -webkit-mask-image: linear-gradient(to right, transparent, #000 28px); mask-image: linear-gradient(to right, transparent, #000 28px); }
+.tabs-scroll.more-r { -webkit-mask-image: linear-gradient(to left, transparent, #000 28px); mask-image: linear-gradient(to left, transparent, #000 28px); }
+.tabs-scroll.more-l.more-r { -webkit-mask-image: linear-gradient(to right, transparent, #000 28px, #000 calc(100% - 28px), transparent); mask-image: linear-gradient(to right, transparent, #000 28px, #000 calc(100% - 28px), transparent); }
+.tabs .chip { align-self: center; margin: 0 6px; flex: none; }
 .tabs .chip.drop { outline: 2px solid var(--accent); outline-offset: 2px; }
-.tab { position: relative; height: 34px; flex: 0 1 220px; min-width: 44px; display: flex; align-items: center; gap: 8px; padding: 0 8px 0 14px; font-size: 13px; color: var(--ink-2); border: 0; background: transparent; cursor: default; user-select: none; }
+.tab { position: relative; height: 34px; flex: 0 1 220px; min-width: 112px; display: flex; align-items: center; gap: 8px; padding: 0 8px 0 14px; font-size: 13px; color: var(--ink-2); border: 0; background: transparent; cursor: default; user-select: none; }
 .tab .t { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .tab .book { width: 13px; height: 13px; color: var(--c); flex: none; }
 .tab .x { border: 0; background: transparent; width: 20px; height: 20px; border-radius: 50%; display: grid; place-items: center; color: var(--muted); padding: 0; flex: none; }
@@ -232,7 +239,10 @@ svg { display: block; }
 .tab .gline { position: absolute; left: 8px; right: 8px; bottom: 0; height: 2.5px; border-radius: 2px; background: var(--g); }
 .tab.dragging { opacity: .3; }
 .tab.floating { position: fixed; z-index: 80; pointer-events: none; background: var(--bar); border-radius: 9px 9px 0 0; box-shadow: 0 4px 14px rgba(0,0,0,.25); }
-.tabs .plus { align-self: center; }
+.tabs .plus, .tabs .tab-all { align-self: center; }
+.tabs .tab-all { width: 30px; height: 30px; color: var(--ink-2); }
+.tabs .tab-all svg { width: 17px; height: 17px; }
+.tabs .tab-all[aria-expanded="true"] { background: var(--fill); }
 .tabs .clock { align-self: center; font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; margin: 0 10px 0 auto; padding-left: 12px; }
 
 /* ---------- Editor ---------- */
@@ -548,7 +558,7 @@ body.is-reordering .tabs .chip:hover { outline: 2px solid var(--accent); outline
 .pdf-panel .swatch:hover { transform: scale(1.12); }
 .pdf-panel .sep { width: 1px; height: 22px; background: var(--hairline); margin: 0 4px; }
 .pdf-panel .icon-btn { width: 32px; height: 32px; color: var(--ink); }
-.tab-group { display: flex; align-items: flex-end; align-self: stretch; min-width: 0; flex: 0 1 auto; }
+.tab-group { display: flex; align-items: flex-end; align-self: stretch; flex: 0 1 auto; }   /* sin min-width: 0, para que sus pestañas no se monten sobre el grupo siguiente */
 .tab-group > .chip { cursor: grab; }
 .tab-group.reordering { z-index: 30; }
 .tab-group.reordering > .chip { cursor: grabbing; box-shadow: 0 4px 14px rgba(0,0,0,.3); }
@@ -699,7 +709,32 @@ body:not(.kbd-nav) select:focus-visible, body:not(.kbd-nav) .options :focus-visi
 .lib-header .lib-fs { position: absolute; top: 0; right: 6px; width: 26px; height: 24px; color: var(--muted); }
 .lib-header .lib-fs svg { width: 15px; height: 15px; }
 .lib-header:has(.lib-fs) .lib-clock { right: 38px; }
-@media (max-width: 520px) { .tabs .clock { display: none; } }   /* en el móvil no cabe junto a las pestañas */
+@media (max-width: 520px) { .tabs .clock { display: none; } .tab { min-width: 100px; flex-basis: 160px; } }   /* en el móvil no cabe junto a las pestañas */
+
+/* Menú «Todas las pestañas»: agrupadas por carpeta; se ordenan arrastrando (con el dedo o el lápiz, desde los puntitos). */
+.popover.tabs-menu { width: min(340px, calc(100vw - 16px)); padding: 6px; gap: 2px; }
+.tabs-menu .tm-title { display: flex; align-items: center; gap: 6px; padding: 4px 8px 6px; }
+.tabs-menu .tm-count { background: var(--fill); color: var(--ink-2); border-radius: 99px; padding: 0 7px; font-size: 11px; }
+.tabs-menu .tm-group { display: flex; flex-direction: column; background: var(--surface); border-radius: 10px; }
+.tabs-menu .tm-group + .tm-group { margin-top: 4px; }
+.tabs-menu .tm-ghead { display: flex; align-items: center; gap: 6px; min-height: 34px; padding: 2px 4px 2px 0; font-size: 12.5px; font-weight: 600; color: var(--c); cursor: grab; user-select: none; -webkit-user-select: none; }
+.tabs-menu .tm-ghead > svg { width: 15px; height: 15px; flex: none; }
+.tabs-menu .tm-gname { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.popover.tabs-menu .tm-gclose { flex: none; font-size: 12px; font-weight: 500; color: var(--accent); padding: 4px 8px; border-radius: 7px; }
+.popover.tabs-menu .tm-gclose:hover { background: var(--accent-soft); color: var(--accent); }
+.tabs-menu .tm-row { display: flex; align-items: center; min-height: 40px; border-radius: 8px; user-select: none; -webkit-user-select: none; touch-action: pan-y; background: var(--surface); }
+.tabs-menu .tm-grip { flex: none; width: 26px; align-self: stretch; display: grid; place-items: center; color: var(--muted); cursor: grab; touch-action: none; }
+.tabs-menu .tm-grip svg { width: 15px; height: 15px; }
+.popover.tabs-menu .tm-go { flex: 1; min-width: 0; padding: 8px 6px; gap: 8px; font-size: 14px; color: var(--ink); }
+.tabs-menu .tm-go .book { display: grid; color: var(--c); flex: none; }
+.tabs-menu .tm-go .book svg { width: 15px; height: 15px; }
+.tabs-menu .tm-go .t { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tabs-menu .tm-row.active .tm-go { font-weight: 600; }
+.tabs-menu .tm-row.active { background: var(--accent-soft); }
+.popover.tabs-menu .tm-x { flex: none; width: 34px; height: 34px; padding: 0; justify-content: center; border-radius: 50%; color: var(--muted); }
+.popover.tabs-menu .tm-x svg { width: 13px; height: 13px; stroke-width: 2.5; }
+.popover.tabs-menu .tm-x:hover:not(:disabled) { background: var(--fill); color: var(--ink); }
+.tabs-menu .tm-row.reordering, .tabs-menu .tm-group.reordering { position: relative; z-index: 2; box-shadow: 0 6px 20px rgba(0,0,0,.22); cursor: grabbing; }
 html.app-full .tabs { display: none; }
 html.app-full .lib-fs { visibility: hidden; }
 html.app-full header.bar { margin-right: 46px; }   /* el botón flotante va en la esquina, fuera de la barra */
@@ -748,6 +783,18 @@ html.pen-mode .item, html.pen-mode .pin, html.pen-mode .lasso-box { touch-action
 .fp-offer p { margin: 0 0 4px; }
 .fp-offer .fp-offer-q { color: var(--ink-2); margin-bottom: 10px; }
 .fp-offer-acts { display: flex; flex-wrap: wrap; gap: 8px; }
+
+/* Arrastrar archivos (PDF, imágenes) desde el ordenador a la biblioteca: se resalta dónde caerán. */
+.library.drop-target { box-shadow: inset 0 0 0 2px var(--accent); background: color-mix(in srgb, var(--accent) 6%, var(--bar)); }
+.folder-card.drop-target .folder-icon { transform: translateY(-3px) scale(1.03); filter: drop-shadow(0 0 10px color-mix(in srgb, var(--accent) 55%, transparent)); }
+.folder-card.drop-target .name { color: var(--accent); }
+.folder-card.drop-target { border-radius: 6px; background: var(--accent-soft); box-shadow: 0 0 0 8px var(--accent-soft); outline: 2px solid var(--accent); outline-offset: 8px; }   /* el anillo deja aire alrededor sin mover nada */
+.dfolder.drop-target .core { box-shadow: 0 0 0 4px #fff, 0 0 30px var(--glow), 0 0 80px var(--glow); }
+.dfolder.drop-target .lbl { color: #9CC8FF; }
+.drop-hint { position: fixed; left: 50%; bottom: 28px; transform: translateX(-50%); z-index: 90; display: flex; align-items: center; gap: 8px; max-width: calc(100% - 32px);
+  padding: 10px 18px; border-radius: 999px; background: var(--accent); color: #fff; font-size: 14px; font-weight: 500; box-shadow: 0 6px 24px rgba(0,0,0,.25); pointer-events: none; animation: rise .2s ease-out; }
+.drop-hint svg { width: 17px; height: 17px; flex: none; }
+.drop-hint span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 /* =============================================================================
    Tutorial de la primera vez (siempre en oscuro, como en la app nativa)
    ============================================================================= */
@@ -1274,6 +1321,9 @@ I18N.dict.it = {
   // --- Atajos ---
   'Restablecer todo': 'Ripristina tutto', '¿Volver a los atajos de siempre?': 'Tornare alle scorciatoie di sempre?', 'Se perderán los cambios que hayas hecho.': 'Le modifiche fatte andranno perse.',
   'Añadir otra combinación': 'Aggiungi un’altra combinazione', 'Esc para cancelar': 'Esc per annullare', 'Pestañas': 'Schede', 'Edición': 'Modifica', 'Páginas ': 'Pagine', 'Otros': 'Altro',
+  'Todas las pestañas': 'Tutte le schede', 'Todas las pestañas: ir a una, cerrarlas u ordenarlas': 'Tutte le schede: vai a una, chiudile o riordinale',
+  'Pestañas abiertas': 'Schede aperte', 'Cerrar todas': 'Chiudi tutte', 'No hay pestañas abiertas': 'Non ci sono schede aperte',
+  'Solo se pueden importar archivos PDF e imágenes.': 'Si possono importare solo file PDF e immagini.',
   'Pestaña siguiente': 'Scheda successiva', 'Pestaña anterior': 'Scheda precedente', 'Última pestaña': 'Ultima scheda', 'Cerrar pestaña': 'Chiudi scheda',
   'Mostrar u ocultar la barra lateral': 'Mostra o nascondi la barra laterale', 'Mostrar u ocultar notas de voz': 'Mostra o nascondi le note vocali', 'Marcador de la página': 'Segnalibro della pagina',
   'Espacio': 'Spazio', 'Supr': 'Canc', 'Mayús': 'Maiusc', 'Haz clic en un atajo para cambiarlo. Clic derecho para quitarlo.': 'Fai clic su una scorciatoia per cambiarla. Clic destro per toglierla.',
@@ -1313,7 +1363,11 @@ I18N.dict.it = {
 I18N.patterns.it = [
   [/^(.+?)\s+\(([^()]+)\)$/, (m, t) => { const a = t(m[1].trim()); return a === null ? null : `${a} (${m[2]})`; }],
   [/^(.+) · (.+)$/, (m, t) => m[0].split(' · ').map((p) => t(p) ?? p).join(' · ')],
-  [/^Abrir carpeta (.+)$/, 'Apri cartella $1'], [/^Abrir (.+)$/, 'Apri $1'], [/^Cerrar (.+)$/, 'Chiudi $1'],
+  [/^Abrir carpeta (.+)$/, 'Apri cartella $1'], [/^Abrir (.+)$/, 'Apri $1'],
+  [/^Cerrar las pestañas de (.+)$/, (m, t) => `Chiudi le schede di ${m[1] === 'Sin carpeta' ? t(m[1]) : m[1]}`], [/^Cerrar (.+)$/, 'Chiudi $1'],
+  [/^Suelta para importar en (.+)$/, (m) => `Rilascia per importare in ${m[1] === 'Libretas' ? 'Quaderni' : m[1]}`],
+  [/^Libreta importada en (.+)$/, (m) => `Quaderno importato in ${m[1] === 'Libretas' ? 'Quaderni' : m[1]}`],
+  [/^(\d+) libretas importadas en (.+)$/, (m) => `${m[1]} quaderni importati in ${m[2] === 'Libretas' ? 'Quaderni' : m[2]}`],
   [/^Opciones de la carpeta (.+)$/, 'Opzioni della cartella $1'], [/^Opciones de (.+)$/, 'Opzioni di $1'],
   [/^Seleccionar carpeta (.+)$/, 'Seleziona cartella $1'], [/^Seleccionar (.+)$/, 'Seleziona $1'],
   [/^Carpeta (.+), (\d+) libretas?\. Entrar$/, (m) => `Cartella ${m[1]}, ${m[2]} ${m[2] === '1' ? 'quaderno' : 'quaderni'}. Entra`],
@@ -2813,7 +2867,8 @@ function newNotebookDialog() {
 }
 
 // ---------- Importar PDF ----------
-async function importPDF(file) {
+/** Crea una libreta con las páginas del PDF en `folder` (la carpeta abierta, si no se dice) y la abre si `open`. Devuelve la libreta. */
+async function importPDF(file, { folder = S.folder || null, open = true } = {}) {
   if (!window.pdfjsLib) { toast('No se ha podido cargar el lector de PDF. Revisa la conexión y recarga.'); return; }
   try {
     toast('Importando el PDF…');
@@ -2821,7 +2876,7 @@ async function importPDF(file) {
     const data = new Uint8Array(await file.arrayBuffer());
     const pdf = await pdfjsLib.getDocument({ data, isEvalSupported: false }).promise;
     const nb = newNotebook(file.name.replace(/\.pdf$/i, ''), COVERS[Math.floor(Math.random() * COVERS.length)], 'blank', 'white');
-    nb.folder = S.folder || null;
+    nb.folder = folder;
     nb.pages = [];
     for (let i = 1; i <= pdf.numPages; i++) {
       const p = await pdf.getPage(i);
@@ -2842,12 +2897,85 @@ async function importPDF(file) {
     }
     S.notebooks.push(nb); Store.put(nb);
     toast(`PDF importado: ${nb.pages.length} ${nb.pages.length === 1 ? 'página' : 'páginas'}`);
-    openNotebook(nb.id);
+    if (open) openNotebook(nb.id);
+    return nb;
   } catch (e) {
     console.error(e);
     toast('No se ha podido abrir ese PDF.');
+    return null;
   }
 }
+/** Crea una libreta con una página por imagen (la imagen, centrada y a todo el ancho que quepa) en `folder`. Devuelve la libreta. */
+async function importImages(files, { folder = S.folder || null } = {}) {
+  const pages = [];
+  for (const f of files) {
+    let img;
+    try { img = await readImageFile(f, 2000); } catch (e) { continue; }
+    const page = newPage('blank', 'white', img.w > img.h), m = 40;
+    const k = Math.min((page.w - 2 * m) / img.w, (page.h - 2 * m) / img.h), w = img.w * k, h = img.h * k;
+    page.items.push({ id: uid(), type: 'image', x: (page.w - w) / 2, y: (page.h - h) / 2, w, h, src: img.src, alt: f.name || 'Imagen' });
+    pages.push(page);
+  }
+  if (!pages.length) { toast('No se ha podido leer esa imagen.'); return null; }
+  const title = files.length === 1 ? files[0].name.replace(/\.[^.]+$/, '') : 'Imágenes';
+  const nb = newNotebook(title, COVERS[Math.floor(Math.random() * COVERS.length)], 'blank', 'white');
+  nb.folder = folder;
+  nb.pages = pages;
+  S.notebooks.push(nb); Store.put(nb);
+  return nb;
+}
+
+// ---------- Arrastrar archivos desde el ordenador (Finder, Archivos) a la biblioteca ----------
+// Soltar sobre una carpeta los importa dentro de ella; en cualquier otro sitio, en la carpeta abierta.
+// Cada PDF es una libreta; las imágenes que se sueltan juntas, una libreta con una página por imagen.
+const FileDrop = { el: null, timer: 0 };
+const dragHasFiles = (e) => [...(e.dataTransfer?.types || [])].includes('Files');
+/** Dónde caería lo que se arrastra: la carpeta bajo el puntero (en la estantería o en el modo dinámico) o la abierta. */
+function fileDropTarget(e) {
+  const card = e.target.closest?.('.folder-card[data-folder], .dfolder[data-folder]');
+  if (card && Folders.byId(card.dataset.folder)) return { el: card, folder: card.dataset.folder };
+  return { el: $('#lib-main') || $('#dyn') || $('#app'), folder: S.folder || null };
+}
+function dropPlaceName(folder) { return folder ? `«${Folders.byId(folder)?.name || ''}»` : 'Libretas'; }
+/** Resalta el destino y enseña a dónde irá; sin `target`, lo quita todo. */
+function markDropTarget(target) {
+  if (FileDrop.el !== target?.el) { FileDrop.el?.classList.remove('drop-target'); target?.el.classList.add('drop-target'); FileDrop.el = target?.el || null; }
+  let hint = $('#drop-hint');
+  if (!target) return hint?.remove();
+  if (!hint) { hint = document.createElement('div'); hint.id = 'drop-hint'; hint.className = 'drop-hint'; hint.setAttribute('role', 'status'); document.body.appendChild(hint); }
+  const text = `Suelta para importar en ${dropPlaceName(target.folder)}`;
+  if (hint.dataset.text !== text) { hint.dataset.text = text; hint.innerHTML = `${icon('download')}<span>${esc(text)}</span>`; }
+}
+async function importDroppedFiles(files, folder) {
+  const pdfs = files.filter((f) => f.type === 'application/pdf' || /\.pdf$/i.test(f.name));
+  const images = files.filter((f) => f.type.startsWith('image/'));
+  if (!pdfs.length && !images.length) { toast('Solo se pueden importar archivos PDF e imágenes.'); return []; }
+  const made = [];
+  for (const f of pdfs) { const nb = await importPDF(f, { folder, open: false }); if (nb) made.push(nb); }
+  if (images.length) { const nb = await importImages(images, { folder }); if (nb) made.push(nb); }
+  if (!made.length) return made;
+  if (S.view === 'library') renderLibrary();
+  const where = dropPlaceName(folder);
+  toast(made.length === 1 ? `Libreta importada en ${where}` : `${made.length} libretas importadas en ${where}`);
+  return made;
+}
+document.addEventListener('dragover', (e) => {
+  if (S.view !== 'library' || !dragHasFiles(e)) return;
+  e.preventDefault();
+  e.dataTransfer.dropEffect = 'copy';
+  markDropTarget(fileDropTarget(e));
+  // dragover se repite mientras el archivo esté encima: si deja de llegar, es que se ha ido.
+  clearTimeout(FileDrop.timer);
+  FileDrop.timer = setTimeout(() => markDropTarget(null), 250);
+});
+document.addEventListener('drop', (e) => {
+  if (S.view !== 'library' || !dragHasFiles(e)) return;
+  e.preventDefault();
+  clearTimeout(FileDrop.timer);
+  const { folder } = fileDropTarget(e);
+  markDropTarget(null);
+  importDroppedFiles([...e.dataTransfer.files], folder);
+});
 
 // ---------- Copia de seguridad ----------
 function backupMenu(anchor) {
@@ -3996,7 +4124,8 @@ const Reorder = {
     let n = 0;
     slots.forEach((s, i) => {
       if (i === from) return;
-      const before = axis === 'x' ? point.x > s.left + s.width / 2 : point.y > s.bottom || (point.y >= s.top && point.x > s.left + s.width / 2);
+      const before = axis === 'x' ? point.x > s.left + s.width / 2 : axis === 'y' ? point.y > s.top + s.height / 2
+        : point.y > s.bottom || (point.y >= s.top && point.x > s.left + s.width / 2);
       if (before) n++;
     });
     return n;
@@ -4014,7 +4143,7 @@ const Reorder = {
  * Hace reordenables los hijos `selector` de `container`.
  * onDrop(from, to, el, pointerEvent) al soltar en otro sitio; onOutside(el, pointerEvent) al soltar fuera
  * (devuelve true si lo ha gestionado); onTarget(el, elementoDebajo) igual, antes que nada.
- * `group(el)`: solo se reordena entre los que tienen el mismo grupo. `ignore` = selector de botones dentro que no inician arrastre.
+ * axis: 'grid' (cuadrícula), 'x' (fila) o 'y' (columna). `group(el)`: solo se reordena entre los que tienen el mismo grupo. `ignore` = selector de botones dentro que no inician arrastre.
  */
 function liveReorder(container, selector, { onDrop, onOutside, onTarget, group, ignore = 'button', scroller = null, axis = 'grid' } = {}) {
   container.addEventListener('pointerdown', (e) => {
@@ -4031,14 +4160,16 @@ function liveReorder(container, selector, { onDrop, onOutside, onTarget, group, 
     const layout = () => {
       const p = point(last);
       to = Reorder.targetIndex(p, slots, from, axis);
-      el.style.transform = `translate(${last.clientX - start.x}px, ${axis === 'x' ? 0 : p.y - start.y}px)`;
+      el.style.transform = `translate(${axis === 'y' ? 0 : last.clientX - start.x}px, ${axis === 'x' ? 0 : p.y - start.y}px)`;
       const order = Reorder.preview(items.map((_, i) => i), from, to);
-      if (axis === 'x') {
-        const gap = slots.length > 1 ? slots[1].left - slots[0].left - slots[0].width : 0;
-        let x = slots[0].left;
+      if (axis === 'x' || axis === 'y') {
+        // En fila (o en columna, 'y'): cada uno se coloca tras el anterior, aunque midan distinto.
+        const [pos, size, move] = axis === 'x' ? ['left', 'width', 'translateX'] : ['top', 'height', 'translateY'];
+        const gap = slots.length > 1 ? slots[1][pos] - slots[0][pos] - slots[0][size] : 0;
+        let x = slots[0][pos];
         order.forEach((itemIndex) => {
-          if (itemIndex !== from) items[itemIndex].style.transform = `translateX(${x - slots[itemIndex].left}px)`;
-          x += slots[itemIndex].width + gap;
+          if (itemIndex !== from) items[itemIndex].style.transform = `${move}(${x - slots[itemIndex][pos]}px)`;
+          x += slots[itemIndex][size] + gap;
         });
         return;
       }
@@ -4795,12 +4926,15 @@ function tabGroups() {
   }
   return groups;
 }
+let lastRevealedTab = null;   // la pestaña activa que ya se desplazó a la vista (para no volver a saltar)
 function renderTabs() {
   const el = $('#tabs');
   if (!el) return;
+  const prevScroll = $('#tabs-scroll')?.scrollLeft || 0;
   const groups = tabGroups();
   const chips = groups.some((g) => g.space);
-  el.innerHTML = groups.map((g) => {
+  // Las pestañas van en su propia franja desplazable; el reloj y los botones quedan siempre a la derecha.
+  el.innerHTML = '<div class="tabs-scroll" id="tabs-scroll">' + groups.map((g) => {
     const color = g.color;
     const collapsed = S.collapsed.includes(g.key);
     const chip = chips ? `<button class="chip" data-chip="${esc(g.key)}" style="--c:${color}" title="${collapsed ? 'Mostrar' : 'Plegar'} ${esc(g.space || 'Sin carpeta')} · arrastra para moverla">
@@ -4813,8 +4947,19 @@ function renderTabs() {
         <button class="x" data-close="${id}" aria-label="Cerrar ${esc(nb.title)}">${icon('close')}</button>
         ${chips ? '<span class="gline"></span>' : ''}</div>`;
     }).join('')) + '</div>';
-  }).join('') + `<span class="clock" data-clock></span><button class="icon-btn plus" id="tab-plus" aria-label="Abrir otra libreta" title="Abrir otra libreta">${icon('plus')}</button>${fullscreenButton()}`;
+  }).join('') + `</div><span class="clock" data-clock></span><button class="icon-btn plus" id="tab-plus" aria-label="Abrir otra libreta" title="Abrir otra libreta">${icon('plus')}</button>
+    <button class="icon-btn tab-all" id="tab-all" aria-haspopup="menu" aria-expanded="false" aria-label="Todas las pestañas" title="Todas las pestañas: ir a una, cerrarlas u ordenarlas">${icon('chevronDown')}</button>${fullscreenButton()}`;
   updateClocks();
+  const sc = $('#tabs-scroll');
+  sc.scrollLeft = prevScroll;
+  if (S.active !== lastRevealedTab) { lastRevealedTab = S.active; revealActiveTab(); }
+  tabEdges(sc);
+  sc.addEventListener('scroll', () => tabEdges(sc), { passive: true });
+  // La rueda vertical del ratón también la desplaza en horizontal.
+  sc.addEventListener('wheel', (e) => {
+    if (sc.scrollWidth <= sc.clientWidth || Math.abs(e.deltaX) >= Math.abs(e.deltaY)) return;
+    e.preventDefault(); sc.scrollLeft += e.deltaY;
+  }, { passive: false });
   el.onclick = (e) => {
     const close = e.target.closest('[data-close]');
     if (close) return closeTab(close.dataset.close);
@@ -4823,6 +4968,7 @@ function renderTabs() {
     const tab = e.target.closest('[data-tab]');
     if (tab && tab.dataset.tab !== S.active) return openNotebook(tab.dataset.tab);
     if (e.target.closest('#tab-plus')) return openOtherMenu(e.target.closest('#tab-plus'));
+    if (e.target.closest('#tab-all')) return tabsMenu(e.target.closest('#tab-all'));
   };
   // Arrastrar pestañas (en vivo, dentro de su espacio); soltar en la etiqueta de otro espacio la lleva allí, al final.
   if (!el.dataset.reorder) {
@@ -4847,6 +4993,96 @@ function renderTabs() {
       },
     });
   }
+}
+/** Desplaza la franja de pestañas lo justo para que se vea entera la activa. */
+function revealActiveTab() {
+  const sc = $('#tabs-scroll'), t = sc?.querySelector('.tab.active');
+  if (!t) return;
+  // Si es la primera de su carpeta, también se enseña la etiqueta de la carpeta.
+  const g = t.closest('.tab-group'), chip = g?.querySelector('.chip'), first = chip && g.querySelector('.tab') === t;
+  const s = sc.getBoundingClientRect(), r = t.getBoundingClientRect(), pad = 14;
+  const left = first ? chip.getBoundingClientRect().left : r.left;
+  if (left < s.left + pad) sc.scrollLeft -= s.left + pad - left;
+  else if (r.right > s.right - pad) sc.scrollLeft += r.right - (s.right - pad);
+  tabEdges(sc);
+}
+/** Difumina el borde por el que quedan pestañas escondidas. */
+function tabEdges(sc) {
+  const max = sc.scrollWidth - sc.clientWidth;
+  sc.classList.toggle('more-l', max > 1 && sc.scrollLeft > 1);
+  sc.classList.toggle('more-r', max > 1 && sc.scrollLeft < max - 1);
+}
+addEventListener('resize', () => { if ($('#tabs-scroll')) revealActiveTab(); });
+
+// ---------- Menú «Todas las pestañas» (botón del final de la barra) ----------
+/** Lista de las pestañas abiertas por carpeta: ir a una, cerrarla, cerrar las de una carpeta y ordenarlas arrastrando. */
+function tabsMenu(anchor) {
+  popover(anchor, tabsMenuHTML(), (act) => { if (act.startsWith('go:')) openNotebook(act.slice(3)); });
+  const pop = openPopover?.el;
+  if (!pop || openPopover.anchor !== anchor) return;
+  pop.classList.add('tabs-menu');
+  const r = anchor.getBoundingClientRect(), w = pop.offsetWidth;   // con su ancho propio: se vuelve a alinear al botón
+  pop.style.left = Math.max(8, Math.min(innerWidth - w - 8, r.right - w)) + 'px';
+  pop.addEventListener('click', (e) => {
+    const x = e.target.closest('[data-tm-close]'), all = e.target.closest('[data-tm-closeall]');
+    if (!x && !all) return;
+    e.stopPropagation();
+    if (x) closeTab(x.dataset.tmClose);
+    else closeTabs(S.tabs.filter((id) => tabKey(nbById(id)) === all.dataset.tmCloseall));
+    refreshTabsMenu();
+  });
+  // Arrastrar una fila la cambia de sitio dentro de su carpeta; soltarla en la cabecera de otra carpeta la lleva allí.
+  liveReorder(pop, '.tm-row', {
+    axis: 'y', ignore: '.tm-x', scroller: pop, group: (r) => r.dataset.group,
+    onDrop: (from, to, r) => { reorderTab(r.dataset.tab, to); refreshTabsMenu(); },
+    onTarget: (r, under) => {
+      const head = under?.closest?.('.tm-ghead'), key = head?.closest('.tm-group').dataset.gkey;
+      if (!head || key === r.dataset.group) return false;
+      moveTabToSpace(r.dataset.tab, key || null); refreshTabsMenu();
+      return true;
+    },
+  });
+  // Arrastrar la cabecera de una carpeta mueve el grupo entero.
+  liveReorder(pop, '.tm-group', {
+    axis: 'y', ignore: '.tm-row, .tm-gclose', scroller: pop,
+    onDrop: (from, to) => { S.tabs = Reorder.preview(tabGroups(), from, to).flatMap((g) => g.ids); saveTabs(); renderTabs(); refreshTabsMenu(); },
+  });
+}
+function tabsMenuHTML() {
+  const groups = tabGroups();
+  if (!groups.length) return '<div class="label">No hay pestañas abiertas</div>';
+  return `<div class="label tm-title"><span>Pestañas abiertas</span><span class="tm-count">${S.tabs.length}</span></div>` + groups.map((g) => {
+    const name = g.space || 'Sin carpeta';
+    return `<div class="tm-group" data-gkey="${esc(g.key)}" style="--c:${g.color}">
+      <div class="tm-ghead"><span class="tm-grip" aria-hidden="true">${icon('grip')}</span>${icon('folder')}<span class="tm-gname" ${g.space ? 'translate="no"' : ''}>${esc(name)}</span>
+        <button class="tm-gclose" data-tm-closeall="${esc(g.key)}" aria-label="Cerrar las pestañas de ${esc(name)}" title="Cerrar las pestañas de ${esc(name)}">Cerrar todas</button></div>
+      ${g.ids.map((id) => {
+        const nb = nbById(id), active = id === S.active;
+        return `<div class="tm-row ${active ? 'active' : ''}" data-tab="${id}" data-group="${esc(g.key)}">
+          <span class="tm-grip" aria-hidden="true">${icon('grip')}</span>
+          <button class="tm-go" data-act="go:${id}" ${active ? 'aria-current="true"' : ''}><span class="book" style="--c:${nb.color}">${icon('book')}</span><span class="t" translate="no">${esc(nb.title)}</span></button>
+          <button class="tm-x" data-tm-close="${id}" aria-label="Cerrar ${esc(nb.title)}" title="Cerrar ${esc(nb.title)}">${icon('close')}</button></div>`;
+      }).join('')}</div>`;
+  }).join('');
+}
+/** Vuelve a pintar el menú abierto (tras cerrar u ordenar), sin cerrarlo; si ya no quedan pestañas, se cierra. */
+function refreshTabsMenu() {
+  const pop = openPopover?.el;
+  if (!pop?.classList.contains('tabs-menu')) return;
+  if (!S.tabs.length || S.view !== 'editor') return closePopover();
+  const scroll = pop.scrollTop;
+  pop.innerHTML = tabsMenuHTML();
+  pop.scrollTop = scroll;
+  // Si la barra se ha vuelto a pintar, el menú cuelga del botón nuevo.
+  const anchor = $('#tab-all');
+  if (anchor && openPopover.anchor !== anchor) { openPopover.anchor = anchor; anchor.setAttribute('aria-expanded', 'true'); }
+}
+/** Cierra varias pestañas: primero las de fondo y la activa la última (así solo se abre otra libreta una vez). */
+function closeTabs(ids) {
+  const rest = ids.filter((id) => id !== S.active);
+  rest.forEach((id) => { const i = S.tabs.indexOf(id); if (i >= 0) S.tabs.splice(i, 1); });
+  saveTabs();
+  if (ids.includes(S.active)) closeTab(S.active); else renderTabs();
 }
 /** Mueve una pestaña a la posición `index` dentro de las de su espacio. */
 function reorderTab(id, index) {
