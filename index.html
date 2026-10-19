@@ -190,6 +190,37 @@ svg { display: block; }
 .choices { display: flex; flex-wrap: wrap; gap: 10px; }
 .swatch { width: 26px; height: 26px; border-radius: 50%; border: 0; padding: 0; flex: none; box-shadow: inset 0 0 0 .5px var(--sep); }
 .swatch[aria-pressed="true"] { box-shadow: 0 0 0 2px var(--bar), 0 0 0 4px var(--accent); }
+/* Colores propios: fila de la barra con «+» (círculo discontinuo) y ventana «Color del …» (palette.js, InkColors). */
+.color-row { display: inline-flex; align-items: center; gap: 10px; flex: none; }
+.color-row .swatch { -webkit-touch-callout: none; user-select: none; -webkit-user-select: none; }
+.swatch.add-color { background: transparent !important; box-shadow: none; border: 1.5px dashed var(--muted); color: var(--muted); display: inline-grid; place-items: center; cursor: pointer; }
+.swatch.add-color svg { width: 15px; height: 15px; }
+.swatch.add-color:hover, .swatch.add-color[aria-expanded="true"] { border-color: var(--accent); color: var(--accent); }
+.popover.color-popover { min-width: 0; width: min(316px, calc(100vw - 16px)); padding: 8px; box-sizing: border-box; }
+.color-pop { display: flex; flex-direction: column; gap: 4px; }
+.color-pop .cp-title { font-weight: 600; font-size: 15px; padding: 4px 4px 2px; }
+.color-pop .label { padding-left: 4px; }
+.color-pop .cp-mine, .color-pop .cp-row { display: flex; flex-wrap: wrap; gap: 10px; padding: 4px; }
+.popover .color-pop .swatch { padding: 0; border-radius: 50%; display: block; flex: none; width: 30px; height: 30px; box-shadow: inset 0 0 0 1px var(--sep); cursor: pointer; }
+.popover .color-pop .swatch.cp-big { width: 38px; height: 38px; touch-action: none; }
+.popover .color-pop .swatch:hover:not(:disabled) { color: inherit; transform: scale(1.08); }
+.popover .color-pop .swatch[aria-pressed="true"] { box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--accent); }
+.color-pop .cp-hint { margin: 0; padding: 0 4px 4px; font-size: 12px; color: var(--muted); white-space: normal; }
+.color-pop .cp-pick { display: flex; align-items: center; gap: 8px; padding: 4px; }
+.color-pop #cp-color { width: 44px; height: 36px; padding: 2px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface-2); flex: none; cursor: pointer; }
+.color-pop #cp-hex { width: 84px; flex: none; font: 14px ui-monospace, SFMono-Regular, Menlo, monospace; text-transform: uppercase; padding: 8px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface-2); color: var(--ink); box-sizing: border-box; }
+.color-pop #cp-hex.bad { border-color: var(--danger); }
+.color-pop .cp-prev { flex: 1; min-width: 0; display: flex; }
+.color-pop .cp-preview { position: relative; flex: 1; height: 36px; border-radius: 8px; box-shadow: inset 0 0 0 1px var(--sep); display: grid; place-items: center; font: 600 20px/1 Georgia, serif; overflow: hidden; }
+.color-pop .cp-preview > span:last-child { position: relative; font: 15px/1 var(--font); }
+.color-pop .cp-hl { position: absolute; left: 8%; right: 8%; top: 8px; bottom: 8px; opacity: .38; border-radius: 3px; }
+.color-pop .cp-acts { display: flex; justify-content: space-between; gap: 8px; padding: 8px 4px 2px; }
+.popover .color-pop .cp-acts .btn { padding: 8px 14px; border-radius: 8px; background: var(--fill); }
+.popover .color-pop .cp-acts .btn.primary { background: var(--accent); color: var(--accent-ink); }
+.popover .color-pop .cp-acts .btn:hover:not(:disabled) { filter: brightness(.95); }
+.popover .color-pop .cp-acts .btn:disabled { opacity: .45; }
+.popover .cp-menu-head { display: flex; align-items: center; gap: 8px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+.popover .cp-menu-head .swatch { width: 14px; height: 14px; }
 .tpl { border: 0; background: var(--surface-2); border-radius: 8px; padding: 6px; display: flex; flex-direction: column; align-items: center; gap: 4px; font-size: 12px; font-weight: 400; }
 .tpl[aria-pressed="true"] { box-shadow: 0 0 0 2px var(--accent); }
 .tpl canvas { border-radius: 3px; box-shadow: 0 1px 3px rgba(0,0,0,.15); }
@@ -873,6 +904,22 @@ html.pen-mode .item, html.pen-mode .pin, html.pen-mode .lasso-box { touch-action
 .storage-box .storage-state.ok b { color: var(--safe-ok); }
 .storage-box .storage-state.warn { background: color-mix(in srgb, var(--safe-warn) 14%, transparent); }
 .storage-box .storage-state.warn b { color: var(--safe-warn); }
+
+/* Lazo: menú «Herramienta Lazo» (qué coge), contador y chip «Solo este color». */
+.popover.lasso-pop { width: 270px; max-width: calc(100vw - 24px); max-height: min(78vh, 640px); }
+.popover.lasso-pop [role="switch"] { padding: 5px 10px; }
+.popover .lf-presets { display: flex; margin: 2px 6px 4px; }
+.popover .lf-presets button { flex: 1; justify-content: center; padding: 5px 8px; }
+.popover .lf-presets button:hover:not(:disabled) { background: var(--fill-strong); color: inherit; }
+.popover .lf-presets button[aria-pressed="true"]:hover { background: var(--seg-thumb); }
+.popover .lf-color { display: flex; align-items: center; gap: 8px; padding: 3px 4px 3px 12px; font-size: 13.5px; color: var(--ink-2); }
+.popover .lf-color button { margin-left: auto; padding: 5px; }
+.lf-sw { width: 16px; height: 16px; border-radius: 50%; flex: none; box-shadow: 0 0 0 1px rgba(0,0,0,.18) inset, 0 0 0 1.5px var(--surface), 0 0 0 2.5px var(--hairline); }
+.lf-chip { border: 0; background: var(--fill); color: inherit; border-radius: 999px; padding: 5px 8px 5px 7px; display: inline-flex; align-items: center; gap: 6px; font-size: 13.5px; flex: none; }
+.lf-chip svg { width: 13px; height: 13px; color: var(--muted); }
+.lf-chip:hover svg { color: var(--ink); }
+.options .lasso-count { font-size: 14px; font-weight: 600; font-variant-numeric: tabular-nums; flex: none; }
+.options .hint svg { width: 16px; height: 16px; vertical-align: -3px; }
 /* =============================================================================
    Tutorial de la primera vez (siempre en oscuro, como en la app nativa)
    ============================================================================= */
@@ -1377,6 +1424,13 @@ I18N.dict.it = {
   'Dibujar con el dedo': 'Disegna con il dito', 'Apagado: el dedo desplaza la página y solo el lápiz escribe': 'Spento: il dito scorre la pagina e solo la penna scrive',
   'El dedo dibuja, aunque uses lápiz': 'Il dito disegna, anche se usi la penna', 'Modo lápiz: el dedo desplaza la página y el lápiz escribe': 'Modalità penna: il dito scorre la pagina e la penna scrive', 'Nombre del comentario': 'Nome del commento', 'Profe': 'Prof',
   'Reproducir': 'Riproduci', 'Grabaciones': 'Registrazioni', 'Renombrar': 'Rinomina',
+  // --- Colores propios (palette.js, InkColors) ---
+  'Añadir un color': 'Aggiungi un colore', 'Color del bolígrafo': 'Colore della penna', 'Color del subrayador': 'Colore dell’evidenziatore',
+  'Color del texto': 'Colore del testo', 'Nuevo color': 'Nuovo colore', 'Elegir color': 'Scegli colore', 'Código HEX': 'Codice HEX',
+  'Toca uno para usarlo. Arrástralo para ordenarlo; fuera de la fila, para quitarlo.': 'Toccane uno per usarlo. Trascinalo per riordinarlo; fuori dalla fila, per toglierlo.',
+  'Sugerencias para este papel': 'Suggerimenti per questa carta', 'Recientes': 'Recenti', 'Restablecer colores': 'Ripristina colori', 'Usar': 'Usa',
+  'Texto subrayado': 'Testo evidenziato', 'Quitar color': 'Togli colore', 'Mover a la izquierda': 'Sposta a sinistra', 'Mover a la derecha': 'Sposta a destra',
+  'Color quitado': 'Colore tolto', 'Colores restablecidos': 'Colori ripristinati', 'Tiene que quedar al menos un color': 'Deve restare almeno un colore',
   // --- Buscar ---
   'Cerrar búsqueda': 'Chiudi ricerca', 'Buscar en esta libreta': 'Cerca in questo quaderno',
   // --- Compartir ---
@@ -1471,10 +1525,23 @@ I18N.dict.it = {
   'es la unidad…': 'è l’unità…', 'Biología · pág. 2': 'Biologia · pag. 2', 'Apuntes · pág. 7': 'Appunti · pag. 7', 'Resumen · pág. 1': 'Riassunto · pag. 1',
   // Libretas de ejemplo (títulos)
   'Bienvenida a Folia': 'Benvenuto in Folia', 'Biología · Tema 3': 'Biologia · Tema 3',
+  // Lazo: menú «Herramienta Lazo», contador y «Solo este color».
+  'Herramienta Lazo': 'Strumento Lazo', 'Solo tinta': 'Solo inchiostro', 'Todo': 'Tutto', 'Tinta': 'Inchiostro', 'Elementos': 'Elementi',
+  'Bolígrafo y pluma': 'Penna e stilografica', 'Cuadros de texto': 'Caselle di testo', 'Post-its': 'Post-it', 'Tinta dentro de post-its': 'Inchiostro nei post-it',
+  'Enlaces': 'Collegamenti', 'Notas de voz': 'Note vocali', 'Solo este color…': 'Solo questo colore…', 'Solo este color': 'Solo questo colore',
+  'Quitar «Solo este color»': 'Togli «Solo questo colore»', 'Quitar': 'Togli', 'Filtro': 'Filtro', 'Qué coge el lazo': 'Cosa prende il lazo', 'Elegir rápido': 'Scelta rapida',
+  'Toca un trazo: el lazo solo cogerá trazos de su color': 'Tocca un tratto: il lazo prenderà solo i tratti del suo colore',
+  'Toca un trazo para elegir su color.': 'Tocca un tratto per sceglierne il colore.', 'Toca un trazo para elegir su color': 'Tocca un tratto per sceglierne il colore',
+  'Ahí no hay ningún trazo: toca uno para elegir su color': 'Lì non c’è nessun tratto: toccane uno per sceglierne il colore',
+  'El lazo solo cogerá trazos de este color': 'Il lazo prenderà solo i tratti di questo colore',
+  'Arrastra el recuadro para moverlo.': 'Trascina il riquadro per spostarlo.', 'Arrastra el recuadro para moverlos.': 'Trascina il riquadro per spostarli.',
+  'Rodea trazos para seleccionarlos; después muévelos, cópialos, cámbiales el color o bórralos.': 'Circonda i tratti per selezionarli; poi spostali, copiali, cambiane il colore o cancellali.',
 };
 
 /** Textos con nombres o números dentro. */
 I18N.patterns.it = [
+  [/^Tus colores \((\d+) de (\d+)\)$/, 'I tuoi colori ($1 di $2)'],
+  [/^Caben (\d+) colores: quita uno para añadir otro(\.?)$/, 'Ci stanno $1 colori: togline uno per aggiungerne un altro$2'],
   // Tarjetas de repaso (cards.js): antes que las reglas generales de «(…)» y «·»
   [/^Repasar tarjetas \((\d+) pendientes?\)$/, 'Ripassa le flashcard ($1 da ripassare)'], [/^Repasar \((\d+)\)$/, 'Ripassa ($1)'],
   [/^Tarjeta creada · (\d+) pendientes?$/, 'Flashcard creata · $1 da ripassare'],
@@ -1523,6 +1590,12 @@ I18N.patterns.it = [
   [/^Pestaña (\d+)$/, 'Scheda $1'], [/^Ir a la pestaña (\d+)$/, 'Vai alla scheda $1'],
   [/^Nota de voz · (.+)$/, 'Nota vocale · $1'], [/^Libreta duplicada$/, 'Quaderno duplicato'],
   [/^(Ahora: )?(.+) terminado\. Ahora: (.+)$/, (m, t) => `${t(m[2]) ?? m[2]} finito. Ora: ${t(m[3]) ?? m[3]}`],
+  // Contador del lazo: «3 trazos · 1 imagen · 2 post-its».
+  [/^\d+ (trazos?|textos?|post-its?|imagen|imágenes|comentarios?|enlaces?|notas? de voz)( · \d+ .+)*$/, (m) => {
+    const W = { trazo: 'tratto', trazos: 'tratti', texto: 'testo', textos: 'testi', 'post-it': 'post-it', 'post-its': 'post-it', imagen: 'immagine', 'imágenes': 'immagini',
+      comentario: 'commento', comentarios: 'commenti', enlace: 'collegamento', enlaces: 'collegamenti', 'nota de voz': 'nota vocale', 'notas de voz': 'note vocali' };
+    return m[0].split(' · ').map((part) => part.replace(/^(\d+) (.+)$/, (x, n, w) => `${n} ${W[w] || w}`)).join(' · ');
+  }],
 ];
 
 /** Palabras sueltas, para lo que mezcla números y nombres («3 libretas · 2 carpetas»). */
@@ -2092,6 +2165,11 @@ function notebookLinks(nb) {
 // Estado
 // =============================================================================
 const saved = Prefs.load();
+/** Lista de colores guardada (de 1 a 12 en «#RRGGBB»); si falta o no vale, la de fábrica. */
+function prefColors(list, def) {
+  const ok = Array.isArray(list) ? list.filter((c) => typeof c === 'string' && /^#[0-9a-f]{6}$/i.test(c)) : [];
+  return ok.length ? [...new Set(ok.map((c) => c.toUpperCase()))].slice(0, 12) : def.slice();
+}
 const S = {
   notebooks: [], folder: null, query: '',      // folder: carpeta abierta en la biblioteca
   selecting: false, picked: new Set(),          // modo «Seleccionar» de la biblioteca
@@ -2103,8 +2181,14 @@ const S = {
   penKind: saved.penKind || 'pen', penColor: saved.penColor || '#1C1C1E', penWidth: saved.penWidth || 3, penShapes: false,
   holdToSnap: saved.holdToSnap !== false,
   showVoiceNotes: saved.showVoiceNotes !== false,
+  // Qué coge el lazo (popover «Herramienta Lazo»): { pen, pencil, highlighter, image, text, sticky, noteInk, comment, link,
+  // voice } → false = apagado; lo que falta (preferencias antiguas) cuenta como encendido. lassoColor: «Solo este color» (no se guarda).
+  lassoFilter: Object.assign({}, saved.lassoFilter && typeof saved.lassoFilter === 'object' ? saved.lassoFilter : {}), lassoColor: null,
   hlColor: saved.hlColor || '#FFD60A', hlWidth: saved.hlWidth || 18, hlMode: saved.hlMode || 'straight',
   eraserMode: saved.eraserMode || 'stroke', eraserSize: 14,
+  // Colores propios (2026-10-19): filas de colores de cada herramienta y los últimos usados (máx. 10 por herramienta).
+  penColors: prefColors(saved.penColors, PEN_COLORS), hlColors: prefColors(saved.hlColors, HL_COLORS), textColors: prefColors(saved.textColors, TEXT_COLORS),
+  recentColors: Object.fromEntries(['pen', 'highlighter', 'text'].map((t) => [t, saved.recentColors?.[t] ? prefColors(saved.recentColors[t], []).slice(0, 10) : []])),
   stickyColor: STICKY_COLORS[0], commentColor: COMMENT_COLORS[0],
   zoom: 1,
   textDefault: Object.assign({}, DEFAULT_TEXT, saved.textDefault || {}),
@@ -2116,7 +2200,8 @@ const S = {
 };
 function savePrefs() {
   Prefs.save({ dynamic: S.dynamic, penKind: S.penKind, penColor: S.penColor, penWidth: S.penWidth, hlColor: S.hlColor, hlWidth: S.hlWidth,
-    hlMode: S.hlMode, eraserMode: S.eraserMode, textDefault: S.textDefault, sidebar: S.sidebar, sidebarMode: S.sidebarMode, holdToSnap: S.holdToSnap, showVoiceNotes: S.showVoiceNotes, seeded: Prefs.load().seeded });
+    hlMode: S.hlMode, eraserMode: S.eraserMode, textDefault: S.textDefault, sidebar: S.sidebar, sidebarMode: S.sidebarMode, holdToSnap: S.holdToSnap, showVoiceNotes: S.showVoiceNotes, lassoFilter: S.lassoFilter,
+    penColors: S.penColors, hlColors: S.hlColors, textColors: S.textColors, recentColors: S.recentColors, seeded: Prefs.load().seeded });
 }
 const nbById = (id) => S.notebooks.find((n) => n.id === id);
 const activeNb = () => nbById(S.active);
@@ -5619,17 +5704,21 @@ function refreshToolButtons() {
   }
 }
 /** Un toque elige la herramienta. En el comentario, si ya está elegido (o con clic derecho o pulsación larga),
- *  abre la lista de comentarios de la libreta; otro toque la cierra. */
+ *  abre la lista de comentarios de la libreta; en el lazo, el menú «Herramienta Lazo» (qué coge); otro toque lo cierra. */
 function bindToolButton(b) {
   const tool = b.dataset.tool;
   let long = false, timer = 0;
+  const menu = tool === 'comment' ? commentsMenu : tool === 'lasso' ? (a) => LassoFilter.menu(a) : null;
   b.addEventListener('click', () => {
     if (long) { long = false; return; }   // la pulsación larga ya abrió la lista
-    if (tool === 'comment' && S.tool === 'comment') return commentsMenu(b);
+    if (menu && S.tool === tool) return menu(b);
     setTool(tool);
   });
-  if (tool !== 'comment') return;
-  const openList = () => { if (openPopover?.anchor !== b) commentsMenu(b); };
+  if (!menu) return;
+  const openList = () => {
+    if (tool === 'lasso' && S.tool !== 'lasso') { setTool('lasso'); return LassoFilter.menu($('.group[role="toolbar"] [data-tool="lasso"]') || b); }
+    if (openPopover?.anchor !== b) menu(b);
+  };
   b.addEventListener('contextmenu', (e) => { e.preventDefault(); if (!long) openList(); });
   b.addEventListener('pointerdown', (e) => {
     long = false;
@@ -6144,6 +6233,7 @@ function setTool(tool) {
   stopEditing();
   clearLasso();
   PdfText.clear();
+  if (tool !== 'lasso') LassoFilter.picking = false;   // el cuentagotas del lazo se cancela al cambiar de herramienta
   S.tool = tool;
   if (!['select', 'text', 'sticky', 'comment', 'link'].includes(tool)) select(null, false);
   $$('[data-tool]').forEach((b) => b.setAttribute('aria-pressed', b.dataset.tool === tool));
@@ -6212,8 +6302,14 @@ function updateToolClass() {
   $$('canvas.ink').forEach((c) => { c.style.pointerEvents = ink ? 'auto' : 'none'; c.style.cursor = S.tool === 'eraser' ? 'cell' : 'crosshair'; });
 }
 /** Colores en círculos (el elegido con anillo azul) y una cápsula para elegir cualquier otro. */
-const swatches = (colors, current, act) => colors.map((c) => `<button class="swatch" style="background:${c}" data-act="${act}" data-v="${c}" aria-label="Color ${c}" aria-pressed="${String(c).toLowerCase() === String(current).toLowerCase()}"></button>`).join('')
+const swatchButtons = (colors, current, act) => colors.map((c) => `<button class="swatch" style="background:${c}" data-act="${act}" data-v="${c}" aria-label="Color ${c}" aria-pressed="${String(c).toLowerCase() === String(current).toLowerCase()}"></button>`).join('');
+const swatches = (colors, current, act) => swatchButtons(colors, current, act)
   + `<label class="custom-color" style="background:${current || '#000000'}" title="Otro color"><input type="color" value="${current || '#000000'}" data-act="${act}" aria-label="Otro color"></label>`;
+/** Fila de colores de una herramienta (los suyos, que se pueden cambiar) con «+» al final para añadir otro (hace de «Otro color»). */
+const colorRow = (tool, current) => {
+  const t = COLOR_TOOLS[tool];
+  return `<span class="color-row" data-tool="${tool}">${swatchButtons(S[t.list], current, t.act)}<button class="swatch add-color" data-act="color-add" data-tool="${tool}" aria-label="Añadir un color" title="Añadir un color" aria-haspopup="dialog">${icon('plus')}</button></span>`;
+};
 /** Grosor: tres puntos (fino, medio, grueso), el deslizador y el valor, como en la app nativa. */
 function widthControl(id, min, max, step, value, color) {
   const presets = [0.08, 0.25, 0.55].map((f) => Math.round((min + (max - min) * f) / step) * step);
@@ -6238,10 +6334,9 @@ function renderOptions() {
   const item = found?.item;
   let html = '';
   if (S.lasso) {
-    const nItems = S.lasso.itemIds?.length || 0, n = S.lasso.ids.length + nItems;
-    const what = nItems ? (n === 1 ? 'elemento seleccionado' : 'elementos seleccionados') : (n === 1 ? 'trazo seleccionado' : 'trazos seleccionados');
-    html = `<span class="hint">${n} ${what}: arrastra el recuadro para ${n === 1 ? 'moverlo' : 'moverlos'}.</span>
-      ${S.lasso.ids.length ? swatches(PEN_COLORS, '', 'lasso-color') : ''}
+    const n = S.lasso.ids.length + (S.lasso.itemIds?.length || 0);
+    html = `<b class="lasso-count">${LassoFilter.summary()}</b><span class="hint">Arrastra el recuadro para ${n === 1 ? 'moverlo' : 'moverlos'}.</span>
+      ${S.lasso.ids.length ? swatches(S.penColors, '', 'lasso-color') : ''}
       <div class="sep"></div><button class="btn" data-act="copy">Copiar</button><button class="btn" data-act="cut">Cortar</button><button class="btn" data-act="duplicate">Duplicar</button>
       <button class="icon-btn" data-act="delete" aria-label="Eliminar" title="Eliminar (Supr)">${icon('trash')}</button>
       <div class="sep"></div><button class="btn tinted" data-act="make-card" title="Tarjeta de repaso con la zona seleccionada">${icon('lightbulb')} Crear tarjeta</button>`;
@@ -6267,12 +6362,12 @@ function renderOptions() {
     html = `<button class="btn tinted" data-act="image-crop">${icon('crop')} Recortar…</button><span class="hint">Arrástrala o usa el círculo de la esquina para cambiar su tamaño.</span>${itemActions()}`;
   } else if (S.tool === 'pen') {
     html = `<button class="menu-btn" data-act="pen-kind-menu" aria-haspopup="menu">${icon('pen')}${PEN_KINDS[S.penKind]}${icon('chevronUpDown')}</button>
-      <div class="sep"></div>${swatches(PEN_COLORS, S.penColor, 'pen-color')}<div class="sep"></div>
+      <div class="sep"></div>${colorRow('pen', S.penColor)}<div class="sep"></div>
       ${widthControl('pen-width', 1, 14, 0.5, S.penWidth, S.penColor)}
       <div class="sep"></div><button class="pill-toggle" data-act="shapes" aria-pressed="${S.penShapes}">${icon('shapes')} Formas</button>
       <span class="hint">${S.penShapes ? 'Cada trazo se convierte en línea, círculo, rectángulo…' : 'Para una forma perfecta, al acabar el trazo mantén quieto 1 segundo antes de soltar'}</span>`;
   } else if (S.tool === 'highlighter') {
-    html = `${swatches(HL_COLORS, S.hlColor, 'hl-color')}<div class="sep"></div>
+    html = `${colorRow('highlighter', S.hlColor)}<div class="sep"></div>
       ${widthControl('hl-width', 8, 40, 1, S.hlWidth, S.hlColor)}
       <div class="sep"></div><div class="seg" role="group" aria-label="Forma del subrayado">
         <button data-act="hl-mode" data-v="free" aria-pressed="${S.hlMode === 'free'}">Libre</button>
@@ -6282,7 +6377,9 @@ function renderOptions() {
     html = `<div class="seg"><button data-act="eraser-mode" data-v="stroke" aria-pressed="${S.eraserMode === 'stroke'}">Trazo entero</button><button data-act="eraser-mode" data-v="partial" aria-pressed="${S.eraserMode === 'partial'}">Parcial</button></div>
       ${S.eraserMode === 'partial' ? `<div class="sep"></div><label class="range" for="er-size">Tamaño <input id="er-size" type="range" min="6" max="60" step="1" value="${S.eraserSize}"> <span>${S.eraserSize}</span></label>` : ''}`;
   } else if (S.tool === 'lasso') {
-    html = '<span class="hint">Rodea trazos para seleccionarlos; después muévelos, cópialos, cámbiales el color o bórralos.</span>';
+    html = LassoFilter.picking
+      ? `<span class="hint">${icon('eyedropper')} Toca un trazo para elegir su color.</span><button class="btn" data-lf-act="pick-cancel">Cancelar</button>`
+      : `${LassoFilter.barHtml()}<span class="hint">Rodea trazos para seleccionarlos; después muévelos, cópialos, cámbiales el color o bórralos.</span>`;
   } else if (S.tool === 'text') {
     html = textBar(null) + '<span class="hint">Haz clic en la página para escribir. Arrastra el borde de un cuadro para moverlo.</span>';
   } else if (S.tool === 'sticky') {
@@ -6297,9 +6394,11 @@ function renderOptions() {
   el.innerHTML = html;
   // Los botones no se quedan el foco: el texto sigue en edición y con su selección (ratón, dedo y lápiz).
   el.onmousedown = el.onpointerdown = (e) => { if (e.target.closest('button')) e.preventDefault(); };
-  el.onclick = onOptionsClick;
+  el.onclick = (e) => { if (!InkColors.onClick(e)) onOptionsClick(e); };
+  InkColors.hook(el);
   el.oninput = onOptionsInput;
   el.onchange = onOptionsInput;
+  LassoFilter.bindBar(el);   // botón «Filtro» y chip «Solo este color» del lazo
   Palette.sync();
 }
 /** Barra de estilo de texto. Con texto seleccionado se aplica a la selección; si no, a todo el cuadro. */
@@ -6309,7 +6408,7 @@ function textBar(item) {
   const state = (cmd, fallback) => (hasTextSelection() ? document.queryCommandState(cmd) : fallback);
   return `<select id="font" aria-label="Tipo de letra">${Object.entries(FONTS).map(([k, f]) => `<option value="${k}" ${base.font === k ? 'selected' : ''}>${f.name}</option>`).join('')}</select>
     <div class="seg"><button data-act="size" data-v="-2" aria-label="Letra más pequeña">−</button><button class="size-btn" data-act="size-menu" aria-haspopup="dialog" aria-expanded="${openPopover?.el.classList.contains('size-pop') ? 'true' : 'false'}" aria-label="Tamaño de letra: ${base.size} pt" title="Tamaño de letra">${base.size} pt</button><button data-act="size" data-v="2" aria-label="Letra más grande">+</button></div>
-    ${swatches(TEXT_COLORS, base.color, 'text-color')}
+    ${colorRow('text', base.color)}
     <div class="seg">
       <button data-act="bold" aria-pressed="${state('bold', base.bold)}" style="font-weight:700" title="Negrita">B</button>
       <button data-act="italic" aria-pressed="${state('italic', base.italic)}" style="font-style:italic" title="Cursiva">I</button>
@@ -6759,6 +6858,7 @@ function attachInk(page, v) {
     if (linkTap) linkTap.at = [e.clientX, e.clientY];
     const p = point(e);
     if (S.tool === 'eraser') { erased = eraseAt(page, p); return; }
+    if (S.tool === 'lasso' && LassoFilter.picking) { linkTap = null; LassoFilter.pickAt(page, p); return; }   // cuentagotas
     if (S.tool === 'lasso') { clearLasso(); lassoPath = [p]; return; }
     stroke = { id: uid(), tool: S.tool === 'highlighter' ? 'highlighter' : 'pen', kind: S.penKind, color: S.tool === 'highlighter' ? S.hlColor : S.penColor, width: S.tool === 'highlighter' ? S.hlWidth : S.penWidth, points: [p] };
     note = hit?.note || null;   // empieza dentro de un post-it (el de encima): el trazo es del post-it
@@ -6805,11 +6905,12 @@ function attachInk(page, v) {
       const poly = lassoPath.map((q) => [q[0], q[1]]);
       lassoPath = null;
       // Un lazo dibujado entero dentro de un post-it que rodea tinta suya selecciona esa tinta (no el post-it).
-      const inNote = noteAround(page, poly);
-      const noteIds = inNote ? inNote.strokes.filter((s) => strokeTouchesPolygon(s.points.map(([x, y]) => [x + inNote.x, y + inNote.y]), poly)).map((s) => s.id) : [];
+      // Solo cuenta lo que deja pasar el filtro del lazo (LassoFilter: tipos encendidos y «Solo este color»).
+      const inNote = LassoFilter.on('noteInk') ? noteAround(page, poly) : null;
+      const noteIds = inNote ? inNote.strokes.filter((s) => LassoFilter.takesStroke(s) && strokeTouchesPolygon(s.points.map(([x, y]) => [x + inNote.x, y + inNote.y]), poly)).map((s) => s.id) : [];
       if (noteIds.length) return setLasso(page, noteIds, [], inNote.id);
-      const ids = page.strokes.filter((s) => strokeTouchesPolygon(s.points, poly)).map((s) => s.id);
-      const itemIds = page.items.filter((it) => rectTouchesPolygon(itemRect(page, it), poly)).map((it) => it.id);
+      const ids = page.strokes.filter((s) => LassoFilter.takesStroke(s) && strokeTouchesPolygon(s.points, poly)).map((s) => s.id);
+      const itemIds = page.items.filter((it) => LassoFilter.takesItem(it) && rectTouchesPolygon(itemRect(page, it), poly)).map((it) => it.id);
       if (ids.length || itemIds.length) setLasso(page, ids, itemIds);
       return;
     }
@@ -7062,6 +7163,119 @@ function recolorLasso(color) {
   for (const s of lassoStrokes()) s.color = color;
   commit(page, before); renderInk(page);
 }
+
+// ---------- Filtro del lazo (popover «Herramienta Lazo») ----------
+// Qué tipos coge el lazo (S.lassoFilter, se guarda en las preferencias) y «Solo este color» (S.lassoColor, cuentagotas).
+// Iconos de Lucide (ISC) que solo usa este menú: el cuentagotas y el lápiz.
+ICONS.eyedropper = ICONS.eyedropper || '<path d="m2 22 1-1h3l9-9"/><path d="M3 21v-3l9-9"/><path d="m15 6 3.4-3.4a2.1 2.1 0 1 1 3 3L18 9l.4.4a2.1 2.1 0 1 1-3 3l-3.8-3.8a2.1 2.1 0 1 1 3-3l.4.4Z"/>';
+ICONS.pencil = ICONS.pencil || '<path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/><path d="m15 5 4 4"/>';
+const LassoFilter = {
+  INK: [['pen', 'Bolígrafo y pluma', 'pen'], ['pencil', 'Lápiz', 'pencil'], ['highlighter', 'Subrayador', 'highlighter']],
+  ITEMS: [['image', 'Imágenes', 'image'], ['text', 'Cuadros de texto', 'text'], ['sticky', 'Post-its', 'sticky'], ['noteInk', 'Tinta dentro de post-its', 'pen'],
+    ['comment', 'Comentarios', 'comment'], ['link', 'Enlaces', 'link'], ['voice', 'Notas de voz', 'waveform']],
+  picking: false,   // cuentagotas: el próximo toque con el lazo coge el color de un trazo
+  keys() { return [...this.INK, ...this.ITEMS].map(([k]) => k); },
+  on(k) { return S.lassoFilter[k] !== false; },
+  allOn() { return this.keys().every((k) => this.on(k)) && !S.lassoColor; },
+  /** Tipo de un trazo para el filtro: subrayador, lápiz o bolígrafo/pluma. (Las formas enderezadas no se distinguen.) */
+  strokeKind(s) { return s.tool === 'highlighter' ? 'highlighter' : s.kind === 'pencil' ? 'pencil' : 'pen'; },
+  takesStroke(s) { return this.on(this.strokeKind(s)) && (!S.lassoColor || String(s.color).toUpperCase() === S.lassoColor.toUpperCase()); },
+  /** Con «Solo este color» solo se cogen trazos; las notas de voz ocultas no se cogen nunca. */
+  takesItem(it) { return !S.lassoColor && this.on(it.type) && !(it.type === 'voice' && !S.showVoiceNotes); },
+  set(k, v) { if (v) delete S.lassoFilter[k]; else S.lassoFilter[k] = false; savePrefs(); },
+  preset(which) {
+    for (const k of this.keys()) this.set(k, which === 'all' || this.INK.some(([i]) => i === k) || k === 'noteInk');
+    if (which === 'all') S.lassoColor = null;
+  },
+  /** Recuento de lo seleccionado: «3 trazos · 1 imagen · 2 post-its». */
+  summary() {
+    const n = { strokes: lassoStrokes().length };
+    for (const it of lassoItems()) n[it.type] = (n[it.type] || 0) + 1;
+    const W = [['strokes', 'trazo', 'trazos'], ['text', 'texto', 'textos'], ['sticky', 'post-it', 'post-its'], ['image', 'imagen', 'imágenes'],
+      ['comment', 'comentario', 'comentarios'], ['link', 'enlace', 'enlaces'], ['voice', 'nota de voz', 'notas de voz']];
+    return W.filter(([k]) => n[k]).map(([k, one, many]) => `${n[k]} ${n[k] === 1 ? one : many}`).join(' · ');
+  },
+  /** Botón del filtro y chip del color para la barra de opciones del lazo. */
+  barHtml() {
+    const chip = S.lassoColor ? `<button class="lf-chip" data-lf-act="color-off" aria-label="Quitar «Solo este color»" title="Quitar «Solo este color»">
+      <span class="lf-sw" style="background:${esc(S.lassoColor)}"></span>Solo este color ${icon('close')}</button>` : '';
+    return `<button class="pill-toggle" id="lf-menu-btn" data-lf-act="menu" aria-haspopup="dialog" aria-pressed="${!this.allOn()}" title="Qué coge el lazo">${icon('lasso')} Filtro</button>${chip}`;
+  },
+  bindBar(el) {
+    if (el._lfBound) return;
+    el._lfBound = true;
+    el.addEventListener('click', (e) => {
+      const b = e.target.closest('[data-lf-act]');
+      if (!b) return;
+      if (b.dataset.lfAct === 'menu') return this.menu(b);
+      if (b.dataset.lfAct === 'color-off') { S.lassoColor = null; renderOptions(); }
+      if (b.dataset.lfAct === 'pick-cancel') { this.picking = false; renderOptions(); }
+    });
+  },
+  menu(anchor) {
+    const sw = ([k, name, ic]) => `<button data-lf="${k}" role="switch" aria-checked="${this.on(k)}">${icon(ic)} ${name} <span class="switch" aria-hidden="true"></span></button>`;
+    const color = S.lassoColor
+      ? `<div class="lf-color"><span class="lf-sw" style="background:${esc(S.lassoColor)}"></span><span>Solo este color</span><button data-act="lf-color-off" aria-label="Quitar «Solo este color»" title="Quitar">${icon('close')}</button></div>`
+      : '';
+    popover(anchor, `<div class="label">Herramienta Lazo</div>
+      <div class="seg lf-presets" role="group" aria-label="Elegir rápido"><button data-lf-preset="ink">Solo tinta</button><button data-lf-preset="all">Todo</button></div>
+      <div class="label">Tinta</div>${this.INK.map(sw).join('')}
+      <div class="label">Elementos</div>${this.ITEMS.map(sw).join('')}
+      <hr><button data-act="lf-pick" title="Toca un trazo: el lazo solo cogerá trazos de su color">${icon('eyedropper')} Solo este color…</button>${color}`,
+    (act) => {
+      if (act === 'lf-pick') this.startPick();
+      if (act === 'lf-color-off') { S.lassoColor = null; renderOptions(); }
+    });
+    const pop = openPopover?.el;
+    if (!pop || openPopover.anchor !== anchor) return;
+    pop.classList.add('lasso-pop');
+    pop.setAttribute('role', 'dialog');
+    pop.setAttribute('aria-label', 'Herramienta Lazo');
+    pop.addEventListener('click', (e) => {
+      const b = e.target.closest('[data-lf], [data-lf-preset]');
+      if (!b) return;
+      if (b.dataset.lf) this.set(b.dataset.lf, !this.on(b.dataset.lf)); else this.preset(b.dataset.lfPreset);
+      this.refreshMenu(pop);
+      renderOptions();
+    });
+    this.refreshMenu(pop);
+  },
+  refreshMenu(pop) {
+    pop.querySelectorAll('[data-lf]').forEach((b) => b.setAttribute('aria-checked', this.on(b.dataset.lf)));
+    const ink = this.keys().every((k) => this.on(k) === (this.INK.some(([i]) => i === k) || k === 'noteInk'));
+    pop.querySelector('[data-lf-preset="ink"]')?.setAttribute('aria-pressed', ink);
+    pop.querySelector('[data-lf-preset="all"]')?.setAttribute('aria-pressed', this.keys().every((k) => this.on(k)));
+    if (!S.lassoColor) pop.querySelector('.lf-color')?.remove();
+  },
+  startPick() {
+    if (S.tool !== 'lasso') setTool('lasso');
+    clearLasso();
+    this.picking = true;
+    renderOptions();
+    toast('Toca un trazo para elegir su color');
+  },
+  /** Cuentagotas: el trazo más cercano a p (de la página o de la tinta del post-it de encima) da el color. */
+  pickAt(page, p) {
+    const r = 10 / Math.max(S.zoom, 0.5);
+    const note = noteAtPoint(page, p);
+    const near = (strokes, q) => {
+      let best = null, bd = Infinity;
+      for (const s of strokes || []) s.points.forEach((b, i) => {
+        const a = s.points[i - 1] || b, dx = b[0] - a[0], dy = b[1] - a[1], len2 = dx * dx + dy * dy;   // distancia al segmento a-b
+        const t = len2 ? Math.max(0, Math.min(1, ((q[0] - a[0]) * dx + (q[1] - a[1]) * dy) / len2)) : 0;
+        const d = Math.hypot(a[0] + t * dx - q[0], a[1] + t * dy - q[1]) - s.width / 2;
+        if (d < bd) { bd = d; best = s; }
+      });
+      return bd < r ? best : null;
+    };
+    const s = (note && near(note.strokes, [p[0] - note.x, p[1] - note.y])) || near(page.strokes, p);
+    if (!s) return toast('Ahí no hay ningún trazo: toca uno para elegir su color');
+    this.picking = false;
+    S.lassoColor = s.color;
+    renderOptions();
+    toast('El lazo solo cogerá trazos de este color');
+  },
+};
 
 // =============================================================================
 // Editor: elementos de la página (texto, post-it, imagen, enlace, voz) y su arrastre
@@ -8351,7 +8565,7 @@ const Palette = {
       const presets = [0.08, 0.25, 0.55].map((f) => Math.round((min + (max - min) * f) / step) * step);
       const dot = (w) => Math.max(4, Math.min(14, 4 + (w - min) / (max - min) * 20));
       width = `<span class="fp-sep" aria-hidden="true"></span><div class="width-dots" style="--c:${color}">${presets.map((w) => `<button data-fp="width" data-v="${w}" aria-label="Grosor ${w}" aria-pressed="${Math.abs(value - w) < step / 2}"><span style="width:${dot(w)}px;height:${dot(w)}px"></span></button>`).join('')}</div>`;
-      colors = `<div class="fp-row fp-colors">${swatches(tool === 'pen' ? PEN_COLORS : HL_COLORS, color, 'fp-color')}</div>`;
+      colors = `<div class="fp-row fp-colors">${swatches(tool === 'pen' ? S.penColors : S.hlColors, color, 'fp-color')}</div>`;
     }
     el.innerHTML = `<button class="fp-grip" data-fp="grip" aria-label="Mover o plegar la paleta" title="Arrástrala para moverla; toca para plegarla">${icon('grip')}</button>
       <div class="fp-body"><div class="fp-row">${tools}<span class="fp-sep" aria-hidden="true"></span>
@@ -8427,6 +8641,7 @@ const Palette = {
   /** Color de la herramienta de ahora (bolígrafo o subrayador), igual que en la barra de opciones. */
   setColor(c) {
     if (S.tool === 'pen') S.penColor = c; else if (S.tool === 'highlighter') S.hlColor = c; else return;
+    InkColors.use(S.tool, c);
     savePrefs(); refreshToolButtons(); renderOptions();
   },
 
@@ -8465,7 +8680,7 @@ const Palette = {
     this.armStrip();
   },
   stripColors(tool, current) {
-    return (tool === 'highlighter' ? HL_COLORS : PEN_COLORS).map((c) => `<button class="swatch" data-v="${c}" style="background:${c}" aria-label="Color ${c}" aria-pressed="${String(c).toLowerCase() === String(current).toLowerCase()}"></button>`).join('');
+    return (tool === 'highlighter' ? S.hlColors : S.penColors).map((c) => `<button class="swatch" data-v="${c}" style="background:${c}" aria-label="Color ${c}" aria-pressed="${String(c).toLowerCase() === String(current).toLowerCase()}"></button>`).join('');
   },
   armStrip() {
     clearTimeout(this.strip.timer);
@@ -8489,6 +8704,7 @@ const Palette = {
       commit(page, before); renderInk(page);
     }
     if (st.tool === 'highlighter') S.hlColor = c; else S.penColor = c;
+    InkColors.use(st.tool, c);
     savePrefs(); refreshToolButtons(); renderOptions();
     if (!this.strip) return;
     st.el.innerHTML = this.stripColors(st.tool, c);
@@ -8533,6 +8749,218 @@ addEventListener('pointerup', (e) => {
 addEventListener('pointerdown', (e) => { if (Palette.strip && !Palette.strip.el.contains(e.target)) Palette.hideStrip(); }, true);
 document.addEventListener('scroll', () => Palette.hideStrip(), true);
 addEventListener('resize', () => { Palette.hideStrip(); Palette.place(); });
+
+// =============================================================================
+// Colores propios (bolígrafo, subrayador y texto). Al final de cada fila de colores de la barra hay un «+»
+// que abre «Color del …»: sus colores en grande (se ordenan arrastrando; fuera de la fila, se quitan), un
+// selector de color con su código HEX y una vista previa sobre el papel de la página (el subrayador, con su
+// transparencia real), sugerencias que se leen bien en ese papel y los últimos colores usados que no están.
+// Mantener pulsado (o clic derecho) un color de la barra: «Quitar color», moverlo y «Restablecer colores».
+// Se guardan en las preferencias: S.penColors, S.hlColors, S.textColors y S.recentColors (ver core.js).
+// =============================================================================
+const COLOR_MAX = 12;
+const COLOR_TOOLS = {
+  pen: { list: 'penColors', def: PEN_COLORS, act: 'pen-color', title: 'Color del bolígrafo' },
+  highlighter: { list: 'hlColors', def: HL_COLORS, act: 'hl-color', title: 'Color del subrayador' },
+  text: { list: 'textColors', def: TEXT_COLORS, act: 'text-color', title: 'Color del texto' },
+};
+// Candidatos para las sugerencias, más o menos por tono (se quedan los que se leen bien en el papel).
+const SUGGEST_INK = ['#B71C1C', '#FF8A80', '#D84315', '#FFB74D', '#8D6E00', '#FFF176', '#558B2F', '#AED581', '#1B5E20', '#00695C', '#80CBC4',
+  '#00838F', '#0277BD', '#81D4FA', '#1A237E', '#4527A0', '#B39DDB', '#6A1B9A', '#AD1457', '#F48FB1', '#5D4037', '#37474F'];
+const SUGGEST_HL = ['#FF5252', '#FFAB91', '#FF9100', '#FFE082', '#FFEB3B', '#E6EE9C', '#B2FF59', '#69F0AE', '#A7FFEB', '#18FFFF',
+  '#80D8FF', '#448AFF', '#B388FF', '#E040FB', '#FF80AB', '#FF4081'];
+const rgbOf = (h) => [16, 8, 0].map((s) => (parseInt(h.slice(1), 16) >> s) & 255);
+const InkColors = {
+  swallow: false,   // tras mantener pulsado un color, su clic no lo elige
+  hex(c) { const m = String(c || '').trim().match(/^#?([0-9a-f]{6})$/i); return m ? '#' + m[1].toUpperCase() : null; },
+  list(tool) { return S[COLOR_TOOLS[tool].list]; },
+  has(tool, c) { return this.list(tool).some((x) => x.toUpperCase() === c.toUpperCase()); },
+  setList(tool, list) { S[COLOR_TOOLS[tool].list] = list; savePrefs(); renderOptions(); },
+  /** Luminancia relativa y contraste (WCAG) entre dos colores. */
+  lum(hex) { return rgbOf(hex).reduce((a, v, i) => { v /= 255; return a + [0.2126, 0.7152, 0.0722][i] * (v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4); }, 0); },
+  contrast(a, b) { const x = this.lum(a), y = this.lum(b); return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05); },
+  /** Color `c` con opacidad `a` sobre `under` (como pinta el subrayador). */
+  blend(c, under, a) { const u = rgbOf(under); return '#' + rgbOf(c).map((v, i) => Math.round(u[i] + (v - u[i]) * a).toString(16).padStart(2, '0')).join(''); },
+  near(a, b) { const x = rgbOf(a), y = rgbOf(b); return Math.hypot(x[0] - y[0], x[1] - y[1], x[2] - y[2]) < 60; },
+  paper() { return activeNb()?.pages[currentPageIndex]?.paper || 'white'; },
+  /** Hasta 5 colores que contrastan con el papel de la página y no se parecen a los de la fila. */
+  suggest(tool) {
+    const paper = this.paper(), fill = PAPERS[paper]?.fill || '#FFFFFF', dark = paper === 'dark', row = this.list(tool);
+    const good = (tool === 'highlighter' ? SUGGEST_HL : SUGGEST_INK).filter((c) => {
+      if (tool !== 'highlighter') return (!dark || luminance(c) >= 0.35) && this.contrast(c, fill) >= 4.5;
+      const b = this.blend(c, fill, 0.38);   // el color se nota y el texto de debajo se sigue leyendo
+      return dark ? this.contrast(b, fill) >= 1.5 && this.contrast(b, '#EDEEF2') >= 4.5 : this.contrast(b, fill) >= 1.15 && this.contrast(b, '#1C1C1E') >= 7;
+    }).filter((c) => !row.some((r) => this.near(r, c)));
+    return good.length <= 5 ? good : [0, 1, 2, 3, 4].map((i) => good[Math.floor(i * good.length / 5)]);
+  },
+  /** Recuerda un color usado (los más recientes primero; se guardan 10). */
+  use(tool, c) {
+    c = this.hex(c);
+    if (!c || !S.recentColors[tool]) return;
+    S.recentColors[tool] = [c, ...S.recentColors[tool].filter((x) => x !== c)].slice(0, 10);
+  },
+  recent(tool) { return S.recentColors[tool].filter((c) => !this.has(tool, c)).slice(0, 5); },
+  current(tool) {
+    if (tool === 'pen') return S.penColor;
+    if (tool === 'highlighter') return S.hlColor;
+    return findItem(S.editing || S.selected)?.item.base?.color || S.textDefault.color;
+  },
+  /** Deja `c` elegido en la herramienta (en el texto, se aplica a la selección o al cuadro). */
+  choose(tool, c) {
+    this.use(tool, c);
+    if (tool === 'pen') S.penColor = c;
+    else if (tool === 'highlighter') S.hlColor = c;
+    else { restoreRange(); textStyle({ color: c }); }
+    savePrefs(); refreshToolButtons(); renderOptions();
+  },
+  add(tool, c) {
+    c = this.hex(c);
+    if (!c) return;
+    if (!this.has(tool, c)) {
+      if (this.list(tool).length >= COLOR_MAX) return toast(`Caben ${COLOR_MAX} colores: quita uno para añadir otro`);
+      S[COLOR_TOOLS[tool].list] = [...this.list(tool), c];
+    }
+    this.choose(tool, c);
+  },
+  remove(tool, c) {
+    const list = this.list(tool);
+    if (list.length <= 1) return toast('Tiene que quedar al menos un color');
+    this.use(tool, c);   // pasa a «Recientes»
+    this.setList(tool, list.filter((x) => x.toUpperCase() !== c.toUpperCase()));
+    toast('Color quitado');
+  },
+  move(tool, from, to) {
+    const list = this.list(tool).slice();
+    to = Math.max(0, Math.min(list.length - 1, to));
+    if (from === to) return;
+    list.splice(to, 0, list.splice(from, 1)[0]);
+    this.setList(tool, list);
+  },
+  reset(tool) { this.setList(tool, COLOR_TOOLS[tool].def.slice()); toast('Colores restablecidos'); },
+  isDefault(tool) { return this.list(tool).join() === COLOR_TOOLS[tool].def.join(); },
+
+  // ---------- Barra de opciones ----------
+  /** Clic en la barra: el «+» abre la ventana; elegir un color lo recuerda. Devuelve true si ya lo ha atendido. */
+  onClick(e) {
+    if (this.swallow) { this.swallow = false; return true; }
+    const b = e.target.closest('[data-act]');
+    if (!b) return false;
+    if (b.dataset.act === 'color-add') { this.open(b, b.dataset.tool); return true; }
+    const tool = b.closest('.color-row')?.dataset.tool;
+    if (tool && b.dataset.v) this.use(tool, b.dataset.v);
+    return false;
+  },
+  /** Mantener pulsado (dedo, lápiz o ratón) o clic derecho en un color de la barra abre su menú. */
+  hook(el) {
+    if (el.dataset.inkColors) return;
+    el.dataset.inkColors = '1';
+    const swatchAt = (t) => t.closest?.('.color-row .swatch:not(.add-color)');
+    let timer = 0, start = [0, 0];
+    const stop = () => { clearTimeout(timer); timer = 0; };
+    el.addEventListener('pointerdown', (e) => {
+      const sw = swatchAt(e.target);
+      stop();
+      if (!sw || e.button > 0) return;
+      start = [e.clientX, e.clientY];
+      timer = setTimeout(() => { timer = 0; this.swallow = true; this.menu(sw); }, 520);
+    });
+    el.addEventListener('pointermove', (e) => { if (timer && Math.hypot(e.clientX - start[0], e.clientY - start[1]) > 8) stop(); });
+    for (const t of ['pointerup', 'pointercancel']) el.addEventListener(t, () => { stop(); if (this.swallow) setTimeout(() => { this.swallow = false; }, 400); });
+    el.addEventListener('contextmenu', (e) => {
+      const sw = swatchAt(e.target);
+      if (!sw) return;
+      e.preventDefault();
+      if (this.swallow || openPopover?.anchor === sw) return;   // ya lo abrió la pulsación larga
+      stop(); this.menu(sw);
+    });
+  },
+  menu(sw) {
+    const tool = sw.closest('.color-row').dataset.tool, c = sw.dataset.v, list = this.list(tool);
+    const i = list.findIndex((x) => x.toUpperCase() === c.toUpperCase());
+    popover(sw, `<div class="label cp-menu-head" translate="no"><span class="swatch" style="background:${c}"></span>${c}</div>
+      <button data-act="remove" ${list.length <= 1 ? 'disabled' : ''}>${icon('trash')} Quitar color</button>
+      <button data-act="left" ${i <= 0 ? 'disabled' : ''}>${icon('back')} Mover a la izquierda</button>
+      <button data-act="right" ${i >= list.length - 1 ? 'disabled' : ''}>${icon('back').replace('<svg', '<svg style="transform:scaleX(-1)"')} Mover a la derecha</button>
+      <hr><button data-act="reset" ${this.isDefault(tool) ? 'disabled' : ''}>${icon('undo')} Restablecer colores</button>`,
+    (act) => {
+      if (act === 'remove') this.remove(tool, c);
+      if (act === 'left' || act === 'right') this.move(tool, i, i + (act === 'left' ? -1 : 1));
+      if (act === 'reset') this.reset(tool);
+    });
+  },
+
+  // ---------- Ventana «Color del …» ----------
+  preview(tool, c) {
+    const paper = this.paper(), fill = PAPERS[paper]?.fill || '#FFFFFF';
+    if (tool === 'highlighter') {
+      return `<span class="cp-preview" style="background:${fill};color:${displayColor('#1C1C1E', paper)}"><span class="cp-hl" style="background:${c}"></span><span>Texto subrayado</span></span>`;
+    }
+    return `<span class="cp-preview" style="background:${fill};color:${displayColor(c, paper)}">Aa</span>`;
+  },
+  open(anchor, tool) {
+    const t = COLOR_TOOLS[tool];
+    if (!t) return;
+    if (tool === 'text') saveRange();
+    const list = this.list(tool), cur = this.hex(this.current(tool)) || list[0], full = list.length >= COLOR_MAX;
+    const btn = (c, cls, extra = '') => `<button class="swatch ${cls}" data-c="${c}" style="background:${c}" aria-label="Color ${c}"${extra}></button>`;
+    const sug = this.suggest(tool), rec = this.recent(tool);
+    // La barra se vuelve a pintar al cambiar los colores: la ventana se reabre junto al «+» nuevo.
+    const anchorNow = () => $(`#options .add-color[data-tool="${tool}"]`) || anchor;
+    let hex = null;
+    popover(anchor, `<div class="color-pop" data-tool="${tool}">
+      <div class="cp-title">${t.title}</div>
+      <div class="label">Tus colores (${list.length} de ${COLOR_MAX})</div>
+      <div class="cp-mine">${list.map((c) => btn(c, 'cp-big', ` aria-pressed="${c.toUpperCase() === cur}"`)).join('')}</div>
+      <p class="cp-hint">Toca uno para usarlo. Arrástralo para ordenarlo; fuera de la fila, para quitarlo.</p>
+      <div class="label">Nuevo color</div>
+      <div class="cp-pick"><input type="color" id="cp-color" value="${cur.toLowerCase()}" aria-label="Elegir color">
+        <input type="text" id="cp-hex" value="${cur}" maxlength="7" spellcheck="false" autocomplete="off" aria-label="Código HEX">
+        <span class="cp-prev">${this.preview(tool, cur)}</span></div>
+      ${sug.length ? `<div class="label">Sugerencias para este papel</div><div class="cp-row">${sug.map((c) => btn(c, 'cp-sug')).join('')}</div>` : ''}
+      ${rec.length ? `<div class="label">Recientes</div><div class="cp-row">${rec.map((c) => btn(c, 'cp-rec')).join('')}</div>` : ''}
+      <div class="cp-acts"><button class="btn" data-act="reset" ${this.isDefault(tool) ? 'disabled' : ''}>Restablecer colores</button>
+        <button class="btn primary" data-act="add">${full ? 'Usar' : 'Añadir'}</button></div>
+      ${full ? `<p class="cp-hint">Caben ${COLOR_MAX} colores: quita uno para añadir otro.</p>` : ''}</div>`,
+    (act) => {
+      if (act === 'reset') return this.reset(tool);
+      const c = this.hex(hex?.value);
+      if (!c) return;
+      if (full && !this.has(tool, c)) return this.choose(tool, c);   // la fila está llena: se usa sin guardarlo
+      this.add(tool, c);
+    });
+    const pop = openPopover?.el;
+    if (!pop?.querySelector('.color-pop')) return;   // volver a pulsar el «+» la cierra
+    pop.setAttribute('role', 'dialog');
+    pop.setAttribute('aria-label', tr(t.title));
+    pop.classList.add('color-popover');
+    const picker = pop.querySelector('#cp-color'), addBtn = pop.querySelector('[data-act="add"]');
+    hex = pop.querySelector('#cp-hex');
+    const show = (c, from) => {
+      const v = this.hex(c);
+      addBtn.disabled = !v;
+      hex.classList.toggle('bad', !v);
+      if (!v) return;
+      if (from !== 'picker') picker.value = v.toLowerCase();
+      if (from !== 'hex') hex.value = v;
+      pop.querySelector('.cp-prev').innerHTML = this.preview(tool, v);
+      translateTree(pop.querySelector('.cp-prev'));
+    };
+    picker.addEventListener('input', () => show(picker.value, 'picker'));
+    hex.addEventListener('input', () => show(hex.value, 'hex'));
+    hex.addEventListener('keydown', (e) => { if (e.key === 'Enter' && !addBtn.disabled) { e.preventDefault(); addBtn.click(); } });
+    pop.addEventListener('click', (e) => {
+      const b = e.target.closest('[data-c]');
+      if (!b) return;
+      if (b.classList.contains('cp-big')) { closePopover(); return this.choose(tool, b.dataset.c); }
+      show(b.dataset.c);
+    });
+    liveReorder(pop.querySelector('.cp-mine'), '.cp-big', {
+      ignore: null,
+      onDrop: (from, to) => { closePopover(); this.move(tool, from, to); this.open(anchorNow(), tool); },
+      onOutside: (el) => { closePopover(); this.remove(tool, el.dataset.c); this.open(anchorNow(), tool); return true; },
+    });
+  },
+};
 
 // =============================================================================
 // Atajos de teclado personalizables (como en la app nativa).
