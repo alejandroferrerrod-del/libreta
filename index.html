@@ -795,6 +795,84 @@ html.pen-mode .item, html.pen-mode .pin, html.pen-mode .lasso-box { touch-action
   padding: 10px 18px; border-radius: 999px; background: var(--accent); color: #fff; font-size: 14px; font-weight: 500; box-shadow: 0 6px 24px rgba(0,0,0,.25); pointer-events: none; animation: rise .2s ease-out; }
 .drop-hint svg { width: 17px; height: 17px; flex: none; }
 .drop-hint span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* ---------- Plantillas de página (diálogos «Nueva libreta» y «Añadir página») ----------
+   Mismo ancho para todas, para que las 11 queden alineadas en filas aunque el nombre sea largo. */
+.choices .tpl { width: 92px; text-align: center; line-height: 1.2; }
+/* ---------- Tarjetas de repaso (cards.js) ---------- */
+.cardz-dialog { width: min(600px, 100%); }
+.cardz-dialog textarea { border: 0; background: var(--surface-2); border-radius: 8px; padding: 9px 11px; font-weight: 400; font-size: 15px; resize: vertical; min-height: 64px; }
+.cardz-zone { background: var(--surface-2); border-radius: 10px; padding: 8px; display: grid; place-items: center; }
+.cardz-zone img, .cardz-img { max-width: 100%; max-height: 260px; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,.18); display: block; margin: 0 auto; }
+.cardz-side { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; font-size: 13px; color: var(--muted); }
+.cardz-muted { color: var(--muted); }
+.cardz-center { text-align: center; }
+.cardz-list { display: flex; flex-direction: column; gap: 6px; max-height: 46vh; overflow: auto; }
+.cardz-row { display: flex; align-items: center; gap: 8px; background: var(--surface-2); border-radius: 10px; padding: 8px 6px 8px 12px; }
+.cardz-row-q { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.cardz-row-q > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cardz-row-q small { font-size: 12px; }
+.cardz-review { display: flex; flex-direction: column; gap: 12px; }
+.cardz-top { display: flex; align-items: center; justify-content: space-between; font-variant-numeric: tabular-nums; margin: -8px -8px 0 0; }
+.cardz-side-label { font-size: 11.5px; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); }
+.cardz-face { background: var(--surface-2); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 10px; min-height: 56px; justify-content: center; }
+.cardz-text { font-size: 18px; line-height: 1.4; white-space: pre-wrap; overflow-wrap: anywhere; text-align: center; }
+.cardz-goto { align-self: center; display: inline-flex; align-items: center; gap: 6px; }
+.cardz-goto svg { width: 16px; height: 16px; }
+.cardz-grades { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.cardz-grade { border: 0; border-radius: 10px; padding: 10px 4px; display: flex; flex-direction: column; align-items: center; gap: 2px; background: var(--surface-2); font-size: 14px; }
+.cardz-grade small { font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.cardz-grade.cardz-again b { color: var(--danger); }
+.cardz-grade.cardz-hard b { color: #B86E00; }
+.cardz-grade.cardz-good b { color: #1F8A4C; }
+.cardz-grade.cardz-easy b { color: var(--accent); }
+.cardz-grade:hover { box-shadow: inset 0 0 0 2px var(--accent-soft); }
+.cardz-tally { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.cardz-t { background: var(--surface-2); border-radius: 10px; padding: 10px 4px; display: flex; flex-direction: column; align-items: center; font-size: 12.5px; color: var(--muted); }
+.cardz-t b { font-size: 22px; color: var(--ink); font-variant-numeric: tabular-nums; }
+.cardz-flash { position: absolute; border: 2px solid var(--accent); background: var(--accent-soft); border-radius: 6px; pointer-events: none !important; animation: cardz-flash 2.2s ease-out forwards; }
+@keyframes cardz-flash { 0%, 60% { opacity: 1; } 100% { opacity: 0; } }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .cardz-grade.cardz-hard b { color: #FFB340; }
+  :root:not([data-theme="light"]) .cardz-grade.cardz-good b { color: #4CD87F; }
+}
+:root[data-theme="dark"] .cardz-grade.cardz-hard b { color: #FFB340; }
+:root[data-theme="dark"] .cardz-grade.cardz-good b { color: #4CD87F; }
+@media (max-width: 480px) { .cardz-grades, .cardz-tally { grid-template-columns: repeat(2, 1fr); } }
+/* Tinta dentro de los post-its y «Ampliar» (tarea/tinta-postit) */
+.item.sticky .note-ink { position: absolute; left: -1.5px; top: -1.5px; right: -1.5px; bottom: -1.5px; overflow: hidden; pointer-events: none; }
+.item.sticky .note-ink canvas { position: absolute; left: 0; top: 0; }
+.note-zoom-done { position: absolute; top: 12px; left: 0; right: 0; margin: 0 auto; width: max-content; z-index: 40; box-shadow: 0 4px 14px rgba(0,0,0,.2); animation: rise .2s ease-out; }
+
+/* ---------- Proteger los datos: aviso de copia en la biblioteca y fila «Almacenamiento» de Ajustes ---------- */
+:root { --safe-ok: #248A3D; --safe-warn: #B35F00; }
+:root[data-theme="dark"] { --safe-ok: #30D158; --safe-warn: #FFB340; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --safe-ok: #30D158; --safe-warn: #FFB340; } }
+.backup-nag { display: flex; align-items: center; gap: 12px; max-width: 760px; margin: 0 0 20px; padding: 12px 14px; border-radius: 12px;
+  background: var(--surface); border: 1px solid var(--hairline); box-shadow: var(--shadow); color: var(--ink); font-size: 13.5px; animation: rise .2s ease-out; }
+.backup-nag .nag-icon { flex: none; width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; background: var(--accent-soft); color: var(--accent); }
+.backup-nag .nag-icon svg { width: 18px; height: 18px; }
+.backup-nag .nag-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.backup-nag .nag-text b { font-size: 14px; font-weight: 600; }
+.backup-nag .nag-text span { color: var(--ink-2); }
+.backup-nag .nag-text .nag-tip { color: var(--muted); font-size: 12.5px; }
+.backup-nag .nag-actions { flex: none; display: flex; gap: 8px; }
+@media (max-width: 600px) {
+  .backup-nag { flex-wrap: wrap; align-items: flex-start; }
+  .backup-nag .nag-text { flex-basis: calc(100% - 46px); }
+  .backup-nag .nag-actions { width: 100%; justify-content: flex-end; }
+}
+.popover .storage-box { width: 270px; max-width: calc(100vw - 40px); padding: 4px 10px 8px; font-size: 13px; display: flex; flex-direction: column; gap: 5px; }
+.storage-box .storage-line { display: flex; justify-content: space-between; gap: 10px; }
+.storage-box .storage-line span { color: var(--ink-2); }
+.storage-box .storage-line b { font-weight: 600; font-variant-numeric: tabular-nums; }
+.storage-box .storage-meter { height: 6px; border-radius: 3px; background: var(--fill); overflow: hidden; }
+.storage-box .storage-meter i { display: block; height: 100%; background: var(--accent); border-radius: 3px; }
+.storage-box .storage-state { margin: 3px 0; padding: 7px 9px; border-radius: 8px; display: flex; flex-direction: column; gap: 2px; font-size: 12.5px; line-height: 1.35; }
+.storage-box .storage-state span { color: var(--ink-2); }
+.storage-box .storage-state.ok { background: color-mix(in srgb, var(--safe-ok) 14%, transparent); }
+.storage-box .storage-state.ok b { color: var(--safe-ok); }
+.storage-box .storage-state.warn { background: color-mix(in srgb, var(--safe-warn) 14%, transparent); }
+.storage-box .storage-state.warn b { color: var(--safe-warn); }
 /* =============================================================================
    Tutorial de la primera vez (siempre en oscuro, como en la app nativa)
    ============================================================================= */
@@ -1191,11 +1269,22 @@ I18N.dict.it = {
   'Ruta': 'Percorso', 'Volver': 'Indietro', 'Eliminado': 'Eliminato', 'Duplicado': 'Duplicato', 'No hay libretas que exportar': 'Non ci sono quaderni da esportare',
   'No se puede meter una carpeta dentro de sí misma.': 'Non si può mettere una cartella dentro se stessa.', 'Se borran de este navegador y no se puede deshacer.': 'Vengono cancellati da questo browser e non si può annullare.',
   'Se borrarán todas sus páginas de este navegador. No se puede deshacer.': 'Verranno cancellate tutte le sue pagine da questo browser. Non si può annullare.',
-  'Este navegador no permite guardar (puede ser una ventana privada). Lo que hagas se perderá al cerrar: usa + › Copia de seguridad.': 'Questo browser non permette di salvare (forse è una finestra privata). Quello che fai andrà perso alla chiusura: usa ⚙︎ › Backup.',
+  'Este navegador no permite guardar (puede ser una ventana privada). Lo que hagas se perderá al cerrar: haz una copia desde Ajustes › Almacenamiento y copia de seguridad.': 'Questo browser non permette di salvare (forse è una finestra privata). Quello che fai andrà perso alla chiusura: usa ⚙︎ › Backup.',
   'Folia instalada. Ábrela desde el menú Inicio o el Dock.': 'Folia installata. Aprila dal menu Start o dal Dock.',
   'Hay una versión nueva de Folia.': 'C’è una nuova versione di Folia.', 'Actualizar': 'Aggiorna', 'Cerrar aviso': 'Chiudi avviso',
   'Tu navegador no deja guardar más. Usa «Copia de seguridad» para no perder nada.': 'Il tuo browser non permette di salvare altro. Usa «Backup» per non perdere nulla.',
   'Ese archivo no es una copia de Folia.': 'Questo file non è un backup di Folia.', 'El archivo no tenía libretas': 'Il file non conteneva quaderni', 'Copia guardada': 'Backup salvato',
+  // --- Proteger los datos (Ajustes › Almacenamiento y aviso de copia) ---
+  'Almacenamiento y copia de seguridad': 'Archiviazione e backup', 'Almacenamiento': 'Archiviazione', 'Usado': 'Usato', 'Disponible': 'Disponibile',
+  'Última copia': 'Ultimo backup', 'Nunca': 'Mai', 'Protegido': 'Protetto', 'Sin proteger': 'Non protetto', 'Sin confirmar': 'Non confermato',
+  'El navegador no borrará tus libretas por su cuenta. Aun así, haz copias de vez en cuando.': 'Il browser non cancellerà i tuoi quaderni da solo. Fai comunque un backup ogni tanto.',
+  'El navegador podría borrar tus libretas si le falta espacio o si no abres Folia en unos días. Haz copias a menudo.': 'Il browser potrebbe cancellare i tuoi quaderni se manca spazio o se non apri Folia per qualche giorno. Fai spesso un backup.',
+  'Este navegador no dice si guardará tus libretas para siempre. Haz copias a menudo.': 'Questo browser non dice se conserverà i tuoi quaderni per sempre. Fai spesso un backup.',
+  'Hacer copia ahora': 'Fai un backup ora', 'Hacer copia': 'Fai un backup', 'Más tarde': 'Più tardi',
+  'Aún no has hecho ninguna copia de seguridad': 'Non hai ancora fatto nessun backup',
+  'Tus libretas solo están en este navegador. Guarda una copia en un archivo por si se borran.': 'I tuoi quaderni sono solo in questo browser. Salva un backup in un file nel caso vengano cancellati.',
+  'Para que Safari no las borre, instala Folia: botón Compartir › «Añadir a pantalla de inicio».': 'Perché Safari non li cancelli, installa Folia: pulsante Condividi › «Aggiungi alla schermata Home».',
+  'Para que el navegador no las borre, instala Folia como app (en el menú del navegador, «Instalar»).': 'Perché il browser non li cancelli, installa Folia come app (nel menu del browser, «Installa»).',
   'Libretas': 'Quaderni', 'Ejemplos': 'Esempi', 'Sin carpeta': 'Senza cartella', 'Esta libreta': 'Questo quaderno',
   'Todas las libretas están abiertas': 'Tutti i quaderni sono aperti', 'Abrir otra libreta': 'Apri un altro quaderno',
   'Portada': 'Copertina', 'Color': 'Colore', 'Página': 'Pagina', 'Foto': 'Foto', 'Elegir imagen…': 'Scegli immagine…',
@@ -1242,6 +1331,14 @@ I18N.dict.it = {
   'Se quitarán la tinta, los textos, las imágenes, los post-its y los comentarios. La página y su papel se conservan. Puedes deshacerlo.': 'Verranno tolti inchiostro, testi, immagini, post-it e commenti. La pagina e la sua carta restano. Puoi annullarlo.',
   'No se puede deshacer.': 'Non si può annullare.',
   'Rayado': 'A righe', 'Rayado estrecho': 'A righe strette', 'Cuadrícula': 'A quadretti', 'Puntos': 'A puntini', 'En blanco': 'Bianca', 'Pentagrama': 'Pentagramma', 'Cornell': 'Cornell',
+  // Plantillas de Medicina: nombres y rótulos que se pintan en el papel.
+  'Caso clínico': 'Caso clinico', 'Ficha de fármaco': 'Scheda farmaco', 'Diagnóstico diferencial': 'Diagnosi differenziale', 'Cornell MIR': 'Cornell MIR',
+  'Paciente': 'Paziente', 'Edad': 'Età', 'Motivo de consulta': 'Motivo della visita', 'Anamnesis': 'Anamnesi', 'Exploración': 'Esame obiettivo',
+  'Pruebas complementarias': 'Esami complementari', 'Diagnóstico': 'Diagnosi', 'Tratamiento': 'Terapia',
+  'Grupo': 'Classe', 'Mecanismo': 'Meccanismo d’azione', 'Indicaciones': 'Indicazioni', 'Dosis': 'Posologia', 'Efectos adversos': 'Effetti avversi',
+  'Contraindicaciones': 'Controindicazioni', 'Interacciones': 'Interazioni', 'Síntoma o signo guía': 'Sintomo o segno guida',
+  'Entidad': 'Entità', 'Clínica': 'Clinica', 'Pruebas': 'Esami', 'Claves': 'Punti chiave',
+  'Tema': 'Argomento', 'Preguntas clave': 'Domande chiave', 'Notas': 'Appunti', 'Resumen / Lo que cae en el MIR': 'Riassunto / Cosa esce al MIR',
   'Blanco': 'Bianco', 'Crema': 'Crema', 'Gris': 'Grigio', 'Oscuro': 'Scuro',
   // --- Opciones de herramientas ---
   'Formas': 'Forme', 'Para una forma perfecta, al acabar el trazo mantén quieto 1 segundo antes de soltar': 'Per una forma perfetta, alla fine del tratto tieni fermo 1 secondo prima di rilasciare',
@@ -1265,6 +1362,7 @@ I18N.dict.it = {
   'Elegir destino': 'Scegli destinazione', 'Cambiar destino': 'Cambia destinazione', 'Vista previa': 'Anteprima', 'Sin destino': 'Senza destinazione', 'Elige destino': 'Scegli destinazione',
   'Enlazar con…': 'Collega a…', 'Enlazar con toda la libreta': 'Collega all’intero quaderno', 'O con una página concreta:': 'O a una pagina precisa:', 'Texto enlazado': 'Testo collegato',
   'Ir →': 'Vai →', 'Vista previa del enlace': 'Anteprima del collegamento', 'Esa libreta ya no existe.': 'Quel quaderno non esiste più.', 'Enlace a': 'Collegamento a',
+  'Ampliar': 'Ingrandisci', 'Acercar el post-it para escribir en él': 'Avvicina il post-it per scriverci dentro', 'Volver al zoom de antes': 'Torna allo zoom di prima',
   'Cerrar comentario': 'Chiudi commento', 'Hecho': 'Fatto', 'Escribe aquí tu comentario…': 'Scrivi qui il tuo commento…',
   'Buscar en los comentarios': 'Cerca nei commenti', 'Ningún comentario coincide con la búsqueda.': 'Nessun commento corrisponde alla ricerca.',
   'Aún no hay comentarios en esta libreta. Toca la página con esta herramienta para añadir uno.': 'Non ci sono ancora commenti in questo quaderno. Tocca la pagina con questo strumento per aggiungerne uno.',
@@ -1312,6 +1410,22 @@ I18N.dict.it = {
   'Grabaciones y notas de voz ': 'Registrazioni e note vocali',
   // --- PDF ---
   'Texto del PDF': 'Testo del PDF', 'Subrayar': 'Evidenzia', 'Subrayar con línea': 'Sottolinea', 'Tachar': 'Barra', 'Copiar texto': 'Copia testo', 'Texto copiado': 'Testo copiato',
+  // --- Tarjetas de repaso (cards.js) ---
+  'Crear tarjeta': 'Crea flashcard', 'Tarjeta de repaso con la zona seleccionada': 'Flashcard di ripasso con la zona selezionata',
+  'Tarjetas de repaso': 'Flashcard di ripasso', 'Nueva tarjeta…': 'Nuova flashcard…', 'Nueva tarjeta': 'Nuova flashcard', 'Todas las tarjetas…': 'Tutte le flashcard…',
+  'Tarjeta con la selección': 'Flashcard con la selezione', 'Zona seleccionada': 'Zona selezionata', 'La zona seleccionada es': 'La zona selezionata è',
+  'La respuesta': 'La risposta', 'La pregunta': 'La domanda', 'Pregunta': 'Domanda', 'Respuesta': 'Risposta',
+  'Respuesta (opcional: la zona ya es la respuesta)': 'Risposta (facoltativa: la zona è già la risposta)',
+  'Pregunta (opcional: la zona ya es la pregunta)': 'Domanda (facoltativa: la zona è già la domanda)',
+  'Escribe la pregunta': 'Scrivi la domanda', 'Escribe la respuesta': 'Scrivi la risposta', 'Selecciona algo con el lazo primero': 'Seleziona prima qualcosa con il lazo',
+  'Pregunta con imagen': 'Domanda con immagine', 'Borrar tarjeta': 'Elimina flashcard', 'Borrar': 'Elimina',
+  'Se borra la tarjeta y su historial de repaso.': 'Si eliminano la flashcard e la sua cronologia di ripasso.',
+  'Aún no hay tarjetas. Crea una aquí o rodea algo con el lazo y pulsa «Crear tarjeta».': 'Non ci sono ancora flashcard. Creane una qui oppure cerchia qualcosa con il lazo e premi «Crea flashcard».',
+  'No hay tarjetas pendientes': 'Nessuna flashcard da ripassare', 'La próxima toca mañana.': 'La prossima tocca domani.',
+  'Crea tarjetas desde el lazo («Crear tarjeta») o escribiéndolas.': 'Crea flashcard dal lazo («Crea flashcard») o scrivendole.',
+  'Repaso terminado': 'Ripasso finito', 'Otra vez': 'Di nuovo', 'Difícil': 'Difficile', 'Bien': 'Bene', 'Fácil': 'Facile',
+  'Cerrar el repaso': 'Chiudi il ripasso', 'Ver en la página': 'Vedi nella pagina', 'Mostrar respuesta': 'Mostra risposta',
+  'Zona de la página': 'Zona della pagina', 'Esa página ya no existe': 'Quella pagina non esiste più',
   // --- Temporizador ---
   'Temporizador de estudio': 'Timer di studio', 'Estudio': 'Studio', 'Descanso': 'Pausa', 'Descanso largo': 'Pausa lunga', 'Empezar': 'Inizia', 'Empezar a estudiar': 'Inizia a studiare',
   'Pausar': 'Metti in pausa', 'Reanudar': 'Riprendi', 'Saltar esta fase': 'Salta questa fase', 'Quitar temporizador': 'Rimuovi timer', 'En pausa': 'In pausa',
@@ -1361,6 +1475,15 @@ I18N.dict.it = {
 
 /** Textos con nombres o números dentro. */
 I18N.patterns.it = [
+  // Tarjetas de repaso (cards.js): antes que las reglas generales de «(…)» y «·»
+  [/^Repasar tarjetas \((\d+) pendientes?\)$/, 'Ripassa le flashcard ($1 da ripassare)'], [/^Repasar \((\d+)\)$/, 'Ripassa ($1)'],
+  [/^Tarjeta creada · (\d+) pendientes?$/, 'Flashcard creata · $1 da ripassare'],
+  [/^(\d+) tarjetas? en esta libreta · (\d+) pendientes?$/, '$1 flashcard in questo quaderno · $2 da ripassare'],
+  [/^La próxima toca dentro de (\d+) días\.$/, 'La prossima tocca tra $1 giorni.'], [/^Has repasado (\d+) tarjetas?\.$/, 'Hai ripassato $1 flashcard.'],
+  [/^(Otra vez|Difícil|Bien|Fácil) \((\d)\)$/, (m, t) => `${t(m[1])} (${m[2]})`],
+  [/^(\d+) d$/, '$1 g'], [/^1 min$/, '$&'], [/^1 mes$/, '1 mese'], [/^(\d+) meses$/, '$1 mesi'], [/^1 año$/, '1 anno'], [/^([\d,]+) años$/, '$1 anni'],
+  [/^(Pendiente|En (\d+ d|1 min|1 mes|\d+ meses|1 año|[\d,]+ años))( · con imagen)?$/, (m, t) => `${m[2] ? `Tra ${t(m[2]) ?? m[2]}` : 'Da ripassare'}${m[3] ? ' · con immagine' : ''}`],
+  [/^Hace (\d+) días? que no haces una copia de seguridad$/, (m) => (m[1] === '1' ? 'È passato 1 giorno dall’ultimo backup' : `Sono passati ${m[1]} giorni dall’ultimo backup`)],
   [/^(.+?)\s+\(([^()]+)\)$/, (m, t) => { const a = t(m[1].trim()); return a === null ? null : `${a} (${m[2]})`; }],
   [/^(.+) · (.+)$/, (m, t) => m[0].split(' · ').map((p) => t(p) ?? p).join(' · ')],
   [/^Abrir carpeta (.+)$/, 'Apri cartella $1'], [/^Abrir (.+)$/, 'Apri $1'],
@@ -1425,6 +1548,8 @@ const PAPERS = {
 const TEMPLATES = {
   blank: 'En blanco', ruled: 'Rayado', narrow: 'Rayado estrecho', grid: 'Cuadrícula',
   dots: 'Puntos', cornell: 'Cornell', music: 'Pentagrama',
+  // Para estudiar Medicina (2026-10-19): valores nuevos de page.template, solo se añaden.
+  clinical: 'Caso clínico', drug: 'Ficha de fármaco', ddx: 'Diagnóstico diferencial', cornellMir: 'Cornell MIR',
 };
 const COVERS = ['#2F5D8C', '#8C2F39', '#2F7D5D', '#6B4C9A', '#D9822B', '#3B3B3B', '#1F7A8C', '#B5838D'];
 const PEN_COLORS = ['#1C1C1E', '#5E5E63', '#1E5BD8', '#0E8FA8', '#2E9E4F', '#E0362C', '#F08A24', '#8E44AD'];
@@ -1929,6 +2054,7 @@ function normalizeNotebook(nb) {
   nb.folder = nb.folder ?? null;
   nb.outline = nb.outline || [];
   nb.recordings = nb.recordings || [];
+  if (Array.isArray(nb.cards)) nb.cards = nb.cards.map((c) => Cards.normalize(c)).filter(Boolean);   // tarjetas (opcional, cards.js)
   for (const page of nb.pages) {
     page.w = page.w || PORTRAIT.w; page.h = page.h || PORTRAIT.h;
     page.strokes = page.strokes || []; page.items = page.items || [];
@@ -1939,6 +2065,8 @@ function normalizeNotebook(nb) {
         delete item.text; delete item.style;
       }
       if ((item.type === 'text' || item.type === 'sticky' || item.type === 'comment') && !item.base) item.base = clone(DEFAULT_TEXT);
+      // Tinta del post-it (opcional): los post-its antiguos no la tienen y se quedan así.
+      if (item.type === 'sticky' && Array.isArray(item.strokes)) for (const s of item.strokes) s.kind = s.kind || 'pen';
     }
     for (const s of page.strokes) s.kind = s.kind || 'pen';
   }
@@ -2175,9 +2303,114 @@ function drawPaper(ctx, page) {
       while (y + 36 < H - 50) { for (let i = 0; i < 5; i++) hline(y + i * 9, 50, W - 50); y += 36 + 70; }
       break;
     }
+    case 'clinical': case 'drug': case 'ddx': case 'cornellMir':
+      ctx.stroke(); drawMedPaper(ctx, page, paper); ctx.beginPath();
+      break;
     default: break;
   }
   ctx.stroke();
+}
+
+// ---------- Plantillas para estudiar Medicina (caso clínico, fármaco, diferencial, Cornell MIR) ----------
+// Mismas líneas y colores que el resto del papel; los rótulos se traducen al pintar (el lienzo no pasa por el traductor).
+const MED_ROW = 32; // renglón, igual que «Rayado»
+/** Color de los rótulos: el de la línea del papel, más marcado para que se lea. */
+function medLabelColor(paper) {
+  if (luminance(paper.fill) < 0.5) return '#9AA0AA';
+  const n = parseInt(paper.line.slice(1, 7), 16), k = 0.55;
+  const c = (v) => Math.round(v * k).toString(16).padStart(2, '0');
+  return `#${c((n >> 16) & 255)}${c((n >> 8) & 255)}${c(n & 255)}`;
+}
+function drawMedPaper(ctx, page, paper) {
+  const W = page.w, H = page.h, X0 = 40, X1 = W - 40, Y0 = 40, Y1 = H - 40;
+  const ink = medLabelColor(paper);
+  const line = (x0, y0, x1, y1, w = 1) => { ctx.beginPath(); ctx.lineWidth = w; ctx.strokeStyle = paper.line; ctx.moveTo(x0, y0); ctx.lineTo(x1, y1); ctx.stroke(); };
+  const band = (x, y, w, h, a = 0.22) => { ctx.save(); ctx.globalAlpha = a; ctx.fillStyle = paper.line; ctx.fillRect(x, y, w, h); ctx.restore(); };
+  const label = (text, x, y, size = 12, bold = true, upper = true) => {
+    const t = tr(text);
+    ctx.fillStyle = ink; ctx.textBaseline = 'alphabetic'; ctx.textAlign = 'left';
+    ctx.font = `${bold ? 700 : 500} ${size}px ${FONTS.sans.css}`;
+    ctx.fillText(upper ? t.toLocaleUpperCase(LOCALE()) : t, x, y);
+  };
+  const ruled = (x0, x1, y0, y1) => { for (let y = y0; y < y1 - 6; y += MED_ROW) line(x0, y, x1, y); };
+  // Casillas rotuladas de la cabecera: filas de [rótulo, fracción del ancho].
+  const fields = (rows, y) => {
+    for (const row of rows) {
+      let x = X0;
+      for (const [text, frac] of row) {
+        const w = (X1 - X0) * frac;
+        band(x, y, w, 52, 0.1);
+        ctx.beginPath(); ctx.lineWidth = 1.5; ctx.strokeStyle = paper.line; ctx.strokeRect(x, y, w, 52);
+        label(text, x + 8, y + 16, 11, false, false);
+        x += w;
+      }
+      y += 52;
+    }
+    return y;
+  };
+  // Bloques con título y renglones, repartidos por peso en una o dos columnas (horizontal).
+  const sections = (list, y0) => {
+    const cols = W > H ? 2 : 1, gap = 24, colW = (X1 - X0 - gap * (cols - 1)) / cols;
+    const per = Math.ceil(list.length / cols);
+    for (let c = 0; c < cols; c++) {
+      const part = list.slice(c * per, (c + 1) * per), x0 = X0 + c * (colW + gap), x1 = x0 + colW;
+      const total = part.reduce((s, [, w]) => s + w, 0), rows = Math.floor((Y1 - y0) / MED_ROW);
+      let y = y0, left = rows;
+      part.forEach(([title, wgt], i) => {
+        const n = i === part.length - 1 ? left : Math.max(2, Math.round(rows * wgt / total));
+        left -= n;
+        const bottom = y + n * MED_ROW;
+        band(x0, y, colW, MED_ROW);
+        line(x0, y, x1, y, 2);
+        label(title, x0 + 8, y + 21);
+        ruled(x0, x1, y + MED_ROW, bottom);
+        y = bottom;
+      });
+    }
+  };
+  switch (page.template) {
+    case 'clinical': {
+      const y = fields([[['Paciente', 0.72], ['Edad', 0.28]], [['Motivo de consulta', 1]]], Y0);
+      sections([['Anamnesis', 4], ['Exploración', 3], ['Pruebas complementarias', 3], ['Diagnóstico diferencial', 2], ['Diagnóstico', 1], ['Tratamiento', 2]], y + 20);
+      break;
+    }
+    case 'drug': {
+      const y = fields([[['Nombre', 0.6], ['Grupo', 0.4]]], Y0);
+      sections([['Mecanismo', 3], ['Indicaciones', 3], ['Dosis', 2], ['Efectos adversos', 3], ['Contraindicaciones', 2], ['Interacciones', 2]], y + 20);
+      break;
+    }
+    case 'ddx': {
+      const top = fields([[['Síntoma o signo guía', 1]]], Y0) + 20;
+      const cols = [['Entidad', 0.22], ['Clínica', 0.3], ['Pruebas', 0.26], ['Claves', 0.22]];
+      const rows = Math.floor((Y1 - top - 40) / MED_ROW), bottom = top + 40 + rows * MED_ROW;
+      band(X0, top, X1 - X0, 40);
+      for (let y = top + 40 + MED_ROW; y < bottom; y += MED_ROW) line(X0, y, X1, y, (y - top - 40) % (MED_ROW * 3) ? 1 : 1.5);
+      line(X0, top + 40, X1, top + 40, 2);
+      let x = X0;
+      for (const [text, frac] of cols) {
+        label(text, x + 8, top + 26);
+        x += (X1 - X0) * frac;
+        if (x < X1 - 1) line(x, top, x, bottom, 1.5);
+      }
+      ctx.beginPath(); ctx.lineWidth = 2; ctx.strokeStyle = paper.line; ctx.strokeRect(X0, top, X1 - X0, bottom - top);
+      break;
+    }
+    case 'cornellMir': {
+      // Como «Cornell», con la columna de preguntas, las notas y la franja del resumen rotuladas.
+      const head = 90, cue = 220, summary = H - 230;
+      band(0, head, cue, summary - head, 0.1);
+      for (let y = 110 + MED_ROW; y < summary - 20; y += MED_ROW) line(0, y, W, y);
+      line(0, head, W, head, 2); line(cue, head, cue, summary, 2); line(0, summary, W, summary, 2);
+      label('Tema', 24, 40, 11, false, false);
+      label('Preguntas clave', 24, head + 26); label('Notas', cue + 24, head + 26);
+      band(0, summary, W, 40);
+      label('Resumen / Lo que cae en el MIR', 24, summary + 26);
+      ruled(24, W - 24, summary + 40 + MED_ROW, H - 20);
+      break;
+    }
+    default: break;
+  }
+  ctx.lineWidth = 1; ctx.strokeStyle = paper.line; ctx.fillStyle = paper.line;
 }
 
 function strokePath(ctx, p) {
@@ -2261,6 +2494,17 @@ function drawStroke(ctx, s, paper, faded = false) {
   ctx.restore();
 }
 
+/** Tinta de un post-it (coordenadas relativas a su esquina), recortada a su borde. `ctx` ya está en px de página. */
+function drawNoteInk(ctx, item, sel = null) {
+  if (!item.strokes?.length) return;
+  ctx.save();
+  ctx.translate(item.x, item.y);
+  ctx.beginPath(); ctx.rect(0, 0, item.w, item.h); ctx.clip();
+  for (const s of item.strokes) drawStroke(ctx, s, 'white');
+  if (sel) { ctx.globalAlpha = 0.25; ctx.shadowColor = '#2F4FD8'; ctx.shadowBlur = 6; for (const s of item.strokes) if (sel.has(s.id)) drawStroke(ctx, s, 'white'); }
+  ctx.restore();
+}
+
 function fontCSS(base, scale = 1) {
   return `${base.italic ? 'italic ' : ''}${base.bold ? '700 ' : '400 '}${base.size * scale}px ${FONTS[base.font]?.css || FONTS.sans.css}`;
 }
@@ -2300,6 +2544,7 @@ async function drawPageQuick(ctx, page) {
       ctx.textBaseline = 'top';
       const pad = it.type === 'sticky' ? 14 : 8;
       wrapText(ctx, htmlText(it.html), it.x + pad, it.y + pad, it.w - pad * 2, it.base.size * 1.35, it.type === 'sticky' ? it.y + it.h - it.base.size : Infinity);
+      if (it.type === 'sticky') drawNoteInk(ctx, it);
     }
   }
   for (const s of page.strokes) drawStroke(ctx, s, page.paper);
@@ -2410,6 +2655,15 @@ function staticItem(it, page) {
     if (it.base.border) div.style.border = `1.5px solid ${it.base.color}`;
   }
   div.appendChild(rich);
+  if (it.type === 'sticky' && it.strokes?.length) {
+    // La tinta del post-it, encima de su texto y recortada a su borde (el div tiene overflow:hidden).
+    const ink = document.createElement('canvas');
+    ink.width = it.w * 2; ink.height = it.h * 2;
+    Object.assign(ink.style, { position: 'absolute', left: 0, top: 0, width: it.w + 'px', height: it.h + 'px' });
+    const ctx = ink.getContext('2d'); ctx.scale(2, 2); ctx.translate(-it.x, -it.y);
+    drawNoteInk(ctx, it);
+    div.appendChild(ink);
+  }
   return div;
 }
 /** Estilo base de un texto (lo que no lleva formato propio por tramos). */
@@ -2559,7 +2813,8 @@ function renderLibrary() {
       : S.dynamic ? '<div class="dyn" id="dyn"></div>'
       : `<div class="title-row">${breadcrumb}<h1 class="large-title">${crumbs.length ? `<button class="back-folder" data-go-folder="${crumbs.length > 1 ? crumbs[crumbs.length - 2].id : ''}" aria-label="Volver">${icon('back')}</button><span translate="no">${esc(crumbs[crumbs.length - 1].name)}</span>` : 'Libretas'}</h1></div>
     <main class="library ${sel ? 'selecting' : ''}" id="lib-main">
-      ${Store.working ? '' : '<p class="notice">Este navegador no permite guardar (puede ser una ventana privada). Lo que hagas se perderá al cerrar: usa + › Copia de seguridad.</p>'}
+      ${sel ? '' : DataSafety.nagHTML()}
+      ${Store.working ? '' : '<p class="notice">Este navegador no permite guardar (puede ser una ventana privada). Lo que hagas se perderá al cerrar: haz una copia desde Ajustes › Almacenamiento y copia de seguridad.</p>'}
       ${folders.length || notebooks.length ? `<div class="shelf">${folders.map(folderCardHTML).join('')}${notebooks.map(cardHTML).join('')}</div>`
         : `<p class="empty">${here ? 'Esta carpeta está vacía. Crea aquí una libreta o una carpeta con +, o mueve otras con «Mover».' : 'Aún no tienes libretas. Crea la primera con +.'}</p>`}
     </main>`}</div>`;
@@ -2645,8 +2900,9 @@ function settingsMenu(anchor) {
     ${fingerSwitch()}
     <button data-act="shortcuts">${icon('keyboard')} Atajos de teclado…</button>
     <button data-act="tutorial">${icon('tutorial')} Ver el tutorial</button>
-    <hr><div class="label">Copia de seguridad</div>
-    <button data-act="save">${icon('download')} Guardar copia de seguridad</button>
+    <hr><div class="label">Almacenamiento y copia de seguridad</div>
+    ${DataSafety.boxHTML()}
+    <button data-act="save">${icon('download')} Hacer copia ahora</button>
     <button data-act="load">${icon('upload')} Recuperar copia…</button>
     ${window.libretaInstall ? `<hr><button data-act="install">${icon('fileDown')} Instalar Folia en este ordenador</button>` : ''}`, (act) => {
     if (act.startsWith('ap:')) setAppearance(act.slice(3));
@@ -2658,8 +2914,11 @@ function settingsMenu(anchor) {
     if (act === 'tutorial') Onboarding.open();
     if (act === 'install') window.libretaInstall?.();
   });
+  DataSafety.refreshBox();
 }
 function onLibraryClick(e) {
+  const nag = e.target.closest('[data-nag]');
+  if (nag) return nag.dataset.nag === 'save' ? saveBackup() : DataSafety.snooze();
   const pick = e.target.closest('[data-pick]');
   if (pick) { const k = pick.dataset.pick; if (S.picked.has(k)) S.picked.delete(k); else S.picked.add(k); return renderLibrary(); }
   const go = e.target.closest('[data-go-folder]');
@@ -2744,6 +3003,7 @@ function duplicateNotebook(nb, folder) {
   const ids = new Map();
   for (const p of copy.pages) { const id = uid(); ids.set(p.id, id); p.id = id; }
   copy.outline.forEach((o) => { o.pageId = ids.get(o.pageId) || o.pageId; });
+  (copy.cards || []).forEach((c) => { c.id = uid(); if (c.pageId) c.pageId = ids.get(c.pageId) || c.pageId; });   // «Ver en la página» lleva a la copia
   S.notebooks.push(copy); Store.put(copy);
   return copy;
 }
@@ -3021,8 +3281,114 @@ async function saveBackup() {
     if (blob) audio[r.id] = await new Promise((res) => { const fr = new FileReader(); fr.onload = () => res(fr.result); fr.readAsDataURL(blob); });
   }
   const data = JSON.stringify({ app: 'Folia', version: 4, saved: new Date().toISOString(), folders: Folders.list, notebooks: S.notebooks, audio });
-  if (await saveFile(`libreta-copia-${new Date().toISOString().slice(0, 10)}.json`, new Blob([data], { type: 'application/json' }))) toast('Copia guardada');
+  if (await saveFile(`libreta-copia-${new Date().toISOString().slice(0, 10)}.json`, new Blob([data], { type: 'application/json' }))) { DataSafety.markBackup(); toast('Copia guardada'); }
 }
+
+// ---------- Proteger los datos: almacenamiento persistente, espacio y recordatorio de copia ----------
+// Las libretas viven solo en este navegador. Safari (sobre todo en iPad) puede borrar los datos de un sitio
+// que no se abre en unos 7 días si no está instalado, o cuando falta espacio. Aquí se pide que no los borre,
+// se mide el espacio y se recuerda, sin agobiar, hacer una copia de seguridad.
+// localStorage: `libreta-last-backup` (ms de la última copia hecha) y `libreta-backup-snooze` (ms hasta los que
+// el aviso queda pospuesto). Ninguna toca IndexedDB ni el formato de la copia.
+const DAY_MS = 864e5;
+const DataSafety = {
+  persisted: null,   // true: el navegador no borrará los datos; false: podría; null: no lo dice (o aún no se sabe)
+  usage: null,       // bytes que ocupa Folia
+  quota: null,       // bytes que el navegador le deja usar
+  /** Pide almacenamiento persistente (en cada arranque: el navegador puede concederlo más adelante) y mide el espacio. */
+  async check(ask = true) {
+    const st = navigator.storage;
+    try {
+      // Primero se pregunta: si ya es persistente no se vuelve a pedir (Firefox mostraría su permiso otra vez).
+      let p = st?.persisted ? await st.persisted() : null;
+      if (ask && p !== true && st?.persist) p = await st.persist();
+      this.persisted = typeof p === 'boolean' ? p : null;
+    } catch (e) { this.persisted = null; }
+    try {
+      const est = st?.estimate ? await st.estimate() : null;
+      if (est) { this.usage = est.usage ?? null; this.quota = est.quota ?? null; }
+    } catch (e) { /* sin datos de espacio */ }
+    return this;
+  },
+  num(key) { try { const v = Number(localStorage.getItem(key)); return Number.isFinite(v) && v > 0 ? v : 0; } catch (e) { return 0; } },
+  setNum(key, v) { try { if (v) localStorage.setItem(key, String(v)); else localStorage.removeItem(key); } catch (e) { /* sin almacenamiento */ } },
+  lastBackup() { return this.num('libreta-last-backup'); },
+  snoozedUntil() { return this.num('libreta-backup-snooze'); },
+  markBackup() { this.setNum('libreta-last-backup', Date.now()); this.setNum('libreta-backup-snooze', 0); this.refreshNag(); },
+  snooze() { this.setNum('libreta-backup-snooze', Date.now() + 3 * DAY_MS); this.refreshNag(); },
+  installed() {
+    try { return matchMedia('(display-mode: standalone)').matches || navigator.standalone === true; } catch (e) { return false; }
+  },
+  isSafari() { return /safari/i.test(navigator.userAgent) && !/chrome|chromium|crios|fxios|edg|android/i.test(navigator.userAgent); },
+  /** Días desde la última copia si toca avisar (-1 = nunca se hizo); null si no hace falta. */
+  nagDays(now = Date.now()) {
+    if (this.snoozedUntil() > now) return null;
+    // Solo cuenta lo tuyo: las libretas de ejemplo sin abrir no necesitan copia.
+    const mine = S.notebooks.filter((nb) => !nb.example);
+    if (!mine.length) return null;
+    const last = this.lastBackup();
+    if (!last) return -1;
+    if (now - last < 7 * DAY_MS || !mine.some((nb) => nb.modified > last)) return null;
+    return Math.floor((now - last) / DAY_MS);
+  },
+  installTip() {
+    if (this.persisted === true || this.installed()) return '';
+    return this.isSafari()
+      ? 'Para que Safari no las borre, instala Folia: botón Compartir › «Añadir a pantalla de inicio».'
+      : 'Para que el navegador no las borre, instala Folia como app (en el menú del navegador, «Instalar»).';
+  },
+  nagHTML() {
+    const days = this.nagDays();
+    if (days === null) return '';
+    const title = days < 0 ? 'Aún no has hecho ninguna copia de seguridad' : `Hace ${days} ${days === 1 ? 'día' : 'días'} que no haces una copia de seguridad`;
+    const tip = this.installTip();
+    return `<div class="backup-nag" id="backup-nag" role="status">
+      <span class="nag-icon" aria-hidden="true">${icon('download')}</span>
+      <div class="nag-text"><b>${title}</b><span>Tus libretas solo están en este navegador. Guarda una copia en un archivo por si se borran.</span>${tip ? `<span class="nag-tip">${tip}</span>` : ''}</div>
+      <div class="nag-actions"><button class="btn primary" data-nag="save">Hacer copia</button><button class="btn" data-nag="later">Más tarde</button></div>
+    </div>`;
+  },
+  /** Vuelve a pintar solo el aviso (sin rehacer la biblioteca). */
+  refreshNag() {
+    $('#backup-nag')?.remove();
+    const main = $('#lib-main');
+    if (!main || S.view !== 'library' || S.selecting || S.query.trim()) return;
+    const html = this.nagHTML();
+    if (html) main.insertAdjacentHTML('afterbegin', html);
+  },
+  formatBytes(n) {
+    if (n == null) return '—';
+    for (const [u, k] of [['GB', 1e9], ['MB', 1e6], ['KB', 1e3]]) {
+      if (n >= k) return `${(n / k).toLocaleString(LOCALE(), { maximumFractionDigits: n / k < 10 ? 1 : 0 })} ${u}`;
+    }
+    return `${Math.round(n)} B`;
+  },
+  /** Fila «Almacenamiento» de Ajustes. */
+  boxHTML() {
+    const { usage, quota, persisted } = this;
+    const free = usage != null && quota != null ? Math.max(0, quota - usage) : null;
+    const pct = usage != null && quota ? Math.min(100, Math.max(1, (usage / quota) * 100)) : 0;
+    const last = this.lastBackup();
+    const [cls, name, text] = persisted === true
+      ? ['ok', 'Protegido', 'El navegador no borrará tus libretas por su cuenta. Aun así, haz copias de vez en cuando.']
+      : persisted === false
+        ? ['warn', 'Sin proteger', 'El navegador podría borrar tus libretas si le falta espacio o si no abres Folia en unos días. Haz copias a menudo.']
+        : ['warn', 'Sin confirmar', 'Este navegador no dice si guardará tus libretas para siempre. Haz copias a menudo.'];
+    return `<div class="storage-box" id="storage-box" role="group" aria-label="Almacenamiento">
+      <div class="storage-line"><span>Usado</span><b translate="no">${this.formatBytes(usage)}</b></div>
+      <div class="storage-meter" aria-hidden="true"><i style="width:${pct}%"></i></div>
+      <div class="storage-line"><span>Disponible</span><b translate="no">${this.formatBytes(free)}</b></div>
+      <p class="storage-state ${cls}"><b>${name}</b><span>${text}</span></p>
+      <div class="storage-line"><span>Última copia</span>${last ? `<b translate="no">${formatDate(last)}</b>` : '<b>Nunca</b>'}</div>
+    </div>`;
+  },
+  /** Con Ajustes abierto: se vuelve a medir y se actualiza la fila. */
+  async refreshBox() {
+    await this.check(false);
+    const box = $('#storage-box');
+    if (box) box.outerHTML = this.boxHTML();
+  },
+};
 
 // =============================================================================
 // Modo dinámico: las libretas flotan en el espacio, unidas por sus enlaces. Las carpetas son
@@ -5214,7 +5580,7 @@ function renderEditor() {
   });
   attachReadingPan($('#desk'));
   pinchActive = false;   // un pellizco a medias del editor anterior no deja las páginas sin repintar
-  attachPenTouch(desk); attachPinchZoom(desk);
+  attachPenTouch(desk); attachPinchZoom(desk); attachNoteHold(desk);
   // Un toque en el escritorio, fuera de las páginas, suelta el texto o el elemento seleccionado.
   desk.addEventListener('pointerdown', (e) => {
     if ((S.editing || S.selected) && e.target.matches('#desk, #pages, .page, .page-number')) deselectAll();
@@ -5340,7 +5706,7 @@ function mountPage(page, v, scale = pageScale()) {
  *  El marco (wrap) conserva su tamaño, así el desplazamiento y los números de página no cambian. */
 function unmountPage(v) {
   if (!v.ink._scale && !v.ink.width) return;
-  for (const c of [v.paper, v.ink, v.live]) { c.width = 0; c.height = 0; c._scale = 0; }
+  for (const c of [v.paper, v.ink, v.live, ...v.items.querySelectorAll('.note-ink canvas')]) { c.width = 0; c.height = 0; c._scale = 0; }
   if (v.bg) v.bg.removeAttribute('src');
 }
 /** Solo las páginas visibles y una pantalla por arriba y por abajo tienen lienzos de verdad (en iPad, pintar
@@ -5368,9 +5734,10 @@ function renderInk(page) {
   if (!v || !v.ink._scale) return;
   const ctx = ctxFor(v.ink);
   ctx.clearRect(0, 0, page.w, page.h);
-  const sel = S.lasso && S.lasso.pageId === page.id ? new Set(S.lasso.ids) : null;
+  const sel = S.lasso && S.lasso.pageId === page.id && !S.lasso.noteId ? new Set(S.lasso.ids) : null;
   for (const s of page.strokes) drawStroke(ctx, s, page.paper);
   if (sel) { ctx.save(); ctx.globalAlpha = 0.25; for (const s of page.strokes) if (sel.has(s.id)) { ctx.shadowColor = '#2F4FD8'; ctx.shadowBlur = 6; drawStroke(ctx, s, page.paper); } ctx.restore(); }
+  for (const it of page.items) if (it.type === 'sticky') paintNoteInk(page, it);   // la tinta de los post-its
 }
 function setZoom(z) {
   const desk = $('#desk');
@@ -5400,6 +5767,97 @@ function anchorAt(cx, cy) {
   if (!v) return null;
   const r = v.wrap.getBoundingClientRect();
   return { page, x: (cx - r.left) / S.zoom, y: (cy - r.top) / S.zoom };
+}
+/** «Ampliar» un post-it (como en Goodnotes): el zoom y el desplazamiento se animan hasta encuadrarlo y aparece
+ *  «Hecho», que vuelve con la misma animación al zoom y la posición de antes. Sigue siendo la hoja: mientras tanto se
+ *  escribe en la página o en el post-it como siempre. Se abre con el botón «Ampliar» del post-it seleccionado o con una
+ *  pulsación larga sobre él (herramientas Seleccionar y Post-it). */
+const NoteZoom = {
+  prev: null,    // { zoom, left, top, pageId }: la vista de antes de ampliar
+  btn: null,     // el botón «Hecho»
+  raf: 0,
+  held: false,   // la pulsación larga acaba de ampliar: el toque que la termina no hace nada más
+  open(page, item) {
+    const desk = $('#desk'), v = views.get(page?.id);
+    if (!desk || !v || !item) return;
+    if (!this.btn?.isConnected) this.prev = null;   // se cerró la libreta estando ampliado
+    if (!this.prev) this.prev = { zoom: S.zoom, left: desk.scrollLeft, top: desk.scrollTop, pageId: page.id };
+    const r = itemRect(page, item);
+    const z = Math.max(0.3, Math.min(3, (desk.clientWidth - 48) / r.w, (desk.clientHeight - 140) / r.h));
+    this.animate(page, z, { x: r.x + r.w / 2, y: r.y + r.h / 2 });
+    this.showDone(desk);
+  },
+  close() {
+    const desk = $('#desk'), prev = this.prev;
+    this.prev = null; this.btn?.remove(); this.btn = null;
+    const page = prev && activeNb()?.pages.find((p) => p.id === prev.pageId), v = page && views.get(page.id);
+    if (!desk || !v) return;
+    // El centro de la vista de antes, en px de esa página: se coloca un momento la vista de antes (sin pintar) y se mide.
+    const now = { zoom: S.zoom, left: desk.scrollLeft, top: desk.scrollTop };
+    S.zoom = prev.zoom; layoutPages(false); desk.scrollLeft = prev.left; desk.scrollTop = prev.top;
+    const c = this.center(desk, v);
+    S.zoom = now.zoom; layoutPages(false); desk.scrollLeft = now.left; desk.scrollTop = now.top;
+    this.animate(page, prev.zoom, c, () => { desk.scrollLeft = prev.left; desk.scrollTop = prev.top; });
+  },
+  /** El punto de la página `v` que está en el centro del escritorio (px de página). */
+  center(desk, v) {
+    const r = desk.getBoundingClientRect(), w = v.wrap.getBoundingClientRect();
+    return { x: (r.left + desk.clientWidth / 2 - w.left) / S.zoom, y: (r.top + desk.clientHeight / 2 - w.top) / S.zoom };
+  },
+  /** Anima (≈300 ms, suave) el zoom hasta z1 con el punto c1 de la página en el centro. Mientras dura no se
+   *  repintan las páginas a cada paso (como al pellizcar): al acabar se pintan una vez a la escala buena. */
+  animate(page, z1, c1, done) {
+    cancelAnimationFrame(this.raf);
+    const desk = $('#desk'), v = views.get(page.id), z0 = S.zoom, c0 = this.center(desk, v);
+    const r = desk.getBoundingClientRect(), cx = r.left + desk.clientWidth / 2, cy = r.top + desk.clientHeight / 2;
+    const t0 = performance.now(), dur = reduceMotion() ? 0 : 300;
+    pinchActive = true;
+    const step = (now) => {
+      const k = dur ? Math.min(1, (now - t0) / dur) : 1, e = k < 0.5 ? 2 * k * k : 1 - (2 - 2 * k) ** 2 / 2;
+      zoomAt(z0 * (z1 / z0) ** e, { page, x: c0.x + (c1.x - c0.x) * e, y: c0.y + (c1.y - c0.y) * e }, cx, cy);
+      if (k < 1) { this.raf = requestAnimationFrame(step); return; }
+      this.raf = 0; pinchActive = false;
+      done?.();
+      redrawPages();
+    };
+    this.raf = requestAnimationFrame(step);
+  },
+  showDone(desk) {
+    if (this.btn?.isConnected) return;
+    const b = document.createElement('button');
+    b.className = 'btn primary note-zoom-done';
+    b.textContent = 'Hecho';
+    b.title = 'Volver al zoom de antes';
+    b.addEventListener('click', () => this.close());
+    desk.parentElement.style.position = 'relative';
+    desk.parentElement.appendChild(b);
+    this.btn = b;
+  },
+};
+/** Pulsación larga (500 ms sin moverse) sobre un post-it con Seleccionar o Post-it: lo amplía. */
+function attachNoteHold(desk) {
+  let timer = 0, at = null, id = null;
+  const stop = () => { clearTimeout(timer); timer = 0; };
+  desk.addEventListener('pointerdown', (e) => {
+    stop(); NoteZoom.held = false;
+    if (!['select', 'sticky'].includes(S.tool) || S.reading || (e.pointerType === 'mouse' && e.button !== 0)) return;
+    if (e.pointerType === 'touch' && PenInput.fingerBlocked()) return;   // modo lápiz: la palma quieta no amplía
+    const el = e.target.closest?.('.item.sticky');
+    if (!el || e.target.closest('.resize')) return;
+    if (S.editing?.itemId === el.dataset.id) return;   // escribiendo dentro: pulsar quieto es para el cursor o seleccionar
+    const page = activeNb()?.pages.find((p) => views.get(p.id)?.items.contains(el)), item = page?.items.find((i) => i.id === el.dataset.id);
+    if (!item) return;
+    at = [e.clientX, e.clientY]; id = e.pointerId;
+    timer = setTimeout(() => {
+      timer = 0; NoteZoom.held = true;
+      if (S.editing) { document.activeElement?.blur?.(); stopEditing(); }
+      select({ pageId: page.id, itemId: item.id });
+      NoteZoom.open(page, item);
+    }, 500);
+  }, true);
+  desk.addEventListener('pointermove', (e) => { if (timer && e.pointerId === id && Math.hypot(e.clientX - at[0], e.clientY - at[1]) > 6) stop(); }, true);
+  for (const t of ['pointerup', 'pointercancel']) desk.addEventListener(t, (e) => { if (e.pointerId === id) stop(); }, true);
+  desk.addEventListener('scroll', () => { if (!NoteZoom.raf) stop(); }, { passive: true });   // el dedo desplazó la libreta
 }
 // Mientras se pellizca no se repintan a la escala nueva las páginas ya montadas (se ven estiradas un momento):
 // al soltar se pintan una sola vez. Las que entran en pantalla sí se montan.
@@ -5595,10 +6053,16 @@ function pageMenu(anchor) {
     ${fingerSwitch()}
     ${paletteRow()}
     <button data-act="shortcuts">${icon('keyboard')} Atajos de teclado…</button>
+    <hr><div class="label">Tarjetas de repaso</div>
+    <button data-act="cards-review">${icon('lightbulb')} Repasar tarjetas (${Cards.pendingText(nb)})</button>
+    <button data-act="cards-new">${icon('plus')} Nueva tarjeta…</button><button data-act="cards-list">${icon('pages')} Todas las tarjetas…</button>
     <hr><div class="label">Apariencia</div>
     ${[['system', 'Automática'], ['light', 'Clara'], ['dark', 'Oscura']].map(([k, n]) => `<button data-act="ap:${k}">${mark(currentAppearance() === k)} ${n}</button>`).join('')}`, (act) => {
     const [kind, value] = act.split(':');
     if (act === 'shortcuts') return shortcutsDialog();
+    if (act === 'cards-review') return Cards.review(nb);
+    if (act === 'cards-new') return Cards.createDialog(nb);
+    if (act === 'cards-list') return Cards.listDialog(nb);
     if (act === 'fullscreen') return toggleFullscreen();
     if (act === 'finger') return toggleFinger();
     if (kind === 'pal') return setPaletteMode(value);
@@ -5779,14 +6243,15 @@ function renderOptions() {
     html = `<span class="hint">${n} ${what}: arrastra el recuadro para ${n === 1 ? 'moverlo' : 'moverlos'}.</span>
       ${S.lasso.ids.length ? swatches(PEN_COLORS, '', 'lasso-color') : ''}
       <div class="sep"></div><button class="btn" data-act="copy">Copiar</button><button class="btn" data-act="cut">Cortar</button><button class="btn" data-act="duplicate">Duplicar</button>
-      <button class="icon-btn" data-act="delete" aria-label="Eliminar" title="Eliminar (Supr)">${icon('trash')}</button>`;
+      <button class="icon-btn" data-act="delete" aria-label="Eliminar" title="Eliminar (Supr)">${icon('trash')}</button>
+      <div class="sep"></div><button class="btn tinted" data-act="make-card" title="Tarjeta de repaso con la zona seleccionada">${icon('lightbulb')} Crear tarjeta</button>`;
   } else if (item && item.type === 'comment') {
     html = `<input type="text" id="comment-title" value="${esc(item.title)}" aria-label="Nombre del comentario" style="border:1px solid var(--line);border-radius:8px;padding:6px 8px;background:var(--surface-2);width:170px">
       ${swatches(COMMENT_COLORS, item.color, 'comment-color')}
       <button class="btn" data-act="toggle-comment">${item.expanded ? 'Cerrar' : 'Abrir'}</button>
       ${S.editing ? '<div class="sep"></div>' + textBar(item) : ''}${itemActions(false)}`;
   } else if (item && item.type === 'sticky') {
-    html = `${swatches(STICKY_COLORS, item.color, 'sticky-color')}<div class="sep"></div>${textBar(item)}${itemActions()}`;
+    html = `${swatches(STICKY_COLORS, item.color, 'sticky-color')}<button class="btn" data-act="note-zoom" title="Acercar el post-it para escribir en él">${icon('plus')} Ampliar</button><div class="sep"></div>${textBar(item)}${itemActions()}`;
   } else if (item && item.type === 'text') {
     html = textBar(item) + itemActions();
   } else if (item && item.type === 'link') {
@@ -5978,6 +6443,7 @@ function onOptionsClick(e) {
     case 'sticky-color': editItem(found, (it) => { it.color = v; }); S.stickyColor = v; break;
     case 'comment-color': editItem(found, (it) => { it.color = v; }); S.commentColor = v; break;
     case 'toggle-comment': toggleComment(found); break;
+    case 'note-zoom': return NoteZoom.open(found?.page, found?.item);
     case 'size': textStyle({ size: Number(v) }); break;
     case 'size-menu': return sizeMenu(b);
     case 'text-color': textStyle({ color: v }); break;
@@ -6000,6 +6466,7 @@ function onOptionsClick(e) {
     case 'duplicate': duplicateSelection(); break;
     case 'front': case 'back': reorderItem(found, act); break;
     case 'delete': deleteSelection(); break;
+    case 'make-card': return Cards.fromLasso();
     default: break;
   }
   savePrefs();
@@ -6231,6 +6698,7 @@ function attachInk(page, v) {
   let stroke = null, lastMove = 0, lastPoint = null, before = null, erased = false, lassoPath = null, pointerType = 'mouse';
   let activeId = null;   // el puntero que está escribiendo: los demás (palma, otro dedo) no cuentan
   let linkTap = null;    // empezó encima de un enlace o un post-it: si es un toque (sin moverse), lo abre en vez de pintar
+  let note = null;       // el post-it en el que empezó el trazo: el trazo es suyo (tinta del post-it)
   // Forma en directo (como en Goodnotes): al quedarse quieto sin soltar, el trazo se endereza al momento; si es una
   // recta, su final sigue al lápiz hasta soltar. snap = { pressure, a?, cardinal? } (a: inicio fijo de la recta).
   let holdTimer = 0, snap = null;
@@ -6264,8 +6732,8 @@ function attachInk(page, v) {
   const cancel = () => {
     try { v.ink.releasePointerCapture(activeId); } catch (err) { /* ya suelto */ }
     activeId = null; PenInput.live = null;
-    if (erased && before) { page.strokes = before.strokes; renderInk(page); }
-    stroke = null; lassoPath = null; erased = false; snap = null; clearTimeout(holdTimer);
+    if (erased && before) { restoreInk(page, before); renderInk(page); }
+    stroke = null; note = null; lassoPath = null; erased = false; snap = null; clearTimeout(holdTimer);
     if (v.live._scale) ctxFor(v.live).clearRect(0, 0, page.w, page.h);
   };
   const point = (e) => {
@@ -6286,12 +6754,14 @@ function attachInk(page, v) {
     currentPageIndex = activeNb().pages.indexOf(page);
     stopEditing();
     before = snapshotPage(page);
-    linkTap = linkAt(page, v, e.clientX, e.clientY) || (performance.now() - lastInkAt < 1500 ? null : noteAt(page, v, e.clientX, e.clientY));   // escribiendo encima: el punto de la «i» no abre el post-it
+    const hit = noteAt(page, v, e.clientX, e.clientY);
+    linkTap = linkAt(page, v, e.clientX, e.clientY) || (performance.now() - lastInkAt < 1500 ? null : hit);   // escribiendo encima: el punto de la «i» no abre el post-it
     if (linkTap) linkTap.at = [e.clientX, e.clientY];
     const p = point(e);
     if (S.tool === 'eraser') { erased = eraseAt(page, p); return; }
     if (S.tool === 'lasso') { clearLasso(); lassoPath = [p]; return; }
     stroke = { id: uid(), tool: S.tool === 'highlighter' ? 'highlighter' : 'pen', kind: S.penKind, color: S.tool === 'highlighter' ? S.hlColor : S.penColor, width: S.tool === 'highlighter' ? S.hlWidth : S.penWidth, points: [p] };
+    note = hit?.note || null;   // empieza dentro de un post-it (el de encima): el trazo es del post-it
     lastMove = performance.now(); lastPoint = [e.clientX, e.clientY];
     snap = null; armHold();
     drawLive();
@@ -6322,10 +6792,10 @@ function attachInk(page, v) {
     if (PenInput.live?.cancel === cancel) PenInput.live = null;
     const tap = linkTap;
     linkTap = null;
-    if (tap && e.type === 'pointerup') {
+    if (tap && e.type === 'pointerup' && !(tap.note && erased)) {   // la goma que ya borró tinta del post-it no lo abre
       // Un toque sobre un enlace o un post-it con cualquier herramienta: se descarta lo empezado y se abre.
-      if (erased && before) { page.strokes = before.strokes; renderInk(page); }
-      stroke = null; lassoPath = null; erased = false;
+      if (erased && before) { restoreInk(page, before); renderInk(page); }
+      stroke = null; note = null; lassoPath = null; erased = false;
       ctxFor(v.live).clearRect(0, 0, page.w, page.h);
       return tap.note ? editStickyAt(page, tap.note, tap.at) : showLinkPreview(tap.target, tap.source);
     }
@@ -6334,6 +6804,10 @@ function attachInk(page, v) {
       ctxFor(v.live).clearRect(0, 0, page.w, page.h);
       const poly = lassoPath.map((q) => [q[0], q[1]]);
       lassoPath = null;
+      // Un lazo dibujado entero dentro de un post-it que rodea tinta suya selecciona esa tinta (no el post-it).
+      const inNote = noteAround(page, poly);
+      const noteIds = inNote ? inNote.strokes.filter((s) => strokeTouchesPolygon(s.points.map(([x, y]) => [x + inNote.x, y + inNote.y]), poly)).map((s) => s.id) : [];
+      if (noteIds.length) return setLasso(page, noteIds, [], inNote.id);
       const ids = page.strokes.filter((s) => strokeTouchesPolygon(s.points, poly)).map((s) => s.id);
       const itemIds = page.items.filter((it) => rectTouchesPolygon(itemRect(page, it), poly)).map((it) => it.id);
       if (ids.length || itemIds.length) setLasso(page, ids, itemIds);
@@ -6350,18 +6824,78 @@ function attachInk(page, v) {
       if (snapped) snapped = Shapes.densify(snapped);
     } else if (S.penShapes || held) snapped = Shapes.recognize(xy);
     const pressure = stroke.points[Math.floor(stroke.points.length / 2)][2];
-    stroke.points = (snapped ? snapped.map(([x, y]) => [x, y, pressure]) : stroke.points).map(([x, y, pr]) => [Math.round(x * 10) / 10, Math.round(y * 10) / 10, pr]);
-    page.strokes.push(stroke);
-    stroke = null;
+    // Tinta del post-it: coordenadas relativas a su esquina (si el post-it sigue en la página).
+    const own = note && page.items.includes(note) ? note : null, ox = own ? own.x : 0, oy = own ? own.y : 0;
+    stroke.points = (snapped ? snapped.map(([x, y]) => [x, y, pressure]) : stroke.points).map(([x, y, pr]) => [Math.round((x - ox) * 10) / 10, Math.round((y - oy) * 10) / 10, pr]);
+    if (own) (own.strokes = own.strokes || []).push(stroke); else page.strokes.push(stroke);
+    lastInkNote = own ? own.id : null;
+    stroke = null; note = null;
     lastInkAt = performance.now();
     ctxFor(v.live).clearRect(0, 0, page.w, page.h);
-    renderInk(page);
+    if (own) paintNoteInk(page, own); else renderInk(page);
     commit(page, before);
   };
   v.ink.addEventListener('pointerup', finish);
   v.ink.addEventListener('pointercancel', finish);
   v.ink.addEventListener('lostpointercapture', (e) => { if (e.pointerId === activeId) finish(e); });   // sin pointerup: no se queda bloqueado
-  function drawLive() { const ctx = ctxFor(v.live); ctx.clearRect(0, 0, page.w, page.h); drawStroke(ctx, stroke, page.paper); }
+  function drawLive() {
+    const ctx = ctxFor(v.live);
+    ctx.clearRect(0, 0, page.w, page.h);
+    if (!note) return drawStroke(ctx, stroke, page.paper);
+    // Dentro de un post-it: recortado a su borde, con los colores sobre fondo claro.
+    ctx.save(); ctx.beginPath(); ctx.rect(note.x, note.y, note.w, note.h); ctx.clip();
+    drawStroke(ctx, stroke, 'white');
+    ctx.restore();
+  }
+}
+/** Deshace lo borrado a medias (toque o trazo descartado): la tinta de la página y la de los post-its. */
+function restoreInk(page, before) {
+  page.strokes = before.strokes;
+  for (const it of page.items) {
+    if (it.type !== 'sticky') continue;
+    const old = before.items.find((x) => x.id === it.id);
+    if (old?.strokes) it.strokes = old.strokes; else delete it.strokes;
+  }
+}
+/** El post-it de encima que contiene todo el lazo (en px de página) y tiene tinta, o null. */
+function noteAround(page, poly) {
+  for (let i = page.items.length - 1; i >= 0; i--) {
+    const it = page.items[i];
+    if (it.type === 'comment') continue;
+    const r = itemRect(page, it);
+    if (!poly.every(([x, y]) => x >= r.x && x <= r.x + r.w && y >= r.y && y <= r.y + r.h)) continue;
+    return it.type === 'sticky' && it.strokes?.length ? it : null;   // dentro de otro elemento de encima: no
+  }
+  return null;
+}
+/** Pinta la tinta de un post-it en su lienzo, dentro del post-it (.note-ink lo recorta a su borde). El lienzo cubre
+ *  hasta donde llega la tinta: al agrandar el post-it reaparece lo que estaba oculto sin repintar. Sin tinta no hay
+ *  lienzo; con la página desmontada el lienzo queda a 0×0 (se pinta al montarla). */
+function paintNoteInk(page, item, el = views.get(page.id)?.items.querySelector(`[data-id="${item.id}"]`)) {
+  if (!el) return;
+  let box = el.querySelector(':scope > .note-ink');
+  if (!item.strokes?.length) { box?.remove(); return; }
+  if (!box) {
+    box = document.createElement('div');
+    box.className = 'note-ink';
+    box.setAttribute('aria-hidden', 'true');
+    box.appendChild(document.createElement('canvas'));
+    el.insertBefore(box, el.querySelector(':scope > .resize'));
+  }
+  const c = box.firstChild, scale = views.get(page.id)?.ink._scale || 0;
+  let w = 1, h = 1;
+  for (const s of item.strokes) for (const q of s.points) { w = Math.max(w, q[0] + s.width); h = Math.max(h, q[1] + s.width); }
+  w = Math.ceil(Math.min(w, page.w)); h = Math.ceil(Math.min(h, page.h));
+  c.style.width = w + 'px'; c.style.height = h + 'px';
+  const cw = Math.round(w * scale), ch = Math.round(h * scale);
+  if (c.width !== cw || c.height !== ch) { c.width = cw; c.height = ch; }   // cambiar el tamaño ya lo borra
+  else c.getContext('2d').clearRect(0, 0, cw, ch);
+  c._scale = scale;
+  if (!scale) return;
+  const ctx = ctxFor(c);
+  const sel = S.lasso?.noteId === item.id ? new Set(S.lasso.ids) : null;
+  for (const s of item.strokes) drawStroke(ctx, s, 'white');
+  if (sel) { ctx.save(); ctx.globalAlpha = 0.25; ctx.shadowColor = '#2F4FD8'; ctx.shadowBlur = 6; for (const s of item.strokes) if (sel.has(s.id)) drawStroke(ctx, s, 'white'); ctx.restore(); }
 }
 /** El enlace bajo un punto de la pantalla (zona de enlace o enlace dentro de un texto). Con una herramienta de tinta
  *  los elementos no reciben el puntero, así que se busca por posición. */
@@ -6379,6 +6913,7 @@ function linkAt(page, v, cx, cy) {
   return null;
 }
 let lastInkAt = 0;   // cuándo se terminó el último trazo
+let lastInkNote = null;   // el id del post-it donde fue el último trazo (null: fue a la página)
 /** El post-it bajo un punto de la pantalla, si es el elemento de encima (no uno tapado por un texto o una imagen).
  *  Los comentarios no hacen falta: van en la capa de encima de la tinta y reciben el toque ellos mismos. */
 function noteAt(page, v, cx, cy) {
@@ -6399,31 +6934,51 @@ function editStickyAt(page, item, [cx, cy]) {
 }
 function eraseAt(page, p) {
   const r = S.eraserSize / Math.max(S.zoom, 0.5);
-  let changed = false;
-  if (S.eraserMode === 'stroke') {
-    const keep = page.strokes.filter((s) => !s.points.some((q) => Math.hypot(q[0] - p[0], q[1] - p[1]) < r + s.width / 2));
-    changed = keep.length !== page.strokes.length;
-    page.strokes = keep;
-  } else {
-    // Parcial: se quitan los puntos tocados y el trazo se parte en trozos.
-    const out = [];
-    for (const s of page.strokes) {
-      const hit = s.points.map((q) => Math.hypot(q[0] - p[0], q[1] - p[1]) < r + s.width / 2);
-      if (!hit.some(Boolean)) { out.push(s); continue; }
-      changed = true;
-      let run = [];
-      s.points.forEach((q, i) => {
-        if (hit[i]) { if (run.length > 1) out.push({ ...s, id: uid(), points: run }); run = []; } else run.push(q);
-      });
-      if (run.length > 1) out.push({ ...s, id: uid(), points: run });
-    }
-    page.strokes = out;
-  }
-  if (changed) renderInk(page);
-  return changed;
+  const out = eraseIn(page.strokes, p, r);
+  if (out) page.strokes = out;
+  // También la tinta del post-it de encima, si la goma está dentro de él.
+  const note = noteAtPoint(page, p);
+  const inNote = note && eraseIn(note.strokes, [p[0] - note.x, p[1] - note.y], r);
+  if (inNote) { if (inNote.length) note.strokes = inNote; else delete note.strokes; }
+  if (out) renderInk(page); else if (inNote) paintNoteInk(page, note);
+  return !!(out || inNote);
 }
-function setLasso(page, ids, itemIds = []) {
-  S.lasso = { pageId: page.id, ids, itemIds };
+/** Los trazos tras pasar la goma por p (radio r), o null si no toca ninguno. Parcial: quita los puntos tocados y
+ *  parte el trazo en trozos. */
+function eraseIn(strokes, p, r) {
+  if (!strokes?.length) return null;
+  if (S.eraserMode === 'stroke') {
+    const keep = strokes.filter((s) => !s.points.some((q) => Math.hypot(q[0] - p[0], q[1] - p[1]) < r + s.width / 2));
+    return keep.length !== strokes.length ? keep : null;
+  }
+  const out = [];
+  let changed = false;
+  for (const s of strokes) {
+    const hit = s.points.map((q) => Math.hypot(q[0] - p[0], q[1] - p[1]) < r + s.width / 2);
+    if (!hit.some(Boolean)) { out.push(s); continue; }
+    changed = true;
+    let run = [];
+    s.points.forEach((q, i) => {
+      if (hit[i]) { if (run.length > 1) out.push({ ...s, id: uid(), points: run }); run = []; } else run.push(q);
+    });
+    if (run.length > 1) out.push({ ...s, id: uid(), points: run });
+  }
+  return changed ? out : null;
+}
+/** El post-it con tinta que está encima en el punto p (px de página), o null si lo tapa otro elemento. */
+function noteAtPoint(page, p) {
+  for (let i = page.items.length - 1; i >= 0; i--) {
+    const it = page.items[i];
+    if (it.type === 'comment') continue;
+    const rc = it.type === 'sticky' ? it : itemRect(page, it);
+    if (p[0] < rc.x || p[0] > rc.x + rc.w || p[1] < rc.y || p[1] > rc.y + rc.h) continue;
+    return it.type === 'sticky' && it.strokes?.length ? it : null;
+  }
+  return null;
+}
+/** Selección del lazo: trazos `ids` de la página (o, con `noteId`, de la tinta de ese post-it) y elementos `itemIds`. */
+function setLasso(page, ids, itemIds = [], noteId = null) {
+  S.lasso = { pageId: page.id, ids, itemIds, ...(noteId ? { noteId } : {}) };
   select(null, false);
   renderItems(page);
   drawLassoBox();
@@ -6432,8 +6987,15 @@ function setLasso(page, ids, itemIds = []) {
 }
 function lassoStrokes() {
   if (!S.lasso) return [];
+  if (S.lasso.noteId) return (lassoNote()?.strokes || []).filter((s) => S.lasso.ids.includes(s.id));
   const page = activeNb().pages.find((p) => p.id === S.lasso.pageId);
   return page ? page.strokes.filter((s) => S.lasso.ids.includes(s.id)) : [];
+}
+/** El post-it cuya tinta está seleccionada con el lazo (o null si el lazo es de la página). */
+function lassoNote() {
+  if (!S.lasso?.noteId) return null;
+  const page = activeNb().pages.find((p) => p.id === S.lasso.pageId);
+  return page?.items.find((i) => i.id === S.lasso.noteId) || null;
 }
 function lassoItems() {
   if (!S.lasso?.itemIds?.length) return [];
@@ -6452,7 +7014,8 @@ function drawLassoBox() {
   const strokes = lassoStrokes(), items = lassoItems();
   if (!strokes.length && !items.length) return clearLasso();
   const corners = items.flatMap((it) => { const r = itemRect(page, it); return [[r.x, r.y], [r.x + r.w, r.y + r.h]]; });
-  const b = Shapes.bounds([...strokes.flatMap((s) => s.points), ...corners]);
+  const note = lassoNote(), ox = note ? note.x : 0, oy = note ? note.y : 0;   // tinta de un post-it: relativa a su esquina
+  const b = Shapes.bounds([...strokes.flatMap((s) => s.points.map(([x, y]) => [x + ox, y + oy])), ...corners]);
   const pad = 8 + Math.max(0, ...strokes.map((s) => s.width)) / 2;
   const box = document.createElement('div');
   box.className = 'lasso-box';
@@ -6517,11 +7080,14 @@ function editItem(found, fn) {
   commit(found.page, before);
   refreshItem(found);
 }
+/** Libera a la vez la memoria de los lienzos de tinta de los post-its que se van a quitar (Safari la retiene). */
+const freeNoteCanvases = (root) => root.querySelectorAll('.note-ink canvas').forEach((c) => { c.width = c.height = 0; });
 function refreshItem(found) {
   const v = views.get(found.page.id);
   const el = v?.inner.querySelector(`[data-id="${found.item.id}"]`);
   if (!el) return renderItems(found.page);
   const fresh = itemElement(found.page, found.item);
+  freeNoteCanvases(el);
   el.replaceWith(fresh);
   if (S.editing?.itemId === found.item.id) focusRichEnd(richFor(found.page.id, found.item.id));
   if (found.item.type === 'comment') { v.over.querySelector(`[data-panel="${found.item.id}"]`)?.remove(); if (found.item.expanded) showCommentPanel(found.page, found.item); }
@@ -6529,6 +7095,7 @@ function refreshItem(found) {
 function renderItems(page) {
   const v = views.get(page.id);
   if (!v) return;
+  freeNoteCanvases(v.items);
   v.items.innerHTML = '';
   $$('.pin, .comment-panel, .ribbon', v.over).forEach((x) => x.remove());
   for (const item of page.items) {
@@ -6624,6 +7191,7 @@ function itemElement(page, item) {
     handle.setAttribute('aria-hidden', 'true');
     el.appendChild(handle);
   }
+  if (item.type === 'sticky') paintNoteInk(page, item, el);   // la tinta escrita dentro del post-it
   el.addEventListener('pointerdown', (e) => onItemPointerDown(e, page, item, el));
   el.addEventListener('dblclick', (e) => { if (RICH_TYPES.includes(item.type) && S.tool === 'select') { setTool(item.type === 'sticky' ? 'sticky' : 'text'); const r = richFor(page.id, item.id); r?.focus(); } });
   return el;
@@ -6819,7 +7387,7 @@ function onItemPointerDown(e, page, item, el) {
     removeEventListener('pointerup', up);
     removeEventListener('pointercancel', up);
     if (moved) { commit(page, before); if (item.type === 'comment' && item.expanded) showCommentPanel(page, item); return; }
-    if (ev.type !== 'pointercancel') itemTap(page, item, wasSelected);
+    if (ev.type !== 'pointercancel' && !NoteZoom.held) itemTap(page, item, wasSelected);   // la pulsación larga ya amplió
   };
   addEventListener('pointermove', move);
   addEventListener('pointerup', up);
@@ -6837,7 +7405,7 @@ function fingerTapItem(e, page, item) {
   const end = (ev) => {
     if (ev.pointerId !== e.pointerId) return;
     removeEventListener('pointermove', move); removeEventListener('pointerup', end); removeEventListener('pointercancel', end);
-    if (moved || ev.type === 'pointercancel') return;
+    if (moved || ev.type === 'pointercancel' || NoteZoom.held) return;
     clearLasso();
     if (S.editing && S.editing.itemId !== item.id) stopEditing();
     const wasSelected = S.selected?.itemId === item.id;
@@ -7001,6 +7569,12 @@ function reorderItem(found, where) {
   commit(found.page, before);
   renderItems(found.page);
 }
+// El texto del comentario usa el fondo del globo, que depende del tema: si el sistema pasa de claro a oscuro (o al
+// revés) con la libreta abierta, se vuelven a pintar (salvo mientras se escribe, para no quitar el foco).
+matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change', () => {
+  if (S.view !== 'editor' || document.documentElement.dataset.theme || S.editing) return;
+  activeNb()?.pages.forEach((p) => views.has(p.id) && p.items.some((i) => i.type === 'comment') && renderItems(p));
+});
 
 // =============================================================================
 // Editor: enlaces entre libretas y páginas, y su vista previa
@@ -7287,6 +7861,9 @@ function copySelection() {
     const items = lassoItems();
     S.clipboard = { kind: 'strokes', data: clone(lassoStrokes()), items: clone(items), pageId: S.lasso.pageId, text: items.filter((i) => RICH_TYPES.includes(i.type)).map(itemText).join('\n') || ' ' };
     S.clipboard.recordings = items.filter((i) => i.type === 'voice').map((i) => clone(Voice.find(activeNb(), i.rec))).filter(Boolean);
+    // Tinta de un post-it: se copia relativa a él (se pega en el mismo post-it o, si no está, en su sitio de la página).
+    const note = lassoNote();
+    if (note) Object.assign(S.clipboard, { noteId: note.id, origin: [note.x, note.y] });
   } else {
     const found = findItem(S.selected);
     if (!found) return false;
@@ -7301,8 +7878,9 @@ function copySelection() {
 function deleteSelection() {
   if (S.lasso) {
     const page = activeNb().pages.find((p) => p.id === S.lasso.pageId), before = snapshotPage(page);
-    const itemIds = S.lasso.itemIds || [];
-    page.strokes = page.strokes.filter((s) => !S.lasso.ids.includes(s.id));
+    const itemIds = S.lasso.itemIds || [], note = lassoNote();
+    if (note) { note.strokes = note.strokes.filter((s) => !S.lasso.ids.includes(s.id)); if (!note.strokes.length) delete note.strokes; }
+    else page.strokes = page.strokes.filter((s) => !S.lasso.ids.includes(s.id));
     page.items = page.items.filter((i) => !itemIds.includes(i.id));
     commit(page, before); clearLasso(); if (itemIds.length) renderItems(page); return;
   }
@@ -7323,9 +7901,22 @@ function pasteInternal() {
   const page = activeNb().pages[currentPageIndex];
   const before = snapshotPage(page);
   const offset = cb.pageId === page.id ? 24 : 0;
+  if (cb.kind === 'strokes' && cb.noteId) {
+    // Tinta copiada de un post-it: vuelve a su post-it si está en esta página; si no, a la página en su sitio.
+    const note = page.items.find((i) => i.id === cb.noteId && i.type === 'sticky');
+    const off = note ? [offset, offset] : [cb.origin[0] + offset, cb.origin[1] + offset];
+    const strokes = clone(cb.data).map((s) => ({ ...s, id: uid(), points: s.points.map(([x, y, p]) => [x + off[0], y + off[1], p]) }));
+    if (note) (note.strokes = note.strokes || []).push(...strokes); else page.strokes.push(...strokes);
+    cb.data = clone(strokes); cb.pageId = page.id;
+    if (!note) { delete cb.noteId; delete cb.origin; }
+    commit(page, before); renderInk(page);
+    if (S.tool !== 'lasso') setTool('lasso');
+    setLasso(page, strokes.map((s) => s.id), [], note?.id);
+    return true;
+  }
   if (cb.kind === 'strokes') {
     const strokes = clone(cb.data).map((s) => ({ ...s, id: uid(), points: s.points.map(([x, y, p]) => [x + offset, y + offset, p]) }));
-    const items = clone(cb.items || []).map((it) => ({ ...it, id: uid(), x: it.x + offset, y: it.y + offset, ...(it.type === 'comment' ? { expanded: false, created: Date.now() } : {}) }));
+    const items = clone(cb.items || []).map((it) => ({ ...it, id: uid(), x: it.x + offset, y: it.y + offset, ...(it.type === 'comment' ? { expanded: false, created: Date.now() } : {}), ...(it.strokes ? { strokes: it.strokes.map((s) => ({ ...s, id: uid() })) } : {}) }));
     if (items.some((it) => it.type === 'voice')) { (cb.recordings || []).forEach((r) => Voice.receive(activeNb(), r)); if (!S.showVoiceNotes) Voice.setShown(true); }
     page.strokes.push(...strokes); page.items.push(...items);
     cb.data = clone(strokes); cb.items = clone(items); cb.pageId = page.id;
@@ -7336,6 +7927,7 @@ function pasteInternal() {
   }
   const item = clone(cb.data);
   item.id = uid(); item.x += offset; item.y += offset;
+  if (item.strokes) item.strokes = item.strokes.map((s) => ({ ...s, id: uid() }));   // la tinta del post-it va con él
   if (item.type === 'comment') { item.expanded = false; item.created = Date.now(); }   // la copia es un comentario nuevo
   if (item.type === 'voice' && cb.recording) { Voice.receive(activeNb(), cb.recording); if (!S.showVoiceNotes) Voice.setShown(true); }
   cb.data = clone(item); cb.pageId = page.id;
@@ -7420,6 +8012,11 @@ const redo = () => restore(S.redo, S.undo);
 document.addEventListener('keydown', (e) => {
   // Biblioteca: Esc sale de «Seleccionar».
   if (S.view === 'library' && e.key === 'Escape' && S.selecting && !document.querySelector('.scrim, .popover, .onb')) return setSelecting(false);
+  // Esc cierra el menú abierto, también en la biblioteca.
+  if (S.view === 'library' && e.key === 'Escape' && openPopover) return closePopover();
+  // Esc sin nada abierto sale de la pantalla completa propia (en la del navegador ya lo hace él).
+  if (e.key === 'Escape' && document.documentElement.classList.contains('app-full') && !openPopover && !previewEl && !S.lasso && !S.selected && !S.editing
+      && !document.querySelector('.scrim, .onb, #pomo-panel, .search-panel')) return setAppFull(false);
   if (S.view !== 'editor' || e.defaultPrevented) return;
   if (typingInField()) {
     if (e.key === 'Escape' && document.activeElement.isContentEditable) document.activeElement.blur();
@@ -7428,6 +8025,253 @@ document.addEventListener('keydown', (e) => {
   if ((e.key === 'Delete' || e.key === 'Backspace') && (S.selected || S.lasso)) { e.preventDefault(); return deleteSelection(); }
   if (e.key === 'Escape') { PdfText.clear(); closePopover(); closeLinkPreview(); closeSearchPanel(); $('#pomo-panel')?.remove(); clearLasso(); return select(null); }
 });
+
+// =============================================================================
+// Tarjetas de repaso (tipo Anki, sin IA). Cada libreta guarda las suyas en `nb.cards` (ARQUITECTURA §2.1).
+// Primero la lógica pura (sin DOM: se prueba sola); después la interfaz: crear, lista y repaso.
+// Para la IA (más adelante): `Cards.addMany(nb, [{ front, back, pageId? }])` mete tarjetas generadas fuera.
+// =============================================================================
+const CARD_DAY = 86400000;
+const CARD_EASE = 2.5, CARD_MIN_EASE = 1.3;
+const CARD_IMG_MAX = 800;            // lado máximo (px) de la imagen recortada: no infla IndexedDB
+const CARD_GRADES = [['again', 'Otra vez'], ['hard', 'Difícil'], ['good', 'Bien'], ['easy', 'Fácil']];
+
+const Cards = {
+  // ---------- Lógica pura ----------
+  /** Las tarjetas de una libreta (sin crear el campo si no lo tiene). */
+  all(nb) { return Array.isArray(nb?.cards) ? nb.cards : []; },
+  startOfDay(t) { const d = new Date(t); d.setHours(0, 0, 0, 0); return d.getTime(); },
+  /** Tarjeta nueva con su estado de repaso inicial (pendiente desde ya). */
+  make(f = {}, now = Date.now()) {
+    const c = { id: uid(), front: String(f.front ?? ''), back: String(f.back ?? ''), due: now, interval: 0, ease: CARD_EASE, reps: 0, lapses: 0, created: now };
+    if (typeof f.img === 'string' && f.img.startsWith('data:image/')) { c.img = f.img; c.imgSide = f.imgSide === 'front' ? 'front' : 'back'; }
+    if (f.pageId) c.pageId = String(f.pageId);
+    const r = f.rect;
+    if (r && [r.x, r.y, r.w, r.h].every(Number.isFinite)) c.rect = { x: Math.round(r.x), y: Math.round(r.y), w: Math.round(r.w), h: Math.round(r.h) };
+    return c;
+  },
+  /** Completa una tarjeta guardada (o llegada de fuera) sin perder nada de lo que trae. */
+  normalize(c, now = Date.now()) {
+    if (!c || typeof c !== 'object') return null;
+    c.id = c.id || uid();
+    c.front = typeof c.front === 'string' ? c.front : String(c.front ?? '');
+    c.back = typeof c.back === 'string' ? c.back : String(c.back ?? '');
+    if (!Number.isFinite(c.created)) c.created = now;
+    if (!Number.isFinite(c.due)) c.due = c.created;
+    if (!Number.isFinite(c.interval) || c.interval < 0) c.interval = 0;
+    if (!Number.isFinite(c.ease)) c.ease = CARD_EASE;
+    c.ease = Math.min(5, Math.max(CARD_MIN_EASE, c.ease));   // datos llegados de fuera: sin facilidades absurdas
+    if (!Number.isFinite(c.reps)) c.reps = 0;
+    if (!Number.isFinite(c.lapses)) c.lapses = 0;
+    if (c.img && c.imgSide !== 'front') c.imgSide = 'back';
+    return c;
+  },
+  isDue(c, now = Date.now()) { return (c.due || 0) <= now; },
+  /** Las pendientes de hoy, la más atrasada primero. */
+  due(nb, now = Date.now()) { return Cards.all(nb).filter((c) => Cards.isDue(c, now)).sort((a, b) => a.due - b.due); },
+  /** Próximo estado de una tarjeta tras contestar (SM-2 sencillo). No cambia la tarjeta: devuelve los campos nuevos.
+   *  Otra vez: vuelve en esta misma sesión y cuenta un fallo. Difícil / Bien / Fácil: días cada vez más largos. */
+  schedule(c, grade, now = Date.now()) {
+    const ease = Number.isFinite(c.ease) ? c.ease : CARD_EASE, i = c.interval || 0, reps = c.reps || 0, lapses = c.lapses || 0;
+    if (grade === 'again') return { interval: 0, ease: Math.max(CARD_MIN_EASE, +(ease - 0.2).toFixed(2)), reps: 0, lapses: lapses + 1, due: now + 60000 };
+    let hard, good, easy;
+    if (reps === 0) { hard = 1; good = 2; easy = 4; }
+    else {
+      hard = Math.max(1, Math.round(i * 1.2));
+      good = Math.max(hard + 1, Math.round(i * ease));
+      easy = Math.max(good + 1, Math.round(i * ease * 1.3));
+    }
+    const interval = Math.min(36500, { hard, good, easy }[grade]);   // como mucho 100 años: la fecha sigue siendo válida
+    if (!interval) throw new Error('Respuesta desconocida: ' + grade);
+    const dEase = { hard: -0.15, good: 0, easy: 0.15 }[grade];
+    return { interval, ease: Math.max(CARD_MIN_EASE, +(ease + dEase).toFixed(2)), reps: reps + 1, lapses, due: Cards.startOfDay(now) + interval * CARD_DAY };
+  },
+  answer(c, grade, now = Date.now()) { return Object.assign(c, Cards.schedule(c, grade, now)); },
+  /** «1 min», «1 d», «3 d», «2 meses»… para los botones y la lista. */
+  span(interval) {
+    if (!interval) return '1 min';
+    if (interval < 31) return `${interval} d`;
+    if (interval < 365) { const m = Math.round(interval / 30); return m === 1 ? '1 mes' : `${m} meses`; }
+    const y = +(interval / 365).toFixed(1); return y === 1 ? '1 año' : `${String(y).replace('.', ',')} años`;
+  },
+
+  // ---------- Guardar ----------
+  /** Añade tarjetas (escritas, desde el lazo o generadas por la IA). Las que no tienen pregunta o respuesta no entran. */
+  addMany(nb, list, now = Date.now()) {
+    const ok = (list || []).map((f) => Cards.make(f, now)).filter((c) => (c.front.trim() || c.imgSide === 'front') && (c.back.trim() || c.imgSide === 'back'));
+    if (!ok.length) return [];
+    if (!Array.isArray(nb.cards)) nb.cards = [];
+    nb.cards.push(...ok);
+    touch(nb);
+    return ok;
+  },
+  remove(nb, id) { if (!Array.isArray(nb.cards)) return; nb.cards = nb.cards.filter((c) => c.id !== id); touch(nb); },
+
+  // ---------- Recortar la zona del lazo ----------
+  /** Rectángulo (px de página) de lo seleccionado con el lazo, con un margen, dentro de la página. */
+  lassoRect() {
+    const page = activeNb()?.pages.find((p) => p.id === S.lasso?.pageId);
+    if (!page) return null;
+    const strokes = lassoStrokes(), items = lassoItems();
+    if (!strokes.length && !items.length) return null;
+    const corners = items.flatMap((it) => { const r = itemRect(page, it); return [[r.x, r.y], [r.x + r.w, r.y + r.h]]; });
+    // Tinta de dentro de un post-it: sus puntos van relativos a la esquina del post-it.
+    const note = S.lasso?.noteId ? lassoNote() : null, ox = note ? note.x : 0, oy = note ? note.y : 0;
+    const b = Shapes.bounds([...strokes.flatMap((s) => s.points.map(([x, y]) => [x + ox, y + oy])), ...corners]);
+    const pad = 12 + Math.max(0, ...strokes.map((s) => s.width)) / 2;
+    const x = Math.max(0, b.x - pad), y = Math.max(0, b.y - pad);
+    return { page, rect: { x, y, w: Math.max(8, Math.min(page.w, b.x + b.w + pad) - x), h: Math.max(8, Math.min(page.h, b.y + b.h + pad) - y) } };
+  },
+  /** Imagen (dataURL JPEG, como mucho CARD_IMG_MAX px de lado) de una zona de la página. */
+  async crop(page, rect) {
+    const scale = Math.min(2, CARD_IMG_MAX / Math.max(rect.w, rect.h));
+    const c = document.createElement('canvas');
+    c.width = Math.max(1, Math.round(rect.w * scale)); c.height = Math.max(1, Math.round(rect.h * scale));
+    const ctx = c.getContext('2d');
+    ctx.scale(scale, scale); ctx.translate(-rect.x, -rect.y);
+    await drawPageQuick(ctx, page);
+    return c.toDataURL('image/jpeg', 0.85);
+  },
+  async fromLasso() {
+    const sel = Cards.lassoRect();
+    if (!sel) return toast('Selecciona algo con el lazo primero');
+    const img = await Cards.crop(sel.page, sel.rect);
+    Cards.createDialog(activeNb(), { img, pageId: sel.page.id, rect: sel.rect });
+  },
+
+  // ---------- Interfaz ----------
+  pendingText(nb) { const n = Cards.due(nb).length; return n === 1 ? '1 pendiente' : `${n} pendientes`; },
+  /** Diálogo para crear una tarjeta. Con `zone` (imagen de la selección), la zona es la respuesta o la pregunta. */
+  createDialog(nb, zone = null, after = null) {
+    let side = 'back';
+    const scrim = dialog(`<h2>${zone ? 'Tarjeta con la selección' : 'Nueva tarjeta'}</h2>
+      ${zone ? `<div class="cardz-zone"><img src="${zone.img}" alt="Zona seleccionada"></div>
+        <div class="cardz-side"><span>La zona seleccionada es</span><div class="seg" role="group" aria-label="La zona seleccionada es">
+          <button data-act="side" data-v="back" aria-pressed="true">La respuesta</button><button data-act="side" data-v="front" aria-pressed="false">La pregunta</button></div></div>` : ''}
+      <label class="field" for="card-front"><span data-for="front">Pregunta</span><textarea id="card-front" rows="3"></textarea></label>
+      <label class="field" for="card-back"><span data-for="back">${zone ? 'Respuesta (opcional: la zona ya es la respuesta)' : 'Respuesta'}</span><textarea id="card-back" rows="3"></textarea></label>
+      <div class="actions"><button class="btn" data-act="cancel">Cancelar</button><button class="btn primary" data-act="create">Crear tarjeta</button></div>`,
+    (act, b, close, sc) => {
+      if (act === 'cancel') return close();
+      if (act === 'side') {
+        side = b.dataset.v;
+        $$('[data-act="side"]', sc).forEach((x) => x.setAttribute('aria-pressed', String(x.dataset.v === side)));
+        $('[data-for="front"]', sc).textContent = side === 'front' ? 'Pregunta (opcional: la zona ya es la pregunta)' : 'Pregunta';
+        $('[data-for="back"]', sc).textContent = side === 'back' ? 'Respuesta (opcional: la zona ya es la respuesta)' : 'Respuesta';
+        return (side === 'front' ? $('#card-back', sc) : $('#card-front', sc)).focus();
+      }
+      if (act !== 'create') return;
+      const front = $('#card-front', sc).value.trim(), back = $('#card-back', sc).value.trim();
+      if (!front && !(zone && side === 'front')) { toast('Escribe la pregunta'); return $('#card-front', sc).focus(); }
+      if (!back && !(zone && side === 'back')) { toast('Escribe la respuesta'); return $('#card-back', sc).focus(); }
+      Cards.addMany(nb, [Object.assign({ front, back }, zone ? { img: zone.img, imgSide: side, pageId: zone.pageId, rect: zone.rect } : {})]);
+      close();
+      toast(`Tarjeta creada · ${Cards.pendingText(nb)}`);
+      if (after) after();
+    });
+    scrim.querySelector('.dialog').classList.add('cardz-dialog');
+    setTimeout(() => $('#card-front', scrim)?.focus(), 40);
+    return scrim;
+  },
+  /** Un lado de la tarjeta: su texto (lo escribe quien estudia: no se traduce) y, si es su lado, la imagen. */
+  face(c, side) {
+    const text = side === 'front' ? c.front : c.back;
+    return `${text ? `<div class="cardz-text" translate="no">${esc(text)}</div>` : ''}${c.img && c.imgSide === side ? `<img class="cardz-img" src="${c.img}" alt="Zona de la página">` : ''}`;
+  },
+  /** Lista de las tarjetas de la libreta: repasar, crear y borrar. */
+  listDialog(nb) {
+    const cards = Cards.all(nb), n = Cards.due(nb).length;
+    const when = (c) => (Cards.isDue(c) ? 'Pendiente' : `En ${Cards.span(Math.max(1, Math.round((Cards.startOfDay(c.due) - Cards.startOfDay(Date.now())) / CARD_DAY)))}`);
+    const rows = cards.map((c) => `<div class="cardz-row"><div class="cardz-row-q">${c.front ? `<span translate="no">${esc(c.front)}</span>` : '<span class="cardz-muted">Pregunta con imagen</span>'}
+        <small class="cardz-muted">${when(c)}${c.img ? ' · con imagen' : ''}</small></div>
+        <button class="icon-btn" data-act="del" data-id="${c.id}" aria-label="Borrar tarjeta" title="Borrar tarjeta">${icon('trash')}</button></div>`).join('');
+    dialog(`<h2>Tarjetas de repaso</h2>
+      <p>${cards.length ? `${cards.length} ${cards.length === 1 ? 'tarjeta' : 'tarjetas'} en esta libreta · ${Cards.pendingText(nb)}` : 'Aún no hay tarjetas. Crea una aquí o rodea algo con el lazo y pulsa «Crear tarjeta».'}</p>
+      ${rows ? `<div class="cardz-list">${rows}</div>` : ''}
+      <div class="actions"><button class="btn" data-act="close">Cerrar</button><button class="btn" data-act="new">Nueva tarjeta…</button>
+        <button class="btn primary" data-act="review" ${n ? '' : 'disabled'}>Repasar (${n})</button></div>`,
+    (act, b, close) => {
+      if (act === 'close') return close();
+      if (act === 'new') { close(); return Cards.createDialog(nb, null, () => Cards.listDialog(nb)); }
+      if (act === 'review') { close(); return Cards.review(nb); }
+      if (act === 'del') confirmDialog('Borrar tarjeta', 'Se borra la tarjeta y su historial de repaso.', 'Borrar', () => { Cards.remove(nb, b.dataset.id); close(); Cards.listDialog(nb); });
+    });
+  },
+  /** Pantalla de repaso: pregunta → «Mostrar respuesta» → Otra vez / Difícil / Bien / Fácil → resumen. */
+  review(nb) {
+    const queue = Cards.due(nb);
+    if (!queue.length) {
+      const next = Cards.all(nb).reduce((m, c) => Math.min(m, c.due), Infinity);
+      const days = Number.isFinite(next) ? Math.max(1, Math.round((Cards.startOfDay(next) - Cards.startOfDay(Date.now())) / CARD_DAY)) : 0;
+      return dialog(`<h2>No hay tarjetas pendientes</h2><p>${days ? `La próxima toca ${days === 1 ? 'mañana' : `dentro de ${days} días`}.` : 'Crea tarjetas desde el lazo («Crear tarjeta») o escribiéndolas.'}</p>
+        <div class="actions"><button class="btn" data-act="close">Cerrar</button><button class="btn primary" data-act="new">Nueva tarjeta…</button></div>`,
+      (act, _b, close) => { close(); if (act === 'new') Cards.createDialog(nb); });
+    }
+    const st = { queue, done: 0, total: queue.length, shown: false, tally: { again: 0, hard: 0, good: 0, easy: 0 } };
+    const scrim = dialog('<div class="cardz-review"></div>', (act, b, close) => {
+      const c = st.queue[0];
+      if (act === 'close') return close();
+      if (act === 'show') { st.shown = true; return paint(); }
+      if (act === 'goto' && c) { close(); return Cards.goTo(nb, c); }
+      if (act === 'grade' && c && st.shown) {
+        const g = b.dataset.v;
+        Cards.answer(c, g);
+        st.tally[g]++;
+        st.queue.shift();
+        if (g === 'again') st.queue.push(c); else st.done++;   // la fallada vuelve al final de la sesión
+        touch(nb);
+        st.shown = false;
+        return paint();
+      }
+    });
+    const box = $('.cardz-review', scrim);
+    scrim.querySelector('.dialog').classList.add('cardz-dialog');
+    const paint = () => {
+      const c = st.queue[0];
+      if (!c) {
+        const t = st.tally, reviewed = t.hard + t.good + t.easy;
+        box.innerHTML = `<h2>Repaso terminado</h2>
+          <p class="cardz-center">${reviewed === 1 ? 'Has repasado 1 tarjeta' : `Has repasado ${reviewed} tarjetas`}.</p>
+          <div class="cardz-tally">${CARD_GRADES.map(([k, n]) => `<div class="cardz-t cardz-${k}"><b>${t[k]}</b><span>${n}</span></div>`).join('')}</div>
+          <div class="actions"><button class="btn primary" data-act="close">Cerrar</button></div>`;
+        return box.querySelector('button').focus();
+      }
+      box.innerHTML = `<div class="cardz-top"><span class="cardz-muted">${Math.min(st.done + 1, st.total)} / ${st.total}</span>
+          <button class="icon-btn" data-act="close" aria-label="Cerrar el repaso" title="Cerrar el repaso">${icon('close')}</button></div>
+        <div class="cardz-side-label">Pregunta</div><div class="cardz-face">${Cards.face(c, 'front')}</div>
+        ${st.shown ? `<div class="cardz-side-label">Respuesta</div><div class="cardz-face">${Cards.face(c, 'back')}</div>` : ''}
+        ${c.pageId ? `<button class="btn tinted cardz-goto" data-act="goto">${icon('pages')} Ver en la página</button>` : ''}
+        ${st.shown ? `<div class="cardz-grades">${CARD_GRADES.map(([k, n], i) => `<button class="cardz-grade cardz-${k}" data-act="grade" data-v="${k}" title="${n} (${i + 1})"><b>${n}</b><small>${Cards.span(Cards.schedule(c, k).interval)}</small></button>`).join('')}</div>`
+          : '<div class="actions"><button class="btn primary cardz-show" data-act="show">Mostrar respuesta</button></div>'}`;
+      (box.querySelector('.cardz-show') || box.querySelector('[data-v="good"]'))?.focus({ preventScroll: true });
+    };
+    // Teclado: espacio muestra la respuesta; 1-4 contestan. No llega al editor (sus atajos).
+    scrim.addEventListener('keydown', (e) => {
+      if (e.metaKey || e.ctrlKey || e.altKey) return;   // Cmd/Ctrl+1… siguen siendo atajos
+      if (e.key === ' ' && !st.shown && st.queue.length) { e.preventDefault(); e.stopPropagation(); box.querySelector('.cardz-show')?.click(); }
+      const k = { 1: 'again', 2: 'hard', 3: 'good', 4: 'easy' }[e.key];
+      if (k && st.shown) { e.preventDefault(); e.stopPropagation(); box.querySelector(`[data-v="${k}"]`)?.click(); }
+    });
+    paint();
+    return scrim;
+  },
+  /** «Ver en la página»: abre la libreta en la página de la tarjeta y marca un momento su zona. */
+  goTo(nb, c) {
+    if (!nb.pages.some((p) => p.id === c.pageId)) return toast('Esa página ya no existe');
+    if (S.active !== nb.id || S.view !== 'editor') openNotebook(nb.id, { pageId: c.pageId });
+    else scrollToPage(c.pageId);
+    if (!c.rect) return;
+    setTimeout(() => {
+      const v = views.get(c.pageId);
+      if (!v?.over) return;
+      const el = document.createElement('div');
+      el.className = 'cardz-flash';
+      el.style.cssText = `left:${c.rect.x}px;top:${c.rect.y}px;width:${c.rect.w}px;height:${c.rect.h}px`;
+      v.over.appendChild(el);
+      setTimeout(() => el.remove(), 2200);
+    }, 450);
+  },
+};
 
 // =============================================================================
 // Paleta flotante (pensada para el lápiz en el iPad): las herramientas a mano sin subir hasta la barra.
@@ -7679,7 +8523,7 @@ const Palette = {
 // Al terminar un trazo de bolígrafo o subrayador (el pointerup llega aquí después de que la tinta lo guarde).
 addEventListener('pointerup', (e) => {
   if (Palette.mode !== 'stroke' || !['pen', 'highlighter'].includes(S.tool) || !e.target?.matches?.('canvas.ink')) return;
-  if (lastInkAt === Palette.inkSeen || performance.now() - lastInkAt > 300) return;
+  if (lastInkAt === Palette.inkSeen || performance.now() - lastInkAt > 300 || lastInkNote) return;   // tinta de un post-it: sin fila
   Palette.inkSeen = lastInkAt;
   const id = [...views].find(([, v]) => v.ink === e.target)?.[0];
   const page = activeNb()?.pages.find((p) => p.id === id), stroke = page?.strokes[page.strokes.length - 1];
@@ -8900,6 +9744,8 @@ async function start() {
   startI18n();
   Pomo.load();
   Shortcuts.load();
+  // Que el navegador no borre las libretas (se pide en cada arranque: puede concederlo más adelante) y cuánto ocupan.
+  const safety = DataSafety.check();
   await Store.open();
   S.notebooks = (await Store.all()).map(normalizeNotebook);
   S.notebooks.forEach(fixExampleHighlights);
@@ -8923,7 +9769,10 @@ async function start() {
   const tabs = await Store.get('tabs', { tabs: [], active: null });
   S.tabs = (tabs.tabs || []).filter((id) => nbById(id));
   S.active = null; // se empieza siempre en la biblioteca; las pestañas siguen abiertas
+  // Si el navegador tarda en contestar, la biblioteca no espera: el aviso se repinta cuando se sabe.
+  await Promise.race([safety, new Promise((r) => setTimeout(r, 300))]);
   renderLibrary();
+  safety.then(() => DataSafety.refreshNag());
   Onboarding.maybeShow();
   // Descargas (PDF, PNG y copia): solo si el visor lo permite.
   try { if (window.claude?.use) S.downloads = await window.claude.use('downloads'); } catch (e) { S.downloads = null; }
@@ -8961,8 +9810,7 @@ addEventListener('beforeinstallprompt', (event) => {
   };
 });
 addEventListener('appinstalled', () => { window.libretaInstall = null; toast('Folia instalada. Ábrela desde el menú Inicio o el Dock.'); });
-// Que el navegador no borre las libretas para hacer sitio.
-navigator.storage?.persist?.().catch(() => {});
+// El almacenamiento persistente se pide al arrancar, en start() (DataSafety.check, en library.js).
 
 </script>
 </body>
