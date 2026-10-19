@@ -284,7 +284,7 @@ svg { display: block; }
 .layer.over { pointer-events: none; }
 .layer.over > * { pointer-events: auto; }
 .ink { touch-action: none; }
-/* Modo lápiz (se vio un lápiz): el dedo desplaza la página sobre la tinta; el lápiz no (editor.js, attachPenTouch). */
+/* Modo lápiz (se vio un lápiz): el dedo desplaza la página sobre la tinta; el lápiz no (ink.js, attachPenTouch). */
 html.pen-mode .ink { touch-action: pan-x pan-y; }
 .page-number { display: none; }
 /* Indicador de página abajo en el centro: «‹ 1 / 3 ›». */
@@ -323,7 +323,7 @@ html.pen-mode .ink { touch-action: pan-x pan-y; }
 .pin { position: absolute; width: 34px; height: 34px; border-radius: 50%; color: #fff; display: grid; place-items: center; font-weight: 700; font-size: 15px; border: 2px solid #fff; box-shadow: 0 1px 3px rgba(0,0,0,.3); cursor: pointer; background: var(--c); }
 .pin .name { position: absolute; left: 40px; top: 7px; white-space: nowrap; color: var(--c); font-size: 13px; font-weight: 600; }
 .pin.selected { box-shadow: 0 0 0 3px #007AFF; }
-/* Globo del comentario (junto a su círculo, con flecha): a escala 1/zoom desde editor.js, mismo tamaño en pantalla. */
+/* Globo del comentario (junto a su círculo, con flecha): a escala 1/zoom desde comments.js, mismo tamaño en pantalla. */
 .comment-panel { position: absolute; z-index: 3; width: 280px; transform-origin: 0 0; background: var(--surface); color: var(--ink); border-radius: 12px;
   border: 1px solid color-mix(in srgb, var(--c) 55%, var(--hairline)); box-shadow: 0 6px 22px rgba(0,0,0,.18), 0 1px 3px rgba(0,0,0,.12); color-scheme: inherit; }
 .comment-panel::before { content: ""; position: absolute; width: 12px; height: 12px; background: var(--surface); transform: rotate(45deg);
@@ -715,7 +715,7 @@ html.app-full header.bar { margin-right: 46px; }   /* el botón flotante va en l
 .popover [aria-checked="true"] .switch::after { left: 17px; }
 
 /* Modo lápiz: el dedo desplaza también sobre post-its, textos, imágenes y comentarios; el lápiz los arrastra sin
-   desplazar (su toque se anula en attachPenTouch). touch-action no distingue dedo y lápiz: por eso va en editor.js. */
+   desplazar (su toque se anula en attachPenTouch). touch-action no distingue dedo y lápiz: por eso va en ink.js. */
 html.pen-mode .item, html.pen-mode .pin, html.pen-mode .lasso-box { touch-action: pan-x pan-y; }
 
 /* ---------- Paleta flotante (palette.js): cápsula fija, fila de colores tras un trazo y aviso del lápiz ---------- */
@@ -2132,6 +2132,50 @@ function strokePath(ctx, p) {
   for (let i = 1; i < p.length - 1; i++) ctx.quadraticCurveTo(p[i][0], p[i][1], (p[i][0] + p[i + 1][0]) / 2, (p[i][1] + p[i + 1][1]) / 2);
   ctx.lineTo(p[p.length - 1][0], p[p.length - 1][1]);
 }
+/** Grosor del trazo en cada punto: presión (bolígrafo) o ángulo de la plumilla (pluma), sin saltos de un punto a otro. */
+function strokeWidths(s, p) {
+  const out = [];
+  let w = null;
+  for (let i = 0; i < p.length; i++) {
+    let target;
+    if (s.kind === 'fountain') {
+      const a = p[Math.max(0, i - 1)], b = p[Math.min(p.length - 1, i + 1)];
+      target = s.width * (0.35 + 1.15 * Math.abs(Math.sin(Math.atan2(b[1] - a[1], b[0] - a[0]) - Math.PI / 4)));
+    } else target = s.width * (0.45 + (p[i][2] ?? 0.5) * 1.1);
+    w = w === null ? target : w + (target - w) * 0.35;
+    out.push(w);
+  }
+  return out;
+}
+/** Forma de un trazo de grosor variable: un círculo en cada punto y, entre dos seguidos, el trapecio que los une.
+ *  Todas las piezas giran en el mismo sentido y se rellenan de una vez: sin huecos donde el trazo se cruza consigo
+ *  mismo y sin oscurecer los solapes. Antes se suaviza la línea (cortando esquinas una vez). */
+function outlinePath(ctx, p, w) {
+  let q = p.map((pt, i) => [pt[0], pt[1], w[i]]);
+  if (q.length > 2) {
+    const c = [q[0]];
+    for (let i = 0; i < q.length - 1; i++) {
+      const a = q[i], b = q[i + 1];
+      c.push([a[0] * 0.75 + b[0] * 0.25, a[1] * 0.75 + b[1] * 0.25, a[2] * 0.75 + b[2] * 0.25], [a[0] * 0.25 + b[0] * 0.75, a[1] * 0.25 + b[1] * 0.75, a[2] * 0.25 + b[2] * 0.75]);
+    }
+    c.push(q[q.length - 1]);
+    q = c;
+  }
+  ctx.beginPath();
+  for (let i = 0; i < q.length; i++) {
+    const [x, y, wd] = q[i], r = wd / 2;
+    ctx.moveTo(x + r, y); ctx.arc(x, y, r, 0, Math.PI * 2);
+    if (!i) continue;
+    const [x0, y0, w0] = q[i - 1], dx = x - x0, dy = y - y0, d = Math.hypot(dx, dy);
+    if (d < 0.01) continue;
+    const nx = -dy / d, ny = dx / d, r0 = w0 / 2;
+    let quad = [[x0 + nx * r0, y0 + ny * r0], [x + nx * r, y + ny * r], [x - nx * r, y - ny * r], [x0 - nx * r0, y0 - ny * r0]];
+    let area = 0;
+    for (let k = 0; k < 4; k++) { const a = quad[k], b = quad[(k + 1) % 4]; area += a[0] * b[1] - b[0] * a[1]; }
+    if (area < 0) quad = quad.reverse();   // mismo sentido que los círculos (horario en pantalla)
+    ctx.moveTo(quad[0][0], quad[0][1]); for (let k = 1; k < 4; k++) ctx.lineTo(quad[k][0], quad[k][1]); ctx.closePath();
+  }
+}
 function drawStroke(ctx, s, paper, faded = false) {
   const p = s.points;
   if (!p || !p.length) return;
@@ -2155,24 +2199,10 @@ function drawStroke(ctx, s, paper, faded = false) {
     strokePath(ctx, p);
     ctx.stroke();
   } else {
-    for (let i = 1; i < p.length; i++) {
-      const a = p[i - 1], b = p[i];
-      let w;
-      if (s.kind === 'fountain') {
-        // Pluma: más gruesa en un sentido que en otro, como una plumilla inclinada.
-        const angle = Math.atan2(b[1] - a[1], b[0] - a[0]);
-        w = s.width * (0.35 + 1.15 * Math.abs(Math.sin(angle - Math.PI / 4)));
-      } else {
-        const pressure = ((a[2] ?? 0.5) + (b[2] ?? 0.5)) / 2;
-        w = s.width * (0.45 + pressure * 1.1);
-      }
-      ctx.lineWidth = w;
-      ctx.beginPath();
-      if (i === 1) ctx.moveTo(a[0], a[1]); else ctx.moveTo((p[i - 2][0] + a[0]) / 2, (p[i - 2][1] + a[1]) / 2);
-      ctx.quadraticCurveTo(a[0], a[1], (a[0] + b[0]) / 2, (a[1] + b[1]) / 2);
-      if (i === p.length - 1) ctx.lineTo(b[0], b[1]);
-      ctx.stroke();
-    }
+    // Bolígrafo y pluma: una sola forma rellena con el contorno suavizado (como Goodnotes). Antes eran trozos
+    // sueltos, cada uno con su grosor, y en las uniones el borde salía dentado.
+    outlinePath(ctx, p, strokeWidths(s, p));
+    ctx.fill();
   }
   ctx.restore();
 }
@@ -4674,7 +4704,7 @@ const PdfText = {
 };
 
 // =============================================================================
-// Editor: pestañas, barra lateral, páginas, herramientas y elementos
+// Editor: abrir y pestañas, estructura, zoom y montaje de páginas, menús, herramientas y modo lectura
 // =============================================================================
 const views = new Map();   // pageId -> vistas DOM de la página
 let currentPageIndex = 0;
@@ -5591,6 +5621,10 @@ function textBar(item) {
     ${hasTextSelection() ? '<button class="btn" data-act="text-link" title="Enlazar el texto seleccionado con otra libreta o página">Enlace</button>' : ''}
     ${item ? `<button class="btn ${isDefault ? 'on' : ''}" data-act="default" ${isDefault ? 'disabled' : ''} title="Usar este estilo en todos los textos nuevos">${isDefault ? '✓ Predeterminado' : 'Predeterminar'}</button>` : ''}`;
 }
+
+// =============================================================================
+// Editor: tamaño de letra y texto enriquecido (cuadros de texto, post-its, comentarios)
+// =============================================================================
 // ---------- Tamaño de letra: menú «Tamaño» (como en Goodnotes) ----------
 const SIZE_QUICK = [10, 12, 14, 16, 18, 20, 24, 28, 32, 36, 48, 72];
 const SIZE_MIN = 8, SIZE_MAX = 96;
@@ -5875,6 +5909,9 @@ function linkSelection(target) {
   toast('Texto enlazado');
 }
 
+// =============================================================================
+// Editor: tinta — lápiz y dedo (PenInput), bolígrafo, subrayador, goma, lazo y formas
+// =============================================================================
 // ---------- Tinta: lápiz y dedo (como en Goodnotes) ----------
 // En cuanto se ve un lápiz (pointerType 'pen'), el dedo deja de escribir: un dedo desplaza la página y dos hacen zoom.
 // Se recuerda en este dispositivo (localStorage). Sin lápiz (móvil, tableta sin lápiz) el dedo sigue escribiendo.
@@ -5958,12 +5995,41 @@ function attachInk(page, v) {
   let stroke = null, lastMove = 0, lastPoint = null, before = null, erased = false, lassoPath = null, pointerType = 'mouse';
   let activeId = null;   // el puntero que está escribiendo: los demás (palma, otro dedo) no cuentan
   let linkTap = null;    // empezó encima de un enlace o un post-it: si es un toque (sin moverse), lo abre en vez de pintar
+  // Forma en directo (como en Goodnotes): al quedarse quieto sin soltar, el trazo se endereza al momento; si es una
+  // recta, su final sigue al lápiz hasta soltar. snap = { pressure, a?, cardinal? } (a: inicio fijo de la recta).
+  let holdTimer = 0, snap = null;
+  const armHold = () => { clearTimeout(holdTimer); if (S.holdToSnap && stroke && !snap) holdTimer = setTimeout(snapNow, holdMs(pointerType)); };
+  const onLine = (pts) => {
+    const a = pts[0], b = pts[pts.length - 1], len = Math.hypot(b[0] - a[0], b[1] - a[1]);
+    return len > 2 && pts.every((q) => Math.abs((b[0] - a[0]) * (a[1] - q[1]) - (a[0] - q[0]) * (b[1] - a[1])) / len < 0.5);
+  };
+  /** La recta enderezada, del inicio fijo al punto dado (horizontal o vertical en el modo «H / V»). */
+  const setLineEnd = ([x, y]) => {
+    const a = snap.a, b = !snap.cardinal ? [x, y] : Math.abs(x - a[0]) >= Math.abs(y - a[1]) ? [x, a[1]] : [a[0], y];
+    stroke.points = Shapes.densify([a, b]).map(([px, py]) => [px, py, snap.pressure]);
+  };
+  function snapNow() {
+    if (!stroke || snap || activeId === null) return;
+    const xy = stroke.points.map((q) => [q[0], q[1]]), pressure = stroke.points[Math.floor(stroke.points.length / 2)][2];
+    // Con el bolígrafo, una pausa a mitad de una letra no la endereza: solo cuenta un dibujo grande.
+    if (stroke.tool === 'pen') { const bb = Shapes.bounds(xy); if (Math.hypot(bb.w, bb.h) * S.zoom < 40) return; }
+    const pts = stroke.tool === 'highlighter' ? (S.hlMode === 'cardinal' ? Shapes.cardinal(xy) : Shapes.straight(xy)) : Shapes.recognize(xy);
+    if (!pts) return;
+    if (onLine(pts)) {
+      snap = { pressure, a: pts[0], cardinal: stroke.tool === 'highlighter' && S.hlMode === 'cardinal' };
+      setLineEnd(pts[pts.length - 1]);
+    } else {
+      snap = { pressure };
+      stroke.points = pts.map(([x, y]) => [x, y, pressure]);
+    }
+    drawLive();
+  }
   /** Descarta lo que se estaba haciendo sin guardarlo (el lápiz llegó mientras escribía un dedo). */
   const cancel = () => {
     try { v.ink.releasePointerCapture(activeId); } catch (err) { /* ya suelto */ }
     activeId = null; PenInput.live = null;
     if (erased && before) { page.strokes = before.strokes; renderInk(page); }
-    stroke = null; lassoPath = null; erased = false;
+    stroke = null; lassoPath = null; erased = false; snap = null; clearTimeout(holdTimer);
     if (v.live._scale) ctxFor(v.live).clearRect(0, 0, page.w, page.h);
   };
   const point = (e) => {
@@ -5991,6 +6057,7 @@ function attachInk(page, v) {
     if (S.tool === 'lasso') { clearLasso(); lassoPath = [p]; return; }
     stroke = { id: uid(), tool: S.tool === 'highlighter' ? 'highlighter' : 'pen', kind: S.penKind, color: S.tool === 'highlighter' ? S.hlColor : S.penColor, width: S.tool === 'highlighter' ? S.hlWidth : S.penWidth, points: [p] };
     lastMove = performance.now(); lastPoint = [e.clientX, e.clientY];
+    snap = null; armHold();
     drawLive();
   });
   v.ink.addEventListener('pointermove', (e) => {
@@ -6006,14 +6073,16 @@ function attachInk(page, v) {
       return;
     }
     if (!stroke) return;
+    if (snap) { if (snap.a) { setLineEnd(point(e)); drawLive(); } return; }   // ya enderezado: solo se mueve el final
     const events = e.getCoalescedEvents ? e.getCoalescedEvents() : [e];
     for (const ev of (events.length ? events : [e])) stroke.points.push(point(ev));
-    if (Math.hypot(e.clientX - lastPoint[0], e.clientY - lastPoint[1]) > 4) { lastMove = performance.now(); lastPoint = [e.clientX, e.clientY]; }
+    if (Math.hypot(e.clientX - lastPoint[0], e.clientY - lastPoint[1]) > 4) { lastMove = performance.now(); lastPoint = [e.clientX, e.clientY]; armHold(); }
     drawLive();
   });
   const finish = (e) => {
     if (e.pointerId !== activeId) return;
     activeId = null;
+    clearTimeout(holdTimer);
     if (PenInput.live?.cancel === cancel) PenInput.live = null;
     const tap = linkTap;
     linkTap = null;
@@ -6038,7 +6107,8 @@ function attachInk(page, v) {
     const held = S.holdToSnap && performance.now() - lastMove > holdMs(pointerType);
     const xy = stroke.points.map((q) => [q[0], q[1]]);
     let snapped = null;
-    if (stroke.tool === 'highlighter') {
+    if (snap) snap = null;   // ya se enderezó en directo: se guarda tal como se ve
+    else if (stroke.tool === 'highlighter') {
       if (S.hlMode === 'cardinal') snapped = Shapes.cardinal(xy);
       else if (S.hlMode === 'straight' || held) snapped = Shapes.straight(xy);
       if (snapped) snapped = Shapes.densify(snapped);
@@ -6194,6 +6264,9 @@ function recolorLasso(color) {
   commit(page, before); renderInk(page);
 }
 
+// =============================================================================
+// Editor: elementos de la página (texto, post-it, imagen, enlace, voz) y su arrastre
+// =============================================================================
 // ---------- Elementos (texto, post-it, comentario, imagen, enlace) ----------
 function findItem(ref) {
   if (!ref) return null;
@@ -6319,6 +6392,10 @@ function itemElement(page, item) {
   el.addEventListener('dblclick', (e) => { if (RICH_TYPES.includes(item.type) && S.tool === 'select') { setTool(item.type === 'sticky' ? 'sticky' : 'text'); const r = richFor(page.id, item.id); r?.focus(); } });
   return el;
 }
+
+// =============================================================================
+// Editor: comentarios — globo junto a su círculo y lista de la libreta
+// =============================================================================
 // ---------- Comentarios: globo junto a su círculo y lista de la libreta ----------
 const CP_W = 280;   // ancho del globo en la pantalla (px), sea cual sea el zoom
 /** Fecha y hora cortas de un comentario («17 oct, 15:48»); '' en los antiguos, que no la guardaban. */
@@ -6689,6 +6766,9 @@ function reorderItem(found, where) {
   renderItems(found.page);
 }
 
+// =============================================================================
+// Editor: enlaces entre libretas y páginas, y su vista previa
+// =============================================================================
 // ---------- Enlaces ----------
 function linkPicker(onPick) {
   let q = '';
@@ -6779,6 +6859,9 @@ function followLink(target) {
   openNotebook(target.nb, { pageId: target.page || null, flashPage: true });
 }
 
+// =============================================================================
+// Editor: barra lateral (miniaturas, marcadores, esquema) y búsqueda en la libreta
+// =============================================================================
 // ---------- Barra lateral: miniaturas, marcadores y esquema ----------
 function setSidebar(on) {
   S.sidebar = on; savePrefs();
@@ -6959,6 +7042,9 @@ function openSearchPanel() {
   panel.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeSearchPanel(); });
 }
 
+// =============================================================================
+// Editor: copiar, cortar y pegar, deshacer y rehacer, y teclado
+// =============================================================================
 // ---------- Copiar, cortar y pegar ----------
 function copySelection() {
   if (S.lasso) {
