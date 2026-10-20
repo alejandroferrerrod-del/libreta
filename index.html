@@ -196,6 +196,9 @@ svg { display: block; }
 .swatch.add-color { background: transparent !important; box-shadow: none; border: 1.5px dashed var(--muted); color: var(--muted); display: inline-grid; place-items: center; cursor: pointer; }
 .swatch.add-color svg { width: 15px; height: 15px; }
 .swatch.add-color:hover, .swatch.add-color[aria-expanded="true"] { border-color: var(--accent); color: var(--accent); }
+/* Fila llena (máximo de colores): el «+» se apaga, pero sigue abriendo la ventana para usar un color sin guardarlo. */
+.swatch.add-color.full { opacity: .4; border-style: dotted; }
+.swatch.add-color.full:hover, .swatch.add-color.full[aria-expanded="true"] { opacity: .7; border-color: var(--muted); color: var(--muted); }
 .popover.color-popover { min-width: 0; width: min(316px, calc(100vw - 16px)); padding: 8px; box-sizing: border-box; }
 .color-pop { display: flex; flex-direction: column; gap: 4px; }
 .color-pop .cp-title { font-weight: 600; font-size: 15px; padding: 4px 4px 2px; }
@@ -214,9 +217,9 @@ svg { display: block; }
 .color-pop .cp-preview { position: relative; flex: 1; height: 36px; border-radius: 8px; box-shadow: inset 0 0 0 1px var(--sep); display: grid; place-items: center; font: 600 20px/1 Georgia, serif; overflow: hidden; }
 .color-pop .cp-preview > span:last-child { position: relative; font: 15px/1 var(--font); }
 .color-pop .cp-hl { position: absolute; left: 8%; right: 8%; top: 8px; bottom: 8px; opacity: .38; border-radius: 3px; }
-.color-pop .cp-acts { display: flex; justify-content: space-between; gap: 8px; padding: 8px 4px 2px; }
-.popover .color-pop .cp-acts .btn { padding: 8px 14px; border-radius: 8px; background: var(--fill); }
-.popover .color-pop .cp-acts .btn.primary { background: var(--accent); color: var(--accent-ink); }
+.color-pop .cp-acts { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; padding: 8px 2px 2px; }   /* «Usar sin guardar» es largo: si no cabe, baja */
+.popover .color-pop .cp-acts .btn { padding: 8px 11px; white-space: nowrap; border-radius: 8px; background: var(--fill); }
+.popover .color-pop .cp-acts .btn.primary { margin-left: auto; background: var(--accent); color: var(--accent-ink); }
 .popover .color-pop .cp-acts .btn:hover:not(:disabled) { filter: brightness(.95); }
 .popover .color-pop .cp-acts .btn:disabled { opacity: .45; }
 .popover .cp-menu-head { display: flex; align-items: center; gap: 8px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
@@ -771,7 +774,51 @@ body:not(.kbd-nav) select:focus-visible, body:not(.kbd-nav) .options :focus-visi
 .popover.tabs-menu .tm-x { flex: none; width: 34px; height: 34px; padding: 0; justify-content: center; border-radius: 50%; color: var(--muted); }
 .popover.tabs-menu .tm-x svg { width: 13px; height: 13px; stroke-width: 2.5; }
 .popover.tabs-menu .tm-x:hover:not(:disabled) { background: var(--fill); color: var(--ink); }
-.tabs-menu .tm-row.reordering, .tabs-menu .tm-group.reordering { position: relative; z-index: 2; box-shadow: 0 6px 20px rgba(0,0,0,.22); cursor: grabbing; }
+.tabs-menu .tm-group.reordering { position: relative; z-index: 2; box-shadow: 0 6px 20px rgba(0,0,0,.22); cursor: grabbing; }
+/* Sin el azul de los menús al pasar o mantener el dedo: en esta lista el botón no ocupa toda la fila, y en el iPad el
+   :hover se queda pegado tras tocar (era el rectángulo azul que no encajaba con la fila). Aquí se ilumina la fila entera. */
+.tabs-menu, .tabs-menu * { -webkit-tap-highlight-color: transparent; -webkit-touch-callout: none; }
+.popover.tabs-menu .tm-go:hover:not(:disabled) { background: transparent; color: var(--ink); }
+@media (hover: hover) { body:not(.is-reordering) .tabs-menu .tm-row:not(.active):hover { background: var(--fill); } }
+.tabs-menu .tm-gcount { flex: none; min-width: 18px; height: 16px; padding: 0 5px; box-sizing: border-box; border-radius: 8px; background: color-mix(in srgb, var(--c) 16%, transparent);
+  color: var(--c); font-size: 10.5px; font-weight: 700; line-height: 16px; text-align: center; font-variant-numeric: tabular-nums; }
+.tabs-menu .tm-gcount.rolling { overflow: hidden; }
+/* Arrastrando una fila: el menú se apaga, la fila sostenida se ilumina y la carpeta de destino se enciende. */
+.popover.tabs-menu { transition: background-color .2s; }
+.tabs-menu .tm-group { position: relative; transition: box-shadow .22s, background-color .22s, scale .25s cubic-bezier(.3,1.45,.5,1); }
+.tabs-menu .tm-row, .tabs-menu .tm-ghead, .tabs-menu .tm-title { transition: filter .2s, opacity .2s, background-color .2s, color .2s; }
+.popover.tabs-menu.tm-dragging { background: color-mix(in srgb, var(--surface) 84%, #000); }
+.tabs-menu.tm-dragging .tm-row:not(.reordering), .tabs-menu.tm-dragging .tm-ghead, .tabs-menu.tm-dragging .tm-title { filter: saturate(.3) brightness(.9); opacity: .5; }
+.tabs-menu.tm-dragging .tm-group { background: transparent; }
+.tabs-menu .tm-row.reordering { position: relative; z-index: 3; cursor: grabbing; background: var(--surface); scale: 1.03;
+  box-shadow: 0 0 0 2px var(--accent), 0 12px 28px rgba(0,0,0,.3); }
+.tabs-menu .tm-row.reordering .tm-grip { color: var(--accent); }
+.tabs-menu .tm-group.tm-drop { background: color-mix(in srgb, var(--c) 12%, var(--surface)); scale: 1.025; z-index: 1;
+  box-shadow: 0 0 0 2px var(--c), 0 8px 22px color-mix(in srgb, var(--c) 35%, transparent); animation: tm-glow 1.1s ease-in-out infinite alternate; }
+.tabs-menu .tm-group.tm-drop .tm-ghead { filter: none; opacity: 1; background: var(--c); color: #fff; border-radius: 10px 10px 0 0; }
+.tabs-menu .tm-group.tm-drop .tm-ghead .tm-grip, .tabs-menu .tm-group.tm-drop .tm-gclose { color: #fff; }
+.tabs-menu .tm-group.tm-drop .tm-gcount { background: rgba(255,255,255,.28); color: #fff; }
+.tabs-menu .tm-group.tm-drop .tm-row:not(.reordering) { filter: none; opacity: .85; }
+@keyframes tm-glow { to { box-shadow: 0 0 0 3px var(--c), 0 10px 30px color-mix(in srgb, var(--c) 50%, transparent); } }
+.tabs-menu .tm-insert { flex: none; height: calc(var(--h, 40px) + 6px); margin: 2px 6px; box-sizing: border-box; border-radius: 9px; pointer-events: none;
+  border: 2px dashed var(--c); background: color-mix(in srgb, var(--c) 14%, transparent); animation: tm-open .18s ease-out; }
+@keyframes tm-open { from { height: 0; opacity: 0; } }
+.tabs-menu .tm-dest { position: absolute; right: 6px; top: 50%; translate: 0 -50%; max-width: 62%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  padding: 3px 9px; border-radius: 99px; background: var(--dc, var(--accent)); color: #fff; font-size: 11.5px; font-weight: 600; pointer-events: none;
+  box-shadow: 0 2px 8px rgba(0,0,0,.2); animation: dg-pop .28s cubic-bezier(.3,1.6,.5,1); }
+.tabs-menu .tm-group.tm-landed .tm-ghead { animation: tm-flash .9s ease-out; }
+@keyframes tm-flash { 0%, 35% { background: var(--c); color: #fff; } 100% { background: transparent; } }
+/* Barra de pestañas: la copia flotante de la pestaña (o del grupo) que se arrastra; su hueco queda vacío. */
+.reorder-placeholder { opacity: 0; }
+.tab.reorder-ghost { z-index: 90; background: var(--bar); color: var(--ink); border-radius: 9px; filter: none;   /* sin zoom: no sale de la franja */
+  box-shadow: inset 0 0 0 1.5px var(--accent), 0 6px 10px -6px rgba(0,0,0,.4); }
+.tab.reorder-ghost .foot, .tab.reorder-ghost::before { display: none; }
+.tab-group.reorder-ghost { z-index: 90; background: var(--strip); border-radius: 10px; box-shadow: inset 0 0 0 1.5px var(--accent), 0 6px 10px -6px rgba(0,0,0,.4); }
+@media (prefers-reduced-motion: reduce) {
+  .tabs-menu .tm-group, .tabs-menu .tm-row, .tabs-menu .tm-ghead { transition: none; }
+  .tabs-menu .tm-group.tm-drop, .tabs-menu .tm-row.reordering { scale: none; animation: none; }
+  .tabs-menu .tm-dest, .tabs-menu .tm-group.tm-landed .tm-ghead, .tabs-menu .tm-insert { animation: none; }
+}
 html.app-full .tabs { display: none; }
 html.app-full .lib-fs { visibility: hidden; }
 html.app-full header.bar { margin-right: 46px; }   /* el botón flotante va en la esquina, fuera de la barra */
@@ -1661,7 +1708,7 @@ I18N.dict.it = {
   'Añadir un color': 'Aggiungi un colore', 'Color del bolígrafo': 'Colore della penna', 'Color del subrayador': 'Colore dell’evidenziatore',
   'Color del texto': 'Colore del testo', 'Nuevo color': 'Nuovo colore', 'Elegir color': 'Scegli colore', 'Código HEX': 'Codice HEX',
   'Toca uno para usarlo. Arrástralo para ordenarlo; fuera de la fila, para quitarlo.': 'Toccane uno per usarlo. Trascinalo per riordinarlo; fuori dalla fila, per toglierlo.',
-  'Sugerencias para este papel': 'Suggerimenti per questa carta', 'Recientes': 'Recenti', 'Restablecer colores': 'Ripristina colori', 'Usar': 'Usa',
+  'Sugerencias para este papel': 'Suggerimenti per questa carta', 'Recientes': 'Recenti', 'Restablecer colores': 'Ripristina colori', 'Usar': 'Usa', 'Usar sin guardar': 'Usa senza salvare',
   'Texto subrayado': 'Testo evidenziato', 'Quitar color': 'Togli colore', 'Mover a la izquierda': 'Sposta a sinistra', 'Mover a la derecha': 'Sposta a destra',
   'Color quitado': 'Colore tolto', 'Colores restablecidos': 'Colori ripristinati', 'Tiene que quedar al menos un color': 'Deve restare almeno un colore',
   // --- Buscar ---
@@ -1830,6 +1877,8 @@ I18N.dict.it = {
 
 /** Textos con nombres o números dentro. */
 I18N.patterns.it = [
+  // Menú de pestañas: al arrastrar una fila a otra carpeta (editor.js, TabsMenuDrag)
+  [/^Se moverá a «(.+)»$/, (m, t) => `Verrà spostata in «${m[1] === 'Sin carpeta' ? t(m[1]) : m[1]}»`],
   // Cinta de repaso (tape.js)
   [/^Cinta «(.+)»: toca para destapar$/, 'Nastro «$1»: tocca per scoprire'], [/^Cinta «(.+)»: toca para volver a taparla$/, 'Nastro «$1»: tocca per ricoprire'],
   [/^(\d+) de (\d+) destapadas$/, '$1 di $2 scoperte'], [/^(\d+) cintas tapadas otra vez$/, '$1 nastri ricoperti'],
@@ -1837,6 +1886,8 @@ I18N.patterns.it = [
   [/^Color (#\w+): (\d+) trazos?$/, (m) => `Colore ${m[1]}: ${m[2]} ${m[2] === '1' ? 'tratto' : 'tratti'}`], [/^Color de cinta (#\w+)$/, 'Colore del nastro $1'],
   [/^Tus colores \((\d+) de (\d+)\)$/, 'I tuoi colori ($1 di $2)'],
   [/^Caben (\d+) colores: quita uno para añadir otro(\.?)$/, 'Ci stanno $1 colori: togline uno per aggiungerne un altro$2'],
+  [/^Máximo (\d+) colores: quita uno para añadir otro(\.?)$/, 'Massimo $1 colori: togline uno per aggiungerne un altro$2'],
+  [/^Tus colores \((\d+); máximo (\d+)\)$/, 'I tuoi colori ($1; massimo $2)'],
   // Tarjetas de repaso (cards.js): antes que las reglas generales de «(…)» y «·»
   [/^Repasar tarjetas \((\d+) pendientes?\)$/, 'Ripassa le flashcard ($1 da ripassare)'], [/^Repasar \((\d+)\)$/, 'Ripassa ($1)'],
   [/^Tarjeta creada · (\d+) pendientes?$/, 'Flashcard creata · $1 da ripassare'],
@@ -2311,6 +2362,36 @@ function rectInsidePolygon(r, poly, min = 0.6) {
     for (let j = 0; j < n; j++) if (pointInPolygon([r.x + r.w * (i + 0.5) / n, r.y + r.h * (j + 0.5) / n], poly)) inside++;
   }
   return inside >= min * n * n;
+}
+
+/** ¿Rodea el lazo lo que se ve de un contenido hecho de varios rectángulos (las líneas de un texto)?
+ *  Se muestrea cada rectángulo con una rejilla proporcional a su tamaño y se descuenta lo tapado por
+ *  `covers` (elementos de encima). Vale si queda dentro al menos `min` del área visible, o si el centro
+ *  del conjunto está dentro y al menos `minCenter`. Si todo está tapado, se ignoran las tapas. */
+function rectsInsidePolygon(rects, poly, covers = [], min = 0.6, minCenter = 0.4) {
+  rects = rects.filter((r) => r.w > 0 && r.h > 0);
+  if (poly.length < 3 || !rects.length) return false;
+  const hidden = (p) => covers.some((c) => p[0] >= c.x && p[0] <= c.x + c.w && p[1] >= c.y && p[1] <= c.y + c.h);
+  const count = (useCovers) => {
+    let total = 0, inside = 0;
+    for (const r of rects) {
+      const cols = Math.max(3, Math.min(16, Math.round(r.w / 8))), rows = Math.max(2, Math.min(6, Math.round(r.h / 8)));
+      const wgt = r.w * r.h / (cols * rows);
+      for (let i = 0; i < cols; i++) {
+        for (let j = 0; j < rows; j++) {
+          const p = [r.x + r.w * (i + 0.5) / cols, r.y + r.h * (j + 0.5) / rows];
+          if (useCovers && hidden(p)) continue;
+          total += wgt;
+          if (pointInPolygon(p, poly)) inside += wgt;
+        }
+      }
+    }
+    return { total, inside };
+  };
+  let { total, inside } = count(covers.length > 0);
+  if (!total) ({ total, inside } = count(false));
+  const b = Shapes.bounds(rects.flatMap((r) => [[r.x, r.y], [r.x + r.w, r.y + r.h]]));
+  return inside >= min * total || (inside >= minCenter * total && pointInPolygon([b.x + b.w / 2, b.y + b.h / 2], poly));
 }
 
 // =============================================================================
@@ -5281,23 +5362,46 @@ const Reorder = {
  * onDrop(from, to, el, pointerEvent) al soltar en otro sitio; onOutside(el, pointerEvent) al soltar fuera
  * (devuelve true si lo ha gestionado); onTarget(el, elementoDebajo) igual, antes que nada.
  * axis: 'grid' (cuadrícula), 'x' (fila) o 'y' (columna). `group(el)`: solo se reordena entre los que tienen el mismo grupo. `ignore` = selector de botones dentro que no inician arrastre.
+ * scroller: lo que se desplaza solo al acercarse a su borde (un elemento o una función que lo da al empezar); en 'x', en horizontal.
+ * float: lo arrastrado se pinta en una copia flotante (position: fixed) para que el recorte del contenedor no la corte;
+ * esa copia no sale de los bordes del scroller (en una fila no se pinta encima de lo que hay a los lados).
+ * onMove(el, elementoDebajo, ev) en cada movimiento; si devuelve true, el puntero está sobre otro destino (otra carpeta):
+ * los demás vuelven a su sitio y soltar no reordena (lo atiende onTarget). onEnd(el) al acabar el arrastre, siempre.
  */
-function liveReorder(container, selector, { onDrop, onOutside, onTarget, group, ignore = 'button', scroller = null, axis = 'grid' } = {}) {
+function liveReorder(container, selector, { onDrop, onOutside, onTarget, onMove, onEnd, group, ignore = 'button', scroller = null, axis = 'grid', float = false } = {}) {
   container.addEventListener('pointerdown', (e) => {
     if (e.button !== 0 || (ignore && e.target.closest(ignore))) return;
     const el = e.target.closest(selector);
     if (!el || !container.contains(el)) return;
     const items = [...container.querySelectorAll(selector)].filter((x) => x.parentElement === el.parentElement && (!group || group(x) === group(el)));
     const from = items.indexOf(el);
-    const scrollEl = scroller || container;
-    const start = { x: e.clientX, y: e.clientY, scroll: scrollEl.scrollTop };
-    let dragging = false, to = from, last = e, autoscroll = 0;
+    const scrollEl = (typeof scroller === 'function' ? scroller() : scroller) || container;
+    const start = { x: e.clientX, y: e.clientY, scroll: scrollEl.scrollTop, scrollX: scrollEl.scrollLeft };
+    let dragging = false, to = from, last = e, autoscroll = 0, ghost = null, g0 = null, lay0 = null, applied = [0, 0];
+    // Desplazamiento de la copia flotante, sin salirse del scroller.
+    const ghostX = () => {
+      const b = scrollEl.getBoundingClientRect(), tx = last.clientX - start.x;
+      return Math.max(b.left - g0.left, Math.min(b.right - g0.right, tx));
+    };
     let slots = [];
-    const point = (ev) => ({ x: ev.clientX, y: ev.clientY + (scrollEl.scrollTop - start.scroll) });
+    // El puntero en las coordenadas del principio (se suma lo que se haya desplazado desde entonces).
+    const point = (ev) => ({ x: ev.clientX + (scrollEl.scrollLeft - start.scrollX), y: ev.clientY + (scrollEl.scrollTop - start.scroll) });
     const layout = () => {
       const p = point(last);
-      to = Reorder.targetIndex(p, slots, from, axis);
-      el.style.transform = `translate(${axis === 'y' ? 0 : last.clientX - start.x}px, ${axis === 'x' ? 0 : p.y - start.y}px)`;
+      const away = onMove ? !!onMove(el, document.elementFromPoint(last.clientX, last.clientY), last) : false;
+      to = away ? from : Reorder.targetIndex(p, slots, from, axis);
+      let dx = axis === 'y' ? 0 : p.x - start.x, dy = axis === 'x' ? 0 : p.y - start.y;
+      if (onMove && !ghost) {
+        // onMove puede cambiar lo que hay alrededor (p. ej. abrir hueco en otra carpeta) y mover el sitio de lo arrastrado:
+        // se mide dónde está ahora sin su transform para que siga pegado al puntero.
+        const r = el.getBoundingClientRect(), lx = r.left - applied[0], ly = r.top - applied[1];
+        if (axis !== 'y') dx = last.clientX - start.x + lay0.left - lx;
+        if (axis !== 'x') dy = last.clientY - start.y + lay0.top - ly;
+      }
+      applied = [dx, dy];
+      if (ghost) ghost.style.transform = `translate(${axis === 'y' ? 0 : ghostX()}px, ${axis === 'x' ? 0 : last.clientY - start.y}px)`;
+      else el.style.transform = `translate(${dx}px, ${dy}px)`;
+      if (away) { items.forEach((x) => { if (x !== el) x.style.transform = ''; }); return; }
       const order = Reorder.preview(items.map((_, i) => i), from, to);
       if (axis === 'x' || axis === 'y') {
         // En fila (o en columna, 'y'): cada uno se coloca tras el anterior, aunque midan distinto.
@@ -5320,15 +5424,38 @@ function liveReorder(container, selector, { onDrop, onOutside, onTarget, group, 
       dragging = true;
       // Casillas en coordenadas de la ventana al empezar (la diferencia de scroll se suma al puntero).
       slots = items.map((x) => { const r = x.getBoundingClientRect(); return { left: r.left, top: r.top, width: r.width, height: r.height, bottom: r.bottom }; });
+      lay0 = { left: slots[from].left, top: slots[from].top };
       items.forEach((x) => { if (x !== el) x.classList.add('reorder-shift'); });
       el.classList.add('reordering');
+      el.style.pointerEvents = 'none';   // para saber qué hay debajo del puntero
+      if (float) {
+        // Copia flotante: fixed no la recorta el overflow del contenedor (va junto a él para conservar sus estilos).
+        const r = el.getBoundingClientRect();
+        g0 = { left: r.left, right: r.right };
+        ghost = el.cloneNode(true);
+        ghost.classList.add('reorder-ghost');
+        ghost.removeAttribute('id');
+        Object.assign(ghost.style, { position: 'fixed', left: r.left + 'px', top: r.top + 'px', width: r.width + 'px', height: r.height + 'px', margin: '0', pointerEvents: 'none', transform: '' });
+        container.appendChild(ghost);
+        el.classList.add('reorder-placeholder');
+      }
       document.body.classList.add('is-reordering');
     };
     const tick = () => {
       if (!dragging) return;
       const r = scrollEl.getBoundingClientRect(), edge = 40;
-      const v = last.clientY < r.top + edge ? -(r.top + edge - last.clientY) : last.clientY > r.bottom - edge ? last.clientY - (r.bottom - edge) : 0;
-      if (v && scrollEl.scrollHeight > scrollEl.clientHeight) { scrollEl.scrollTop += v * 0.4; layout(); }
+      if (axis === 'x') {
+        // En una fila, desplaza en horizontal (también si el puntero se sale por el borde). Con copia flotante cuenta su
+        // borde (tal como iría sin el tope): la franja corre en cuanto la pestaña llega al final de lo que se ve.
+        const tx = last.clientX - start.x, lo = ghost ? g0.left + tx : last.clientX, hi = ghost ? g0.right + tx : last.clientX;
+        const v = lo < r.left + edge ? -(r.left + edge - lo) : hi > r.right - edge ? hi - (r.right - edge) : 0;
+        const before = scrollEl.scrollLeft;
+        if (v && scrollEl.scrollWidth > scrollEl.clientWidth) { scrollEl.scrollLeft += Math.max(-24, Math.min(24, v * 0.4)); if (scrollEl.scrollLeft !== before) layout(); }
+      } else {
+        const v = last.clientY < r.top + edge ? -(r.top + edge - last.clientY) : last.clientY > r.bottom - edge ? last.clientY - (r.bottom - edge) : 0;
+        if (v && scrollEl.scrollHeight > scrollEl.clientHeight) { scrollEl.scrollTop += v * 0.4; layout(); }
+        else if (onMove) layout();   // lo de alrededor puede estar animándose (un hueco que se abre)
+      }
       autoscroll = requestAnimationFrame(tick);
     };
     const move = (ev) => {
@@ -5352,13 +5479,14 @@ function liveReorder(container, selector, { onDrop, onOutside, onTarget, group, 
       const swallow = (c) => { c.stopPropagation(); c.preventDefault(); };
       addEventListener('click', swallow, { capture: true, once: true });
       setTimeout(() => removeEventListener('click', swallow, true), 0);
-      el.style.pointerEvents = 'none';
       const under = ev && document.elementFromPoint(ev.clientX, ev.clientY);
       el.style.pointerEvents = '';
+      ghost?.remove();
       const r = container.getBoundingClientRect();
       const inside = ev && ev.clientX >= r.left - 20 && ev.clientX <= r.right + 20 && ev.clientY >= r.top - 20 && ev.clientY <= r.bottom + 20;
-      items.forEach((x) => { x.classList.remove('reorder-shift', 'reordering'); x.style.transform = ''; });
+      items.forEach((x) => { x.classList.remove('reorder-shift', 'reordering', 'reorder-placeholder'); x.style.transform = ''; });
       document.body.classList.remove('is-reordering');
+      onEnd?.(el);
       if (cancelled) return;
       if (onTarget && onTarget(el, under, ev)) return;
       if (!inside && onOutside && onOutside(el, ev, under)) return;
@@ -6111,8 +6239,10 @@ function renderTabs() {
   // Arrastrar pestañas (en vivo, dentro de su espacio); soltar en la etiqueta de otro espacio la lleva allí, al final.
   if (!el.dataset.reorder) {
     el.dataset.reorder = '1';
+    // float: la pestaña arrastrada va en una copia flotante (el recorte de #tabs-scroll la cortaba a mitad) y la franja
+    // se desplaza sola al acercarse a su borde, así se puede llevar hasta el final.
     liveReorder(el, '.tab', {
-      axis: 'x', ignore: '.x', group: (t) => t.dataset.group,
+      axis: 'x', ignore: '.x', group: (t) => t.dataset.group, float: true, scroller: () => $('#tabs-scroll'),
       onDrop: (from, to, t) => reorderTab(t.dataset.tab, to),
       onTarget: (t, under) => {
         const chip = under?.closest?.('[data-chip]');
@@ -6123,7 +6253,7 @@ function renderTabs() {
     });
     // Arrastrar la etiqueta de un espacio mueve el grupo entero (con sus pestañas).
     liveReorder(el, '.tab-group', {
-      axis: 'x', ignore: '.tab',
+      axis: 'x', ignore: '.tab', float: true, scroller: () => $('#tabs-scroll'),
       onDrop: (from, to) => {
         const order = Reorder.preview(tabGroups(), from, to);
         S.tabs = order.flatMap((g) => g.ids);
@@ -6169,14 +6299,21 @@ function tabsMenu(anchor) {
     else closeTabs(S.tabs.filter((id) => tabKey(nbById(id)) === all.dataset.tmCloseall));
     refreshTabsMenu();
   });
-  // Arrastrar una fila la cambia de sitio dentro de su carpeta; soltarla en la cabecera de otra carpeta la lleva allí.
+  // Arrastrar una fila la cambia de sitio dentro de su carpeta; soltarla en otra carpeta (cabecera o filas) la lleva allí,
+  // en el sitio de la línea de inserción. Mientras se arrastra, el resto del menú se apaga y la carpeta de destino se enciende.
   liveReorder(pop, '.tm-row', {
     axis: 'y', ignore: '.tm-x', scroller: pop, group: (r) => r.dataset.group,
+    onMove: (r, under, ev) => TabsMenuDrag.over(pop, r, under, ev),
+    onEnd: () => TabsMenuDrag.clear(pop),
     onDrop: (from, to, r) => { reorderTab(r.dataset.tab, to); refreshTabsMenu(); },
-    onTarget: (r, under) => {
-      const head = under?.closest?.('.tm-ghead'), key = head?.closest('.tm-group').dataset.gkey;
-      if (!head || key === r.dataset.group) return false;
-      moveTabToSpace(r.dataset.tab, key || null); refreshTabsMenu();
+    onTarget: (r, under, ev) => {
+      const g = TabsMenuDrag.groupAt(pop, r, under);
+      if (!g) return false;
+      const key = g.dataset.gkey, shown = TabsMenuDrag.shown, index = shown?.key === key ? shown.index : TabsMenuDrag.indexIn(g, ev.clientY), count0 = g.querySelectorAll('.tm-row').length;
+      moveTabToSpace(r.dataset.tab, key || null);
+      reorderTab(r.dataset.tab, index);
+      refreshTabsMenu();
+      TabsMenuDrag.land(pop, r.dataset.tab, key, count0);
       return true;
     },
   });
@@ -6186,13 +6323,73 @@ function tabsMenu(anchor) {
     onDrop: (from, to) => { S.tabs = Reorder.preview(tabGroups(), from, to).flatMap((g) => g.ids); saveTabs(); renderTabs(); refreshTabsMenu(); },
   });
 }
+/** Lo visual de arrastrar una fila del menú de pestañas a otra carpeta (los datos los cambia onTarget al soltar). */
+const TabsMenuDrag = {
+  shown: null,   // { key, index }: la carpeta y la posición del hueco que se está enseñando
+  /** La carpeta (otra que la de la fila) que hay bajo el puntero, o null. */
+  groupAt(pop, row, under) {
+    const g = under?.closest?.('.tm-group');
+    return g && pop.contains(g) && g.dataset.gkey !== row.dataset.group ? g : null;
+  },
+  /** En qué posición quedaría entre las filas de `g` (por la altura del puntero). */
+  indexIn(g, y) {
+    return [...g.querySelectorAll('.tm-row')].filter((r) => { const b = r.getBoundingClientRect(); return y > b.top + b.height / 2; }).length;
+  },
+  over(pop, row, under, ev) {
+    pop.classList.add('tm-dragging');
+    const target = this.groupAt(pop, row, under);
+    pop.querySelectorAll('.tm-group').forEach((g) => {
+      g.classList.toggle('tm-drop', g === target);
+      if (g !== target) g.querySelector('.tm-insert')?.remove();
+    });
+    let dest = row.querySelector('.tm-dest');
+    if (!target) { dest?.remove(); this.shown = null; return false; }
+    // Hueco de inserción entre las filas de la carpeta de destino (se abre; sus bordes de color son las líneas).
+    const rows = [...target.querySelectorAll('.tm-row')], i = this.indexIn(target, ev.clientY);
+    let line = target.querySelector('.tm-insert');
+    if (!line) { line = document.createElement('div'); line.className = 'tm-insert'; line.style.setProperty('--h', row.offsetHeight + 'px'); }
+    this.shown = { key: target.dataset.gkey, index: i };   // el sitio que se ve: ahí cae al soltar
+    const before = rows[i] || null;
+    if (line.nextElementSibling !== before || line.parentElement !== target) target.insertBefore(line, before);
+    // En la fila que se sostiene: «Se moverá a <carpeta>», con el color de la carpeta.
+    const name = target.querySelector('.tm-gname').textContent;
+    if (!dest) { dest = document.createElement('span'); dest.className = 'tm-dest'; row.appendChild(dest); }
+    if (dest.dataset.key !== target.dataset.gkey) {
+      dest.dataset.key = target.dataset.gkey;
+      dest.style.setProperty('--dc', target.style.getPropertyValue('--c'));
+      dest.textContent = target.dataset.gkey ? `Se moverá a «${name}»` : 'Se moverá a «Sin carpeta»';
+    }
+    return true;
+  },
+  clear(pop) {
+    pop.classList.remove('tm-dragging');
+    pop.querySelectorAll('.tm-drop').forEach((g) => g.classList.remove('tm-drop'));
+    pop.querySelectorAll('.tm-insert, .tm-dest').forEach((x) => x.remove());
+  },
+  /** Tras soltar en otra carpeta: la fila entra con un rebote, la cabecera se enciende y su contador sube. */
+  land(pop, id, key, count0) {
+    const g = [...pop.querySelectorAll('.tm-group')].find((x) => x.dataset.gkey === key);
+    const row = g?.querySelector(`.tm-row[data-tab="${id}"]`);
+    if (!row || reduceMotion()) return;
+    softAnimate(row, [{ transform: 'translateY(-10px) scale(.94)', opacity: 0.3 }, { transform: 'scale(1.035)', opacity: 1, offset: 0.55 }, { transform: 'scale(.99)', offset: 0.8 }, { transform: 'none' }], { duration: 560, easing: 'ease-out' });
+    g.classList.add('tm-landed');
+    setTimeout(() => g.classList.remove('tm-landed'), 900);
+    const count = g.querySelector('.tm-gcount'), n = g.querySelectorAll('.tm-row').length;
+    if (!count || n === count0) return;
+    count.classList.add('rolling');
+    count.innerHTML = `<span class="count-roll"><span>${count0}</span><span>${n}</span></span>`;
+    softAnimate(count.firstChild, [{ transform: 'translateY(0)' }, { transform: 'translateY(-50%)' }], { duration: 460, delay: 120, easing: 'cubic-bezier(.3,1.45,.5,1)', fill: 'forwards' })
+      .then(() => { if (count.isConnected) { count.classList.remove('rolling'); count.textContent = n; } });
+    softAnimate(count, [{ transform: 'none' }, { transform: 'scale(1.35)', offset: 0.45 }, { transform: 'none' }], { duration: 560, delay: 80, easing: 'ease-out' });
+  },
+};
 function tabsMenuHTML() {
   const groups = tabGroups();
   if (!groups.length) return '<div class="label">No hay pestañas abiertas</div>';
   return `<div class="label tm-title"><span>Pestañas abiertas</span><span class="tm-count">${S.tabs.length}</span></div>` + groups.map((g) => {
     const name = g.space || 'Sin carpeta';
     return `<div class="tm-group" data-gkey="${esc(g.key)}" style="--c:${g.color}">
-      <div class="tm-ghead"><span class="tm-grip" aria-hidden="true">${icon('grip')}</span>${icon('folder')}<span class="tm-gname" ${g.space ? 'translate="no"' : ''}>${esc(name)}</span>
+      <div class="tm-ghead"><span class="tm-grip" aria-hidden="true">${icon('grip')}</span>${icon('folder')}<span class="tm-gname" ${g.space ? 'translate="no"' : ''}>${esc(name)}</span><span class="tm-gcount">${g.ids.length}</span>
         <button class="tm-gclose" data-tm-closeall="${esc(g.key)}" aria-label="Cerrar las pestañas de ${esc(name)}" title="Cerrar las pestañas de ${esc(name)}">Cerrar todas</button></div>
       ${g.ids.map((id) => {
         const nb = nbById(id), active = id === S.active;
@@ -7026,7 +7223,9 @@ const swatches = (colors, current, act) => swatchButtons(colors, current, act)
 /** Fila de colores de una herramienta (los suyos, que se pueden cambiar) con «+» al final para añadir otro (hace de «Otro color»). */
 const colorRow = (tool, current) => {
   const t = COLOR_TOOLS[tool];
-  return `<span class="color-row" data-tool="${tool}">${swatchButtons(S[t.list], current, t.act)}<button class="swatch add-color" data-act="color-add" data-tool="${tool}" aria-label="Añadir un color" title="Añadir un color" aria-haspopup="dialog">${icon('plus')}</button></span>`;
+  // Con la fila llena (COLOR_MAX), el «+» se ve apagado: sigue abriendo la ventana, pero para usar un color sin guardarlo.
+  const full = S[t.list].length >= COLOR_MAX, tip = full ? colorsFullText() : 'Añadir un color';
+  return `<span class="color-row" data-tool="${tool}">${swatchButtons(S[t.list], current, t.act)}<button class="swatch add-color${full ? ' full' : ''}" data-act="color-add" data-tool="${tool}" aria-label="${tip}" title="${tip}" aria-haspopup="dialog">${icon('plus')}</button></span>`;
 };
 /** Grosor: tres puntos (fino, medio, grueso), el deslizador y el valor, como en la app nativa. */
 function widthControl(id, min, max, step, value, color) {
@@ -7656,9 +7855,9 @@ function attachInk(page, v) {
       const noteIds = inNote ? inNote.strokes.filter((s) => LassoFilter.takesStroke(s) && strokeTouchesPolygon(s.points.map(([x, y]) => [x + inNote.x, y + inNote.y]), poly)).map((s) => s.id) : [];
       if (noteIds.length) return setLasso(page, noteIds, [], inNote.id);
       const ids = page.strokes.filter((s) => LassoFilter.takesStroke(s) && strokeTouchesPolygon(s.points, poly)).map((s) => s.id);
-      // Los elementos solo entran si el lazo los rodea de verdad (centro y ~60 % dentro), no con rozarlos:
-      // así rodear un post-it no coge el cuadro grande de detrás, y un lazo dentro de un cuadro no lo coge.
-      const itemIds = page.items.filter((it) => LassoFilter.takesItem(it) && rectInsidePolygon(itemRect(page, it), poly)).map((it) => it.id);
+      // Los elementos solo entran si el lazo los rodea de verdad (~60 % dentro), no con rozarlos: así rodear un
+      // post-it no coge el cuadro grande de detrás, y un lazo dentro de un cuadro no lo coge (lassoTakesItem).
+      const itemIds = page.items.filter((it) => LassoFilter.takesItem(it) && lassoTakesItem(page, it, poly)).map((it) => it.id);
       if (ids.length || itemIds.length) setLasso(page, ids, itemIds);
       return;
     }
@@ -7862,6 +8061,43 @@ function lassoItems() {
 function itemRect(page, item) {
   const el = views.get(page.id)?.wrap.querySelector(`[data-id="${item.id}"]`);
   return { x: item.x, y: item.y, w: el?.offsetWidth || item.w || 30, h: el?.offsetHeight || item.h || 30 };
+}
+/** Rectángulos (px de página) de lo escrito en un cuadro de texto: una caja por línea de texto o imagen.
+ *  En la página montada se miden con Range; sin montar, se estiman por líneas. null si no hay texto. */
+function itemContentRects(page, item) {
+  const el = views.get(page.id)?.wrap.querySelector(`[data-id="${item.id}"]`), rich = el?.querySelector('.rich');
+  if (rich && el.offsetWidth) {
+    const box = el.getBoundingClientRect(), k = box.width / el.offsetWidth || 1, out = [];
+    const add = (r) => { if (r.width > 0 && r.height > 0) out.push({ x: item.x + (r.left - box.left) / k, y: item.y + (r.top - box.top) / k, w: r.width / k, h: r.height / k }); };
+    const walk = document.createTreeWalker(rich, NodeFilter.SHOW_TEXT), range = document.createRange();
+    for (let n = walk.nextNode(); n; n = walk.nextNode()) {
+      if (!n.textContent.trim()) continue;
+      range.selectNodeContents(n);
+      for (const r of range.getClientRects()) add(r);
+    }
+    rich.querySelectorAll('img').forEach((im) => add(im.getBoundingClientRect()));
+    return out.length ? out : null;
+  }
+  // Sin montar: cada línea mide ~0,55 em por carácter y 1,35 em de alto (lo de .rich), con el relleno del cuadro.
+  const text = (item.html || '').replace(/<br\s*\/?>|<\/(div|p|li)>/gi, '\n').replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').replace(/&[a-z#0-9]+;/gi, 'x');
+  const size = item.base?.size || DEFAULT_TEXT.size, lh = size * 1.35, cw = size * 0.55, inner = Math.max(cw, (item.w || 300) - 16);
+  const out = [];
+  let y = item.y + 6;
+  for (const line of text.split('\n')) {
+    const w = line.trim() ? Math.min(inner, line.length * cw) : 0, rows = Math.max(1, Math.ceil(line.length * cw / inner));
+    if (w) out.push({ x: item.x + 8, y, w, h: lh * rows });
+    y += lh * rows;
+  }
+  return out.length ? out : null;
+}
+/** ¿Coge el lazo este elemento? Hay que rodearlo de verdad. En los cuadros de texto cuenta lo escrito
+ *  (no el cuadro entero, que puede ser mucho más ancho) y lo que tapan los elementos de encima no cuenta. */
+function lassoTakesItem(page, item, poly) {
+  if (item.type !== 'text') return rectInsidePolygon(itemRect(page, item), poly);
+  const rects = itemContentRects(page, item);
+  if (!rects) return rectInsidePolygon(itemRect(page, item), poly);
+  const above = page.items.slice(page.items.indexOf(item) + 1).filter((i) => i.type !== 'tape' && i.type !== 'comment').map((i) => itemRect(page, i));
+  return rectsInsidePolygon(rects, poly, above);
 }
 function drawLassoBox() {
   $$('.lasso-box').forEach((x) => x.remove());
@@ -10608,7 +10844,8 @@ addEventListener('resize', () => { Palette.hideStrip(); Palette.place(); });
 // Mantener pulsado (o clic derecho) un color de la barra: «Quitar color», moverlo y «Restablecer colores».
 // Se guardan en las preferencias: S.penColors, S.hlColors, S.textColors y S.recentColors (ver core.js).
 // =============================================================================
-const COLOR_MAX = 12;
+const COLOR_MAX = 10;   // por herramienta, contando los de fábrica (si ya hay más guardados, se ven todos pero no se añaden)
+const colorsFullText = () => `Máximo ${COLOR_MAX} colores: quita uno para añadir otro`;
 const COLOR_TOOLS = {
   pen: { list: 'penColors', def: PEN_COLORS, act: 'pen-color', title: 'Color del bolígrafo' },
   highlighter: { list: 'hlColors', def: HL_COLORS, act: 'hl-color', title: 'Color del subrayador' },
@@ -10667,7 +10904,7 @@ const InkColors = {
     c = this.hex(c);
     if (!c) return;
     if (!this.has(tool, c)) {
-      if (this.list(tool).length >= COLOR_MAX) return toast(`Caben ${COLOR_MAX} colores: quita uno para añadir otro`);
+      if (this.list(tool).length >= COLOR_MAX) return toast(colorsFullText());
       S[COLOR_TOOLS[tool].list] = [...this.list(tool), c];
     }
     this.choose(tool, c);
@@ -10759,7 +10996,7 @@ const InkColors = {
     let hex = null;
     popover(anchor, `<div class="color-pop" data-tool="${tool}">
       <div class="cp-title">${t.title}</div>
-      <div class="label">Tus colores (${list.length} de ${COLOR_MAX})</div>
+      <div class="label">${list.length > COLOR_MAX ? `Tus colores (${list.length}; máximo ${COLOR_MAX})` : `Tus colores (${list.length} de ${COLOR_MAX})`}</div>
       <div class="cp-mine">${list.map((c) => btn(c, 'cp-big', ` aria-pressed="${c.toUpperCase() === cur}"`)).join('')}</div>
       <p class="cp-hint">Toca uno para usarlo. Arrástralo para ordenarlo; fuera de la fila, para quitarlo.</p>
       <div class="label">Nuevo color</div>
@@ -10769,8 +11006,8 @@ const InkColors = {
       ${sug.length ? `<div class="label">Sugerencias para este papel</div><div class="cp-row">${sug.map((c) => btn(c, 'cp-sug')).join('')}</div>` : ''}
       ${rec.length ? `<div class="label">Recientes</div><div class="cp-row">${rec.map((c) => btn(c, 'cp-rec')).join('')}</div>` : ''}
       <div class="cp-acts"><button class="btn" data-act="reset" ${this.isDefault(tool) ? 'disabled' : ''}>Restablecer colores</button>
-        <button class="btn primary" data-act="add">${full ? 'Usar' : 'Añadir'}</button></div>
-      ${full ? `<p class="cp-hint">Caben ${COLOR_MAX} colores: quita uno para añadir otro.</p>` : ''}</div>`,
+        <button class="btn primary" data-act="add">${full ? 'Usar sin guardar' : 'Añadir'}</button></div>
+      ${full ? `<p class="cp-hint cp-full">${colorsFullText()}.</p>` : ''}</div>`,
     (act) => {
       if (act === 'reset') return this.reset(tool);
       const c = this.hex(hex?.value);
