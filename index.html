@@ -1370,6 +1370,9 @@ body.is-card-dragging .crumbs button { box-shadow: inset 0 0 0 1.5px color-mix(i
 .popover .sw-opt:hover:not(:disabled) .sw-txt span { color: rgba(255,255,255,.85); }
 .cardz-practice { font-weight: 600; color: var(--accent); }
 .color-pop .cp-mean input { border: 0; background: var(--surface-2); border-radius: 8px; padding: 7px 10px; font-size: 14px; font-weight: 400; color: var(--ink); width: 100%; box-sizing: border-box; }
+
+/* Segundos que lleva la IA (ventana de espera) */
+.aiz-busy .aiz-secs { margin: 2px 0 0; font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
 /* =============================================================================
    Tutorial de la primera vez (siempre en oscuro, como en la app nativa)
    ============================================================================= */
@@ -2037,7 +2040,7 @@ I18N.dict.it = {
   'Sin resultados. La escritura a mano solo se encuentra si la transcribes (Estudio › IA › Transcribir).': 'Nessun risultato. La scrittura a mano si trova solo se la trascrivi (Studio › IA › Trascrivi).',
   'Borrar la clave': 'Elimina la chiave', 'Guardar y seguir': 'Salva e continua', 'Clave de IA borrada de este dispositivo': 'Chiave IA eliminata da questo dispositivo',
   'Esa clave no parece válida: cópiala entera': 'Questa chiave non sembra valida: copiala per intero', 'Este navegador no deja guardar la clave': 'Questo browser non permette di salvare la chiave',
-  'La IA está leyendo tu selección…': 'L’IA sta leggendo la tua selezione…', 'Suele tardar unos segundos (como mucho 1 minuto).': 'Di solito ci mette qualche secondo (al massimo 1 minuto).',
+  'La IA está leyendo tu selección…': 'L’IA sta leggendo la tua selezione…', 'Suele tardar unos segundos.': 'Di solito ci mette qualche secondo.', 'Recibiendo la respuesta…': 'Ricezione della risposta…',
   'No se han podido hacer las tarjetas': 'Impossibile creare le flashcard', 'Cambiar la clave…': 'Cambia la chiave…', 'Reintentar': 'Riprova',
   'No se ha podido conectar con Google. Comprueba tu conexión a internet y vuelve a intentarlo.': 'Impossibile collegarsi a Google. Controlla la connessione a internet e riprova.',
   'Google no acepta la clave. Revisa que la copiaste entera o crea otra en Google AI Studio.': 'Google non accetta la chiave. Controlla di averla copiata per intero o creane un’altra in Google AI Studio.',
@@ -2045,7 +2048,7 @@ I18N.dict.it = {
   'El modelo de IA ya no está disponible. Actualiza Folia o inténtalo más tarde.': 'Il modello di IA non è più disponibile. Aggiorna Folia o riprova più tardi.',
   'Google no ofrece la IA gratuita en tu país.': 'Google non offre l’IA gratuita nel tuo paese.',
   'El servicio de Google no responde ahora mismo. Inténtalo en un rato.': 'Il servizio di Google non risponde in questo momento. Riprova tra poco.',
-  'La IA ha tardado demasiado (más de 1 minuto). Prueba con una selección más pequeña o inténtalo de nuevo.': 'L’IA ci ha messo troppo (più di 1 minuto). Prova con una selezione più piccola o riprova.',
+  'La IA ha tardado demasiado (30 segundos sin responder). Prueba con una selección más pequeña o inténtalo de nuevo.': 'L’IA ci ha messo troppo (30 secondi senza risposta). Prova con una selezione più piccola o riprova.',
   'Google no ha querido procesar esta selección.': 'Google non ha voluto elaborare questa selezione.',
   'La IA no ha encontrado nada que convertir en tarjetas en esta selección.': 'L’IA non ha trovato niente da trasformare in flashcard in questa selezione.',
   'La IA ha devuelto una respuesta no válida. Vuelve a intentarlo.': 'L’IA ha restituito una risposta non valida. Riprova.',
@@ -10823,7 +10826,8 @@ function sortMenu(anchor) {
 // =============================================================================
 const AI_KEY = 'libreta-ai-key';
 const AI_MODELS = ['gemini-3.8-flash', 'gemini-3.5-flash-lite'];
-const AI_URL = (model) => `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
+const AI_URL = (model, stream = false) => `https://generativelanguage.googleapis.com/v1beta/models/${model}:${stream ? 'streamGenerateContent?alt=sse' : 'generateContent'}`;
+const AI_FETCH = (url, init) => fetch(url, init);
 const AI_KEY_PAGE = 'https://aistudio.google.com/apikey';
 const AI_TEXT_MAX = 12000;   // letras de texto como mucho por petición (un párrafo largo cabe de sobra)
 const AI_TYPES = { concepto: 'Concepto', mecanismo: 'Mecanismo', dato: 'Dato', aplicacion: 'Aplicación', huecos: 'Huecos' };
@@ -10868,8 +10872,8 @@ class AIError extends Error {
 
 const AI = {
   /** Cómo se habla con la red. Las pruebas lo cambian por uno simulado (misma firma que fetch). */
-  transport: (url, init) => fetch(url, init),
-  timeout: 60000,    // ms como mucho por petición
+  transport: AI_FETCH,
+  timeout: 30000,    // ms como mucho sin recibir nada de la respuesta (en directo, cada trozo lo reinicia)
 
   // ---------- Clave (solo en este dispositivo) ----------
   key() { try { return localStorage.getItem(AI_KEY) || ''; } catch (e) { return ''; } },
@@ -10963,7 +10967,32 @@ const AI = {
     return new AIError('bad', err?.error?.message || String(status));
   },
   /** Una petición (prueba el modelo de reserva si el primero no está o no le queda cuota). */
-  async request(body, signal, clean = AI.clean) {
+  /** Respuesta «en directo» (streamGenerateContent + SSE): junta el texto de los trozos y avisa con cada uno
+   *  (así el tiempo máximo cuenta desde el último trozo, no desde el principio). */
+  async readStream(res, onChunk) {
+    const reader = res.body.getReader(), dec = new TextDecoder();
+    let buf = '', text = '', finish = null, feedback = null;
+    const take = (line) => {
+      if (!line.startsWith('data:')) return;
+      let j; try { j = JSON.parse(line.slice(5)); } catch (e) { return; }
+      const c = j.candidates?.[0];
+      if (c?.content?.parts) text += c.content.parts.filter((p) => !p.thought && typeof p.text === 'string').map((p) => p.text).join('');
+      if (c?.finishReason) finish = c.finishReason;
+      if (j.promptFeedback) feedback = j.promptFeedback;
+    };
+    for (;;) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      onChunk?.();
+      buf += dec.decode(value, { stream: true });
+      const lines = buf.split(/\r?\n/); buf = lines.pop();
+      lines.forEach(take);
+    }
+    take(buf);
+    return text || finish ? { candidates: [{ content: { parts: [{ text }] }, finishReason: finish }] } : { promptFeedback: feedback };
+  },
+  async request(body, signal, clean = AI.clean, onChunk = null) {
+    const stream = AI.transport === AI_FETCH;   // con el fetch de verdad, en directo (las pruebas usan un transporte simulado)
     const key = AI.key();
     if (!key) throw new AIError('key');
     let last = null;
@@ -10972,17 +11001,17 @@ const AI = {
       try {
         // Pensar poco: es mucho más rápido y para resumir y preguntar basta (gemini-3.x: thinkingLevel, ai.google.dev 2026-10).
         const fast = { ...body, generationConfig: { ...body.generationConfig, thinkingConfig: { thinkingLevel: /lite/.test(model) ? 'minimal' : 'low' } } };
-        res = await AI.transport(AI_URL(model), { method: 'POST', headers: { 'content-type': 'application/json', 'x-goog-api-key': key }, body: JSON.stringify(fast), signal });
+        res = await AI.transport(AI_URL(model, stream), { method: 'POST', headers: { 'content-type': 'application/json', 'x-goog-api-key': key }, body: JSON.stringify(fast), signal });
         if (res.status === 400) {
           const err = await (res.clone ? res.clone() : res).json().catch(() => null);
           // Si un modelo no admitiera esa opción, se repite sin ella.
-          if (/thinking/i.test(err?.error?.message || '')) res = await AI.transport(AI_URL(model), { method: 'POST', headers: { 'content-type': 'application/json', 'x-goog-api-key': key }, body: JSON.stringify(body), signal });
+          if (/thinking/i.test(err?.error?.message || '')) res = await AI.transport(AI_URL(model, stream), { method: 'POST', headers: { 'content-type': 'application/json', 'x-goog-api-key': key }, body: JSON.stringify(body), signal });
         }
       } catch (e) {
         if (signal?.aborted) throw e;
         throw new AIError('offline');
       }
-      if (res.ok) return AI.parse(await res.json().catch(() => null), clean);
+      if (res.ok) return AI.parse(stream && res.body?.getReader ? await AI.readStream(res, onChunk) : await res.json().catch(() => null), clean);
       last = AI.classify(res.status, await res.json().catch(() => null));
       if (last.code !== 'quota' && last.code !== 'model') throw last;
     }
@@ -10994,11 +11023,15 @@ const AI = {
     let why = null;
     const stop = (w) => { if (!ctl.signal.aborted) { why = w; ctl.abort(); } };
     const busy = AI.busyDialog(() => stop('cancel'), busyText);
-    const timer = setTimeout(() => stop('timeout'), AI.timeout);
+    // Tiempo máximo sin recibir nada (cada trozo de la respuesta lo reinicia) y un tope total de 3 minutos.
+    let timer = setTimeout(() => stop('timeout'), AI.timeout);
+    const onChunk = () => { clearTimeout(timer); timer = setTimeout(() => stop('timeout'), AI.timeout); busy.querySelector('.aiz-small') && (busy.querySelector('.aiz-small').textContent = tr('Recibiendo la respuesta…')); };
+    const cap = setTimeout(() => stop('timeout'), Math.max(AI.timeout, 180000));
+    const t0 = performance.now(), tick = setInterval(() => { const s = busy.querySelector('.aiz-secs'); if (s) s.textContent = `${Math.round((performance.now() - t0) / 1000)} s`; }, 1000);
     const aborted = new Promise((_, rej) => ctl.signal.addEventListener('abort', () => rej(new AIError(why || 'cancel'))));
-    try { return await Promise.race([AI.request(body, ctl.signal, clean), aborted]); }
+    try { return await Promise.race([AI.request(body, ctl.signal, clean, onChunk), aborted]); }
     catch (e) { throw ctl.signal.aborted ? new AIError(why || 'cancel') : (e instanceof AIError ? e : new AIError('invalid')); }
-    finally { clearTimeout(timer); busy.remove(); }
+    finally { clearTimeout(timer); clearTimeout(cap); clearInterval(tick); busy.remove(); }
   },
   message(e) {
     return {
@@ -11008,7 +11041,7 @@ const AI = {
       model: 'El modelo de IA ya no está disponible. Actualiza Folia o inténtalo más tarde.',
       region: 'Google no ofrece la IA gratuita en tu país.',
       server: 'El servicio de Google no responde ahora mismo. Inténtalo en un rato.',
-      timeout: 'La IA ha tardado demasiado (más de 1 minuto). Prueba con una selección más pequeña o inténtalo de nuevo.',
+      timeout: 'La IA ha tardado demasiado (30 segundos sin responder). Prueba con una selección más pequeña o inténtalo de nuevo.',
       blocked: 'Google no ha querido procesar esta selección.',
       empty: 'La IA no ha encontrado nada que convertir en tarjetas en esta selección.',
       'empty-text': 'La IA no ha encontrado texto que leer aquí.',
@@ -11080,7 +11113,7 @@ const AI = {
   },
   busyDialog(onCancel, text = 'La IA está leyendo tu selección…') {
     const scrim = dialog(`<div class="aiz-busy" role="status"><span class="aiz-spin" aria-hidden="true"></span>
-      <h2>${esc(text)}</h2><p class="aiz-small">Suele tardar unos segundos (como mucho 1 minuto).</p></div>
+      <h2>${esc(text)}</h2><p class="aiz-small">Suele tardar unos segundos.</p><p class="aiz-secs" aria-hidden="true">0 s</p></div>
       <div class="actions"><button class="btn" data-act="cancel">Cancelar</button></div>`, (act, _b, close) => { close(); onCancel(); });
     scrim.querySelector('.dialog').classList.add('aiz-dialog');
     // Tocar fuera o Esc también cancela (dialog() ya cierra la ventana).
@@ -11240,7 +11273,7 @@ Object.assign(AI, {
   async pageZone(page) {
     const rect = { x: 0, y: 0, w: page.w, h: page.h };
     const img = await Cards.crop(page, rect), sendImg = await AI.sendCrop(page, rect);
-    const text = AI.pageText(page), send = page.strokes.length > 0 || !!page.bg || page.items.some((it) => it.type === 'image' || it.strokes?.length) || !text.trim();
+    const text = AI.pageText(page), send = page.strokes.length > 0 || page.items.some((it) => it.type === 'image' || it.strokes?.length) || !text.trim();
     return { img, sendImg, send, pageId: page.id, rect, text, whole: true };
   },
   /** La imagen que se envía: ninguna si no hace falta leerla (zone.send === false, lo más rápido); si no, la grande. */
@@ -11308,6 +11341,11 @@ Object.assign(AI, {
   async runTask(nb, zone, task) {
     const t = AI_TASKS[task];
     let res;
+    // Transcribir algo que ya es texto (PDF con capa de texto, cuadros de texto) no necesita la IA: es instantáneo.
+    if (task === 'ocr' && zone.send === false && zone.text.trim()) {
+      res = { texto: zone.text.trim().slice(0, AI_OCR_MAX), ilegible: [] };
+      AI.saveOcr(nb, zone, res.texto); return AI.ocrDialog(nb, zone, res);
+    }
     try { res = await AI.call(AI.buildTask(task, { text: zone.text, img: AI.imgOf(zone, task === 'ocr') }), AI.cleanTask(task), AI.busyText(zone)); }
     catch (e) { return AI.showError(e, () => AI.runTask(nb, zone, task), t.err); }
     if (task === 'ocr') { AI.saveOcr(nb, zone, res.texto); return AI.ocrDialog(nb, zone, res); }
@@ -11399,7 +11437,7 @@ Object.assign(AI, {
   canReplace(nb, zone) {
     if (zone.whole || zone.noteId) return false;
     const page = nb.pages.find((p) => p.id === zone.pageId);
-    return !!page && (zone.strokeIds.length > 0 || page.items.some((i) => zone.itemIds.includes(i.id) && (i.type === 'image' || i.type === 'text')));
+    return !!page && ((zone.strokeIds || []).length > 0 || page.items.some((i) => (zone.itemIds || []).includes(i.id) && (i.type === 'image' || i.type === 'text')));
   },
 
   // ---------- Ventanas ----------
