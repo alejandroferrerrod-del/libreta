@@ -382,6 +382,24 @@ html.pen-mode .ink { touch-action: pan-x pan-y; }
 .page-indicator button:disabled { color: var(--muted); }
 .page-indicator svg { width: 16px; height: 16px; stroke-width: 2.2; }
 .desk-wrap { flex: 1; display: flex; position: relative; min-width: 0; }
+/* ---- Modo de páginas (editor.js, PageMode): continuo, vertical por páginas u horizontal (diapositivas) ---- */
+/* Horizontal: páginas en fila, centradas de arriba abajo; los márgenes y el hueco entre páginas los pone PageMode.layout. */
+.desk.pm-horizontal .pages { flex-direction: row; width: max-content; min-width: 100%; min-height: 100%; box-sizing: border-box; }
+/* Encaje del navegador (con el zoom de ajuste o menos): cada página se queda entera y centrada, de una en una. */
+.desk.pm-snap.pm-paged { scroll-snap-type: y mandatory; }
+.desk.pm-snap.pm-horizontal { scroll-snap-type: x mandatory; }
+.desk.pm-snap .page, .desk.pm-snap .add-page { scroll-snap-align: center; scroll-snap-stop: always; }
+.desk.panning { scroll-snap-type: none !important; }
+/* El contador «1 / 4» es un botón: abre el menú de los modos. */
+.page-indicator #page-count { color: var(--ink); font: inherit; font-variant-numeric: tabular-nums; padding: 2px 6px; margin: -2px -4px; border-radius: 8px; min-width: 52px; display: inline-flex; justify-content: center; gap: 5px; }
+.page-indicator #page-count:hover { background: var(--fill); }
+.page-indicator[data-mode="horizontal"] #page-count::before, .page-indicator[data-mode="paged"] #page-count::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); align-self: center; }
+/* Las tres opciones (menú «⋯» y menú del contador): iconos dibujados con su nombre debajo. */
+.popover .pm-choices { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; padding: 2px 4px 4px; }
+.popover .pm-choices button { flex-direction: column; gap: 4px; padding: 8px 4px 6px; text-align: center; justify-content: center; font-size: 12.5px; border-radius: 10px; box-shadow: inset 0 0 0 1px var(--hairline); min-width: 74px; }
+.popover .pm-choices button svg { width: 28px; height: 28px; color: var(--accent); }
+.popover .pm-choices button[aria-pressed="true"] { background: var(--accent-soft); box-shadow: inset 0 0 0 1.5px var(--accent); font-weight: 600; }
+.popover .pm-choices button:hover:not(:disabled) svg { color: #fff; }
 /* Regla (ruler.js): capa encima de las páginas que no recibe el puntero (se reconoce por geometría) */
 .ruler-layer { position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: 4; }
 .ruler { position: absolute; left: 0; top: 0; height: 76px; color: #3A3A3C; background: rgba(250, 250, 247, .66); border-radius: 4px;
@@ -733,6 +751,27 @@ body.is-reordering .tabs .chip:hover { outline: 2px solid var(--accent); outline
 .move-row:disabled { opacity: .35; cursor: not-allowed; }
 .move-row .mf { width: 26px; height: 26px; border-radius: 7px; display: grid; place-items: center; background: var(--c); color: #fff; flex: none; }
 .move-row .mf svg { width: 15px; height: 15px; }
+
+/* ---------- Color de las carpetas (folders.js): cada una el suyo; al cambiarlo, transición suave ---------- */
+@property --fcol { syntax: '<color>'; inherits: true; initial-value: #8E8E93; }
+.folder-icon { --fcol: var(--c); transition: transform .15s ease, --fcol .45s ease; }
+.folder-icon::before { background: color-mix(in srgb, var(--fcol) 60%, #34405a); }
+.folder-icon::after { background: linear-gradient(180deg, color-mix(in srgb, var(--fcol) 55%, white), color-mix(in srgb, var(--fcol) 75%, white)); }
+.fcolor-dialog { width: min(420px, 100%); }
+.fcolor-head { display: flex; align-items: center; gap: 16px; }
+.fcolor-head .field { flex: 1; min-width: 0; }
+.fcolor-preview { width: 58px; flex: none; cursor: default; pointer-events: none; }
+.fcolor-head:not(:has(.field)) { justify-content: center; }
+.fcolor-inherit { align-self: flex-start; display: inline-flex; align-items: center; gap: 6px; border: 1.5px solid color-mix(in srgb, var(--c) 45%, transparent); background: color-mix(in srgb, var(--c) 12%, var(--surface)); color: var(--ink); border-radius: 99px; padding: 5px 12px 5px 8px; font: 500 13.5px var(--font); cursor: pointer; transition: box-shadow .2s, background .2s; }
+.fcolor-inherit .chip-dot { border-radius: 50%; width: 14px; height: 14px; margin: 0; }
+.fcolor-inherit[aria-pressed="true"] { border-color: var(--c); background: color-mix(in srgb, var(--c) 22%, var(--surface)); box-shadow: 0 0 0 2px color-mix(in srgb, var(--c) 30%, transparent); }
+.fcolor-row { gap: 9px; }
+.fcolor-row .swatch { width: 30px; height: 30px; cursor: pointer; transition: transform .15s, box-shadow .15s; }
+.fcolor-row .swatch:hover { transform: scale(1.08); }
+.fcolor-free { position: relative; overflow: hidden; background: conic-gradient(#e0362c, #ffd60a, #2e9e4f, #1f7a8c, #6b4c9a, #e0362c); }
+.fcolor-free.on { background: var(--c); box-shadow: 0 0 0 2px var(--bar), 0 0 0 4px var(--accent); }
+.fcolor-free input { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; border: 0; padding: 0; cursor: pointer; }
+@media (prefers-reduced-motion: reduce) { .folder-icon { transition: transform .15s ease; } }
 
 /* Modo dinámico: carpetas como nebulosas, ruta y viaje al abrir */
 .dfolder { position: absolute; width: 170px; margin-left: -85px; margin-top: -26px; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; user-select: none; touch-action: none; transform: scale(var(--s, 1)); transition: transform .25s; will-change: left, top, transform; }
@@ -1299,6 +1338,38 @@ body.is-card-dragging .crumbs button { box-shadow: inset 0 0 0 1.5px color-mix(i
 .opt-more-pop .icon-btn { width: auto; justify-content: start; display: flex; align-items: center; gap: 10px; padding: 0 12px 0 8px; color: var(--ink); }
 .opt-more-pop .icon-btn svg { color: var(--accent); }
 .opt-more-pop .icon-btn::after { content: attr(aria-label); font-size: 14px; }
+
+/* Resaltar encendido mientras se escribe resaltado (como la negrita) */
+#options .mark-btn.on { background: var(--accent-soft); color: var(--accent); box-shadow: inset 0 0 0 1.5px var(--accent); }
+/* ---------- Menú «Estudio» (editor.js), IA con un único punto de entrada (ai.js) y significado en la ventana de color ---------- */
+.study-btn { position: relative; }
+.study-badge { position: absolute; top: 2px; right: 1px; min-width: 16px; height: 16px; padding: 0 4px; border-radius: 999px; background: var(--danger); color: #fff;
+  font-size: 10.5px; font-weight: 700; line-height: 16px; text-align: center; font-variant-numeric: tabular-nums; box-shadow: 0 0 0 2px var(--bar); pointer-events: none; }
+.popover.study-pop { width: min(290px, calc(100vw - 16px)); box-sizing: border-box; max-height: min(82vh, 680px); overflow-y: auto; }
+.popover .study-ai { display: flex; align-items: center; gap: 5px; color: var(--accent); }
+.popover .study-ai svg { width: 13px; height: 13px; }
+.popover .study-count { margin-left: auto; padding: 1px 8px; border-radius: 999px; background: var(--fill); color: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; }
+.popover .study-count.on { background: var(--danger); color: #fff; font-weight: 600; }
+.popover button:hover:not(:disabled) .study-count:not(.on) { background: rgba(255,255,255,.2); color: #fff; }
+.options .ai-btn svg:last-child { width: 12px; height: 12px; margin-left: -2px; opacity: .8; }
+.popover.ai-pop { width: min(230px, calc(100vw - 16px)); box-sizing: border-box; }
+.aiz-result .aiz-pre { white-space: pre-wrap; }
+.aiz-result .aiz-actions { flex-wrap: wrap; justify-content: flex-end; }
+.aiz-ocr { width: 100%; box-sizing: border-box; min-height: 160px; max-height: 46vh; resize: vertical; border: 1px solid var(--line); border-radius: 10px; background: var(--surface-2);
+  color: var(--ink); padding: 10px 12px; font-size: 15px; line-height: 1.45; white-space: pre-wrap; }
+.aiz-ocr:focus { outline: 2px solid var(--accent); outline-offset: 0; border-color: transparent; }
+.color-pop .cp-mean { display: flex; flex-direction: column; gap: 4px; padding: 4px 4px 6px; font-size: 12px; color: var(--muted); font-weight: 600; }
+.options .shapes-more { width: 26px; margin-left: -4px; }
+.options .shapes-more svg { width: 14px; height: 14px; }
+.popover.shapes-pop { width: min(300px, calc(100vw - 16px)); box-sizing: border-box; }
+.popover .sw-opt { align-items: flex-start; gap: 12px; padding: 8px 10px; }
+.popover .sw-opt .sw-txt { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
+.popover .sw-opt .sw-txt b { font-weight: 600; font-size: 14px; }
+.popover .sw-opt .sw-txt span { font-size: 12.5px; color: var(--muted); line-height: 1.3; white-space: normal; }
+.popover .sw-opt .switch { margin-top: 2px; }
+.popover .sw-opt:hover:not(:disabled) .sw-txt span { color: rgba(255,255,255,.85); }
+.cardz-practice { font-weight: 600; color: var(--accent); }
+.color-pop .cp-mean input { border: 0; background: var(--surface-2); border-radius: 8px; padding: 7px 10px; font-size: 14px; font-weight: 400; color: var(--ink); width: 100%; box-sizing: border-box; }
 /* =============================================================================
    Tutorial de la primera vez (siempre en oscuro, como en la app nativa)
    ============================================================================= */
@@ -1546,6 +1617,10 @@ const ICONS = {
  "zoomIn": "<circle cx=\"10.5\" cy=\"10.5\" r=\"6.5\"/><path d=\"m15.5 15.5 5 5\"/><path d=\"M10.5 7.8v5.4\"/><path d=\"M7.8 10.5h5.4\"/>",
  "textDefault": "<path d=\"M3 20 8.5 6 14 20\"/><path d=\"M5.2 14.6h6.6\"/><path class=\"star\" d=\"M18 2.5l1.18 2.88 3.1.23-2.38 2.01.75 3.02L18 9l-2.65 1.64.75-3.02-2.38-2.01 3.1-.23z\" stroke-width=\"1.5\"/>",
  "boxBg": "<rect x=\"4\" y=\"4\" width=\"16\" height=\"16\" rx=\"3.5\"/><rect x=\"7.5\" y=\"7.5\" width=\"9\" height=\"9\" rx=\"1.5\" fill=\"currentColor\" fill-opacity=\".28\" stroke=\"none\"/>",
+ // Lucide (2026-10-20): menú «Estudio» (birrete), clave de IA y transcribir.
+ "study": "<path d=\"M21.42 10.922a1 1 0 0 0-.019-1.838L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.08a1 1 0 0 0 0 1.832l8.57 3.908a2 2 0 0 0 1.66 0z\" /> <path d=\"M22 10v6\" /> <path d=\"M6 12.5V16a6 3 0 0 0 12 0v-3.5\" />",
+ "key": "<path d=\"M2.586 17.414A2 2 0 0 0 2 18.828V21a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h1a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h.172a2 2 0 0 0 1.414-.586l.814-.814a6.5 6.5 0 1 0-4-4z\" /> <circle cx=\"16.5\" cy=\"7.5\" r=\".5\" fill=\"currentColor\" />",
+ "scanText": "<path d=\"M3 7V5a2 2 0 0 1 2-2h2\" /> <path d=\"M17 3h2a2 2 0 0 1 2 2v2\" /> <path d=\"M21 17v2a2 2 0 0 1-2 2h-2\" /> <path d=\"M7 21H5a2 2 0 0 1-2-2v-2\" /> <path d=\"M7 8h8\" /> <path d=\"M7 12h10\" /> <path d=\"M7 16h6\" />",
  "dots": "<circle cx=\"5.5\" cy=\"12\" r=\"1.6\" fill=\"currentColor\" stroke=\"none\"/><circle cx=\"12\" cy=\"12\" r=\"1.6\" fill=\"currentColor\" stroke=\"none\"/><circle cx=\"18.5\" cy=\"12\" r=\"1.6\" fill=\"currentColor\" stroke=\"none\"/>",
 };
 const icon = (name, extra = '') => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" ${extra}>${ICONS[name] || ''}</svg>`;
@@ -1688,6 +1763,7 @@ I18N.dict.it = {
   'Libretas': 'Quaderni', 'Libreta': 'Libreta', 'Libretas (inicio)': 'Quaderni (inizio)', 'Libretas abiertas': 'Quaderni aperti',
   'Tus libretas': 'I tuoi quaderni', 'Vista y ajustes': 'Vista e impostazioni', 'Ir a una carpeta': 'Vai a una cartella', 'Ir a': 'Vai a',
   'Crear o importar': 'Crea o importa', 'Crear': 'Crea', 'Importar': 'Importa', 'Nueva libreta': 'Nuovo quaderno', 'Nueva carpeta': 'Nuova cartella',
+  'Como la carpeta madre': 'Come la cartella madre', 'Usar el color de la carpeta madre': 'Usa il colore della cartella madre',
   'Nueva carpeta…': 'Nuova cartella…', 'Nueva carpeta aquí…': 'Nuova cartella qui…', 'Nueva carpeta dentro…': 'Nuova cartella dentro…',
   'Importar PDF…': 'Importa PDF…', 'Ajustes': 'Impostazioni', 'Ajustes: apariencia, atajos, copias de seguridad…': 'Impostazioni: aspetto, scorciatoie, backup…',
   'Idioma': 'Lingua', 'Apariencia': 'Aspetto', 'Automática': 'Automatico', 'Clara': 'Chiaro', 'Oscura': 'Scuro',
@@ -1766,6 +1842,12 @@ I18N.dict.it = {
   'Lápiz detectado: ahora el dedo desplaza la página y el lápiz escribe': 'Penna rilevata: ora il dito scorre la pagina e la penna scrive',
   'Estás en modo lectura': 'Sei in modalità lettura', 'Estás en modo lectura. Sal con el lápiz tachado de arriba para escribir.': 'Sei in modalità lettura. Esci con la matita barrata in alto per scrivere.',
   'Página anterior': 'Pagina precedente', 'Página siguiente': 'Pagina successiva', 'Página': 'Pagina', 'Páginas': 'Pagine',
+  // Modo de páginas (editor.js, PageMode)
+  'Cómo pasar las páginas': 'Come sfogliare le pagine', 'Cómo pasar las páginas (también con una pulsación larga)': 'Come sfogliare le pagine (anche con una pressione prolungata)',
+  'Continuo': 'Continuo', 'Por páginas': 'A pagine', 'Las páginas una debajo de otra, sin encajar': 'Le pagine una sotto l’altra, senza agganciarsi',
+  'De arriba abajo, cada página entera y de una en una': 'Dall’alto in basso, ogni pagina intera e una alla volta', 'Como diapositivas: se pasan de lado': 'Come diapositive: si sfogliano di lato',
+  'Páginas en continuo, una debajo de otra': 'Pagine in continuo, una sotto l’altra', 'Páginas de una en una, siempre enteras': 'Pagine una alla volta, sempre intere',
+  'Páginas en horizontal: pásalas de lado, como diapositivas': 'Pagine in orizzontale: sfogliale di lato, come diapositive',
   'Miniaturas': 'Miniature', 'Marcadores': 'Segnalibri', 'Vista de la barra lateral': 'Vista della barra laterale',
   'Sin páginas guardadas. Pulsa el marcador de una página (arriba o en Miniaturas) para guardarla aquí.': 'Nessuna pagina salvata. Premi il segnalibro di una pagina (in alto o in Miniature) per salvarla qui.',
   'Página guardada en marcadores': 'Pagina salvata nei segnalibri', 'Página quitada de marcadores': 'Pagina tolta dai segnalibri',
@@ -1919,6 +2001,40 @@ I18N.dict.it = {
   'Tu clave de Gemini': 'La tua chiave di Gemini', 'Aviso:': 'Avviso:',
   'En el nivel gratuito Google puede usar lo que envías para mejorar sus productos; no envíes datos de pacientes.': 'Nel livello gratuito Google può usare ciò che invii per migliorare i suoi prodotti; non inviare dati di pazienti.',
   'La clave se guarda solo en este dispositivo: no va en la copia de seguridad. Puedes borrarla cuando quieras.': 'La chiave si salva solo su questo dispositivo: non va nel backup. Puoi eliminarla quando vuoi.',
+  // --- Menú «Estudio» e IA con un único punto de entrada (editor.js, ai.js, palette.js) ---
+  'Estudio: tarjetas, repaso e IA': 'Studio: flashcard, ripasso e IA', 'Tarjetas': 'Flashcard', 'Repasar': 'Ripassa', 'Colores': 'Colori', 'IA': 'IA',
+  'Tarjetas de esta página': 'Flashcard di questa pagina', 'Resumir esta página': 'Riassumi questa pagina', 'Transcribir esta página': 'Trascrivi questa pagina',
+  'Clave de IA…': 'Chiave IA…', 'Clave de IA': 'Chiave IA', 'Leyenda de colores de esta libreta…': 'Legenda dei colori di questo quaderno…',
+  'Con lo seleccionado': 'Con la selezione', 'Resumir': 'Riassumi', 'Transcribir a texto': 'Trascrivi in testo', 'Explicar': 'Spiega',
+  'IA con lo seleccionado: tarjetas, resumir, transcribir a texto o explicar': 'IA con la selezione: flashcard, riassumere, trascrivere in testo o spiegare',
+  'Para leer tus apuntes, Folia usa Gemini, la IA de Google, con': 'Per leggere i tuoi appunti, Folia usa Gemini, l’IA di Google, con',
+  'La IA está leyendo tu página…': 'L’IA sta leggendo la tua pagina…', 'La IA no ha encontrado texto que leer aquí.': 'L’IA non ha trovato testo da leggere qui.',
+  'La IA no ha podido terminar. Vuelve a intentarlo.': 'L’IA non è riuscita a finire. Riprova.',
+  'No se ha podido resumir': 'Non è stato possibile riassumere', 'No se ha podido explicar': 'Non è stato possibile spiegare', 'No se ha podido transcribir': 'Non è stato possibile trascrivere',
+  'Explicación': 'Spiegazione', 'Transcripción': 'Trascrizione', 'La IA puede equivocarse: compáralo con tus apuntes.': 'L’IA può sbagliare: confrontalo con i tuoi appunti.',
+  'Hacer tarjetas': 'Crea flashcard', 'Insertar como texto': 'Inserisci come testo', 'Hacer tarjetas con esto': 'Crea flashcard con questo',
+  'Insertar al lado': 'Inserisci accanto', 'Sustituir': 'Sostituisci', 'Texto transcrito': 'Testo trascritto', 'No se lee bien:': 'Non si legge bene:',
+  'Revisa el texto y corrige lo que haga falta. Ya puedes encontrarlo con «Buscar».': 'Controlla il testo e correggi ciò che serve. Ora puoi trovarlo con «Cerca».',
+  'Un cuadro de texto con la transcripción': 'Una casella di testo con la trascrizione', 'Un cuadro de texto con la transcripción, al lado de la selección': 'Una casella di testo con la trascrizione, accanto alla selezione',
+  'Borra lo seleccionado y pone el texto en su sitio (puedes deshacerlo)': 'Cancella la selezione e mette il testo al suo posto (puoi annullarlo)',
+  'No se ha podido copiar: selecciónalo y cópialo a mano': 'Non è stato possibile copiare: selezionalo e copialo a mano', 'No hay texto que poner': 'Non c’è testo da inserire',
+  'Sustituido por texto · puedes deshacerlo': 'Sostituito con testo · puoi annullarlo', 'Texto añadido a la página': 'Testo aggiunto alla pagina',
+  'Significado en esta libreta': 'Significato in questo quaderno', 'p. ej. Cae en el MIR': 'es. Esce all’esame',
+  'Significado guardado en la leyenda': 'Significato salvato nella legenda', 'Significado quitado de la leyenda': 'Significato tolto dalla legenda',
+  'Da un significado a cada color (p. ej. rojo = cae en el MIR) y luego junta todo lo de un color con Estudio › Resumen por color.': 'Dai un significato a ogni colore (es. rosso = esce all’esame) e poi riunisci tutto ciò che è di un colore con Studio › Riepilogo per colore.',
+  'Escritura a mano': 'Scrittura a mano',
+  'Temporizador de estudio…': 'Timer di studio…', 'Mostrar en la barra': 'Mostra nella barra',
+  'Opciones de formas': 'Opzioni delle forme', 'Opciones de formas: mantener quieto al final': 'Opzioni delle forme: restare fermi alla fine',
+  'Cada trazo, una forma': 'Ogni tratto, una forma', 'Todo lo que dibujes se convierte en línea, círculo, rectángulo…': 'Tutto ciò che disegni diventa linea, cerchio, rettangolo…',
+  'Mantener quieto al final': 'Restare fermi alla fine',
+  'Al acabar un trazo, quédate quieto 1 segundo sin soltar: sale una forma perfecta o una recta.': 'Alla fine di un tratto, resta fermo 1 secondo senza staccare: esce una forma perfetta o una retta.',
+  'Al acabar el subrayado en «Libre», quédate quieto 1 segundo sin soltar: sale recto.': 'Alla fine dell’evidenziatura in «Libero», resta fermo 1 secondo senza staccare: esce dritta.',
+  'Repasar todas (aunque no toquen)': 'Ripassa tutte (anche se non tocca)', 'Practicar también las que aún no tocan: no cambia cuándo vuelven': 'Esercitati anche con quelle che non toccano ancora: non cambia quando tornano',
+  'Repasar todas': 'Ripassa tutte', 'También las que aún no tocan: no cambia cuándo vuelven': 'Anche quelle che non toccano ancora: non cambia quando tornano',
+  'Repasar todas igualmente': 'Ripassa tutte comunque', 'Ver pregunta y respuesta': 'Vedi domanda e risposta', 'Repasar desde esta tarjeta': 'Ripassa da questa flashcard',
+  'Práctica terminada': 'Esercizio finito', 'Las que aún no tocaban siguen con su fecha de repaso.': 'Quelle che non toccavano ancora mantengono la loro data di ripasso.',
+  'Práctica: no cambia cuándo vuelve': 'Esercizio: non cambia quando torna', 'otra vez': 'di nuovo',
+  'Sin resultados. La escritura a mano solo se encuentra si la transcribes (Estudio › IA › Transcribir).': 'Nessun risultato. La scrittura a mano si trova solo se la trascrivi (Studio › IA › Trascrivi).',
   'Borrar la clave': 'Elimina la chiave', 'Guardar y seguir': 'Salva e continua', 'Clave de IA borrada de este dispositivo': 'Chiave IA eliminata da questo dispositivo',
   'Esa clave no parece válida: cópiala entera': 'Questa chiave non sembra valida: copiala per intero', 'Este navegador no deja guardar la clave': 'Questo browser non permette di salvare la chiave',
   'La IA está leyendo tu selección…': 'L’IA sta leggendo la tua selezione…', 'Suele tardar unos segundos (como mucho 1 minuto).': 'Di solito ci mette qualche secondo (al massimo 1 minuto).',
@@ -2034,6 +2150,8 @@ I18N.patterns.it = [
   [/^Repasada hace (\d+) días$/, 'Ripassato $1 giorni fa'], [/^conviene repasar en (\d+) días$/, 'conviene ripassare tra $1 giorni'],
   [/^(\d+) tarjetas pendientes$/, '$1 flashcard da ripassare'],
   // Tarjetas de repaso (cards.js): antes que las reglas generales de «(…)» y «·»
+  [/^Has practicado (\d+) tarjetas?\.$/, 'Hai fatto esercizio con $1 flashcard.'], [/^(\d+) \/ (\d+) ·$/, '$1 / $2 ·'],
+  [/^Estudio · (\d+) pendientes?$/, (m) => `Studio · ${m[1]} da ripassare`], [/^(\d+) pendientes?$/, '$1 da ripassare'],
   [/^Repasar tarjetas \((\d+) pendientes?\)$/, 'Ripassa le flashcard ($1 da ripassare)'], [/^Repasar \((\d+)\)$/, 'Ripassa ($1)'],
   [/^Tarjeta creada · (\d+) pendientes?$/, 'Flashcard creata · $1 da ripassare'],
   // Significado de los colores (meaning.js)
@@ -2072,11 +2190,12 @@ I18N.patterns.it = [
   [/^Importando el PDF… (\d+) de (\d+)$/, 'Importazione del PDF… $1 di $2'], [/^Recuperadas (\d+) libretas$/, 'Recuperati $1 quaderni'],
   [/^Exportando (\d+) libretas? en PDF…$/, (m) => `Esportazione di ${m[1]} ${m[1] === '1' ? 'quaderno' : 'quaderni'} in PDF…`],
   [/^(\d+) elementos duplicados$/, '$1 elementi duplicati'], [/^Grosor ([\d.]+)$/, 'Spessore $1'], [/^Color (#\w+)$/, 'Colore $1'], [/^Portada (#\w+)$/, 'Copertina $1'],
+  [/^Página (\d+) de (\d+)\. Cómo pasar las páginas: (.+)$/, (m, t) => `Pagina ${m[1]} di ${m[2]}. Come sfogliare le pagine: ${t(m[3])}`],
   [/^Pág\. (\d+)$/, 'Pag. $1'], [/^Página (\d+)$/, 'Pagina $1'], [/^Página (\d+) \/ (\d+)$/, 'Pagina $1 / $2'], [/^Continúas en la página (\d+)$/, 'Riprendi dalla pagina $1'],
   [/^Portada de «(.+)»$/, 'Copertina di «$1»'], [/^Color de «(.+)»$/, 'Colore di «$1»'], [/^Mover «(.+)» a$/, 'Sposta «$1» in'],
   [/^Copiada a «(.+)», en su primera página\.$/, 'Copiata in «$1», nella sua prima pagina.'],
   [/^Grabación guardada \((.+)\)\. Está en el menú del micrófono › Grabaciones\.$/, 'Registrazione salvata ($1). È nel menu del microfono › Registrazioni.'],
-  [/^Grabaciones \((\d+)\)$/, 'Registrazioni ($1)'], [/^Nada coincide con «(.+)»\. (.*)$/, (m, t) => `Nessun risultato per «${m[1]}». La scrittura a mano non si può cercare nella versione web; testi, post-it, commenti e PDF sì.`],
+  [/^Grabaciones \((\d+)\)$/, 'Registrazioni ($1)'], [/^Nada coincide con «(.+)»\. (.*)$/, (m, t) => `Nessun risultato per «${m[1]}». Si cercano testi, post-it, commenti e PDF; la scrittura a mano, solo se l’hai trascritta (Studio › IA).`],
   [/^Pulsa la combinación para «(.+)»$/, (m, t) => `Premi la combinazione per «${t(m[1]) ?? m[1]}»`],
   [/^(.+) la usa el navegador; elige otra combinación\.$/, '$1 la usa il browser; scegli un’altra combinazione.'],
   [/^(.+) ya no es «(.+)»: ahora es «(.+)»\.$/, (m, t) => `${m[1]} non è più «${t(m[2]) ?? m[2]}»: ora è «${t(m[3]) ?? m[3]}».`],
@@ -2142,6 +2261,8 @@ const MARK_COLORS = [['Sin resaltar', ''], ['Amarillo', '#FFE66B'], ['Verde', '#
 const BOX_BGS = [['Sin fondo', ''], ['Amarillo', '#FFF3B0'], ['Verde', '#D8F5D0'], ['Azul', '#D6E8FF'], ['Rosa', '#FFDCE6'], ['Gris', '#EBEBF0']];
 const STICKY_COLORS = ['#FFF08A', '#FFC4D6', '#BDE3FF', '#C6F2C2', '#FFD3A6', '#DCCBFF'];
 const COMMENT_COLORS = ['#F5A524', '#E0362C', '#1E5BD8', '#2E9E4F', '#8E44AD', '#5E5E63'];
+/** Modos de desplazamiento de las páginas (`nb.scrollMode`, editor.js): continuo, vertical por páginas y horizontal. */
+const PAGE_MODES = ['continuous', 'paged', 'horizontal'];
 /** Tamaños del círculo de los comentarios (preferencia commentSize). «Grande» es el de antes de 2026-10-19. */
 const COMMENT_SIZES = { s: { name: 'Pequeño', px: 20 }, m: { name: 'Mediano', px: 26 }, l: { name: 'Grande', px: 34 } };
 const PEN_KINDS = { pen: 'Bolígrafo', fountain: 'Pluma', pencil: 'Lápiz' };
@@ -2701,10 +2822,12 @@ function normalizeNotebook(nb) {
   nb.recordings = nb.recordings || [];
   if (Array.isArray(nb.cards)) nb.cards = nb.cards.map((c) => Cards.normalize(c)).filter(Boolean);   // tarjetas (opcional, cards.js)
   if ('legend' in nb) Meaning.normalize(nb);   // leyenda de colores (opcional, meaning.js)
+  if ('scrollMode' in nb && !PAGE_MODES.includes(nb.scrollMode)) delete nb.scrollMode;   // modo de páginas (opcional)
   if ('reviews' in nb || 'lastReviewed' in nb) Recall.normalize(nb);   // curva del olvido (opcional, recall.js)
   for (const page of nb.pages) {
     page.w = page.w || PORTRAIT.w; page.h = page.h || PORTRAIT.h;
     page.strokes = page.strokes || []; page.items = page.items || [];
+    if ('ocr' in page) page.ocr = AI.normalizeOcr(page.ocr);   // transcripciones buscables (opcional, ai.js)
     for (const item of page.items) {
       if (item.type === 'text' && item.html === undefined) {
         item.html = textToHTML(item.text || '');
@@ -2767,6 +2890,8 @@ const S = {
   stickyColor: STICKY_COLORS[0], commentColor: COMMENT_COLORS[0],
   // Tamaño del círculo de los comentarios (2026-10-19), para todos: 's' | 'm' | 'l'. Sin guardar = 'm'.
   commentSize: COMMENT_SIZES[saved.commentSize] ? saved.commentSize : 'm',
+  // Modo de páginas por defecto (2026-10-20) para las libretas sin `scrollMode` propio: el último elegido.
+  scrollMode: PAGE_MODES.includes(saved.scrollMode) ? saved.scrollMode : 'continuous',
   // Regla (2026-10-20, ruler.js): visible, centro en px del escritorio (null = en medio), ángulo en grados y transportador.
   ruler: Object.assign({ on: false, x: null, y: null, angle: 0, protractor: false }, saved.ruler && typeof saved.ruler === 'object' ? saved.ruler : {}),
   zoom: 1,
@@ -2780,7 +2905,7 @@ const S = {
 function savePrefs() {
   Prefs.save({ dynamic: S.dynamic, penKind: S.penKind, penColor: S.penColor, penWidth: S.penWidth, hlColor: S.hlColor, hlWidth: S.hlWidth,
     hlMode: S.hlMode, eraserMode: S.eraserMode, textDefault: S.textDefault, sidebar: S.sidebar, sidebarMode: S.sidebarMode, holdToSnap: S.holdToSnap, showVoiceNotes: S.showVoiceNotes, lassoFilter: S.lassoFilter,
-    penColors: S.penColors, hlColors: S.hlColors, textColors: S.textColors, recentColors: S.recentColors, commentSize: S.commentSize, ruler: S.ruler, seeded: Prefs.load().seeded });
+    penColors: S.penColors, hlColors: S.hlColors, textColors: S.textColors, recentColors: S.recentColors, commentSize: S.commentSize, ruler: S.ruler, scrollMode: S.scrollMode, seeded: Prefs.load().seeded });
 }
 /** Diámetro (px de página, a zoom 1) del círculo de los comentarios; el CSS lo lee de html[data-pin]. */
 const pinPx = () => COMMENT_SIZES[S.commentSize].px;
@@ -3462,7 +3587,7 @@ function highlightAll(text, query) {
   for (const m of ms) { out += esc(text.slice(last, m.start)) + '<mark>' + esc(text.slice(m.start, m.end)) + '</mark>'; last = m.end; }
   return out + esc(text.slice(last));
 }
-const SOURCE_NAMES = { text: 'Cuadro de texto', sticky: 'Post-it', comment: 'Comentario', pdf: 'PDF' };
+const SOURCE_NAMES = { text: 'Cuadro de texto', sticky: 'Post-it', comment: 'Comentario', pdf: 'PDF', ocr: 'Escritura a mano' };
 /** Coincidencias de una libreta: [{ pageIndex, pageId, itemId, source, snippet }]. */
 function searchNotebook(nb, query, limit = 30) {
   const hits = [];
@@ -3473,6 +3598,8 @@ function searchNotebook(nb, query, limit = 30) {
       for (const m of findMatches(text, query)) hits.push({ pageIndex, pageId: page.id, itemId: item.id, source: item.type, snippet: snippetHTML(text, m) });
     }
     if (page.pdfText) for (const m of findMatches(page.pdfText, query)) hits.push({ pageIndex, pageId: page.id, itemId: null, source: 'pdf', snippet: snippetHTML(page.pdfText, m) });
+    // Escritura a mano transcrita con la IA (page.ocr): su id lleva a su zona (flashItem → AI.flashOcr).
+    for (const o of AI.ocrOf(page)) for (const m of findMatches(o.text, query)) hits.push({ pageIndex, pageId: page.id, itemId: o.id, source: 'ocr', snippet: snippetHTML(o.text, m) });
   });
   return hits.slice(0, limit);
 }
@@ -3577,7 +3704,7 @@ function folderCardHTML(f) {
   const key = `folder:${f.id}`, picked = S.picked.has(key);
   const newest = Math.max(f.modified || 0, ...Folders.notebooksIn(f.id).map((nb) => nb.modified));
   return `<div class="card folder-card ${picked ? 'picked' : ''}" data-folder="${f.id}">
-    <button class="folder-icon" style="--c:${Folders.color(Folders.top(f.id))}" ${S.selecting ? `data-pick="${key}" aria-pressed="${picked}" aria-label="Seleccionar carpeta ${esc(f.name)}"` : `data-go-folder="${f.id}" aria-label="Abrir carpeta ${esc(f.name)}"`}>
+    <button class="folder-icon" style="--c:${Folders.color(f)}" ${S.selecting ? `data-pick="${key}" aria-pressed="${picked}" aria-label="Seleccionar carpeta ${esc(f.name)}"` : `data-go-folder="${f.id}" aria-label="Abrir carpeta ${esc(f.name)}"`}>
       <span class="sheet" aria-hidden="true"></span><span class="count">${inside}</span></button>
     ${S.selecting ? `<span class="pick-mark" aria-hidden="true">${picked ? icon('check') : ''}</span>` : `<button class="more" data-fmore="${f.id}" aria-label="Opciones de la carpeta ${esc(f.name)}" aria-haspopup="menu">${icon('more')}</button>`}
     <div class="name" translate="no">${esc(f.name)}</div>
@@ -3596,7 +3723,7 @@ function newMenu(anchor) {
     <hr><div class="label">Importar</div>
     <button data-act="pdf">${icon('pdf')} Importar PDF…</button>`, (act) => {
     if (act === 'new') newNotebookDialog();
-    if (act === 'folder') promptDialog('Nueva carpeta', '', (v) => { Folders.create(v, S.folder); renderLibrary(); }, 'Nombre de la carpeta');
+    if (act === 'folder') newFolderDialog(S.folder, () => renderLibrary());
     if (act === 'pdf') pickFile('application/pdf', importPDF);
   });
 }
@@ -3648,7 +3775,7 @@ function resultsHTML(q) {
   const pool = S.notebooks.filter((nb) => Folders.inSubtree(nb, S.folder));
   const byTitle = pool.filter((nb) => fold(nb.title).includes(fold(q)));
   const groups = pool.map((nb) => ({ nb, hits: searchNotebook(nb, q, 20) })).filter((g) => g.hits.length);
-  if (!byTitle.length && !groups.length) return `<p class="empty">Nada coincide con «${esc(q)}». La escritura a mano no se puede buscar en la versión web; los textos, post-its, comentarios y PDF sí.</p>`;
+  if (!byTitle.length && !groups.length) return `<p class="empty">Nada coincide con «${esc(q)}». Se buscan los textos, post-its, comentarios y PDF; la escritura a mano, solo si la has transcrito (Estudio › IA).</p>`;
   const mini = (nb) => `<span class="mini">${coverHTML(nb, { label: false, tag: 'span' })}</span>`;
   return `<div class="results">
     ${byTitle.length ? `<section><h2>Libretas</h2>${byTitle.map((nb) => `<button class="result" data-open="${nb.id}">${mini(nb)}<span><b translate="no">${highlightAll(nb.title, q)}</b><br><span class="where">${nb.folder ? esc(Folders.label(nb)) + ' · ' : ''}${nb.pages.length} páginas · ${formatDate(nb.modified)}</span></span></button>`).join('')}</section>` : ''}
@@ -3684,15 +3811,15 @@ function folderMenu(anchor, f) {
     <button data-act="open">${icon('folder')} Abrir</button>
     <button data-act="new">${icon('plus')} Nueva carpeta dentro…</button>
     <button data-act="rename">${icon('rename')} Renombrar…</button>
-    ${f.parent ? '' : `<button data-act="color">${icon('palette')} Color…</button>`}
+    <button data-act="color">${icon('palette')} Color…</button>
     <button data-act="move">${icon('folder')} Mover a…</button>
     <button data-act="duplicate">${icon('copy')} Duplicar</button>
     ${S.dynamic ? '' : `<hr><button data-act="select">${icon('checkCircle')} Seleccionar</button>`}
     <hr><button data-act="delete" class="danger">${icon('trash')} Eliminar…</button>`, (act) => {
     if (act === 'open') return S.dynamic && Dyn.running ? Dyn.enterFolder(f.id) : goFolder(f.id);
-    if (act === 'new') return promptDialog('Nueva carpeta', '', (v) => { Folders.create(v, f.id); refresh(); }, 'Nombre de la carpeta');
+    if (act === 'new') return newFolderDialog(f.id, () => refresh());
     if (act === 'rename') return promptDialog('Renombrar carpeta', f.name, (v) => { Folders.rename(f.id, v); refresh(); }, 'Nombre');
-    if (act === 'color') return popover(anchor, `<div class="label">Color de «${esc(f.name)}»</div><div class="choices" style="padding:4px 8px 8px">${COVERS.map((c) => `<button class="swatch" data-act="${c}" style="background:${c};width:28px;height:28px" aria-label="Color ${c}"></button>`).join('')}</div>`, (c) => { f.color = c; Folders.save(); refresh(); });
+    if (act === 'color') return folderColorEdit(f);
     if (act === 'move') return moveDialog([{ kind: 'folder', id: f.id }]);
     if (act === 'duplicate') { duplicateFolder(f, f.parent); refresh(); return toast('Carpeta duplicada'); }
     if (act === 'select') { S.selecting = true; S.picked = new Set([`folder:${f.id}`]); return renderLibrary(); }
@@ -3704,7 +3831,7 @@ function folderJumpMenu(anchor) {
   const tree = Folders.tree();
   popover(anchor, `<div class="label">Ir a</div>
     <button data-act="root">${S.folder ? '<svg width="17" height="17"></svg>' : icon('check')} Libretas (inicio)</button>
-    ${tree.map(({ folder, depth }) => `<button data-act="${folder.id}" style="padding-left:${10 + depth * 16}px">${S.folder === folder.id ? icon('check') : `<span class="chip-dot" style="--c:${Folders.color(Folders.top(folder.id))}"></span>`} <span translate="no">${esc(folder.name)}</span></button>`).join('')}
+    ${tree.map(({ folder, depth }) => `<button data-act="${folder.id}" style="padding-left:${10 + depth * 16}px">${S.folder === folder.id ? icon('check') : `<span class="chip-dot" style="--c:${Folders.color(folder)}"></span>`} <span translate="no">${esc(folder.name)}</span></button>`).join('')}
     ${tree.length ? '' : '<div class="label" style="text-transform:none;letter-spacing:0;white-space:normal;max-width:220px">Aún no tienes carpetas. Créalas con +.</div>'}`, (act) => {
     if (act === 'root') return goFolder(null);
     goFolder(act);
@@ -4489,7 +4616,7 @@ async function startDynamic(root) {
         const inside = Folders.notebooksIn(n.folder.id).length;
         el.className = 'dfolder';
         el.dataset.folder = n.folder.id;
-        el.style.setProperty('--glow', Folders.color(Folders.top(n.folder.id)));
+        el.style.setProperty('--glow', Folders.colorOf(n.folder.id));
         el.innerHTML = `<span class="core">${icon('folder')}</span><div class="lbl" translate="no">${esc(n.folder.name)}</div><div class="sub">${inside} ${inside === 1 ? 'libreta' : 'libretas'}</div>`;
         el.setAttribute('aria-label', `Carpeta ${n.folder.name}, ${inside} libretas. Entrar`);
       }
@@ -4512,7 +4639,7 @@ async function startDynamic(root) {
   function renderCrumbs() {
     const path = Folders.path(S.folder);
     crumbsEl.innerHTML = `<button data-crumb="" ${path.length ? '' : 'aria-current="page"'}>${icon('sparkles')} Libretas</button>`
-      + path.map((f, i) => `<span>›</span><button translate="no" data-crumb="${f.id}" ${i === path.length - 1 ? 'aria-current="page"' : ''} style="--glow:${Folders.color(Folders.top(f.id))}">${esc(f.name)}</button>`).join('');
+      + path.map((f, i) => `<span>›</span><button translate="no" data-crumb="${f.id}" ${i === path.length - 1 ? 'aria-current="page"' : ''} style="--glow:${Folders.colorOf(f.id)}">${esc(f.name)}</button>`).join('');
   }
   crumbsEl.addEventListener('click', (e) => {
     const b = e.target.closest('[data-crumb]');
@@ -4575,7 +4702,7 @@ async function startDynamic(root) {
   function enterFolder(fid) {
     if (dynBusy()) return;
     const key = `f:${fid}`, f = Folders.byId(fid);
-    const color = Folders.color(Folders.top(fid));
+    const color = Folders.colorOf(fid);
     hideHover(); select(null);
     if (reduceMotion()) { goLevel(fid); return; }
     const t = performance.now() / 1000;
@@ -4603,7 +4730,7 @@ async function startDynamic(root) {
     setTimeout(() => {
       goLevel(target);
       const a = (Dyn.anim = { kind: 'land', start: performance.now(), dur: 1000, focusKey: from ? `f:${from.id}` : null });
-      Dyn.flash = { color: from ? Folders.color(Folders.top(from.id)) : '#8E7CFF', start: performance.now() - 200, dur: 700 };
+      Dyn.flash = { color: from ? Folders.colorOf(from.id) : '#8E7CFF', start: performance.now() - 200, dur: 700 };
       Dyn.warpTarget = 0.04;
       setTimeout(() => { if (Dyn.anim === a) Dyn.anim = null; }, 1050);
     }, 650);
@@ -4710,7 +4837,7 @@ async function startDynamic(root) {
     if (key.startsWith('f:')) {
       const f = Folders.byId(key.slice(2)), list = Folders.notebooksIn(f.id).sort((a, b) => b.modified - a.modified);
       const subs = Folders.children(f.id).length;
-      hoverEl.style.setProperty('--glow', Folders.color(Folders.top(f.id)));
+      hoverEl.style.setProperty('--glow', Folders.colorOf(f.id));
       hoverEl.innerHTML = `<div style="font-weight:700;font-size:14px" translate="no">${esc(f.name)}</div><div style="opacity:.75">${list.length} ${list.length === 1 ? 'libreta' : 'libretas'}${subs ? ` · ${subs} ${subs === 1 ? 'carpeta' : 'carpetas'}` : ''}</div>
         <div class="hover-list">${list.slice(0, 4).map((nb) => `<span style="--c:${nb.color}" translate="no">${esc(nb.title)}</span>`).join('')}${list.length > 4 ? `<span class="more">y ${list.length - 4} más…</span>` : ''}</div>
         <div class="hover-go">Clic para entrar</div>`;
@@ -4801,7 +4928,7 @@ async function startDynamic(root) {
     Dyn.zoom += (Dyn.zoomTarget - Dyn.zoom) * 0.08;
     Dyn.warp += ((reduceMotion() ? 0 : Dyn.warpTarget) - Dyn.warp) * Math.min(1, dt * 4);
     const w = W(), h = H(), cx = w / 2, cy = h / 2, focal = Math.max(w, h) * 0.5;
-    const tint = Dyn.anim?.color || (S.folder ? Folders.color(Folders.top(S.folder)) : null);
+    const tint = Dyn.anim?.color || (S.folder ? Folders.colorOf(S.folder) : null);
     // Fondo y nebulosas de fondo (degradados radiales: no hace falta difuminar nada grande)
     const grad = ctx.createLinearGradient(0, 0, w, h);
     grad.addColorStop(0, '#070918'); grad.addColorStop(1, '#150C30');
@@ -4849,7 +4976,7 @@ async function startDynamic(root) {
       const involved = Dyn.selected && (e.from === Dyn.selected || e.to === Dyn.selected);
       const faded = Dyn.selected && !involved;
       const fromNode = g.nodes.find((n) => n.key === e.from);
-      const color = fromNode.kind === 'nb' ? fromNode.nb.color : Folders.color(Folders.top(fromNode.folder.id));
+      const color = fromNode.kind === 'nb' ? fromNode.nb.color : Folders.colorOf(fromNode.folder.id);
       const width = (1 + Math.log2(e.count)) * (involved ? 2.2 : e.direct ? 1.2 : 1.6);
       // Un poco curvado: queda más orgánico.
       const mx = (a[0] + b[0]) / 2 + (b[1] - a[1]) * 0.12, my = (a[1] + b[1]) / 2 - (b[0] - a[0]) * 0.12;
@@ -4888,7 +5015,7 @@ async function startDynamic(root) {
       if (n.kind !== 'folder') continue;
       const { p, s, a } = views.get(n.key);
       if (a <= 0.01) continue;
-      const col = rgb(Folders.color(Folders.top(n.folder.id))), c = col.join(',');
+      const col = rgb(Folders.colorOf(n.folder.id)), c = col.join(',');
       const hovered = hoverEl?.dataset.key === n.key;
       const pulse = 1 + 0.06 * Math.sin(t * 1.6 + (phase.get(n.key) || 0)) + (hovered ? 0.12 : 0);
       const R = 92 * s * pulse;
@@ -5125,6 +5252,7 @@ const Pomo = {
       <hr>
       ${stepper('focusMinutes', 'Estudio', 5, 120, 5)}${stepper('shortBreakMinutes', 'Descanso', 1, 30, 1)}${stepper('longBreakMinutes', 'Descanso largo', 5, 60, 5)}
       ${stepper('sessionsBeforeLongBreak', 'Descanso largo cada (sesiones)', 2, 8, 1)}
+      <label class="pomo-row"><span>Mostrar en la barra</span><input type="checkbox" data-vis ${this.visible ? 'checked' : ''}></label>
       <label class="pomo-row"><span>Empezar la siguiente fase sola</span><input type="checkbox" data-opt="autoStartNext" ${s.autoStartNext ? 'checked' : ''}></label>
       <div class="pomo-row"><label><input type="checkbox" data-opt="alarm" ${s.alarm ? 'checked' : ''}> Alarma</label><button class="btn" data-pomo="test">Probar</button></div>`;
     panel.onclick = (e) => {
@@ -5142,7 +5270,10 @@ const Pomo = {
         this.changed();
       }
     };
-    panel.onchange = (e) => { const k = e.target.dataset.opt; if (k) { s[k] = e.target.checked; this.changed(); } };
+    panel.onchange = (e) => {
+      if ('vis' in e.target.dataset) { this.visible = e.target.checked; return this.changed(); }   // el reloj de la barra (antes en «⋯»)
+      const k = e.target.dataset.opt; if (k) { s[k] = e.target.checked; this.changed(); }
+    };
   },
   /** «¡Hora del descanso!» arriba en el editor. */
   renderBanner() {
@@ -5233,7 +5364,20 @@ const Folders = {
   /** ¿Está `id` dentro de `ancestor` (o es ella)? */
   within(id, ancestor) { return !ancestor || this.path(id).some((f) => f.id === ancestor); },
   inSubtree(nb, ancestor) { return !ancestor || this.within(nb.folder, ancestor); },
-  color(f) { return f?.color || spaceColor(f?.name || ''); },
+  /** Color con que se pinta: el suyo si lo tiene; si no, el de la carpeta madre (y así hacia arriba);
+   *  las de primer nivel sin color, uno según su nombre. Las carpetas antiguas (`color: null`) heredan como antes. */
+  color(f, guard = 0) {
+    if (f && validFolderColor(f.color)) return f.color;
+    const up = f?.parent && guard < 50 ? this.byId(f.parent) : null;
+    return up ? this.color(up, guard + 1) : spaceColor(f?.name || '');
+  },
+  colorOf(id) { return this.color(this.byId(id)); },
+  /** Poner color propio (`null` = volver a heredar el de la madre). */
+  setColor(id, color) {
+    const f = this.byId(id);
+    if (!f) return;
+    f.color = validFolderColor(color) ? color : null; f.modified = Date.now(); this.save();
+  },
   label(nb) { return this.path(nb.folder).map((f) => f.name).join(' › '); },
   /** Libretas de una carpeta y todas sus subcarpetas. */
   notebooksIn(id) { return S.notebooks.filter((nb) => this.within(nb.folder, id)); },
@@ -5244,8 +5388,8 @@ const Folders = {
   },
 
   save() { Store.set('folders', this.list); },
-  create(name, parent = null) {
-    const f = { id: uid(), name: name.trim() || 'Carpeta sin título', parent: parent || null, color: null, created: Date.now(), modified: Date.now() };
+  create(name, parent = null, color = null) {
+    const f = { id: uid(), name: name.trim() || 'Carpeta sin título', parent: parent || null, color: validFolderColor(color) ? color : null, created: Date.now(), modified: Date.now() };
     this.list.push(f);
     this.save();
     return f;
@@ -5307,7 +5451,7 @@ function moveDialog(items, onDone = refresh) {
       <button class="btn" data-act="cancel">Cancelar</button><button class="btn primary" data-act="move">Mover aquí</button></div>`, (act, b, close) => {
     if (act === 'cancel') return close();
     if (act === 'pick') { target = b.dataset.id || null; return draw(); }
-    if (act === 'newf') return promptDialog('Nueva carpeta', '', (name) => { target = Folders.create(name, target).id; draw(); }, 'Nombre de la carpeta');
+    if (act === 'newf') return newFolderDialog(target, (f) => { target = f.id; draw(); });
     if (act === 'move') {
       if (!allowed(target)) return toast('No se puede meter una carpeta dentro de sí misma.');
       moveItemsTo(items, target);
@@ -5324,10 +5468,78 @@ function moveDialog(items, onDone = refresh) {
         <span class="mf" style="--c:${color}">${icon(id ? 'folder' : 'book')}</span><span ${id ? 'translate="no"' : ''}>${esc(name)}</span></button>`;
     };
     $('#move-tree', scrim).innerHTML = row(null, 'Libretas (inicio)', 0, 'var(--accent)')
-      + Folders.tree().map(({ folder, depth }) => row(folder.id, folder.name, depth + 1, Folders.color(Folders.top(folder.id)))).join('');
+      + Folders.tree().map(({ folder, depth }) => row(folder.id, folder.name, depth + 1, Folders.color(folder))).join('');
     scrim.querySelector('[data-act="move"]').disabled = !allowed(target);
   }
   draw();
+}
+
+// ---------- Color de las carpetas ----------
+// Cada carpeta puede tener su color (`color`, «#rrggbb») o ninguno (`null`): entonces hereda el de su madre.
+function validFolderColor(c) { return typeof c === 'string' && /^#[0-9a-f]{6}$/i.test(c); }
+/** Color propuesto para una carpeta nueva del inicio: el primero de COVERS que aún no usa otra de primer nivel. */
+function freeTopColor() {
+  const used = new Set(Folders.children(null).map((f) => Folders.color(f).toLowerCase()));
+  return COVERS.find((c) => !used.has(c.toLowerCase())) || COVERS[Folders.children(null).length % COVERS.length];
+}
+/** Ventana de color: nombre (solo al crear) + fila de colores + selector libre. `parent` da la opción «como la madre».
+ *  `onOk(name, color)` recibe `color = null` si se queda heredando el de la madre. */
+function folderColorDialog({ title, parent = null, name = null, color = null, inheritLabel, okLabel = 'Guardar', onOk }) {
+  const mother = parent ? Folders.colorOf(parent) : null;
+  let pick = color;   // null = como la madre
+  if (!parent && !pick) pick = freeTopColor();
+  const shown = () => pick || mother;
+  const swatches = COVERS.map((c) => `<button type="button" class="swatch" data-act="color" data-v="${c}" style="background:${c}" aria-label="Color ${c}"></button>`).join('');
+  const scrim = dialog(`<h2>${esc(title)}</h2>
+    <div class="fcolor-head"><span class="folder-icon fcolor-preview" aria-hidden="true"><span class="sheet"></span></span>
+      ${name !== null ? `<label class="field" for="prompt-input">Nombre de la carpeta<input type="text" id="prompt-input" value="${esc(name)}"></label>` : ''}</div>
+    <div class="field">Color
+      ${parent ? `<button type="button" class="fcolor-inherit" data-act="inherit" style="--c:${mother}"><span class="chip-dot"></span> ${esc(inheritLabel)}</button>` : ''}
+      <div class="choices fcolor-row">${swatches}
+        <label class="swatch fcolor-free" title="Otro color"><input type="color" id="fcolor-input" aria-label="Otro color" value="${shown()}"></label></div></div>
+    <div class="actions"><button class="btn" data-act="no">Cancelar</button><button class="btn primary" data-act="ok">${esc(okLabel)}</button></div>`,
+  (act, b, close, sc) => {
+    if (act === 'inherit') { pick = null; return paint(); }
+    if (act === 'color') { pick = b.dataset.v; return paint(); }
+    if (act === 'no') return close();
+    if (act === 'ok') {
+      const v = name !== null ? $('#prompt-input', sc).value.trim() : null;
+      if (name !== null && !v) return $('#prompt-input', sc).focus();
+      close(); onOk(v, pick);
+    }
+  });
+  scrim.querySelector('.dialog').classList.add('fcolor-dialog');
+  const input = $('#fcolor-input', scrim);
+  input.addEventListener('input', () => { pick = input.value; paint(); });
+  $('#prompt-input', scrim)?.addEventListener('keydown', (e) => { if (e.key === 'Enter') scrim.querySelector('[data-act="ok"]').click(); });
+  function paint() {
+    const c = shown(), custom = pick && !COVERS.some((x) => x.toLowerCase() === pick.toLowerCase());
+    scrim.querySelector('.fcolor-preview').style.setProperty('--c', c);
+    scrim.querySelectorAll('.fcolor-row [data-v]').forEach((s) => s.setAttribute('aria-pressed', String(!!pick && s.dataset.v.toLowerCase() === pick.toLowerCase())));
+    scrim.querySelector('.fcolor-inherit')?.setAttribute('aria-pressed', String(!pick));
+    const free = scrim.querySelector('.fcolor-free');
+    free.classList.toggle('on', !!custom); free.style.setProperty('--c', custom ? pick : 'transparent');
+    if (pick) input.value = pick.toLowerCase();
+  }
+  paint();
+  return scrim;
+}
+/** «Nueva carpeta» en `parent` (null = inicio): nombre + color (dentro de otra, el de la madre ya elegido). */
+function newFolderDialog(parent, onDone) {
+  folderColorDialog({ title: 'Nueva carpeta', parent, name: '', inheritLabel: 'Como la carpeta madre', okLabel: 'Crear',
+    onOk: (name, color) => onDone(Folders.create(name, parent, color)) });
+}
+/** «Color…» de una carpeta que ya existe (también las de dentro, cada una por separado). */
+function folderColorEdit(f) {
+  folderColorDialog({ title: `Color de «${f.name}»`, parent: f.parent, color: validFolderColor(f.color) ? f.color : null,
+    inheritLabel: 'Usar el color de la carpeta madre',
+    onOk: (_n, color) => { Folders.setColor(f.id, color); repaintFolderColors(); } });
+}
+/** Cambia en su sitio el color de las carpetas que se ven (sin volver a pintar todo), para que la transición se vea. */
+function repaintFolderColors() {
+  document.querySelectorAll('.folder-card[data-folder] .folder-icon').forEach((el) => el.style.setProperty('--c', Folders.colorOf(el.closest('[data-folder]').dataset.folder)));
+  document.querySelectorAll('.dfolder[data-folder]').forEach((el) => el.style.setProperty('--glow', Folders.colorOf(el.dataset.folder)));
+  document.querySelectorAll('[data-crumb]').forEach((el) => el.style.setProperty('--glow', Folders.colorOf(el.dataset.crumb)));
 }
 
 // =============================================================================
@@ -6634,7 +6846,7 @@ function renderEditor() {
       ${paletteButton()}
       <button class="reading-pill" id="reading-pill" title="Salir del modo lectura">${icon('penOff')}<span>Modo lectura</span><b>Salir</b></button>
       <div class="spacer"></div>
-      <div class="cluster" aria-label="Estudio"><span id="pomo-slot" class="pomo-slot"></span><span id="mic-slot" class="mic-slot"></span></div>
+      <div class="cluster" aria-label="Estudio">${studyButton()}<span id="pomo-slot" class="pomo-slot"></span><span id="mic-slot" class="mic-slot"></span></div>
       <span class="bar-sep" aria-hidden="true"></span>
       <div class="cluster" aria-label="Deshacer">
         <button class="icon-btn" id="undo" aria-label="Deshacer" title="Deshacer (${onbKey('undo')})">${icon('undo')}</button>
@@ -6657,7 +6869,7 @@ function renderEditor() {
       <div class="desk-wrap">
         <main class="desk" id="desk"><div class="pages" id="pages"></div></main>
         <nav class="page-indicator" id="page-indicator" aria-label="Página">
-          <button id="prev-page" aria-label="Página anterior">${icon('back')}</button><span id="page-count"></span>
+          <button id="prev-page" aria-label="Página anterior">${icon('back')}</button><button id="page-count" aria-haspopup="menu" title="Cómo pasar las páginas (también con una pulsación larga)"></button>
           <button id="next-page" aria-label="Página siguiente">${icon('chevronRight')}</button>
         </nav>
       </div>
@@ -6672,6 +6884,7 @@ function renderEditor() {
   $('#find-btn').addEventListener('click', () => ($('.search-panel') ? closeSearchPanel() : openSearchPanel()));
   $('#share-btn').addEventListener('click', (e) => shareMenu(e.currentTarget));
   $('#pal-btn').addEventListener('click', (e) => paletteMenu(e.currentTarget));
+  $('#study-btn').addEventListener('click', (e) => studyMenu(e.currentTarget));
   $('#undo').addEventListener('click', undo);
   $('#redo').addEventListener('click', redo);
   $('#pages-btn').addEventListener('click', openPagesWindow);
@@ -6688,8 +6901,9 @@ function renderEditor() {
   if (Voice.player) Voice.update();
   $('#pomo-slot').addEventListener('click', (e) => { if (e.target.closest('#pomo-btn')) Pomo.openPanel(e.target.closest('#pomo-btn')); });
   $('#pomo-slot').addEventListener('contextmenu', (e) => { if (e.target.closest('#pomo-btn')) Pomo.contextMenu(e); });
-  $('#prev-page').addEventListener('click', () => { updateCurrentPage(); const p = nb.pages[currentPageIndex - 1]; if (p) scrollToPage(p.id); });
-  $('#next-page').addEventListener('click', () => { updateCurrentPage(); const p = nb.pages[currentPageIndex + 1]; if (p) scrollToPage(p.id); });
+  $('#prev-page').addEventListener('click', () => PageMode.step(-1));
+  $('#next-page').addEventListener('click', () => PageMode.step(1));
+  PageMode.bindCounter($('#page-count'));
   $('#page-format').addEventListener('click', (e) => pageFormatMenu(e.currentTarget));
   $('#read-btn').addEventListener('click', () => setReading(!activeNb().reading));
   $('#reading-pill').addEventListener('click', () => setReading(false));
@@ -6718,7 +6932,7 @@ function renderEditor() {
   });
   attachReadingPan($('#desk'));
   pinchActive = false;   // un pellizco a medias del editor anterior no deja las páginas sin repintar
-  attachPenTouch(desk); attachPinchZoom(desk); attachNoteHold(desk);
+  attachPenTouch(desk); attachPinchZoom(desk); attachNoteHold(desk); PageMode.attach(desk);
   // Un toque en el escritorio, fuera de las páginas, suelta el texto o el elemento seleccionado.
   desk.addEventListener('pointerdown', (e) => {
     if ((S.editing || S.selected) && e.target.matches('#desk, #pages, .page, .page-number')) deselectAll();
@@ -6730,6 +6944,7 @@ function renderEditor() {
   applyReading();
   updateBookmarkButton();
   Palette.mount();
+  updateStudyBadge();
 }
 
 /** Botón de herramienta: el bolígrafo y el subrayador llevan su color en el icono y en una barrita. */
@@ -6785,6 +7000,7 @@ function updatePageIndicator() {
   const nb = activeNb(), count = $('#page-count');
   if (!nb || !count) return;
   count.textContent = `${currentPageIndex + 1} / ${nb.pages.length}`;
+  count.setAttribute('aria-label', `Página ${currentPageIndex + 1} de ${nb.pages.length}. Cómo pasar las páginas: ${PageMode.name()}`);
   $('#prev-page').disabled = currentPageIndex === 0;
   $('#next-page').disabled = currentPageIndex >= nb.pages.length - 1;
 }
@@ -6828,6 +7044,7 @@ function layoutPages(redraw = true) {
     v.inner.style.transform = `scale(${S.zoom})`;
     if (!v.laidOut) { v.laidOut = true; renderItems(page); }
   }
+  PageMode.layout();   // modo de páginas: fila o columna, márgenes para encuadrar y encaje
   $$('.comment-panel').forEach(placeCommentPanel);   // los globos de comentario no cambian de tamaño con el zoom
   if (redraw) redrawPages(pageDpr());
   Ruler.sync();   // la regla mide en mm de la página: con otro zoom, otras marcas
@@ -6858,11 +7075,12 @@ function unmountPage(v) {
 function redrawPages(dpr = pageDpr()) {
   const nb = activeNb(), desk = $('#desk');
   if (!nb || !desk || !desk.clientHeight) return;   // escritorio oculto: no se sabe qué se ve, no se toca nada
-  const scale = pageScale(dpr), top = desk.scrollTop, h = desk.clientHeight;
+  // En el modo horizontal las páginas van en fila: la distancia se mide de lado.
+  const a = PageMode.ax(), scale = pageScale(dpr), top = desk[a.pos], h = desk[a.vp];
   for (const page of nb.pages) {
     const v = views.get(page.id);
     if (!v || !document.contains(v.wrap)) continue;
-    const y0 = v.wrap.offsetTop, y1 = y0 + v.wrap.offsetHeight;
+    const y0 = v.wrap[a.off], y1 = y0 + v.wrap[a.len];
     const gap = y1 < top ? top - y1 : y0 > top + h ? y0 - top - h : 0;   // distancia a la zona visible
     if (pinchActive) { if (gap <= h && !v.ink._scale) mountPage(page, v, scale); continue; }
     if (gap <= h) mountPage(page, v, scale);
@@ -6885,6 +7103,10 @@ function renderInk(page) {
 function setZoom(z) {
   const desk = $('#desk');
   if (!desk) return;
+  if (PageMode.snapped()) {   // por páginas: el centro de la vista se queda quieto (no salta a otra página)
+    const r = desk.getBoundingClientRect(), cx = r.left + desk.clientWidth / 2, cy = r.top + desk.clientHeight / 2, at = anchorAt(cx, cy);
+    if (at) return zoomAt(z, at, cx, cy);
+  }
   const ratio = desk.scrollTop / Math.max(1, desk.scrollHeight);
   S.zoom = Math.max(0.3, Math.min(3, z));
   layoutPages(false);
@@ -6961,7 +7183,7 @@ const NoteZoom = {
       if (k < 1) { this.raf = requestAnimationFrame(step); return; }
       this.raf = 0; pinchActive = false;
       done?.();
-      redrawPages();
+      redrawPages(); PageMode.afterZoom();
     };
     this.raf = requestAnimationFrame(step);
   },
@@ -7030,7 +7252,7 @@ function attachPinchZoom(desk) {
     cancelAnimationFrame(pinch.raf);
     if (pinch.next) zoomAt(pinch.next[0], pinch.anchor, pinch.next[1], pinch.next[2]);
     pinch = null; pinchActive = false;
-    redrawPages();
+    redrawPages(); PageMode.afterZoom();
   };
   desk.addEventListener('touchend', end);
   desk.addEventListener('touchcancel', end);
@@ -7039,6 +7261,12 @@ function attachPinchZoom(desk) {
 function fitZoom() {
   const desk = $('#desk'), nb = activeNb();
   if (!desk || !nb) return;
+  if (PageMode.snapped()) {   // por páginas: una página entera, y se sigue en la misma
+    const page = nb.pages[currentPageIndex];
+    S.zoom = PageMode.fit(desk, nb); layoutPages(false);
+    if (page) scrollToPage(page.id, false);
+    return redrawPages();
+  }
   const widest = Math.max(...nb.pages.map((p) => p.w));
   setZoom(Math.min(1.3, (desk.clientWidth - 40) / widest));
 }
@@ -7047,9 +7275,9 @@ addEventListener('resize', () => { if (S.view === 'editor') fitZoom(); });
 function updateCurrentPage() {
   const desk = $('#desk'), nb = activeNb();
   if (!desk || !nb) return;
-  const mid = desk.scrollTop + desk.clientHeight / 2;
+  const a = PageMode.ax(), mid = desk[a.pos] + desk[a.vp] / 2;
   let index = 0;
-  nb.pages.forEach((p, i) => { const v = views.get(p.id); if (v && v.wrap.offsetTop <= mid) index = i; });
+  nb.pages.forEach((p, i) => { const v = views.get(p.id); if (v && v.wrap[a.off] <= mid) index = i; });
   if (index !== currentPageIndex) {
     currentPageIndex = index;
     updateBookmarkButton();
@@ -7061,10 +7289,189 @@ function updateCurrentPage() {
 function scrollToPage(pageId, smooth = true) {
   const v = views.get(pageId), desk = $('#desk');
   if (!v || !desk) return;
-  desk.scrollTo({ top: v.wrap.offsetTop - 20, behavior: smooth && !reduceMotion() ? 'smooth' : 'auto' });
+  const behavior = smooth && !reduceMotion() ? 'smooth' : 'auto';
+  if (PageMode.snapped()) desk.scrollTo({ [PageMode.ax().key]: PageMode.target(desk, v.wrap, true), behavior });   // encuadrada
+  else desk.scrollTo({ top: v.wrap.offsetTop - 20, behavior });
   currentPageIndex = activeNb().pages.findIndex((p) => p.id === pageId);
+  PageMode.aimed(currentPageIndex);
   updateBookmarkButton();
 }
+// ---------- Cómo se pasan las páginas: continuo, vertical por páginas u horizontal (diapositivas) ----------
+// La libreta lo recuerda (nb.scrollMode); sin él, vale el último elegido en este dispositivo (S.scrollMode). En los dos
+// modos «por páginas» cada página se encuadra entera y centrada: con el zoom de ajuste (o menos) lo hace el navegador
+// (scroll-snap, también con la inercia del dedo); con más zoom uno se mueve libre dentro de la página y, al soltar, se
+// encaja en su borde o en la vecina si ya se ve más (settle). Mientras se pellizca o hay un post-it ampliado, no se encaja.
+const PM_PAD = 56;   // margen arriba y abajo de la página encuadrada (abajo va el contador de página)
+const PM_ICONS = {
+  continuous: '<path d="M6 1v4h12V1"/><rect x="6" y="8" width="12" height="8" rx="1.2"/><path d="M6 23v-4h12v4"/>',
+  paged: '<rect x="7.5" y="5" width="9" height="12" rx="1.2"/><path d="M3 7V3h4M21 7V3h-4M3 15v4h4M21 15v4h-4"/><path d="M10 21.5l2 1.5 2-1.5"/>',
+  horizontal: '<rect x="8" y="4.5" width="8" height="11.5" rx="1.2"/><path d="M1.5 6h3v9h-3M22.5 6h-3v9h3"/><path d="M9 20.5h6M13.5 19l1.5 1.5-1.5 1.5"/>',
+};
+const PM_UI = {
+  continuous: { name: 'Continuo', hint: 'Las páginas una debajo de otra, sin encajar', toast: 'Páginas en continuo, una debajo de otra' },
+  paged: { name: 'Por páginas', hint: 'De arriba abajo, cada página entera y de una en una', toast: 'Páginas de una en una, siempre enteras' },
+  horizontal: { name: 'Horizontal', hint: 'Como diapositivas: se pasan de lado', toast: 'Páginas en horizontal: pásalas de lado, como diapositivas' },
+};
+const PageMode = {
+  touches: 0, timer: 0, last: null, goal: -1, goalAt: 0, wheelLast: 0, wheelArmed: true, wheelAcc: 0,
+  get(nb = activeNb()) { const m = nb?.scrollMode; return PAGE_MODES.includes(m) ? m : S.scrollMode; },
+  snapped() { return this.get() !== 'continuous'; },
+  horiz() { return this.get() === 'horizontal'; },
+  name() { return PM_UI[this.get()].name; },
+  /** Nombres de las medidas del eje en el que se pasan las páginas (vertical u horizontal). */
+  ax() {
+    return this.horiz() ? { pos: 'scrollLeft', vp: 'clientWidth', full: 'scrollWidth', off: 'offsetLeft', len: 'offsetWidth', key: 'left' }
+      : { pos: 'scrollTop', vp: 'clientHeight', full: 'scrollHeight', off: 'offsetTop', len: 'offsetHeight', key: 'top' };
+  },
+  /** Zoom que deja ver una página entera (la más grande de la libreta): ajustada a lo ancho o a lo alto según quepa. */
+  fit(desk = $('#desk'), nb = activeNb()) {
+    const w = Math.max(...nb.pages.map((p) => p.w)), h = Math.max(...nb.pages.map((p) => p.h));
+    return Math.max(0.3, Math.min(3, (desk.clientWidth - 40) / w, (desk.clientHeight - 2 * PM_PAD) / h));
+  },
+  /** Fila o columna, y márgenes para que cada página se pueda centrar sola (sin asomar la vecina). Lo llama layoutPages. */
+  layout() {
+    const desk = $('#desk'), box = $('#pages'), nb = activeNb();
+    if (!desk || !box || !nb) return;
+    const mode = this.get(), h = mode === 'horizontal';
+    desk.classList.toggle('pm-paged', mode === 'paged');
+    desk.classList.toggle('pm-horizontal', h);
+    $('#page-indicator')?.setAttribute('data-mode', mode);
+    if (mode === 'continuous') { box.style.gap = box.style.padding = ''; return this.sync(); }
+    const vp = h ? desk.clientWidth : desk.clientHeight, len = (p) => (h ? p.w : p.h) * S.zoom;
+    const gap = Math.max(28, vp - Math.max(...nb.pages.map(len)));
+    const start = Math.max(14, (vp - len(nb.pages[0])) / 2), end = Math.max(14, (vp - 52) / 2);   // al final, «+ Añadir página» centrado
+    box.style.gap = `${Math.round(gap)}px`;
+    box.style.padding = h ? `14px ${Math.round(end)}px 14px ${Math.round(start)}px` : `${Math.round(start)}px 16px ${Math.round(end)}px`;
+    this.sync();
+  },
+  /** Encaje del navegador: solo por páginas, con el zoom de ajuste o menos y sin pellizco ni post-it ampliado. */
+  sync() {
+    const desk = $('#desk');
+    if (!desk || !activeNb()) return;
+    desk.classList.toggle('pm-snap', this.snapped() && !pinchActive && !NoteZoom.prev && S.zoom <= this.fit(desk) * 1.02);
+  },
+  afterZoom() { this.sync(); this.queueSettle(); },
+  /** Posición del eje que encuadra `el` (una página o «+ Añadir página»): centrada si cabe; si no, con `enter` va a su
+   *  principio y sin él se queda donde está sin pasar de sus bordes. */
+  target(desk, el, enter) {
+    const a = this.ax(), vp = desk[a.vp], start = el[a.off], len = el[a.len];
+    const t = len <= vp ? start - (vp - len) / 2 : enter ? start : Math.min(Math.max(desk[a.pos], start), start + len - vp);
+    return Math.max(0, Math.min(desk[a.full] - vp, Math.round(t)));
+  },
+  /** Lo que más se ve ahora en el eje (página o «+ Añadir página»). */
+  best(desk) {
+    const a = this.ax(), p0 = desk[a.pos], p1 = p0 + desk[a.vp];
+    let best = null, most = -Infinity;
+    for (const el of desk.querySelectorAll('#pages > .page, #pages > .add-page')) {
+      const s = el[a.off], vis = Math.min(s + el[a.len], p1) - Math.max(s, p0);
+      if (vis > most) { most = vis; best = el; }
+    }
+    return best;
+  },
+  queueSettle() { if (this.snapped()) { clearTimeout(this.timer); this.timer = setTimeout(() => this.settle(), 160); } },
+  /** Al dejar de desplazarse (con más zoom que el de ajuste, o tras arrastrar en modo lectura): encaja con una animación suave. */
+  settle(force = false) {
+    const desk = $('#desk');
+    if (!desk || !activeNb() || !this.snapped() || !desk.clientHeight) return;
+    if (this.touches || pinchActive || NoteZoom.prev || NoteZoom.raf || desk.classList.contains('panning')) return;
+    if (desk.classList.contains('pm-snap') && !force) return;   // ya lo encaja el navegador
+    const el = this.best(desk);
+    if (!el) return;
+    const a = this.ax(), pos = desk[a.pos], t = this.target(desk, el, false);
+    if (Math.abs(t - pos) <= 2 || (this.last !== null && Math.abs(this.last - pos) <= 1)) return;   // ya está, o no se deja
+    this.last = pos;
+    desk.scrollTo({ [a.key]: t, behavior: reduceMotion() ? 'auto' : 'smooth' });
+  },
+  /** scrollToPage acaba de ir a la página `i`: las flechas siguientes cuentan desde ella aunque la animación siga. */
+  aimed(i) { this.goal = i; this.goalAt = performance.now(); this.last = null; },
+  /** Página siguiente (+1) o anterior (−1). Con `within` (teclado), si la página no cabe se recorre antes hasta su borde. */
+  step(dir, within = false) {
+    const desk = $('#desk'), nb = activeNb();
+    if (!desk || !nb) return;
+    let i;
+    if (this.snapped() && performance.now() - this.goalAt < 700 && this.goal >= 0) i = this.goal;
+    else { updateCurrentPage(); i = currentPageIndex; }
+    const v = views.get(nb.pages[i]?.id), a = this.ax(), vp = desk[a.vp];
+    if (within && this.snapped() && v && v.wrap[a.len] > vp + 2) {
+      const pos = desk[a.pos], s = v.wrap[a.off], e = s + v.wrap[a.len] - vp;
+      const to = dir > 0 ? Math.min(e, pos + vp * 0.85) : Math.max(s, pos - vp * 0.85);
+      if (Math.abs(to - pos) > 2) return desk.scrollTo({ [a.key]: to, behavior: reduceMotion() ? 'auto' : 'smooth' });
+    }
+    const page = nb.pages[i + dir];
+    if (page) scrollToPage(page.id);
+  },
+  /** Escuchas del escritorio (cada renderEditor crea uno nuevo). */
+  attach(desk) {
+    desk.addEventListener('scroll', () => this.queueSettle(), { passive: true });
+    const fingers = (e) => { this.touches = e.touches.length; this.last = null; if (!this.touches) this.queueSettle(); };
+    for (const t of ['touchstart', 'touchend', 'touchcancel']) desk.addEventListener(t, fingers, { passive: true });
+    // Horizontal: la rueda (de arriba abajo) pasa las páginas de una en una; un giro seguido (o la inercia del trackpad)
+    // cuenta como uno solo. Con zoom y la página más alta que la vista, la rueda baja por la página.
+    desk.addEventListener('wheel', (e) => {
+      if (!this.horiz() || e.ctrlKey || e.metaKey || NoteZoom.prev || Math.abs(e.deltaX) >= Math.abs(e.deltaY)) return;
+      if (desk.scrollHeight > desk.clientHeight + 2) return;
+      e.preventDefault();
+      const now = performance.now();
+      if (now - this.wheelLast > 250) { this.wheelArmed = true; this.wheelAcc = 0; }
+      this.wheelLast = now;
+      if (!this.wheelArmed) return;
+      this.wheelAcc += e.deltaY;
+      if (Math.abs(this.wheelAcc) < 30) return;
+      this.wheelArmed = false;
+      this.step(Math.sign(this.wheelAcc));
+    }, { passive: false });
+  },
+  /** El contador «1 / 4»: un toque o una pulsación larga abren el menú pequeño de los modos. */
+  bindCounter(b) {
+    let timer = 0, held = false;
+    b.addEventListener('click', () => { if (held) { held = false; return; } this.counterMenu(b); });
+    b.addEventListener('contextmenu', (e) => { e.preventDefault(); if (!openPopover) this.counterMenu(b); });
+    b.addEventListener('pointerdown', (e) => {
+      if (e.pointerType === 'mouse') return;
+      held = false; clearTimeout(timer);
+      timer = setTimeout(() => { held = true; if (!openPopover) this.counterMenu(b); }, 500);
+    });
+    for (const t of ['pointerup', 'pointercancel', 'pointerleave']) b.addEventListener(t, () => clearTimeout(timer));
+  },
+  choices() {
+    const cur = this.get();
+    return `<div class="pm-choices" role="group" aria-label="Cómo pasar las páginas">${PAGE_MODES.map((m) => `<button data-act="pm:${m}" aria-pressed="${m === cur}" title="${PM_UI[m].hint}">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${PM_ICONS[m]}</svg><span>${PM_UI[m].name}</span></button>`).join('')}</div>`;
+  },
+  menuHtml() { return `<hr><div class="label">Páginas</div>${this.choices()}`; },
+  counterMenu(anchor) { popover(anchor, `<div class="label">Cómo pasar las páginas</div>${this.choices()}`, (act) => this.menuAct(act)); },
+  menuAct(act) {
+    if (!act.startsWith('pm:')) return false;
+    this.set(act.slice(3));
+    return true;
+  },
+  /** Cambia el modo de esta libreta (y el de por defecto) sin perder la página en la que se está. */
+  set(mode) {
+    const nb = activeNb(), desk = $('#desk');
+    if (!nb || !desk || !PAGE_MODES.includes(mode)) return;
+    updateCurrentPage();
+    const page = nb.pages[currentPageIndex];
+    nb.scrollMode = mode; S.scrollMode = mode;
+    savePrefs(); Store.put(nb);   // como el modo lectura: no cuenta como cambio del contenido
+    desk.scrollLeft = 0;
+    layoutPages(false); fitZoom();
+    if (page) scrollToPage(page.id, false);
+    updatePageIndicator();
+    toast(PM_UI[mode].toast);
+  },
+};
+// Teclado (por páginas): AvPág/RePág y las flechas del eje pasan de página (con zoom, recorren antes la página).
+addEventListener('keydown', (e) => {
+  if (S.view !== 'editor' || e.defaultPrevented || e.metaKey || e.ctrlKey || e.altKey || e.shiftKey || !PageMode.snapped()) return;
+  if (typingInField() || document.querySelector('.scrim, .popover, .onb')) return;
+  const h = PageMode.horiz();
+  const dir = { PageDown: 1, PageUp: -1, [h ? 'ArrowRight' : 'ArrowDown']: 1, [h ? 'ArrowLeft' : 'ArrowUp']: -1 }[e.key];
+  if (!dir) return;
+  e.preventDefault();
+  PageMode.step(dir, true);
+});
+// Al soltar el ratón (p. ej. tras arrastrar en modo lectura), la página se encaja. Con el dedo lo hace touchend (sin pisar la inercia).
+addEventListener('pointerup', (e) => { if (e.pointerType === 'mouse' && S.view === 'editor' && activeNb() && PageMode.snapped()) setTimeout(() => PageMode.settle(true), 60); });
 function pageAtPoint(clientX, clientY) {
   for (const page of activeNb().pages) {
     const r = views.get(page.id).wrap.getBoundingClientRect();
@@ -7096,6 +7503,7 @@ function flashRect(pageId, rect) {
 function flashItem(pageId, itemId, query) {
   const page = activeNb().pages.find((p) => p.id === pageId);
   const item = page?.items.find((i) => i.id === itemId);
+  if (!item && AI.flashOcr(page, itemId)) return;   // escritura a mano transcrita (page.ocr)
   if (!item) return flashRect(pageId, null);
   if (item.type === 'comment' && !item.expanded) { item.expanded = true; renderItems(page); }
   const v = views.get(pageId), desk = $('#desk');
@@ -7144,11 +7552,13 @@ function pageFormatMenu(anchor) {
     <button class="pf-row" data-sub="paper" aria-expanded="false"><span class="pf-sw" style="background:${(PAPERS[page.paper] || PAPERS.white).fill}"></span> <span class="pf-name">Color del papel</span> <span class="pf-val">${(PAPERS[page.paper] || PAPERS.white).name}</span>${icon('chevronDown')}</button>
     <div class="pf-sub pf-papers" data-for="paper" hidden>${Object.entries(PAPERS).map(([k, p]) => `<button data-act="paper:${k}" title="${p.name}" aria-label="${p.name}" aria-pressed="${page.paper === k}"><span class="pf-sw" style="background:${p.fill}"></span>${p.name}</button>`).join('')}</div>
     <button data-act="all">${icon('layers')} Aplicar a todas las páginas</button>`}
+    <hr><button data-act="legend">${icon('palette')} Leyenda de colores de esta libreta…</button>
     <hr><button data-act="clear">${icon('eraser')} Borrar el contenido de esta página…</button>
     <button data-act="delete" class="danger" ${nb.pages.length < 2 ? 'disabled' : ''}>${icon('trash')} Eliminar esta página…</button>`, (act) => {
     const [kind, value] = act.split(':');
     if (act === 'add') return newPageDialog();
     if (act === 'dup') return duplicatePage(nb, currentPageIndex);
+    if (act === 'legend') return Meaning.legendDialog(nb);
     if (kind === 'tpl' || kind === 'paper') {
       const before = snapshotPage(page);
       page[kind === 'tpl' ? 'template' : 'paper'] = value;
@@ -7190,37 +7600,83 @@ function pageMenu(anchor) {
   popover(anchor, `
     <div class="label">Zoom (también con Ctrl + rueda)</div>
     <button data-act="zoom-in">${icon('plus')} Acercar</button><button data-act="zoom-out">${icon('minus')} Alejar</button><button data-act="zoom-fit">${icon('pages')} Ajustar al ancho</button>
-    <hr><button data-act="pomo-visible">${mark(Pomo.visible)} Mostrar el temporizador en la barra</button>
-    <button data-act="hold">${mark(S.holdToSnap)} Mantener quieto al final: forma perfecta o recta</button>
-    <button data-act="fullscreen">${icon(isFullscreen() ? 'shrink' : 'expand')} ${isFullscreen() ? 'Salir de pantalla completa' : 'Pantalla completa'} <span class="kbd-hint">${onbKey('fullscreen')}</span></button>
+    <hr><button data-act="fullscreen">${icon(isFullscreen() ? 'shrink' : 'expand')} ${isFullscreen() ? 'Salir de pantalla completa' : 'Pantalla completa'} <span class="kbd-hint">${onbKey('fullscreen')}</span></button>
     ${fingerSwitch()}
     <button data-act="shortcuts">${icon('keyboard')} Atajos de teclado…</button>
-    <hr><div class="label">Tarjetas de repaso</div>
-    <button data-act="cards-review">${icon('lightbulb')} Repasar tarjetas (${Cards.pendingText(nb)})</button>
-    <button data-act="cards-new">${icon('plus')} Nueva tarjeta…</button><button data-act="cards-list">${icon('pages')} Todas las tarjetas…</button>
-    ${Recall.menuHtml(nb)}
-    <hr><div class="label">Colores con significado</div>
-    <button data-act="legend">${icon('palette')} Leyenda de colores…</button><button data-act="color-sum">${icon('layers')} Resumen por color</button>
-    ${Tape.menuHtml(nb)}
+    ${PageMode.menuHtml()}
     <hr><div class="label">Apariencia</div>
     ${appearanceButtons()}`, (act) => {
     if (act === 'shortcuts') return shortcutsDialog();
-    if (act === 'cards-review') return Cards.review(nb);
-    if (act === 'cards-new') return Cards.createDialog(nb);
-    if (act === 'cards-list') return Cards.listDialog(nb);
-    if (Recall.menuAct(act, nb)) return;   // «Marcar como repasada» (curva del olvido)
-    if (act === 'legend') return Meaning.legendDialog(nb);
-    if (act === 'color-sum') return Meaning.summaryDialog(nb);
-    if (Tape.menuAct(act, nb, anchor)) return;   // «Repaso activo»: cintas y repaso por color
+    if (PageMode.menuAct(act)) return;   // «Páginas»: continuo, por páginas u horizontal
     if (act === 'fullscreen') return toggleFullscreen();
     if (act === 'finger') return toggleFinger();
-    if (act === 'pomo-visible') { Pomo.visible = !Pomo.visible; return Pomo.changed(); }
-    if (act === 'hold') { S.holdToSnap = !S.holdToSnap; savePrefs(); return toast(S.holdToSnap ? 'Mantener quieto al final de un trazo lo convierte en forma o recta' : 'Los trazos quedan siempre tal como los dibujas'); }
     if (act === 'zoom-in') return setZoom(S.zoom * 1.2);
     if (act === 'zoom-out') return setZoom(S.zoom / 1.2);
     if (act === 'zoom-fit') return fitZoom();
   });
   if (openPopover) bindSubmenus(openPopover.el);
+}
+// ---------- Menú «Estudio» de la barra: tarjetas, repaso activo, resumen por color e IA ----------
+function studyButton() {
+  return `<button class="icon-btn study-btn" id="study-btn" aria-haspopup="menu" aria-label="Estudio" title="Estudio: tarjetas, repaso e IA">${icon('study')}<span class="study-badge" hidden></span></button>`;
+}
+/** La insignia del botón: cuántas tarjetas tocan hoy (no se ve si ninguna). */
+function updateStudyBadge() {
+  const b = $('#study-btn'), nb = activeNb();
+  if (!b || !nb) return;
+  const n = Cards.due(nb).length, badge = b.querySelector('.study-badge');
+  badge.hidden = !n;
+  badge.textContent = n > 99 ? '99+' : String(n);
+  b.setAttribute('aria-label', n ? `Estudio · ${Cards.pendingText(nb)}` : 'Estudio');
+}
+// Al cerrar una ventana (repaso, nueva tarjeta, IA…) y cada minuto (las tarjetas «vencen» con el tiempo).
+new MutationObserver((list) => { if (list.some((m) => [...m.removedNodes].some((n) => n.classList?.contains('scrim')))) updateStudyBadge(); }).observe(document.body, { childList: true });
+setInterval(updateStudyBadge, 60000);
+function studyMenu(anchor) {
+  updateCurrentPage();
+  const nb = activeNb(), n = Cards.due(nb).length;
+  popover(anchor, `<div class="label">Tarjetas</div>
+    <button data-act="cards-review">${icon('lightbulb')} Repasar <span class="study-count${n ? ' on' : ''}">${n === 1 ? '1 pendiente' : `${n} pendientes`}</span></button>
+    <button data-act="cards-all" ${Cards.all(nb).length ? '' : 'disabled'} title="Practicar también las que aún no tocan: no cambia cuándo vuelven">${icon('rotate')} Repasar todas (aunque no toquen)</button>
+    <button data-act="cards-new">${icon('plus')} Nueva tarjeta…</button><button data-act="cards-list">${icon('pages')} Todas las tarjetas…</button>
+    ${Recall.menuHtml(nb)}
+    ${Tape.menuHtml(nb)}
+    <hr><div class="label">Colores</div>
+    <button data-act="color-sum">${icon('layers')} Resumen por color</button>
+    <hr><div class="label study-ai">${icon('sparkles')} IA</div>
+    <button data-act="ai:cards">${icon('lightbulb')} Tarjetas de esta página</button>
+    <button data-act="ai:summary">${icon('outline')} Resumir esta página</button>
+    <button data-act="ai:ocr">${icon('scanText')} Transcribir esta página</button>
+    <button data-act="ai-key">${icon('key')} Clave de IA…</button>
+    <hr><button data-act="pomo">${icon('timer')} Temporizador de estudio…</button>`, (act) => {
+    if (act === 'cards-review') return Cards.review(nb);
+    if (act === 'cards-all') return Cards.review(nb, { all: true });
+    if (act === 'cards-new') return Cards.createDialog(nb);
+    if (act === 'cards-list') return Cards.listDialog(nb);
+    if (act === 'color-sum') return Meaning.summaryDialog(nb);
+    if (act.startsWith('ai:')) return AI.fromPage(act.slice(3));
+    if (act === 'ai-key') return AI.keyDialog();
+    if (act === 'pomo') return Pomo.openPanel(anchor);
+    if (Recall.menuAct(act, nb)) return;   // «Marcar como repasada» (curva del olvido)
+    Tape.menuAct(act, nb, anchor);   // «Repaso activo»: cintas y repaso por color
+  });
+  openPopover?.el.classList.add('study-pop');
+}
+// ---------- Menú «Formas» de la barra del bolígrafo y del subrayador: «Mantener quieto al final» (antes en «⋯») ----------
+function shapesMenuButton() {
+  return `<button class="icon-btn shapes-more" data-act="shapes-menu" aria-haspopup="menu" aria-label="Opciones de formas" title="Opciones de formas: mantener quieto al final">${icon('chevronDown')}</button>`;
+}
+function shapesMenu(anchor) {
+  const pen = S.tool !== 'highlighter';
+  const opt = (act, on, name, hint) => `<button class="sw-opt" data-act="${act}" role="menuitemcheckbox" aria-checked="${on}"><span class="sw-txt"><b>${name}</b><span>${hint}</span></span><span class="switch" aria-hidden="true"></span></button>`;
+  popover(anchor, `<div class="label">Formas</div>
+    ${pen ? opt('shapes', S.penShapes, 'Cada trazo, una forma', 'Todo lo que dibujes se convierte en línea, círculo, rectángulo…') : ''}
+    ${opt('hold', S.holdToSnap, 'Mantener quieto al final', pen ? 'Al acabar un trazo, quédate quieto 1 segundo sin soltar: sale una forma perfecta o una recta.' : 'Al acabar el subrayado en «Libre», quédate quieto 1 segundo sin soltar: sale recto.')}`, (act) => {
+    if (act === 'shapes') { S.penShapes = !S.penShapes; renderOptions(); return; }
+    S.holdToSnap = !S.holdToSnap; savePrefs();
+    toast(S.holdToSnap ? 'Mantener quieto al final de un trazo lo convierte en forma o recta' : 'Los trazos quedan siempre tal como los dibujas');
+  });
+  openPopover?.el.classList.add('shapes-pop');
 }
 // ---------- Botón «Paleta flotante» de la barra (justo después de las herramientas: la paleta las lleva consigo) ----------
 /** Icono, nombre (para la etiqueta) y explicación de cada modo de la paleta (PALETTE_MODES en palette.js). */
@@ -7509,7 +7965,7 @@ function renderOptions() {
       <div class="sep"></div><span class="item-acts">${optGroup(2, optBtn('copy', 'copy', 'Copiar', mod + 'C') + optBtn('cut', 'cut', 'Cortar', mod + 'X') + optBtn('duplicate', 'duplicate', 'Duplicar'), 'list')}
       ${optBtn('delete', 'trash', 'Eliminar', 'Supr')}</span>
       <div class="sep"></div>${optGroup(4, `<button class="btn tinted" data-act="make-card" title="Tarjeta de repaso con la zona seleccionada">${icon('lightbulb')} Crear tarjeta</button>`)}
-      ${optGroup(3, `<button class="btn tinted" data-act="make-ai-cards" title="La IA resume la selección y propone varias tarjetas">${icon('sparkles')} Tarjetas con IA</button>`)}${optGroup(1, Tape.lassoBtn())}`;
+      ${optGroup(3, `<button class="btn tinted ai-btn" data-act="ai-menu" aria-haspopup="menu" title="IA con lo seleccionado: tarjetas, resumir, transcribir a texto o explicar">${icon('sparkles')} IA ${icon('chevronDown')}</button>`)}${optGroup(1, Tape.lassoBtn())}`;
   } else if (item && item.type === 'tape') {
     html = Tape.optionsHtml(item) + itemActions(false);
   } else if (item && item.type === 'comment') {
@@ -7536,7 +7992,7 @@ function renderOptions() {
     html = `<button class="menu-btn" data-act="pen-kind-menu" aria-haspopup="menu">${icon('pen')}${PEN_KINDS[S.penKind]}${icon('chevronUpDown')}</button>
       <div class="sep"></div>${colorRow('pen', S.penColor)}<div class="sep"></div>
       ${widthControl('pen-width', 1, 14, 0.5, S.penWidth, S.penColor)}
-      ${optGroup(2, `<div class="sep"></div><button class="pill-toggle" data-act="shapes" aria-pressed="${S.penShapes}">${icon('shapes')} Formas</button>`)}
+      ${optGroup(2, `<div class="sep"></div><button class="pill-toggle" data-act="shapes" aria-pressed="${S.penShapes}">${icon('shapes')} Formas</button>${shapesMenuButton()}`)}
       <span class="hint">${S.penShapes ? 'Cada trazo se convierte en línea, círculo, rectángulo…' : 'Para una forma perfecta, al acabar el trazo mantén quieto 1 segundo antes de soltar'}</span>`;
   } else if (S.tool === 'highlighter') {
     html = Tape.drawing ? Tape.hlBarHtml() : `${colorRow('highlighter', S.hlColor)}<div class="sep"></div>
@@ -7544,7 +8000,7 @@ function renderOptions() {
       ${optGroup(2, `<div class="sep"></div><div class="seg" role="group" aria-label="Forma del subrayado">
         <button data-act="hl-mode" data-v="free" aria-pressed="${S.hlMode === 'free'}">Libre</button>
         <button data-act="hl-mode" data-v="straight" aria-pressed="${S.hlMode === 'straight'}">Recto</button>
-        <button data-act="hl-mode" data-v="cardinal" aria-pressed="${S.hlMode === 'cardinal'}">H / V</button></div>`)}
+        <button data-act="hl-mode" data-v="cardinal" aria-pressed="${S.hlMode === 'cardinal'}">H / V</button></div>${shapesMenuButton()}`)}
       ${optGroup(1, `<div class="sep"></div>${Tape.hlBarHtml()}`)}`;
   } else if (S.tool === 'eraser') {
     html = `<div class="seg"><button data-act="eraser-mode" data-v="stroke" aria-pressed="${S.eraserMode === 'stroke'}">Trazo entero</button><button data-act="eraser-mode" data-v="partial" aria-pressed="${S.eraserMode === 'partial'}">Parcial</button></div>
@@ -7597,7 +8053,30 @@ function setCommentSize(size) {
   renderOptions();
 }
 /** Color con el que «Resaltar» marca las letras (el último elegido; solo en memoria). */
-const TextMark = { last: MARK_COLORS[1][1] };
+const TextMark = {
+  last: MARK_COLORS[1][1],
+  typing: null,   // color con el que se está escribiendo resaltado (aún sin letras escritas)
+  /** ¿El cursor está dentro de un trozo resaltado? */
+  atCaret() {
+    const sel = getSelection();
+    let el = sel.rangeCount ? nodeEl(sel.anchorNode) : null;
+    while (el && !el.classList?.contains('rich')) {
+      const bg = el.style?.backgroundColor;
+      if (bg && bg !== 'transparent' && !/rgba\(\s*0,\s*0,\s*0,\s*0\s*\)/.test(bg)) return bg;
+      el = el.parentElement;
+    }
+    return null;
+  },
+  /** Enciende el botón Resaltar mientras se escribe resaltado (como la negrita). */
+  sync() {
+    const b = document.querySelector('#options .mark-btn');
+    if (!b) return;
+    const on = !!S.editing && !!(TextMark.typing || TextMark.atCaret());
+    b.setAttribute('aria-pressed', on);
+    b.classList.toggle('on', on);
+  },
+};
+document.addEventListener('selectionchange', () => { if (S.editing) TextMark.sync(); });
 /** Barra de estilo de texto. Con texto seleccionado se aplica a la selección; si no, a todo el cuadro.
  *  Lo esencial (tamaño, color, B I U S, resaltar) siempre está; lo demás pasa a «Más» si no cabe. */
 function textBar(item) {
@@ -7614,7 +8093,7 @@ function textBar(item) {
       <button data-act="italic" aria-pressed="${state('italic', base.italic)}" style="font-style:italic" aria-label="Cursiva" title="Cursiva">I</button>
       <button data-act="underline" aria-pressed="${state('underline', base.underline)}" style="text-decoration:underline" aria-label="Subrayado" title="Subrayado">U</button>
       <button data-act="strike" aria-pressed="${state('strikeThrough', base.strike)}" style="text-decoration:line-through" aria-label="Tachado" title="Tachado">S</button></div>
-    <button class="icon-btn mark-btn" data-act="mark-menu" aria-haspopup="menu" aria-label="Resaltar" title="Resaltar: color de fondo de las letras" style="--c:${TextMark.last}">${icon('textMark')}<span class="ink-bar"></span></button>
+    <button class="icon-btn mark-btn${S.editing && (TextMark.typing || TextMark.atCaret()) ? ' on' : ''}" aria-pressed="${!!(S.editing && (TextMark.typing || TextMark.atCaret()))}" data-act="mark-menu" aria-haspopup="menu" aria-label="Resaltar" title="Resaltar: color de fondo de las letras" style="--c:${TextMark.last}">${icon('textMark')}<span class="ink-bar"></span></button>
     ${item?.type === 'text' || !item ? optGroup(4, `<div class="seg align-seg" role="group" aria-label="Alineación">${[['left', 'alignLeft', 'Alinear a la izquierda'], ['center', 'alignCenter', 'Centrar'], ['right', 'alignRight', 'Alinear a la derecha']].map(([k, ic, n]) => `<button data-act="align" data-v="${k}" aria-pressed="${base.align === k}" aria-label="${n}" title="${n}">${icon(ic)}</button>`).join('')}</div>
       ${optBtn('box-menu', 'boxBg', 'Fondo y borde', '', 'Fondo y borde del cuadro', 'aria-haspopup="menu"')}`) : ''}
     ${item && S.editing ? optGroup(3, optBtn('inline-image', 'image', 'Imagen', '', 'Insertar una imagen donde está el cursor')) : ''}
@@ -7748,7 +8227,14 @@ function onOptionsClick(e) {
     case 'text-color': textStyle({ color: v }); break;
     case 'bold': case 'italic': case 'underline': case 'strike': textStyle({ [act]: true }); break;
     case 'align': textStyle({ align: v }); break;
-    case 'mark-menu': return popover(b, MARK_COLORS.map(([n, c]) => `<button data-act="${c || 'none'}"><span class="swatch" style="background:${c || 'transparent'};width:16px;height:16px"></span>${n}</button>`).join(''), (c) => { if (c !== 'none') TextMark.last = c; textStyle({ mark: c === 'none' ? '' : c }); });
+    case 'mark-menu': saveRange(); return popover(b, MARK_COLORS.map(([n, c]) => `<button data-act="${c || 'none'}"><span class="swatch" style="background:${c || 'transparent'};width:16px;height:16px"></span>${n}</button>`).join(''), (c) => {
+      // El menú se lleva el foco: se vuelve al cursor guardado. Sin texto seleccionado, lo que se escriba sale resaltado.
+      if (c !== 'none') TextMark.last = c;
+      const typing = !!S.editing && !hasTextSelection();
+      textStyle({ mark: c === 'none' ? '' : c });
+      TextMark.typing = typing && c !== 'none' ? c : null;
+      TextMark.sync();
+    });
     case 'box-menu': return popover(b, BOX_BGS.map(([n, c]) => `<button data-act="bg:${c}"><span class="swatch" style="background:${c || 'transparent'};width:16px;height:16px"></span>${n}</button>`).join('') + `<hr><button data-act="border">${found?.item.base.border ? '✓ ' : ''}Borde</button>`,
       (a) => (a === 'border' ? textStyle({ border: true }) : textStyle({ bg: a.slice(3) })));
     case 'inline-image': saveRange(); return pickFile('image/*', (f) => insertImageFile(f));
@@ -7767,6 +8253,8 @@ function onOptionsClick(e) {
     case 'delete': deleteSelection(); break;
     case 'make-card': return Cards.fromLasso();
     case 'make-ai-cards': return AI.fromLasso();
+    case 'ai-menu': return AI.lassoMenu(b);
+    case 'shapes-menu': return shapesMenu(b);
     default: break;
   }
   savePrefs();
@@ -9249,6 +9737,7 @@ function beginEditing(page, item) {
   renderOptions();
 }
 function stopEditing() {
+  TextMark.typing = null;
   const found = findItem(S.editing);
   S.editing = null;
   if (!found) return;
@@ -9644,7 +10133,7 @@ function openSearchPanel() {
     if (!q) { list.innerHTML = ''; return; }
     const hits = searchNotebook(nb, q, 60);
     list.innerHTML = hits.length ? hits.map((h) => `<button class="result" data-page="${h.pageId}" data-item="${h.itemId || ''}"><span><span class="where">Página ${h.pageIndex + 1} · ${SOURCE_NAMES[h.source]}</span><br>${h.snippet}</span></button>`).join('')
-      : '<p class="side-empty">Sin resultados. La escritura a mano no se puede buscar en la versión web.</p>';
+      : '<p class="side-empty">Sin resultados. La escritura a mano solo se encuentra si la transcribes (Estudio › IA › Transcribir).</p>';
   };
   input.addEventListener('input', run);
   panel.addEventListener('click', (e) => {
@@ -9989,30 +10478,50 @@ const Cards = {
     const when = (c) => (Cards.isDue(c) ? 'Pendiente' : `En ${Cards.span(Math.max(1, Math.round((Cards.startOfDay(c.due) - Cards.startOfDay(Date.now())) / CARD_DAY)))}`);
     const rows = cards.map((c) => `<div class="cardz-row"><div class="cardz-row-q">${c.front ? `<span translate="no">${esc(c.front)}</span>` : '<span class="cardz-muted">Pregunta con imagen</span>'}
         <small class="cardz-muted">${when(c)}${c.img ? ' · con imagen' : ''}</small></div>
+        <button class="icon-btn" data-act="see" data-id="${c.id}" aria-label="Ver pregunta y respuesta" title="Ver pregunta y respuesta">${icon('eye')}</button>
+        <button class="icon-btn" data-act="from" data-id="${c.id}" aria-label="Repasar desde esta tarjeta" title="Repasar desde esta tarjeta">${icon('play')}</button>
         <button class="icon-btn" data-act="del" data-id="${c.id}" aria-label="Borrar tarjeta" title="Borrar tarjeta">${icon('trash')}</button></div>`).join('');
     dialog(`<h2>Tarjetas de repaso</h2>
       <p>${cards.length ? `${cards.length} ${cards.length === 1 ? 'tarjeta' : 'tarjetas'} en esta libreta · ${Cards.pendingText(nb)}` : 'Aún no hay tarjetas. Crea una aquí o rodea algo con el lazo y pulsa «Crear tarjeta».'}</p>
       ${rows ? `<div class="cardz-list">${rows}</div>` : ''}
       <div class="actions"><button class="btn" data-act="close">Cerrar</button><button class="btn" data-act="new">Nueva tarjeta…</button>
+        <button class="btn" data-act="all" ${cards.length ? '' : 'disabled'} title="También las que aún no tocan: no cambia cuándo vuelven">Repasar todas</button>
         <button class="btn primary" data-act="review" ${n ? '' : 'disabled'}>Repasar (${n})</button></div>`,
     (act, b, close) => {
       if (act === 'close') return close();
       if (act === 'new') { close(); return Cards.createDialog(nb, null, () => Cards.listDialog(nb)); }
       if (act === 'review') { close(); return Cards.review(nb); }
+      if (act === 'all') { close(); return Cards.review(nb, { all: true }); }
+      if (act === 'from' || act === 'see') { close(); return Cards.review(nb, { from: b.dataset.id, only: act === 'see' }); }
       if (act === 'del') confirmDialog('Borrar tarjeta', 'Se borra la tarjeta y su historial de repaso.', 'Borrar', () => { Cards.remove(nb, b.dataset.id); close(); Cards.listDialog(nb); });
     });
   },
-  /** Pantalla de repaso: pregunta → «Mostrar respuesta» → Otra vez / Difícil / Bien / Fácil → resumen. */
-  review(nb) {
-    const queue = Cards.due(nb);
+  /** Cola del repaso. Normal: las pendientes. `all`: todas (las pendientes primero, luego las que tocan antes).
+   *  `from`: desde esa tarjeta, en el orden de la lista (`only`: solo esa). */
+  queue(nb, opts = {}, now = Date.now()) {
+    const all = Cards.all(nb);
+    if (opts.from) {
+      const i = all.findIndex((c) => c.id === opts.from);
+      return i < 0 ? [] : opts.only ? [all[i]] : [...all.slice(i), ...all.slice(0, i)];
+    }
+    if (opts.all) return [...Cards.due(nb, now), ...all.filter((c) => !Cards.isDue(c, now)).sort((a, b) => a.due - b.due)];
+    return Cards.due(nb, now);
+  },
+  /** Pantalla de repaso: pregunta → «Mostrar respuesta» → Otra vez / Difícil / Bien / Fácil → resumen.
+   *  Repasar por adelantado («Repasar todas», «desde esta tarjeta») es PRÁCTICA: las tarjetas que aún no tocaban se
+   *  contestan igual pero no cambian (ni fecha, ni intervalo, ni facilidad); las que sí tocaban cuentan como su repaso. */
+  review(nb, opts = {}) {
+    const queue = Cards.queue(nb, opts), practice = !!(opts.all || opts.from);
+    const counts = new Set(queue.filter((c) => Cards.isDue(c)).map((c) => c.id));   // las que tocaban al empezar
     if (!queue.length) {
       const next = Cards.all(nb).reduce((m, c) => Math.min(m, c.due), Infinity);
       const days = Number.isFinite(next) ? Math.max(1, Math.round((Cards.startOfDay(next) - Cards.startOfDay(Date.now())) / CARD_DAY)) : 0;
       return dialog(`<h2>No hay tarjetas pendientes</h2><p>${days ? `La próxima toca ${days === 1 ? 'mañana' : `dentro de ${days} días`}.` : 'Crea tarjetas desde el lazo («Crear tarjeta») o escribiéndolas.'}</p>
-        <div class="actions"><button class="btn" data-act="close">Cerrar</button><button class="btn primary" data-act="new">Nueva tarjeta…</button></div>`,
-      (act, _b, close) => { close(); if (act === 'new') Cards.createDialog(nb); });
+        <div class="actions"><button class="btn" data-act="close">Cerrar</button>${Cards.all(nb).length ? '<button class="btn" data-act="all">Repasar todas igualmente</button>' : ''}<button class="btn primary" data-act="new">Nueva tarjeta…</button></div>`,
+      (act, _b, close) => { close(); if (act === 'new') Cards.createDialog(nb); if (act === 'all') Cards.review(nb, { all: true }); });
     }
-    const st = { queue, done: 0, total: queue.length, shown: false, tally: { again: 0, hard: 0, good: 0, easy: 0 } };
+    const st = { queue, done: 0, total: queue.length, shown: !!opts.only, tally: { again: 0, hard: 0, good: 0, easy: 0 }, real: 0 };
+    const real = (c) => counts.has(c.id);   // ¿esta respuesta cambia su repaso?
     const scrim = dialog('<div class="cardz-review"></div>', (act, b, close) => {
       const c = st.queue[0];
       if (act === 'close') return close();
@@ -10020,11 +10529,10 @@ const Cards = {
       if (act === 'goto' && c) { close(); return Cards.goTo(nb, c); }
       if (act === 'grade' && c && st.shown) {
         const g = b.dataset.v;
-        Cards.answer(c, g);
+        if (real(c)) { Cards.answer(c, g); st.real++; touch(nb); }   // práctica: la tarjeta no cambia
         st.tally[g]++;
         st.queue.shift();
         if (g === 'again') st.queue.push(c); else st.done++;   // la fallada vuelve al final de la sesión
-        touch(nb);
         st.shown = false;
         return paint();
       }
@@ -10036,18 +10544,19 @@ const Cards = {
       if (!c) {
         const t = st.tally, reviewed = t.hard + t.good + t.easy;
         if (reviewed && !st.counted) { st.counted = true; Recall.mark(nb); }   // sesión terminada = libreta repasada (recall.js)
-        box.innerHTML = `<h2>Repaso terminado</h2>
-          <p class="cardz-center">${reviewed === 1 ? 'Has repasado 1 tarjeta' : `Has repasado ${reviewed} tarjetas`}.</p>
+        box.innerHTML = `<h2>${practice ? 'Práctica terminada' : 'Repaso terminado'}</h2>
+          <p class="cardz-center">${practice ? (reviewed === 1 ? 'Has practicado 1 tarjeta' : `Has practicado ${reviewed} tarjetas`) : reviewed === 1 ? 'Has repasado 1 tarjeta' : `Has repasado ${reviewed} tarjetas`}.</p>
+          ${practice ? '<p class="cardz-center cardz-muted">Las que aún no tocaban siguen con su fecha de repaso.</p>' : ''}
           <div class="cardz-tally">${CARD_GRADES.map(([k, n]) => `<div class="cardz-t cardz-${k}"><b>${t[k]}</b><span>${n}</span></div>`).join('')}</div>
           <div class="actions"><button class="btn primary" data-act="close">Cerrar</button></div>`;
         return box.querySelector('button').focus();
       }
-      box.innerHTML = `<div class="cardz-top"><span class="cardz-muted">${Math.min(st.done + 1, st.total)} / ${st.total}</span>
+      box.innerHTML = `<div class="cardz-top"><span class="cardz-muted">${Math.min(st.done + 1, st.total)} / ${st.total}${practice && !real(c) ? ' · <b class="cardz-practice">Práctica: no cambia cuándo vuelve</b>' : ''}</span>
           <button class="icon-btn" data-act="close" aria-label="Cerrar el repaso" title="Cerrar el repaso">${icon('close')}</button></div>
         <div class="cardz-side-label">Pregunta</div><div class="cardz-face">${Cards.face(c, 'front')}</div>
         ${st.shown ? `<div class="cardz-side-label">Respuesta</div><div class="cardz-face">${Cards.face(c, 'back')}</div>` : ''}
         ${c.pageId ? `<button class="btn tinted cardz-goto" data-act="goto">${icon('pages')} Ver en la página</button>` : ''}
-        ${st.shown ? `<div class="cardz-grades">${CARD_GRADES.map(([k, n], i) => `<button class="cardz-grade cardz-${k}" data-act="grade" data-v="${k}" title="${n} (${i + 1})"><b>${n}</b><small>${Cards.span(Cards.schedule(c, k).interval)}</small></button>`).join('')}</div>`
+        ${st.shown ? `<div class="cardz-grades">${CARD_GRADES.map(([k, n], i) => `<button class="cardz-grade cardz-${k}" data-act="grade" data-v="${k}" title="${n} (${i + 1})"><b>${n}</b><small>${real(c) ? Cards.span(Cards.schedule(c, k).interval) : k === 'again' ? 'otra vez' : '—'}</small></button>`).join('')}</div>`
           : '<div class="actions"><button class="btn primary cardz-show" data-act="show">Mostrar respuesta</button></div>'}`;
       (box.querySelector('.cardz-show') || box.querySelector('[data-v="good"]'))?.focus({ preventScroll: true });
     };
@@ -10426,14 +10935,14 @@ const AI = {
 
   // ---------- Respuesta ----------
   /** Saca el JSON de la respuesta de Gemini y lo deja limpio. Lanza AIError si no vale. */
-  parse(data) {
+  parse(data, clean = AI.clean) {
     const cand = data?.candidates?.[0];
     if (!cand) throw new AIError(data?.promptFeedback?.blockReason ? 'blocked' : 'invalid');
     if (['SAFETY', 'PROHIBITED_CONTENT', 'BLOCKLIST', 'SPII'].includes(cand.finishReason)) throw new AIError('blocked');
     const txt = (cand.content?.parts || []).filter((p) => !p.thought && typeof p.text === 'string').map((p) => p.text).join('');
     let j;
     try { j = JSON.parse(txt.trim().replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '')); } catch (e) { throw new AIError('invalid'); }
-    return AI.clean(j);
+    return clean(j);
   },
   clean(j) {
     const s = (v) => (typeof v === 'string' ? v.trim() : '');
@@ -10454,7 +10963,7 @@ const AI = {
     return new AIError('bad', err?.error?.message || String(status));
   },
   /** Una petición (prueba el modelo de reserva si el primero no está o no le queda cuota). */
-  async request(body, signal) {
+  async request(body, signal, clean = AI.clean) {
     const key = AI.key();
     if (!key) throw new AIError('key');
     let last = null;
@@ -10473,21 +10982,21 @@ const AI = {
         if (signal?.aborted) throw e;
         throw new AIError('offline');
       }
-      if (res.ok) return AI.parse(await res.json().catch(() => null));
+      if (res.ok) return AI.parse(await res.json().catch(() => null), clean);
       last = AI.classify(res.status, await res.json().catch(() => null));
       if (last.code !== 'quota' && last.code !== 'model') throw last;
     }
     throw last;
   },
   /** Petición con la ventana «La IA está leyendo…», «Cancelar» y tiempo máximo. */
-  async call(body) {
+  async call(body, clean = AI.clean, busyText = 'La IA está leyendo tu selección…') {
     const ctl = new AbortController();
     let why = null;
     const stop = (w) => { if (!ctl.signal.aborted) { why = w; ctl.abort(); } };
-    const busy = AI.busyDialog(() => stop('cancel'));
+    const busy = AI.busyDialog(() => stop('cancel'), busyText);
     const timer = setTimeout(() => stop('timeout'), AI.timeout);
     const aborted = new Promise((_, rej) => ctl.signal.addEventListener('abort', () => rej(new AIError(why || 'cancel'))));
-    try { return await Promise.race([AI.request(body, ctl.signal), aborted]); }
+    try { return await Promise.race([AI.request(body, ctl.signal, clean), aborted]); }
     catch (e) { throw ctl.signal.aborted ? new AIError(why || 'cancel') : (e instanceof AIError ? e : new AIError('invalid')); }
     finally { clearTimeout(timer); busy.remove(); }
   },
@@ -10502,8 +11011,9 @@ const AI = {
       timeout: 'La IA ha tardado demasiado (más de 1 minuto). Prueba con una selección más pequeña o inténtalo de nuevo.',
       blocked: 'Google no ha querido procesar esta selección.',
       empty: 'La IA no ha encontrado nada que convertir en tarjetas en esta selección.',
+      'empty-text': 'La IA no ha encontrado texto que leer aquí.',
       invalid: 'La IA ha devuelto una respuesta no válida. Vuelve a intentarlo.',
-    }[e?.code] || 'La IA no ha podido hacer las tarjetas. Vuelve a intentarlo.';
+    }[e?.code] || 'La IA no ha podido terminar. Vuelve a intentarlo.';
   },
 
   // ---------- Puertas de entrada ----------
@@ -10525,13 +11035,13 @@ const AI = {
   },
   /** Pide las tarjetas y abre la revisión. Si falla, explica por qué. */
   async generate(nb, zone) {
-    try { AI.review(nb, zone, await AI.call(AI.buildRequest({ text: zone.text, img: zone.send === false ? null : zone.img }))); }
+    try { AI.review(nb, zone, await AI.call(AI.buildRequest({ text: zone.text, img: AI.imgOf(zone) }), AI.clean, AI.busyText(zone))); }
     catch (e) { AI.showError(e, () => AI.generate(nb, zone)); }
   },
-  showError(e, retry) {
+  showError(e, retry, title = 'No se han podido hacer las tarjetas') {
     if (e?.code === 'cancel') return;
     const isKey = e?.code === 'key';
-    dialog(`<h2>No se han podido hacer las tarjetas</h2><p class="aiz-err">${esc(AI.message(e))}</p>
+    dialog(`<h2>${esc(title)}</h2><p class="aiz-err">${esc(AI.message(e))}</p>
       <div class="actions"><button class="btn" data-act="close">Cerrar</button>
         ${isKey ? '<button class="btn primary" data-act="key">Cambiar la clave…</button>' : '<button class="btn primary" data-act="retry">Reintentar</button>'}</div>`,
     (act, _b, close) => {
@@ -10545,8 +11055,8 @@ const AI = {
   /** Primera vez (o «Cambiar la clave»): cómo conseguir la clave gratuita, aviso de privacidad y dónde se guarda. */
   keyDialog(then = null) {
     const had = !!AI.key();
-    const scrim = dialog(`<h2>${icon('sparkles')} Tarjetas con IA</h2>
-      <p>Para leer tu selección, Folia usa Gemini, la IA de Google, con <b>tu propia clave gratuita</b>. Solo hay que hacerlo una vez:</p>
+    const scrim = dialog(`<h2>${icon('sparkles')} Clave de IA</h2>
+      <p>Para leer tus apuntes, Folia usa Gemini, la IA de Google, con <b>tu propia clave gratuita</b>. Solo hay que hacerlo una vez:</p>
       <ol class="aiz-steps"><li>Abre <a href="${AI_KEY_PAGE}" target="_blank" rel="noopener">Google AI Studio</a> y entra con tu cuenta de Google.</li>
         <li>Pulsa «Create API key» y copia la clave.</li><li>Pégala aquí.</li></ol>
       <label class="field" for="ai-key">Tu clave de Gemini<input type="password" id="ai-key" autocomplete="off" spellcheck="false" placeholder="AQ.… o AIza…"></label>
@@ -10568,9 +11078,9 @@ const AI = {
     setTimeout(() => $('#ai-key', scrim)?.focus(), 40);
     return scrim;
   },
-  busyDialog(onCancel) {
+  busyDialog(onCancel, text = 'La IA está leyendo tu selección…') {
     const scrim = dialog(`<div class="aiz-busy" role="status"><span class="aiz-spin" aria-hidden="true"></span>
-      <h2>La IA está leyendo tu selección…</h2><p class="aiz-small">Suele tardar unos segundos (como mucho 1 minuto).</p></div>
+      <h2>${esc(text)}</h2><p class="aiz-small">Suele tardar unos segundos (como mucho 1 minuto).</p></div>
       <div class="actions"><button class="btn" data-act="cancel">Cancelar</button></div>`, (act, _b, close) => { close(); onCancel(); });
     scrim.querySelector('.dialog').classList.add('aiz-dialog');
     // Tocar fuera o Esc también cancela (dialog() ya cierra la ventana).
@@ -10588,7 +11098,7 @@ const AI = {
       if (act === 'regen' || act === 'more') {
         const more = act === 'more';
         try {
-          const r = await AI.call(AI.buildRequest({ text: zone.text, img: zone.send === false ? null : zone.img, avoid: more ? st.cards.map((c) => c.pregunta) : [] }));
+          const r = await AI.call(AI.buildRequest({ text: zone.text, img: AI.imgOf(zone), avoid: more ? st.cards.map((c) => c.pregunta) : [] }), AI.clean, AI.busyText(zone));
           if (more) {
             const seen = new Set(st.cards.map((c) => c.pregunta.toLowerCase()));
             const fresh = r.tarjetas.filter((t) => !seen.has(t.pregunta.toLowerCase()));
@@ -10653,6 +11163,291 @@ const AI = {
     return scrim;
   },
 };
+
+// =============================================================================
+// Estudiar con IA (2026-10-20, tarea/estudio-ia): un único punto de entrada.
+//  · Menú «Estudio › ✨ IA» de la barra (editor.js): tarjetas, resumen y transcripción de la PÁGINA entera
+//    (imagen de toda la página con renderPageZone + su texto real: cuadros de texto, post-its, comentarios y PDF).
+//  · Botón «✨ IA ▾» de la barra del lazo: Tarjetas, Resumir, Transcribir a texto y Explicar lo seleccionado.
+// «Transcribir» guarda además el texto como transcripción oculta y buscable (`page.ocr`, ARQUITECTURA §2.1).
+// =============================================================================
+const AI_OCR_MAX = 20000;   // letras como mucho por transcripción guardada
+const AI_SEND_MAX = 1600;   // lado máximo (px) de la imagen que se envía (la de las tarjetas sigue en CARD_IMG_MAX)
+const AI_POINTS = { type: 'ARRAY', items: { type: 'STRING' } };
+const AI_TASKS = {
+  summary: {
+    title: 'Resumen', err: 'No se ha podido resumir',
+    schema: { type: 'OBJECT', properties: { resumen: { type: 'STRING' }, puntos_clave: AI_POINTS }, required: ['resumen', 'puntos_clave'], propertyOrdering: ['resumen', 'puntos_clave'] },
+    system: `Eres un profesor experto que resume los apuntes de un estudiante.
+Reglas, por orden de importancia:
+1. Fidelidad total: usa SOLO lo que hay en el material (texto e imagen). No inventes datos, cifras ni ejemplos. Si algo es ilegible, dilo ("ilegible: …").
+2. Interpreta lo que el texto QUIERE DECIR (también abreviaturas, flechas y esquemas escritos a mano).
+3. "resumen": de 3 a 6 frases claras que recojan todo lo importante, sin saltarse nada.
+4. "puntos_clave": cada idea importante, una por elemento, breve.
+5. Escribe en el idioma que se indique.`,
+  },
+  explain: {
+    title: 'Explicación', err: 'No se ha podido explicar',
+    schema: { type: 'OBJECT', properties: { explicacion: { type: 'STRING' }, puntos_clave: AI_POINTS }, required: ['explicacion', 'puntos_clave'], propertyOrdering: ['explicacion', 'puntos_clave'] },
+    system: `Eres un profesor paciente que explica a un estudiante un fragmento de sus propios apuntes.
+Reglas, por orden de importancia:
+1. Parte SOLO de lo que hay en el material (texto e imagen). Puedes añadir el contexto general imprescindible para entenderlo, pero no inventes datos, cifras ni casos. Si algo es ilegible, dilo.
+2. Interpreta abreviaturas, flechas y esquemas escritos a mano.
+3. "explicacion": una explicación sencilla y ordenada (de 1 a 3 párrafos cortos), como se la contarías a un compañero.
+4. "puntos_clave": de 2 a 5 ideas para recordar, breves.
+5. Escribe en el idioma que se indique.`,
+  },
+  ocr: {
+    title: 'Transcripción', err: 'No se ha podido transcribir',
+    schema: { type: 'OBJECT', properties: { texto: { type: 'STRING' }, ilegible: AI_POINTS }, required: ['texto', 'ilegible'], propertyOrdering: ['texto', 'ilegible'] },
+    system: `Eres un transcriptor experto de apuntes escritos a mano y de imágenes con texto.
+Reglas, por orden de importancia:
+1. Transcribe LITERALMENTE lo que está escrito: mismas palabras, abreviaturas, símbolos y cifras. No corrijas, no resumas, no traduzcas, no expliques y no añadas nada.
+2. Conserva la estructura: salto de línea donde lo hay en el original, una línea en blanco entre bloques, y las viñetas o números de las listas («•», «-», «1.») al principio de su línea. Las flechas, como «→».
+3. Si una palabra o un trozo no se puede leer, escribe [ilegible] en su lugar y pon en "ilegible" dónde está (p. ej. "línea 3, después de «aorta»").
+4. Si hay texto tecleado que también se ve en la imagen, cópialo tal cual en su sitio, en orden de lectura (de arriba abajo y de izquierda a derecha).
+5. Ignora los dibujos que no son texto; si un esquema tiene rótulos, transcríbelos.
+6. "texto": la transcripción completa. Si no hay nada escrito, "texto" vacío.`,
+  },
+};
+
+Object.assign(AI, {
+  // ---------- Qué se envía ----------
+  /** Texto real de toda la página: cuadros de texto, post-its, comentarios y texto del PDF. */
+  pageText(page) {
+    const parts = page.items.filter((it) => ['text', 'sticky', 'comment'].includes(it.type)).map((it) => AI.plain(it.html)).filter(Boolean);
+    const pdf = AI.pdfTextIn(page, { x: 0, y: 0, w: page.w, h: page.h }) || page.pdfText || '';
+    if (pdf) parts.push(pdf);
+    return parts.join('\n\n').slice(0, AI_TEXT_MAX);
+  },
+  /** Imagen para enviar: más grande que la de las tarjetas (la escritura a mano se lee mejor). */
+  async sendCrop(page, rect) {
+    const c = await renderPageZone(page, rect, Math.min(2, AI_SEND_MAX / Math.max(rect.w, rect.h)));
+    return c.toDataURL('image/jpeg', 0.85);
+  },
+  /** La zona del lazo, con lo seleccionado (para «Sustituir»). */
+  async lassoZone() {
+    const sel = Cards.lassoRect();
+    if (!sel) return null;
+    const img = await Cards.crop(sel.page, sel.rect);
+    const sendImg = Math.max(sel.rect.w, sel.rect.h) > CARD_IMG_MAX / 2 ? await AI.sendCrop(sel.page, sel.rect) : img;
+    const text = AI.selectionText(sel.page, sel.rect);
+    const send = lassoStrokes().length > 0 || lassoItems().some((it) => it.type === 'image') || !text.trim();   // como gather()
+    return { img, sendImg, send, pageId: sel.page.id, rect: sel.rect, text,
+      strokeIds: lassoStrokes().map((s) => s.id), itemIds: lassoItems().map((i) => i.id), noteId: S.lasso?.noteId || null };
+  },
+  /** La página entera. */
+  async pageZone(page) {
+    const rect = { x: 0, y: 0, w: page.w, h: page.h };
+    const img = await Cards.crop(page, rect), sendImg = await AI.sendCrop(page, rect);
+    const text = AI.pageText(page), send = page.strokes.length > 0 || !!page.bg || page.items.some((it) => it.type === 'image' || it.strokes?.length) || !text.trim();
+    return { img, sendImg, send, pageId: page.id, rect, text, whole: true };
+  },
+  /** La imagen que se envía: ninguna si no hace falta leerla (zone.send === false, lo más rápido); si no, la grande. */
+  imgOf(zone, always = false) { return !always && zone.send === false ? null : (zone.sendImg || zone.img); },
+  busyText(zone) { return zone?.whole ? 'La IA está leyendo tu página…' : 'La IA está leyendo tu selección…'; },
+  /** Petición de resumen, explicación o transcripción (mismo transporte, clave y errores que las tarjetas). */
+  buildTask(task, { text = '', img = null, lang = I18N.lang }) {
+    const langName = { es: 'español', it: 'italiano' }[lang] || 'español';
+    let prompt = task === 'ocr' ? 'Transcribe el texto de la imagen tal cual está escrito.\n' : `Idioma de la respuesta: ${langName}.\n`;
+    prompt += text.trim()
+      ? `\nTexto tecleado de la zona (exacto${task === 'ocr' ? '' : ', úsalo como fuente principal'}):\n<<<\n${text.trim()}\n>>>\n`
+      : '\nNo hay texto tecleado: todo está en la imagen.\n';
+    if (img) prompt += '\nLa imagen adjunta es la zona de la página: puede tener escritura a mano, dibujos, esquemas o subrayados. Léela entera.\n';
+    const parts = [{ text: prompt }];
+    if (img) parts.push({ inlineData: { mimeType: 'image/jpeg', data: img.slice(img.indexOf(',') + 1) } });
+    return {
+      systemInstruction: { parts: [{ text: AI_TASKS[task].system }] },
+      contents: [{ role: 'user', parts }],
+      generationConfig: { responseMimeType: 'application/json', responseSchema: AI_TASKS[task].schema, temperature: task === 'ocr' ? 0 : 0.2 },
+    };
+  },
+  /** Limpieza de cada respuesta (lanza AIError('empty-text') si no trae nada). */
+  cleanTask(task) {
+    const s = (v) => (typeof v === 'string' ? v.trim() : '');
+    const list = (v) => (Array.isArray(v) ? v.map(s).filter(Boolean) : []);
+    return (j) => {
+      if (task === 'ocr') {
+        const texto = (typeof j?.texto === 'string' ? j.texto : '').replace(/\r/g, '').replace(/[ \t]+\n/g, '\n').trim().slice(0, AI_OCR_MAX);
+        if (!texto) throw new AIError('empty-text');
+        return { texto, ilegible: list(j.ilegible) };
+      }
+      const main = s(task === 'summary' ? j?.resumen : j?.explicacion), puntos = list(j?.puntos_clave);
+      if (!main && !puntos.length) throw new AIError('empty-text');
+      return { main, puntos };
+    };
+  },
+
+  // ---------- Puertas de entrada ----------
+  /** Botón «✨ IA ▾» de la barra del lazo. */
+  lassoMenu(anchor) {
+    popover(anchor, `<div class="label">Con lo seleccionado</div>
+      <button data-act="cards">${icon('lightbulb')} Tarjetas</button>
+      <button data-act="summary">${icon('outline')} Resumir</button>
+      <button data-act="ocr">${icon('scanText')} Transcribir a texto</button>
+      <button data-act="explain">${icon('comment')} Explicar</button>`, (act) => AI.fromLassoTask(act));
+    openPopover?.el.classList.add('ai-pop');
+  },
+  async fromLassoTask(task) {
+    const zone = await AI.lassoZone();
+    if (!zone) return toast('Selecciona algo con el lazo primero');
+    AI.begin(activeNb(), zone, task);
+  },
+  /** «Estudio › IA»: la página que se está viendo. */
+  async fromPage(task) {
+    updateCurrentPage();
+    const nb = activeNb(), page = nb?.pages[currentPageIndex];
+    if (!page) return;
+    AI.begin(nb, await AI.pageZone(page), task);
+  },
+  begin(nb, zone, task) {
+    const go = () => (task === 'cards' ? AI.generate(nb, zone) : AI.runTask(nb, zone, task));
+    if (!AI.key()) return AI.keyDialog(go);
+    go();
+  },
+  async runTask(nb, zone, task) {
+    const t = AI_TASKS[task];
+    let res;
+    try { res = await AI.call(AI.buildTask(task, { text: zone.text, img: AI.imgOf(zone, task === 'ocr') }), AI.cleanTask(task), AI.busyText(zone)); }
+    catch (e) { return AI.showError(e, () => AI.runTask(nb, zone, task), t.err); }
+    if (task === 'ocr') { AI.saveOcr(nb, zone, res.texto); return AI.ocrDialog(nb, zone, res); }
+    AI.resultDialog(nb, zone, task, res);
+  },
+
+  // ---------- Transcripciones guardadas (page.ocr) ----------
+  /** Para normalizeNotebook: deja solo las entradas con texto y zona válidas (sin inventar nada más). */
+  normalizeOcr(list) {
+    if (!Array.isArray(list)) return [];
+    const num = (v) => typeof v === 'number' && Number.isFinite(v);
+    return list.filter((o) => o && typeof o.text === 'string' && o.text.trim() && o.rect && ['x', 'y', 'w', 'h'].every((k) => num(o.rect[k])) && o.rect.w > 0 && o.rect.h > 0)
+      .map((o) => Object.assign(o, { id: typeof o.id === 'string' && o.id ? o.id : uid(), text: o.text.slice(0, AI_OCR_MAX) }));
+  },
+  /** Guarda (o actualiza, o quita si queda vacía) la transcripción de la zona. */
+  saveOcr(nb, zone, text) {
+    const page = nb?.pages.find((p) => p.id === zone.pageId);
+    if (!page) return;
+    text = String(text || '').replace(/\r/g, '').trim().slice(0, AI_OCR_MAX);
+    const r = zone.rect, list = Array.isArray(page.ocr) ? page.ocr : [];
+    const old = list.find((o) => (zone.ocrId && o.id === zone.ocrId) || ['x', 'y', 'w', 'h'].every((k) => Math.abs(o.rect[k] - r[k]) < 1));
+    if (old) zone.ocrId = old.id;
+    if (old && old.text === text) return;
+    if (!text) { if (!old) return; page.ocr = list.filter((o) => o !== old); }
+    else if (old) Object.assign(old, { text, at: Date.now() });
+    else { const o = { id: uid(), rect: { x: Math.round(r.x), y: Math.round(r.y), w: Math.round(r.w), h: Math.round(r.h) }, text, at: Date.now() }; list.push(o); page.ocr = list; zone.ocrId = o.id; }
+    touch(nb);
+  },
+  /** ¿Sigue habiendo algo escrito en la zona? (si se borró o se sustituyó por un cuadro de texto, ya no se busca). */
+  ocrLive(page, o) {
+    if (page.bg) return true;
+    const r = o.rect, inside = (x, y) => x >= r.x && x <= r.x + r.w && y >= r.y && y <= r.y + r.h;
+    if (page.strokes.some((s) => s.points.some(([x, y]) => inside(x, y)))) return true;
+    return page.items.some((it) => (it.type === 'image' || (it.type === 'sticky' && it.strokes?.length))
+      && it.x < r.x + r.w && it.x + (it.w || 0) > r.x && it.y < r.y + r.h && it.y + (it.h || 0) > r.y);
+  },
+  /** Las transcripciones que la búsqueda tiene en cuenta (searchNotebook, library.js). */
+  ocrOf(page) { return Array.isArray(page.ocr) ? page.ocr.filter((o) => AI.ocrLive(page, o)) : []; },
+  /** Lleva a una transcripción y marca su zona; false si `id` no es de ninguna (flashItem, editor.js). */
+  flashOcr(page, id) {
+    const o = Array.isArray(page?.ocr) && page.ocr.find((x) => x.id === id);
+    const v = o && views.get(page.id);
+    if (!v) return false;
+    const desk = $('#desk');
+    desk.scrollTo({ top: v.wrap.offsetTop + o.rect.y * S.zoom - desk.clientHeight / 3, behavior: reduceMotion() ? 'auto' : 'smooth' });
+    flashRect(page.id, o.rect);
+    return true;
+  },
+
+  // ---------- Usar el texto ----------
+  async copy(text) {
+    try { await navigator.clipboard.writeText(text); toast('Texto copiado'); } catch (e) { toast('No se ha podido copiar: selecciónalo y cópialo a mano'); }
+  },
+  /** Pone el texto en un cuadro de texto: al lado de la zona, o en su sitio si `replace` (borra la tinta, las imágenes y
+   *  los cuadros de texto seleccionados). Un solo paso de deshacer. */
+  placeText(nb, zone, text, replace = false) {
+    const page = nb.pages.find((p) => p.id === zone.pageId);
+    text = String(text || '').trim();
+    if (!page || !text) return toast('No hay texto que poner');
+    const base = Object.assign({}, S.textDefault, { bg: '', border: false });
+    if (page.paper === 'dark' && luminance(base.color) < 0.4) base.color = '#F2F2F7';
+    const r = zone.rect, lines = text.split('\n').length;
+    let x, y, w;
+    if (replace) {
+      x = r.x; y = r.y; w = Math.max(120, r.w);
+      base.size = Math.max(12, Math.min(36, Math.round((r.h - 24) / lines / 1.35)));
+    } else if (zone.whole) {
+      w = Math.min(480, page.w - 80); x = 40; y = 40;
+    } else {
+      w = Math.min(420, Math.max(220, r.w));
+      x = r.x + r.w + 16; y = r.y;
+      if (x + w > page.w - 8) { x = Math.max(8, Math.min(r.x, page.w - w - 8)); y = Math.min(page.h - 60, r.y + r.h + 12); }
+    }
+    const item = { id: uid(), type: 'text', x, y, w, html: textToHTML(text), base };
+    const before = snapshotPage(page);
+    if (replace) {
+      const ids = new Set(zone.strokeIds), gone = new Set(zone.itemIds);
+      page.strokes = page.strokes.filter((s) => !ids.has(s.id));
+      page.items = page.items.filter((i) => !(gone.has(i.id) && (i.type === 'image' || i.type === 'text')));
+    }
+    page.items.push(item);
+    commit(page, before);
+    if (S.lasso) clearLasso();
+    if (INK_TOOLS.includes(S.tool)) setTool('select');
+    renderInk(page); renderItems(page);
+    select({ pageId: page.id, itemId: item.id });
+    toast(replace ? 'Sustituido por texto · puedes deshacerlo' : 'Texto añadido a la página');
+  },
+  canReplace(nb, zone) {
+    if (zone.whole || zone.noteId) return false;
+    const page = nb.pages.find((p) => p.id === zone.pageId);
+    return !!page && (zone.strokeIds.length > 0 || page.items.some((i) => zone.itemIds.includes(i.id) && (i.type === 'image' || i.type === 'text')));
+  },
+
+  // ---------- Ventanas ----------
+  /** Resumen o explicación: el texto, sus puntos clave y qué hacer con ellos. */
+  resultDialog(nb, zone, task, res) {
+    const plain = [res.main, ...res.puntos.map((p) => `• ${p}`)].filter(Boolean).join('\n');
+    const scrim = dialog(`<h2>${icon('sparkles')} ${AI_TASKS[task].title}</h2>
+      <section class="aiz-sum">${res.main ? `<p class="aiz-pre" translate="no">${esc(res.main)}</p>` : ''}
+        ${res.puntos.length ? `<div class="aiz-label">Puntos clave</div><ul translate="no">${res.puntos.map((p) => `<li>${esc(p)}</li>`).join('')}</ul>` : ''}</section>
+      <p class="aiz-small">La IA puede equivocarse: compáralo con tus apuntes.</p>
+      <div class="actions aiz-actions"><button class="btn" data-act="close">Cerrar</button><button class="btn" data-act="copy">${icon('copy')} Copiar</button>
+        <button class="btn" data-act="cards">${icon('lightbulb')} Hacer tarjetas</button><button class="btn primary" data-act="insert">${icon('text')} Insertar como texto</button></div>`,
+    (act, _b, close) => {
+      if (act === 'copy') return AI.copy(plain);
+      close();
+      if (act === 'insert') AI.placeText(nb, zone, plain);
+      if (act === 'cards') AI.generate(nb, zone);
+    });
+    scrim.querySelector('.dialog').classList.add('aiz-dialog', 'aiz-result');
+    return scrim;
+  },
+  /** Transcripción editable: Copiar · Insertar al lado · Sustituir · Hacer tarjetas con esto. Lo editado se guarda. */
+  ocrDialog(nb, zone, res) {
+    const replace = AI.canReplace(nb, zone);
+    const scrim = dialog(`<h2>${icon('scanText')} Transcripción</h2>
+      <p class="aiz-small">Revisa el texto y corrige lo que haga falta. Ya puedes encontrarlo con «Buscar».</p>
+      <textarea class="aiz-ocr" rows="9" spellcheck="false" aria-label="Texto transcrito">${esc(res.texto)}</textarea>
+      ${res.ilegible.length ? `<p class="aiz-warn"><b>No se lee bien:</b> <span translate="no">${res.ilegible.map(esc).join(' · ')}</span></p>` : ''}
+      <div class="actions aiz-actions"><button class="btn" data-act="close">Cerrar</button><button class="btn" data-act="copy">${icon('copy')} Copiar</button>
+        <button class="btn" data-act="cards">${icon('lightbulb')} Hacer tarjetas con esto</button>
+        <button class="btn${replace ? '' : ' primary'}" data-act="insert" title="Un cuadro de texto con la transcripción${zone.whole ? '' : ', al lado de la selección'}">${icon('text')} ${zone.whole ? 'Insertar como texto' : 'Insertar al lado'}</button>
+        ${replace ? `<button class="btn primary" data-act="replace" title="Borra lo seleccionado y pone el texto en su sitio (puedes deshacerlo)">${icon('rotate')} Sustituir</button>` : ''}</div>`,
+    (act, _b, close, sc) => {
+      const text = $('.aiz-ocr', sc).value;
+      AI.saveOcr(nb, zone, text);
+      if (act === 'copy') return AI.copy(text);
+      close();
+      if (act === 'insert') AI.placeText(nb, zone, text);
+      if (act === 'replace') AI.placeText(nb, zone, text, true);
+      if (act === 'cards') AI.start(nb, Object.assign({}, zone, { text: text.slice(0, AI_TEXT_MAX) }));
+    });
+    scrim.querySelector('.dialog').classList.add('aiz-dialog', 'aiz-result');
+    const ta = $('.aiz-ocr', scrim);
+    ta.addEventListener('change', () => AI.saveOcr(nb, zone, ta.value));   // cerrar con Esc o tocando fuera también guarda lo editado
+    setTimeout(() => { ta.focus({ preventScroll: true }); ta.setSelectionRange(0, 0); ta.scrollTop = 0; }, 40);
+    return scrim;
+  },
+});
 
 // =============================================================================
 // Significado de los colores (idea propia de Folia, pensada para estudiar Medicina y el MIR).
@@ -10973,7 +11768,7 @@ const Meaning = {
           <input type="text" maxlength="${MEANING_MAX}" data-c="${u.color}" value="${esc(leg[u.color] || '')}" placeholder="${esc(Meaning.suggest(u.color) || 'Sin significado')}"></label>
         ${u.n ? `<button class="icon-btn" data-act="sum" data-c="${u.color}" aria-label="Ver todo lo de este color" title="Ver todo lo de este color">${icon('layers')}<small>${u.n}</small></button>` : ''}</div>`;
     const scrim = dialog(`<h2>Leyenda de colores</h2>
-      <p>Dale un significado a cada color de esta libreta. Luego verás todo lo de un color junto en «Resumen por color».</p>
+      <p>Da un significado a cada color (p. ej. rojo = cae en el MIR) y luego junta todo lo de un color con Estudio › Resumen por color.</p>
       ${rows.length ? `<div class="mean-tpls"><span>Rellenar con</span>${Object.entries(MEANING_TEMPLATES).map(([k, t]) => `<button class="btn" data-act="tpl" data-v="${k}">${t.name}</button>`).join('')}<button class="btn" data-act="tpl" data-v="clear">Vaciar</button></div>
         <div class="mean-list">${rows.map(row).join('')}</div>` : `<p class="mean-empty">${Meaning.emptyText}</p>`}
       <div class="actions"><button class="btn" data-act="cancel">Cancelar</button><button class="btn primary" data-act="save" ${rows.length ? '' : 'disabled'}>Guardar</button></div>`,
@@ -11654,7 +12449,10 @@ addEventListener('pointerup', (e) => {
   Palette.inkSeen = lastInkAt;
   const id = [...views].find(([, v]) => v.ink === e.target)?.[0];
   const page = activeNb()?.pages.find((p) => p.id === id), stroke = page?.strokes[page.strokes.length - 1];
-  if (stroke && stroke.tool === (S.tool === 'highlighter' ? 'highlighter' : 'pen')) Palette.showStrip(page, stroke);
+  // Un punto suelto (un toque sin mover) no es un trazo al que cambiar el color: sin fila.
+  const b = stroke && Shapes.bounds(stroke.points.map((q) => [q[0], q[1]]));
+  if (!stroke || Math.hypot(b.w, b.h) * S.zoom < 6) return;
+  if (stroke.tool === (S.tool === 'highlighter' ? 'highlighter' : 'pen')) Palette.showStrip(page, stroke);
 });
 // Volver a escribir (o tocar cualquier otra cosa) quita la fila de colores; también al desplazar la libreta.
 addEventListener('pointerdown', (e) => { if (Palette.strip && !Palette.strip.el.contains(e.target)) Palette.hideStrip(); }, true);
@@ -11801,6 +12599,35 @@ const InkColors = {
     });
   },
 
+  // ---------- Significado del color (leyenda de la libreta, meaning.js) ----------
+  /** Campo «Significado en esta libreta» de la ventana del «+» (bolígrafo y subrayador). */
+  meaningHtml(tool, c) {
+    if (tool === 'text' || !activeNb()) return '';
+    return `<label class="cp-mean" for="cp-mean"><span>Significado en esta libreta</span>
+      <input type="text" id="cp-mean" maxlength="${MEANING_MAX}" value="${esc(Meaning.label(c))}" placeholder="${esc(Meaning.suggest(c) || 'p. ej. Cae en el MIR')}" autocomplete="off" spellcheck="false"></label>`;
+  },
+  /** Guarda el significado al salir del campo o con Intro; al cambiar de color, enseña el del color nuevo. */
+  bindMeaning(pop, c) {
+    const input = pop.querySelector('#cp-mean');
+    if (!input) return;
+    let color = this.hex(c);
+    const save = () => {
+      const nb = activeNb(), v = input.value.trim();
+      if (!nb || !color || v === Meaning.label(color, nb)) return;
+      Meaning.set(nb, color, v);
+      toast(v ? 'Significado guardado en la leyenda' : 'Significado quitado de la leyenda');
+    };
+    input.addEventListener('change', save);
+    input.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); e.stopPropagation(); save(); input.blur(); } });
+    pop._meanShow = (v) => {
+      if (v === color) return;
+      save();
+      color = v;
+      input.value = Meaning.label(v);
+      input.placeholder = Meaning.suggest(v) || 'p. ej. Cae en el MIR';
+    };
+  },
+
   // ---------- Ventana «Color del …» ----------
   preview(tool, c) {
     const paper = this.paper(), fill = PAPERS[paper]?.fill || '#FFFFFF';
@@ -11828,6 +12655,7 @@ const InkColors = {
       <div class="cp-pick"><input type="color" id="cp-color" value="${cur.toLowerCase()}" aria-label="Elegir color">
         <input type="text" id="cp-hex" value="${cur}" maxlength="7" spellcheck="false" autocomplete="off" aria-label="Código HEX">
         <span class="cp-prev">${this.preview(tool, cur)}</span></div>
+      ${this.meaningHtml(tool, cur)}
       ${sug.length ? `<div class="label">Sugerencias para este papel</div><div class="cp-row">${sug.map((c) => btn(c, 'cp-sug')).join('')}</div>` : ''}
       ${rec.length ? `<div class="label">Recientes</div><div class="cp-row">${rec.map((c) => btn(c, 'cp-rec')).join('')}</div>` : ''}
       <div class="cp-acts"><button class="btn" data-act="reset" ${this.isDefault(tool) ? 'disabled' : ''}>Restablecer colores</button>
@@ -11855,8 +12683,10 @@ const InkColors = {
       if (from !== 'picker') picker.value = v.toLowerCase();
       if (from !== 'hex') hex.value = v;
       pop.querySelector('.cp-prev').innerHTML = this.preview(tool, v);
+      pop._meanShow?.(v);
       translateTree(pop.querySelector('.cp-prev'));
     };
+    this.bindMeaning(pop, cur);
     picker.addEventListener('input', () => show(picker.value, 'picker'));
     hex.addEventListener('input', () => show(hex.value, 'hex'));
     hex.addEventListener('keydown', (e) => { if (e.key === 'Enter' && !addBtn.disabled) { e.preventDefault(); addBtn.click(); } });
