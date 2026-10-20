@@ -9228,6 +9228,14 @@ function attachInk(page, v) {
     if (tapeDrag) { tapeDrag[1] = point(e); Tape.preview(ctxFor(v.live), page, tapeDrag); return; }
     if (!stroke) return;
     if (snap) { if (snap.a) { setLineEnd(point(e)); drawLive(); } return; }   // ya enderezado: solo se mueve el final
+    if (guide?.map) {
+      // Pegado a la regla: siempre la recta del inicio a donde está el lápiz, así se alarga o se acorta en directo.
+      const a = stroke.points[0], q = point(e);
+      stroke.points = Shapes.densify([[a[0], a[1]], [q[0], q[1]]]).map(([x, y]) => [x, y, a[2]]);
+      guide.move(e.clientX, e.clientY);
+      drawLive();
+      return;
+    }
     const events = e.getCoalescedEvents ? e.getCoalescedEvents() : [e];
     for (const ev of (events.length ? events : [e])) stroke.points.push(point(ev));
     guide?.move(e.clientX, e.clientY);   // medida en directo (se pinta una vez por fotograma)
@@ -9504,11 +9512,22 @@ function itemContentRects(page, item) {
 /** ¿Coge el lazo este elemento? Hay que rodearlo de verdad. En los cuadros de texto cuenta lo escrito
  *  (no el cuadro entero, que puede ser mucho más ancho) y lo que tapan los elementos de encima no cuenta. */
 function lassoTakesItem(page, item, poly) {
-  if (item.type !== 'text') return rectInsidePolygon(itemRect(page, item), poly);
-  const rects = itemContentRects(page, item);
-  if (!rects) return rectInsidePolygon(itemRect(page, item), poly);
+  // Como en Goodnotes: basta con rodear un trozo del elemento (desde un 6 % de lo que se ve de él). Lo tapado por
+  // elementos de encima no cuenta, y así rodear un post-it que está sobre un cuadro de texto no coge el cuadro.
+  const r = itemRect(page, item);
+  if (poly.length < 3 || !(r.w > 0) || !(r.h > 0)) return false;
   const above = page.items.slice(page.items.indexOf(item) + 1).filter((i) => i.type !== 'tape' && i.type !== 'comment').map((i) => itemRect(page, i));
-  return rectsInsidePolygon(rects, poly, above);
+  // Lo tapado, y lo pegado (16 px) a lo que hay encima: es el margen que queda al rodear el elemento de encima.
+  const m = 16, hidden = (p) => above.some((c) => p[0] >= c.x - m && p[0] <= c.x + c.w + m && p[1] >= c.y - m && p[1] <= c.y + c.h + m);
+  const n = 16;
+  let seen = 0, inside = 0;
+  for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) {
+    const p = [r.x + r.w * (i + 0.5) / n, r.y + r.h * (j + 0.5) / n];
+    if (hidden(p)) continue;
+    seen++;
+    if (pointInPolygon(p, poly)) inside++;
+  }
+  return seen > 0 && inside >= Math.max(1, seen * 0.06);
 }
 function drawLassoBox() {
   $$('.lasso-box').forEach((x) => x.remove());
