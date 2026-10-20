@@ -7078,7 +7078,7 @@ function renderEditor() {
   });
   attachReadingPan($('#desk'));
   pinchActive = false;   // un pellizco a medias del editor anterior no deja las páginas sin repintar
-  attachPenTouch(desk); attachPinchZoom(desk); attachNoteHold(desk); PageMode.attach(desk);
+  attachPenTouch(desk); attachPinchZoom(desk); attachNoteHold(desk); PageMode.attach(desk); DoubleTap.attach(desk);
   // Un toque en el escritorio, fuera de las páginas, suelta el texto o el elemento seleccionado.
   desk.addEventListener('pointerdown', (e) => {
     if ((S.editing || S.selected) && e.target.matches('#desk, #pages, .page, .page-number')) deselectAll();
@@ -7415,10 +7415,112 @@ function fitZoom() {
     if (page) scrollToPage(page.id, false);
     return redrawPages();
   }
-  const widest = Math.max(...nb.pages.map((p) => p.w));
-  setZoom(Math.min(1.3, (desk.clientWidth - 40) / widest));
+  setZoom(fitZoomValue(desk, nb));
+}
+/** El zoom de «Ajustar»: al ancho en continuo (como mucho 1,3) y la página entera en los modos por páginas. */
+function fitZoomValue(desk = $('#desk'), nb = activeNb()) {
+  if (PageMode.snapped()) return PageMode.fit(desk, nb);
+  return Math.max(0.3, Math.min(3, 1.3, (desk.clientWidth - 40) / Math.max(...nb.pages.map((p) => p.w))));
 }
 addEventListener('resize', () => { if (S.view === 'editor') fitZoom(); });
+
+// ---------- Doble toque: ajustar al ancho (como en Goodnotes) ----------
+// Dos toques rápidos y quietos en el mismo sitio, con cualquier puntero (dedo, también en modo lápiz; ratón; lápiz),
+// animan el zoom hasta «Ajustar»; si ya está ajustada, vuelven al zoom de antes. Si el bolígrafo o el subrayador dejaron
+// un punto en cada toque, los dos se quitan (de la página y de deshacer); un toque solo deja su punto.
+// No cuenta sobre elementos (textos, post-its, comentarios, lazo, lupa), enlaces, cintas destapadas ni texto de PDF con
+// Seleccionar; ni con las herramientas que crean algo al tocar. La regla y la palma paran el evento antes del escritorio.
+const DT_MS = 300, DT_GAP = 20, DT_STILL = 8;
+const DoubleTap = {
+  cur: null,    // toque en marcha: { id, type, x, y, t, page, inkAt, moved }
+  last: null,   // el toque anterior ya soltado: { id, type, x, y, t, page, dot }
+  prev: null,   // la vista de antes de ajustar: { nbId, pageId, zoom, x, y } (centro de la vista en px de esa página)
+  /** En captura en el escritorio: la regla (desk-wrap) y la palma (ventana) ya lo pararon si era suyo. */
+  attach(desk) { desk.addEventListener('pointerdown', (e) => this.down(e), true); },
+  down(e) {
+    if (this.cur) { this.cur = this.last = null; return; }   // segundo dedo: pellizco, no doble toque
+    const page = this.target(e);
+    if (!page) { this.last = null; return; }
+    this.cur = { id: e.pointerId, type: e.pointerType, x: e.clientX, y: e.clientY, t: performance.now(), page, inkAt: lastInkAt, moved: false };
+  },
+  /** La página tocada si el toque puede ser un doble toque (si no, null). */
+  target(e) {
+    const nb = activeNb(), t = e.target;
+    if (S.view !== 'editor' || !nb || (e.pointerType === 'mouse' && e.button !== 0) || !t?.closest) return null;
+    if (S.editing || NoteZoom.prev || NoteZoom.raf || ['text', 'sticky', 'comment', 'link'].includes(S.tool)) return null;
+    if (!t.closest('.page') || t.closest('.item, .pin, .lasso-box, .zw-guide, a, button, input, textarea, [contenteditable="true"]')) return null;
+    const wrap = t.closest('.page'), page = nb.pages.find((pg) => views.get(pg.id)?.wrap === wrap), v = page && views.get(page.id);
+    if (!v) return null;
+    const w = wrap.getBoundingClientRect(), p = [(e.clientX - w.left) / S.zoom, (e.clientY - w.top) / S.zoom];
+    if (S.tool === 'select' && page.pdfRuns?.length && PdfText.hasText(page, { x: p[0], y: p[1] }, 2)) return null;
+    // Lo mismo que abre la tinta con un toque (ink.js): enlaces, y si no se acaba de escribir, cintas destapadas y post-its.
+    if (linkAt(page, v, e.clientX, e.clientY)) return null;
+    if (performance.now() - lastInkAt >= 1500 && (Tape.openAt(page, p) || noteAt(page, v, e.clientX, e.clientY))) return null;
+    return page;
+  },
+  move(e) {
+    const c = this.cur;
+    if (c && e.pointerId === c.id && !c.moved && Math.hypot(e.clientX - c.x, e.clientY - c.y) > DT_STILL) c.moved = true;
+  },
+  /** Al soltar (en la ventana, después de que la tinta haya guardado su punto). */
+  up(e) {
+    const c = this.cur;
+    if (!c || e.pointerId !== c.id) return;
+    this.cur = null;
+    const now = performance.now();
+    if (e.type !== 'pointerup' || c.moved || now - c.t > DT_MS || Math.hypot(e.clientX - c.x, e.clientY - c.y) > DT_STILL) { this.last = null; return; }
+    const tap = { ...c, t: now, dot: lastInkAt > c.inkAt ? this.dot(c.page) : null };
+    const a = this.last;
+    if (a && a.type === tap.type && a.page === tap.page && c.t - a.t <= DT_MS && Math.hypot(tap.x - a.x, tap.y - a.y) <= DT_GAP) {
+      this.last = null;
+      this.drop(tap.dot); this.drop(a.dot);   // de arriba abajo en la pila de deshacer
+      return this.toggle(tap);
+    }
+    this.last = tap;
+  },
+  /** El punto que la tinta acaba de guardar en este toque, con su entrada de deshacer. */
+  dot(page) {
+    const nb = activeNb(), holder = lastInkNote ? page.items.find((i) => i.id === lastInkNote) : page;
+    const s = holder?.strokes?.at(-1);
+    return s ? { pageId: page.id, noteId: lastInkNote, id: s.id, entry: S.undo[nb.id]?.at(-1) } : null;
+  },
+  /** Quita un punto de un toque si su entrada sigue arriba en deshacer (nada se hizo después). */
+  drop(d) {
+    const nb = activeNb(), st = nb && S.undo[nb.id];
+    if (!d || !st || st.at(-1) !== d.entry) return;
+    const page = nb.pages.find((p) => p.id === d.pageId), note = d.noteId && page?.items.find((i) => i.id === d.noteId);
+    const holder = d.noteId ? note : page;
+    if (!holder?.strokes?.some((s) => s.id === d.id)) return;
+    st.pop();
+    holder.strokes = holder.strokes.filter((s) => s.id !== d.id);
+    page._v = (page._v || 0) + 1;
+    if (note) paintNoteInk(page, note); else renderInk(page);
+    touch(nb);
+  },
+  /** Ajusta la página tocada (animado) o, si ya lo está, vuelve al zoom de antes. */
+  toggle(tap) {
+    const desk = $('#desk'), nb = activeNb(), v = views.get(tap.page.id);
+    if (!desk || !nb || !v) return;
+    const fit = fitZoomValue(desk, nb), r = desk.getBoundingClientRect();
+    const cy = r.top + desk.clientHeight / 2, w = v.wrap.getBoundingClientRect();
+    const tapY = (tap.y - w.top) / S.zoom;   // el punto tocado, en px de página
+    if (Math.abs(S.zoom - fit) < 0.005) {
+      const p = this.prev, back = p && p.nbId === nb.id && nb.pages.find((x) => x.id === p.pageId);
+      this.prev = null;
+      if (back && Math.abs(p.zoom - fit) >= 0.005) return NoteZoom.animate(back, p.zoom, { x: p.x, y: p.y });
+      // Sin zoom de antes: se amplía al doble alrededor del punto tocado.
+      const z = Math.min(3, fit * 2);
+      return NoteZoom.animate(tap.page, z, { x: (tap.x - w.left) / S.zoom, y: tapY });
+    }
+    this.prev = { nbId: nb.id, pageId: tap.page.id, zoom: S.zoom, ...NoteZoom.center(desk, v) };
+    // Por páginas: la página entera, centrada. En continuo: centrada de lado y el punto tocado a la misma altura.
+    const c1 = PageMode.snapped() ? { x: tap.page.w / 2, y: tap.page.h / 2 } : { x: tap.page.w / 2, y: tapY + (cy - tap.y) / fit };
+    NoteZoom.animate(tap.page, fit, c1);
+  },
+};
+addEventListener('pointermove', (e) => { if (DoubleTap.cur) DoubleTap.move(e); }, true);
+addEventListener('pointerup', (e) => DoubleTap.up(e));
+addEventListener('pointercancel', (e) => DoubleTap.up(e));
 
 function updateCurrentPage() {
   const desk = $('#desk'), nb = activeNb();
