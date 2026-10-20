@@ -699,9 +699,60 @@ body.is-reordering .tabs .chip:hover { outline: 2px solid var(--accent); outline
 #app.hide-voice .item.voice { display: none; }
 .voice-label { display: inline-flex; align-items: center; gap: 6px; color: #C76E00; max-width: 300px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
 .voice-label svg { width: 16px; height: 16px; flex: none; }
-.playback-bar { position: absolute; left: 50%; bottom: 64px; transform: translateX(-50%); display: flex; align-items: center; gap: 10px; padding: 6px 12px; border-radius: 26px; background: color-mix(in srgb, var(--bar) 85%, transparent); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); box-shadow: 0 0 0 .5px var(--hairline), 0 2px 10px rgba(0,0,0,.15); z-index: 20; font-variant-numeric: tabular-nums; font-size: 12px; animation: rise .2s ease-out; }
-.playback-bar input { width: 220px; accent-color: #FF9500; }
-.playback-bar [data-pb="play"] svg { fill: currentColor; }
+/* Reproducir sincronizado (voice.js): barra con onda, tramos por página, ±10 s, velocidad y «Escuchar» */
+.playback-bar { --pb-rest: rgba(120, 120, 128, .42); position: absolute; left: 50%; translate: -50% 0; bottom: 64px; display: flex; align-items: center; gap: 8px; padding: 6px 10px; width: min(760px, calc(100% - 32px)); box-sizing: border-box; border-radius: 26px; background: color-mix(in srgb, var(--bar) 88%, transparent); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); box-shadow: 0 0 0 .5px var(--hairline), 0 2px 10px rgba(0,0,0,.15); z-index: 20; font-variant-numeric: tabular-nums; font-size: 12px; animation: rise .2s ease-out; touch-action: manipulation; }
+:root[data-theme="dark"] .playback-bar { --pb-rest: rgba(235, 235, 245, .3); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .playback-bar { --pb-rest: rgba(235, 235, 245, .3); } }
+.playback-bar .pb-ctrls { display: flex; align-items: center; gap: 2px; flex: none; }
+.playback-bar .pb-play { width: 36px; height: 36px; border-radius: 50%; background: #FF9500; color: #fff; }
+.playback-bar .pb-play:hover { background: #F08A00; }
+.playback-bar .pb-play svg { fill: currentColor; width: 16px; height: 16px; }
+.playback-bar [data-pb="back"] svg, .playback-bar [data-pb="fwd"] svg { width: 22px; height: 22px; }
+.playback-bar .pb-cur, .playback-bar .pb-total { flex: none; min-width: 34px; color: var(--muted); }
+.playback-bar .pb-cur { text-align: right; color: inherit; }
+.pb-track { position: relative; flex: 1; min-width: 120px; height: 36px; }
+.pb-wave { position: absolute; left: 0; right: 0; top: 0; width: 100%; height: 36px; display: block; }
+.pb-track input { position: absolute; left: 0; top: 0; width: 100%; height: 36px; margin: 0; opacity: 0; cursor: pointer; }
+.playback-bar.has-pages .pb-track { height: 48px; }
+.pb-pages { position: absolute; left: 0; right: 0; bottom: 0; height: 11px; }
+.pb-seg { position: absolute; top: 0; height: 11px; padding: 0; border: 0; border-radius: 3px; background: color-mix(in srgb, #FF9500 30%, transparent); color: #A35A00; font: 600 8.5px/11px var(--font); overflow: hidden; cursor: pointer; }
+.pb-seg.alt { background: color-mix(in srgb, #FF9500 55%, transparent); }
+:root[data-theme="dark"] .pb-seg { color: #FFD9A8; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .pb-seg { color: #FFD9A8; } }
+.pb-seg:hover, .pb-seg:focus-visible { outline: 1.5px solid #FF9500; outline-offset: 0; }
+.pb-rate { min-width: 40px; height: 30px; padding: 0 8px; border: 0; border-radius: 15px; background: var(--fill, rgba(120,120,128,.12)); color: inherit; font: 600 12.5px var(--font); font-variant-numeric: tabular-nums; cursor: pointer; }
+.pb-listen { display: inline-flex; align-items: center; gap: 5px; height: 30px; padding: 0 10px 0 8px; border: 0; border-radius: 15px; background: transparent; color: inherit; font: 600 12.5px var(--font); cursor: pointer; }
+.pb-listen svg { width: 18px; height: 18px; }
+.pb-listen[aria-pressed="true"] { background: rgba(255, 149, 0, .18); color: #C76E00; }
+:root[data-theme="dark"] .pb-listen[aria-pressed="true"] { color: #FFB340; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .pb-listen[aria-pressed="true"] { color: #FFB340; } }
+@media (max-width: 640px) {
+  .playback-bar { flex-wrap: wrap; bottom: 58px; border-radius: 20px; row-gap: 2px; padding: 6px 8px; }
+  .playback-bar .pb-track { order: -1; flex: 1 0 100%; }
+  .playback-bar .pb-cur { min-width: 0; margin-right: auto; }
+  .playback-bar .pb-total { min-width: 0; margin-left: auto; }
+  .pb-listen span { display: none; }
+  .pb-listen { padding: 0 8px; }
+}
+/* «Escuchar»: tocar lo escrito salta el audio; lo de después del instante, atenuado (la tinta en el lienzo, los elementos con .vfuture) */
+#app.voice-listen #pages .page .ink, #app.voice-listen #pages .page .item:not(.voice) { cursor: pointer; }
+#pages .item.vfuture { opacity: .22; transition: opacity .25s; }
+#pages .item.vfuture.selected, #pages .item.vfuture.editing { opacity: 1; }
+.vtap { position: absolute; width: 36px; height: 36px; margin: -18px 0 0 -18px; border-radius: 50%; border: 2px solid rgba(120, 120, 128, .6); pointer-events: none !important; transform: scale(calc(var(--zi, 1))); animation: vtap .55s ease-out forwards; }
+.vtap.hit { border-color: #FF9500; background: rgba(255, 149, 0, .15); }
+@keyframes vtap { from { opacity: 1; scale: .4; } to { opacity: 0; scale: 1.3; } }
+/* Marcas ★ «Importante»: en la grabación (botón junto al micrófono) y en el margen de la página */
+.mic-pill .mic-mark { width: 26px; height: 26px; margin-left: 2px; color: #FF9500; }
+.mic-pill .mic-mark svg { width: 17px; height: 17px; }
+.mic-pill.recording .mic-main { padding: 0 8px; gap: 5px; }
+.layer.over > .vmarks { position: absolute; left: 0; top: 0; width: 0; height: 0; }
+.vmark { position: absolute; left: 4px; width: 26px; height: 26px; margin-top: -13px; padding: 0; border: 0; border-radius: 50%; display: grid; place-items: center; background: #FFF2E0; color: #FF9500; box-shadow: 0 0 0 1px rgba(255, 149, 0, .55), 0 1px 3px rgba(0,0,0,.15); cursor: pointer; pointer-events: auto; transform: scale(var(--zi, 1)); transform-origin: 0 50%; }
+.vmark svg { width: 15px; height: 15px; }
+.vmark.live { animation: vmarkin .35s ease-out; }
+.vmark:hover { background: #FFE2BA; }
+@keyframes vmarkin { from { scale: .2; opacity: 0; } }
+#app.hide-voice .vmarks { display: none; }
+@media (prefers-reduced-motion: reduce) { .vtap, .vmark.live, #pages .item.vfuture { animation: none; transition: none; } }
 .recordings-window { width: min(640px, 100%); }
 .rec-list { display: flex; flex-direction: column; border-radius: 12px; background: var(--fill); overflow: hidden; }
 .rec-row { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-bottom: 1px solid var(--hairline); }
@@ -1455,6 +1506,122 @@ body.is-card-dragging .crumbs button { box-shadow: inset 0 0 0 1.5px color-mix(i
 
 /* Textos de la app nunca a medias: estos bajan de línea en vez de cortarse con «…» */
 .mean-cname, .cloze-inc small { white-space: normal; overflow: visible; text-overflow: clip; }
+
+/* ---------- Repaso de hoy (daily.js): acceso en la biblioteca, sesión, gráfico de 30 días y celebración ---------- */
+:root { --daily-flame: #F2700F; --daily-flame-2: #FFC23D; --daily-part: rgba(120, 120, 128, .38); --daily-good: #1F8A4C; }
+:root[data-theme="dark"] { --daily-flame: #FF9440; --daily-flame-2: #FFD25E; --daily-part: rgba(160, 160, 170, .42); --daily-good: #4CD87F; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --daily-flame: #FF9440; --daily-flame-2: #FFD25E; --daily-part: rgba(160, 160, 170, .42); --daily-good: #4CD87F; } }
+.daily-flame { width: 20px; height: 20px; flex: none; }
+.daily-flame path { fill: var(--daily-flame); }
+.daily-flame .df-core { fill: var(--daily-flame-2); }
+.popover .daily-flame.menu { width: 18px; height: 18px; }
+.daily-lib { margin: 0 0 12px; }
+.daily-go { display: flex; align-items: center; gap: 12px; width: min(440px, 100%); padding: 10px 12px 10px 10px; border-radius: 14px; border: 1px solid var(--hairline); background: var(--bar); color: var(--ink); text-align: left; box-shadow: 0 1px 2px rgba(0,0,0,.05); transition: border-color .15s, transform .15s; }
+.daily-go:hover { border-color: var(--daily-flame); }
+.daily-go:active { transform: scale(.99); }
+.daily-go > svg:last-child { width: 16px; height: 16px; color: var(--muted); flex: none; }
+.dy-ring { --p: 0; width: 38px; height: 38px; border-radius: 50%; flex: none; display: grid; place-items: center;
+  background: radial-gradient(closest-side, var(--bar) 78%, transparent 80%), conic-gradient(var(--daily-flame) calc(var(--p) * 1%), var(--fill) 0); }
+.daily-go.done .dy-ring svg { width: 18px; height: 18px; color: var(--daily-flame); stroke-width: 3; }
+.dy-body { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.dy-body b { font-size: 15px; font-weight: 600; }
+.dy-body small { color: var(--muted); font-size: 12.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dy-streak { display: inline-flex; align-items: center; gap: 2px; font: 700 15px var(--font); font-variant-numeric: tabular-nums; color: var(--ink); flex: none; }
+.dy-streak .daily-flame { width: 16px; height: 16px; }
+
+.dialog.daily-dialog { width: min(520px, 100%); }
+.daily { display: flex; flex-direction: column; gap: 14px; }
+.daily-head { display: flex; align-items: center; gap: 12px; }
+.daily-head > div { flex: 1; min-width: 0; }
+.daily-head h2 { text-align: left; }
+.daily-head .icon-btn { align-self: flex-start; margin: -8px -8px 0 0; }
+.dh-flame { width: 46px; height: 46px; border-radius: 50%; display: grid; place-items: center; background: var(--fill); flex: none; }
+.dh-flame .daily-flame { width: 28px; height: 28px; filter: grayscale(1) opacity(.5); }
+.dh-flame.on { background: color-mix(in srgb, var(--daily-flame) 16%, transparent); }
+.dh-flame.on .daily-flame { filter: none; }
+.dh-streak { margin: 2px 0 0; font-size: 14px; color: var(--ink-2); }
+.dh-streak b { color: var(--ink); font-weight: 600; }
+.dh-streak span { color: var(--muted); }
+.daily-note { margin: 0; font-size: 13.5px; padding: 8px 12px; border-radius: 10px; background: var(--fill); color: var(--ink-2); }
+.daily-note.ok { background: color-mix(in srgb, var(--daily-good) 14%, transparent); }
+.daily-chart { margin: 0; background: var(--surface-2); border-radius: 12px; padding: 10px 12px 8px; }
+.daily-chart figcaption { display: flex; justify-content: space-between; align-items: baseline; font-size: 12.5px; font-weight: 600; color: var(--ink-2); margin-bottom: 6px; }
+.daily-chart figcaption small { font-weight: 500; color: var(--muted); font-variant-numeric: tabular-nums; }
+.daily-chart svg { width: 100%; height: 66px; overflow: visible; }
+.dc-hit { fill: transparent; }
+.dc-bar { fill: var(--daily-part); }
+.dc-day.done .dc-bar { fill: var(--daily-flame); }
+.dc-day:hover .dc-bar { opacity: .75; }
+.dc-day.today .dc-hit { fill: var(--fill); }
+.dc-none { fill: var(--line); }
+.dc-goal { stroke: var(--muted); stroke-width: 1; stroke-dasharray: 3 3; vector-effect: non-scaling-stroke; }
+.dc-axis { display: flex; justify-content: space-between; font-size: 11px; color: var(--muted); margin-top: 4px; font-variant-numeric: tabular-nums; }
+.daily-goal { display: flex; align-items: center; justify-content: space-between; gap: 8px 12px; flex-wrap: wrap; font-size: 13.5px; color: var(--ink-2); }
+.daily-what { margin: 0; font-size: 14px; color: var(--ink-2); text-align: center; }
+
+.daily-top { display: flex; align-items: center; gap: 10px; font-variant-numeric: tabular-nums; margin: -8px -8px 0 0; font-size: 13px; color: var(--muted); }
+.dt-bar { flex: 1; height: 4px; border-radius: 2px; background: var(--fill); overflow: hidden; }
+.dt-bar i { display: block; height: 100%; background: var(--daily-flame); border-radius: 2px; transition: width .3s; }
+.daily-where { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--muted); min-width: 0; }
+.daily-where svg { width: 15px; height: 15px; flex: none; }
+.daily-where > span:first-of-type { font-weight: 600; color: var(--ink-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dw-page::before { content: "·"; margin-right: 6px; }
+.daily-ask { display: flex; flex-direction: column; align-items: center; gap: 2px; text-align: center; }
+.daily-ask b { font-size: 18px; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; }
+.daily-ask > span { color: var(--muted); font-size: 13.5px; }
+.daily-zone { min-height: 150px; padding: 10px; }
+.daily-zone img { max-width: 100%; max-height: 300px; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,.18); display: block; margin: 0 auto; }
+.daily-zone.loading { background: linear-gradient(100deg, var(--surface-2) 30%, var(--fill) 50%, var(--surface-2) 70%) 0 0 / 300% 100%; animation: daily-shimmer 1.2s linear infinite; }
+@keyframes daily-shimmer { to { background-position: -150% 0; } }
+.daily-answers { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.daily-ans { border: 0; border-radius: 12px; padding: 12px 8px; display: flex; align-items: center; justify-content: center; gap: 8px; background: var(--surface-2); font-size: 15px; }
+.daily-ans svg { width: 18px; height: 18px; }
+.daily-ans.bad { color: var(--danger); }
+.daily-ans.good { color: var(--daily-good); }
+.daily-ans b { color: var(--ink); font-weight: 600; }
+.daily-ans:hover { box-shadow: inset 0 0 0 2px currentColor; }
+
+/* Celebración: el círculo se cierra, el «hecho» se escribe a mano, salpican gotas de tinta y la racha sube. */
+.daily-done { display: flex; flex-direction: column; align-items: center; gap: 12px; text-align: center; }
+.daily-done .actions { align-self: stretch; }
+.dd-mark { position: relative; width: 120px; height: 120px; }
+.dd-mark svg { width: 120px; height: 120px; position: relative; }
+.dd-ring-bg { fill: none; stroke: var(--fill); stroke-width: 7; }
+.dd-ring { fill: none; stroke: var(--daily-flame); stroke-width: 7; stroke-linecap: round; stroke-dasharray: 100; stroke-dashoffset: 0; transform: rotate(-90deg); transform-origin: 60px 60px;
+  animation: dd-ring .9s cubic-bezier(.55, .05, .25, 1) both; }
+.dd-check { fill: none; stroke: var(--ink); stroke-width: 7; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 100; stroke-dashoffset: 0; animation: dd-check .5s .8s cubic-bezier(.3, .6, .3, 1) both; }
+.dd-drops { position: absolute; left: 50%; top: 50%; }
+.dd-drops i { position: absolute; width: var(--s); height: var(--s); margin: calc(var(--s) / -2); border-radius: 50% 50% 50% 0; background: var(--c); opacity: 0; transform: translate(var(--dx), var(--dy)) scale(.4); animation: dd-drop .9s calc(1.05s + var(--d)) cubic-bezier(.15, .7, .3, 1) both; }
+.dd-streak { display: flex; align-items: center; gap: 8px; margin: 0; font-size: 15px; color: var(--ink-2); }
+.dd-streak .daily-flame { width: 26px; height: 26px; }
+.dd-num { display: inline-block; height: 34px; overflow: hidden; font: 700 30px/34px var(--font-display); color: var(--ink); font-variant-numeric: tabular-nums; }
+.dd-roll { display: flex; flex-direction: column; }
+.daily-done.up .dd-roll { animation: dd-roll .55s 1.35s cubic-bezier(.3, 1.45, .5, 1) both; }
+.daily-done.up .dd-streak .daily-flame { animation: dd-flame .7s 1.35s ease-out both; }
+.dd-week { display: flex; gap: 6px; }
+.dd-week span { width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; font-size: 11.5px; font-weight: 600; text-transform: uppercase; background: var(--fill); color: var(--muted); }
+.dd-week span.on { background: var(--daily-flame); color: #fff; }
+.dd-week span.today { box-shadow: 0 0 0 2px var(--surface), 0 0 0 3.5px var(--daily-flame); }
+.daily-done.up .dd-week span.today.on { animation: dd-pop .45s 1.5s cubic-bezier(.3, 1.6, .5, 1) both; }
+.dd-tally { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; align-self: stretch; }
+.dd-tally div { background: var(--surface-2); border-radius: 10px; padding: 8px 4px; display: flex; flex-direction: column; font-size: 12.5px; color: var(--muted); }
+.dd-tally b { font-size: 20px; color: var(--ink); font-variant-numeric: tabular-nums; }
+@keyframes dd-ring { from { stroke-dashoffset: 100; } }
+@keyframes dd-check { from { stroke-dashoffset: 100; } }
+@keyframes dd-drop { 0% { opacity: 0; transform: translate(0, 0) scale(.3); } 25% { opacity: 1; } 100% { opacity: 0; transform: translate(var(--dx), var(--dy)) scale(1) rotate(45deg); } }
+@keyframes dd-roll { from { transform: translateY(0); } to { transform: translateY(-34px); } }
+@keyframes dd-flame { 0%, 100% { transform: none; } 40% { transform: scale(1.35) rotate(-8deg); } }
+@keyframes dd-pop { 0% { transform: scale(.6); } 100% { transform: none; } }
+@media (prefers-reduced-motion: reduce) {
+  .dd-ring, .dd-check, .daily-done.up .dd-week span.today.on, .daily-done.up .dd-streak .daily-flame, .daily-zone.loading { animation: none; }
+  .dd-drops { display: none; }
+  .daily-done.up .dd-roll { animation: none; transform: translateY(-34px); }
+}
+@media (max-width: 480px) {
+  .daily-go { width: 100%; }
+  .daily-goal { justify-content: center; }
+  .daily-dialog .actions .btn { flex: 1; }
+}
 /* =============================================================================
    Tutorial de la primera vez (siempre en oscuro, como en la app nativa)
    ============================================================================= */
@@ -2341,10 +2508,28 @@ I18N.dict.it = {
   'Ese PDF no coincide con las páginas de esta libreta.': 'Questo PDF non corrisponde alle pagine di questo quaderno.', 'Listo: el PDF ya se ve nítido': 'Fatto: ora il PDF si vede nitido',
   'Guardar copia sin los PDF originales (más pequeña)': 'Salva backup senza i PDF originali (più piccolo)',
   '1 frase': '1 frase', '1 frase ya tenía su tarjeta y no se repite.': '1 frase aveva già la sua flashcard e non si ripete.', 'Crear 1 tarjeta': 'Crea 1 flashcard',
+  // --- Audio sincronizado (voice.js) ---
+  'Marcar como importante': 'Segna come importante', 'Reproducir la última con lo escrito': 'Riproduci l’ultima con ciò che hai scritto',
+  'Retroceder 10 segundos': 'Indietro di 10 secondi', 'Avanzar 10 segundos': 'Avanti di 10 secondi', 'Velocidad': 'Velocità', 'Escuchar': 'Ascolta',
+  'Toca lo escrito para oír ese momento': 'Tocca ciò che hai scritto per ascoltare quel momento',
+  'Se podrá escuchar al terminar la grabación.': 'Potrai ascoltarla quando finisce la registrazione.', 'Descargar el audio': 'Scarica l’audio',
+  // Repaso de hoy (daily.js): racha → serie
+  'Repaso de hoy': 'Ripasso di oggi', 'Una sesión corta que mezcla tus tarjetas pendientes y lo que se te está olvidando': 'Una sessione breve che mescola le tue flashcard da ripassare e quello che stai dimenticando',
+  'Lo que se te está olvidando': 'Quello che stai dimenticando', 'Hecho hoy': 'Fatto oggi', '1 día seguido': '1 giorno di fila', 'día seguido': 'giorno di fila', 'días seguidos': 'giorni di fila',
+  'Últimos 30 días': 'Ultimi 30 giorni', '1 día hecho': '1 giorno fatto', 'Minutos de repaso de los últimos 30 días': 'Minuti di ripasso degli ultimi 30 giorni', 'Hoy': 'Oggi', 'hecho': 'fatto',
+  'Hoy ya lo has hecho. Puedes repasar más si quieres.': 'Oggi l’hai già fatto. Puoi ripassare ancora, se vuoi.', 'Duración (objetivo diario)': 'Durata (obiettivo giornaliero)', 'Duración': 'Durata',
+  'Hoy no hay nada que repasar: ni tarjetas pendientes ni libretas que se estén olvidando. Vuelve mañana.': 'Oggi non c’è niente da ripassare: né flashcard in sospeso né quaderni che stai dimenticando. Torna domani.',
+  '¿Qué hay debajo de la cinta?': 'Cosa c’è sotto il nastro?', '¿Lo recuerdas?': 'Te lo ricordi?', 'Zona destapada': 'Zona scoperta', 'Zona tapada': 'Zona coperta', 'Último': 'Ultimo',
+  'Mal': 'Male', 'Mal (1)': 'Male (1)', 'Bien (2)': 'Bene (2)', 'Se acabó el tiempo': 'Tempo scaduto', '¡Repaso hecho!': 'Ripasso fatto!', 'Últimos 7 días': 'Ultimi 7 giorni', 'min': 'min',
+  'Queda 1 cosa para mañana.': 'Resta 1 cosa per domani.', '1 tarjeta': '1 flashcard', '1 zona para recordar': '1 zona da ricordare',
 };
 
 /** Textos con nombres o números dentro. */
 I18N.patterns.it = [
+  // Repaso de hoy (daily.js)
+  [/^~(\d+) min$/, '~$1 min'], [/^(\d+) min$/, '$1 min'], [/^(\d+) días seguidos$/, '$1 giorni di fila'], [/^(\d+) días hechos$/, '$1 giorni fatti'],
+  [/^(\d+) tarjetas$/, '$1 flashcard'], [/^(\d+) zonas para recordar$/, '$1 zone da ricordare'], [/^Objetivo: (\d+) min$/, 'Obiettivo: $1 min'],
+  [/^· Récord: (\d+)$/, '· Record: $1'], [/^Quedan (\d+) cosas para mañana\.$/, 'Restano $1 cose per domani.'], [/^(\d{1,2} [^\s:]+): (\d+) min$/, '$1: $2 min'],
   [/^Listo: (\d+) de (\d+) páginas se ven nítidas$/, 'Fatto: $1 di $2 pagine si vedono nitide'],
   // Tarjetas de huecos (cloze.js)
   [/^(\d+) frases$/, '$1 frasi'], [/^Crear (\d+) tarjetas$/, 'Crea $1 flashcard'],
@@ -2428,6 +2613,7 @@ I18N.patterns.it = [
       comentario: 'commento', comentarios: 'commenti', enlace: 'collegamento', enlaces: 'collegamenti', 'nota de voz': 'nota vocale', 'notas de voz': 'note vocali', cinta: 'nastro', cintas: 'nastri' };
     return m[0].split(' · ').map((part) => part.replace(/^(\d+) (.+)$/, (x, n, w) => `${n} ${W[w] || w}`)).join(' · ');
   }],
+  [/^Importante · (.+)$/, 'Importante · $1'], [/^Pág\. (\d+) · (.+)$/, 'Pag. $1 · $2'],
 ];
 
 /** Palabras sueltas, para lo que mezcla números y nombres («3 libretas · 2 carpetas»). */
@@ -2766,7 +2952,8 @@ const Shapes = (() => {
     const ax = axis(raw), [a, b] = line;
     return Math.abs(b[0] - a[0]) >= Math.abs(b[1] - a[1]) ? [[a[0], ax.c[1]], [b[0], ax.c[1]]] : [[ax.c[0], a[1]], [ax.c[0], b[1]]];
   }
-  function recognize(raw) {
+  /** Forma reconocida en un trazo a mano: { type, points } (tipos en TYPES) o null si no parece ninguna. */
+  function classify(raw) {
     const pts = smooth(resample(raw, 2));
     if (pts.length < 4) return null;
     const b = bounds(pts), diag = Math.hypot(b.w, b.h);
@@ -2774,23 +2961,35 @@ const Shapes = (() => {
     const len = pathLength(pts), ax = axis(pts);
     const s = project(pts[0], ax), e = project(pts[pts.length - 1], ax), chord = dist(s, e);
     const maxDev = Math.max(...pts.map((p) => Math.abs(perp(p, ax))));
-    if (maxDev < Math.max(3, 0.05 * chord) && chord > 0.85 * len) return densify([s, e]);
+    if (maxDev < Math.max(3, 0.05 * chord) && chord > 0.85 * len) return { type: 'line', points: densify([s, e]) };
+    const poly = (c) => (c.length === 3 ? 'triangle' : c.length === 4 ? 'quad' : 'polygon');
     if (dist(pts[0], pts[pts.length - 1]) < Math.max(16, 0.2 * len)) {
       const corners = simplifyClosed(pts, 0.06 * diag), err = ellipseError(pts, b);
-      if (corners.length >= 3 && corners.length <= 6 && err > 0.07) { const c = regularize(corners); return densify(c.concat([c[0]])); }
+      if (corners.length >= 3 && corners.length <= 6 && err > 0.07) {
+        const c = regularize(corners);
+        return { type: c !== corners ? 'rect' : poly(c), points: densify(c.concat([c[0]])) };
+      }
       if (err < 0.14 && b.w > 8 && b.h > 8) {
         let rx = b.w / 2, ry = b.h / 2;
         if (Math.abs(rx - ry) / Math.max(rx, ry) < 0.12) rx = ry = (rx + ry) / 2;
         const cx = b.x + b.w / 2, cy = b.y + b.h / 2, n = Math.max(48, Math.floor(2 * Math.PI * Math.sqrt((rx * rx + ry * ry) / 2) / 3));
-        return Array.from({ length: n + 3 }, (_, i) => [cx + rx * Math.cos(i / n * 2 * Math.PI), cy + ry * Math.sin(i / n * 2 * Math.PI)]);
+        return { type: 'ellipse', points: Array.from({ length: n + 3 }, (_, i) => [cx + rx * Math.cos(i / n * 2 * Math.PI), cy + ry * Math.sin(i / n * 2 * Math.PI)]) };
       }
-      if (corners.length >= 3 && corners.length <= 8) return densify(corners.concat([corners[0]]));
+      if (corners.length >= 3 && corners.length <= 8) return { type: poly(corners), points: densify(corners.concat([corners[0]])) };
       return null;
     }
     const simp = simplify(pts, Math.max(4, 0.05 * diag));
-    return simp.length <= 5 ? densify(simp) : null;
+    return simp.length <= 5 ? { type: simp.length === 2 ? 'line' : 'polyline', points: densify(simp) } : null;
   }
-  return { straight, cardinal, recognize, densify, bounds };
+  const recognize = (raw) => classify(raw)?.points || null;
+  // Campo opcional `shape` del trazo (ARQUITECTURA §2.1): solo el tipo, la geometría son sus puntos.
+  const TYPES = ['line', 'polyline', 'triangle', 'rect', 'quad', 'polygon', 'ellipse'];
+  /** Quita un `shape` mal formado (datos de fuera); los trazos sin él no se tocan. */
+  function normalize(s) {
+    if (s && 'shape' in s && !(s.shape && typeof s.shape === 'object' && TYPES.includes(s.shape.type))) delete s.shape;
+    return s;
+  }
+  return { straight, cardinal, recognize, classify, normalize, TYPES, densify, bounds };
 })();
 
 /** ¿Está el punto dentro del polígono? (lazo) */
@@ -3050,6 +3249,7 @@ function normalizeNotebook(nb) {
   for (const p of nb.pages || []) if ('pdf' in p && !(p.pdf && typeof p.pdf.id === 'string' && Number.isInteger(p.pdf.index) && p.pdf.index >= 0)) delete p.pdf;
   if ('scrollMode' in nb && !PAGE_MODES.includes(nb.scrollMode)) delete nb.scrollMode;   // modo de páginas (opcional)
   if ('reviews' in nb || 'lastReviewed' in nb) Recall.normalize(nb);   // curva del olvido (opcional, recall.js)
+  Voice.normalize(nb);   // audio sincronizado (opcional, voice.js): `t` de trazos y elementos, marcas y onda
   for (const page of nb.pages) {
     page.w = page.w || PORTRAIT.w; page.h = page.h || PORTRAIT.h;
     page.strokes = page.strokes || []; page.items = page.items || [];
@@ -3062,10 +3262,10 @@ function normalizeNotebook(nb) {
       }
       if ((item.type === 'text' || item.type === 'sticky' || item.type === 'comment') && !item.base) item.base = clone(DEFAULT_TEXT);
       // Tinta del post-it (opcional): los post-its antiguos no la tienen y se quedan así.
-      if (item.type === 'sticky' && Array.isArray(item.strokes)) for (const s of item.strokes) s.kind = s.kind || 'pen';
+      if (item.type === 'sticky' && Array.isArray(item.strokes)) for (const s of item.strokes) { s.kind = s.kind || 'pen'; Shapes.normalize(s); }
       if (item.type === 'tape') Tape.normalize(item);   // cinta de repaso (tape.js)
     }
-    for (const s of page.strokes) s.kind = s.kind || 'pen';
+    for (const s of page.strokes) { s.kind = s.kind || 'pen'; Shapes.normalize(s); }   // shape: forma enderezada (opcional)
   }
   return nb;
 }
@@ -3465,22 +3665,22 @@ function strokeWidths(s, p) {
   }
   return out;
 }
-/** Forma de un trazo de grosor variable: un círculo en cada punto y, entre dos seguidos, el trapecio que los une.
- *  Todas las piezas giran en el mismo sentido y se rellenan de una vez: sin huecos donde el trazo se cruza consigo
- *  mismo y sin oscurecer los solapes. Antes se suaviza la línea (cortando esquinas una vez). */
-function outlinePath(ctx, p, w) {
-  let q = p.map((pt, i) => [pt[0], pt[1], w[i]]);
-  if (q.length > 2) {
-    const c = [q[0]];
-    for (let i = 0; i < q.length - 1; i++) {
-      const a = q[i], b = q[i + 1];
-      c.push([a[0] * 0.75 + b[0] * 0.25, a[1] * 0.75 + b[1] * 0.25, a[2] * 0.75 + b[2] * 0.25], [a[0] * 0.25 + b[0] * 0.75, a[1] * 0.25 + b[1] * 0.75, a[2] * 0.25 + b[2] * 0.75]);
-    }
-    c.push(q[q.length - 1]);
-    q = c;
+/** Puntos del contorno con su grosor [x, y, grosor], tras suavizar la línea (cortando esquinas una vez). */
+function outlinePoints(p, w) {
+  const q = p.map((pt, i) => [pt[0], pt[1], w[i]]);
+  if (q.length <= 2) return q;
+  const c = [q[0]];
+  for (let i = 0; i < q.length - 1; i++) {
+    const a = q[i], b = q[i + 1];
+    c.push([a[0] * 0.75 + b[0] * 0.25, a[1] * 0.75 + b[1] * 0.25, a[2] * 0.75 + b[2] * 0.25], [a[0] * 0.25 + b[0] * 0.75, a[1] * 0.25 + b[1] * 0.75, a[2] * 0.25 + b[2] * 0.75]);
   }
-  ctx.beginPath();
+  c.push(q[q.length - 1]);
+  return c;
+}
+/** Las piezas del contorno (ver outlinePath) en el camino actual; con `keep`, solo las piezas i con keep(i). */
+function outlinePieces(ctx, q, keep = null) {
   for (let i = 0; i < q.length; i++) {
+    if (keep && !keep(i)) continue;
     const [x, y, wd] = q[i], r = wd / 2;
     ctx.moveTo(x + r, y); ctx.arc(x, y, r, 0, Math.PI * 2);
     if (!i) continue;
@@ -3493,6 +3693,56 @@ function outlinePath(ctx, p, w) {
     if (area < 0) quad = quad.reverse();   // mismo sentido que los círculos (horario en pantalla)
     ctx.moveTo(quad[0][0], quad[0][1]); for (let k = 1; k < 4; k++) ctx.lineTo(quad[k][0], quad[k][1]); ctx.closePath();
   }
+}
+/** Forma de un trazo de grosor variable: un círculo en cada punto y, entre dos seguidos, el trapecio que los une.
+ *  Todas las piezas giran en el mismo sentido y se rellenan de una vez: sin huecos donde el trazo se cruza consigo
+ *  mismo y sin oscurecer los solapes. Antes se suaviza la línea (cortando esquinas una vez). */
+function outlinePath(ctx, p, w) {
+  ctx.beginPath();
+  outlinePieces(ctx, outlinePoints(p, w));
+}
+/** Trazo en directo por zonas (ink.js): pinta en `z` ({x,y,w,h} px de página, ya borrada y recortada por quien llama)
+ *  todas las piezas del trazo que caen en ella, en un solo camino. Así cada píxel de la zona queda igual que con
+ *  drawStroke del trazo entero, pero sin rehacer las miles de piezas de fuera (el trazo largo ya no se repinta). */
+function drawStrokeZone(ctx, s, paper, z) {
+  const p = s.points;
+  if (!p || !p.length) return;
+  if (p.length === 1 || (s.tool !== 'highlighter' && s.kind !== 'pencil' && p.length < 3)) return drawStroke(ctx, s, paper);
+  const x0 = z.x, y0 = z.y, x1 = z.x + z.w, y1 = z.y + z.h;
+  // ¿Toca la zona la caja de estos puntos, ensanchada `r`?
+  const hits = (r, ...pts) => {
+    let ax = Infinity, ay = Infinity, bx = -Infinity, by = -Infinity;
+    for (const q of pts) { if (q[0] < ax) ax = q[0]; if (q[0] > bx) bx = q[0]; if (q[1] < ay) ay = q[1]; if (q[1] > by) by = q[1]; }
+    return bx + r >= x0 && ax - r <= x1 && by + r >= y0 && ay - r <= y1;
+  };
+  ctx.save();
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+  ctx.strokeStyle = ctx.fillStyle = displayColor(s.color, paper);
+  ctx.beginPath();
+  if (s.tool === 'highlighter' || s.kind === 'pencil') {
+    // Mismas curvas que strokePath, solo los tramos que caen en la zona (cada tramo suelto empieza con moveTo).
+    const hl = s.tool === 'highlighter';
+    ctx.globalAlpha = hl ? 0.38 : 0.8;
+    ctx.lineWidth = hl ? s.width : Math.max(0.8, s.width * 0.75);
+    const r = ctx.lineWidth / 2 + 1, n = p.length, mid = (i) => [(p[i][0] + p[i + 1][0]) / 2, (p[i][1] + p[i + 1][1]) / 2];
+    let open = false;
+    for (let i = 1; i < n - 1; i++) {
+      const a = i === 1 ? p[0] : mid(i - 1), b = mid(i);
+      if (!hits(r, a, p[i], b)) { open = false; continue; }
+      if (!open) ctx.moveTo(a[0], a[1]);
+      ctx.quadraticCurveTo(p[i][0], p[i][1], b[0], b[1]);
+      open = true;
+    }
+    const a = n > 2 ? mid(n - 2) : p[0];
+    if (hits(r, a, p[n - 1])) { if (!open) ctx.moveTo(a[0], a[1]); ctx.lineTo(p[n - 1][0], p[n - 1][1]); }
+    ctx.stroke();
+  } else {
+    const q = outlinePoints(p, strokeWidths(s, p));
+    outlinePieces(ctx, q, (i) => hits(Math.max(q[i][2], q[Math.max(0, i - 1)][2]) / 2 + 1, q[i], q[Math.max(0, i - 1)]));
+    ctx.fill();
+  }
+  ctx.restore();
 }
 function drawStroke(ctx, s, paper, faded = false) {
   const p = s.points;
@@ -3942,6 +4192,7 @@ function renderLibrary() {
       ${notebooks.length > 1 && !sel ? `<button class="lib-sort" id="sort-btn" aria-haspopup="menu" aria-expanded="false" title="Ordenar por">${icon('chevronUpDown')}<span>${LIB_SORTS.find(([k]) => k === libSort())[1]}</span></button>` : ''}</div>
     <main class="library ${sel ? 'selecting' : ''}" id="lib-main">
       ${Store.working ? '' : '<p class="notice">Este navegador no permite guardar (puede ser una ventana privada). Lo que hagas se perderá al cerrar: haz una copia desde Ajustes › Almacenamiento y copia de seguridad.</p>'}
+      ${sel || here ? '' : Daily.libHTML()}
       ${sel ? '' : Recall.stripHTML(S.notebooks.filter((nb) => Folders.inSubtree(nb, here)))}
       ${folders.length || notebooks.length ? `<div class="shelf">${folders.map(folderCardHTML).join('')}${notebooks.map(cardHTML).join('')}</div>`
         : `<p class="empty">${here ? 'Esta carpeta está vacía. Crea aquí una libreta o una carpeta con +, o mueve otras con «Mover».' : 'Aún no tienes libretas. Crea la primera con +.'}</p>`}
@@ -4058,6 +4309,7 @@ function onLibraryClick(e) {
   const rc = e.target.closest('[data-recall]');
   if (rc) return Recall.barMenu(rc, nbById(rc.dataset.recall));
   if (e.target.closest('[data-recall-fold]')) return Recall.toggleFold();
+  if (e.target.closest('[data-daily]')) return Daily.open();   // «Repaso de hoy» (daily.js)
   const ro = e.target.closest('[data-recall-open]');
   if (ro) return Recall.openFromStrip(nbById(ro.dataset.recallOpen));
   const more = e.target.closest('[data-more]');
@@ -4156,7 +4408,10 @@ function deleteNotebook(nb) {
   S.notebooks = S.notebooks.filter((n) => n.id !== nb.id); Store.remove(nb.id);
   (nb.recordings || []).forEach((r) => Voice.forgetIfUnused(r.id));
   new Set([...(nb.pdfs || []).map((f) => f.id), ...nb.pages.map((p) => p.pdf?.id).filter(Boolean)]).forEach((id) => Store.forgetPdfIfUnused(id));   // su PDF original
-  S.tabs = S.tabs.filter((id) => id !== nb.id); if (S.active === nb.id) S.active = S.tabs[0] || null; saveTabs();
+  S.tabs = S.tabs.filter((id) => id !== nb.id);
+  // En la biblioteca no hay libreta activa: si otra pasara a «activa», al abrir la siguiente se le apuntaría una página que no es la suya.
+  if (S.active === nb.id) S.active = S.view === 'editor' ? S.tabs[0] || null : null;
+  saveTabs();
 }
 /** Borrar libretas y carpetas (las carpetas, con todo lo que tienen dentro), tras preguntar. */
 function deleteItemsConfirm(items, after = refresh) {
@@ -4723,6 +4978,7 @@ function loadBackup() {
         }
         for (const [id, url] of Object.entries(data.audio || {})) { try { await Store.putAudio(id, await (await fetch(url)).blob()); } catch (e) { /* audio dañado */ } }
         for (const [id, url] of Object.entries(data.pdfs || {})) { try { await Store.putPdf(id, await (await fetch(url)).blob()); PdfDocs.missing.delete(id); } catch (e) { /* PDF dañado: se ve el JPEG */ } }
+        Daily.restore(data.daily);   // racha y progreso del «Repaso de hoy» (copias antiguas: sin el campo)
         renderLibrary();
         toast(added ? `Recuperadas ${added} libretas` : 'El archivo no tenía libretas');
       } catch (e) { toast('Ese archivo no es una copia de Folia.'); }
@@ -4749,7 +5005,8 @@ async function saveBackup({ pdfs = true } = {}) {
       if (blob) parts.push((parts.length ? ',' : '') + JSON.stringify(id) + ':', JSON.stringify(await new Promise((res) => { const fr = new FileReader(); fr.onload = () => res(fr.result); fr.readAsDataURL(blob); })));
     }
   }
-  const data = JSON.stringify({ app: 'Folia', version: 4, saved: new Date().toISOString(), folders: Folders.list, notebooks: S.notebooks, audio });
+  const daily = Daily.backup();   // «Repaso de hoy»: solo si ya se usó
+  const data = JSON.stringify(Object.assign({ app: 'Folia', version: 4, saved: new Date().toISOString(), folders: Folders.list, notebooks: S.notebooks, audio }, daily ? { daily } : {}));
   const blob = new Blob(parts.length ? [data.slice(0, -1), ',"pdfs":{', ...parts, '}}'] : [data], { type: 'application/json' });
   if (await saveFile(`libreta-copia-${new Date().toISOString().slice(0, 10)}.json`, blob)) { DataSafety.markBackup(); toast('Copia guardada'); }
 }
@@ -6333,13 +6590,37 @@ function renderPagesWindow() {
 // Grabaciones y notas de voz (como en la app nativa). El audio se guarda en IndexedDB, aparte de
 // la libreta, por el id de la grabación: una libreta duplicada o una nota copiada a otra libreta
 // comparten el mismo audio, que solo se borra cuando ya no lo usa ninguna.
+//
+// Audio sincronizado con lo escrito (2026-10-20, ARQUITECTURA §2.1, como Notability): mientras se graba, cada trazo
+// y elemento nuevo guarda `t: { rec, ms }` (Voice.stamp). Al reproducir esa grabación, lo escrito después del instante
+// actual se ve atenuado y va apareciendo al ritmo del audio (Voice.sync, como mucho 10 veces por segundo y solo en las
+// páginas cuyo estado cambia); con «Escuchar», tocar lo escrito salta el audio a ese momento. Marcas «★ Importante»
+// (r.marks) en la línea de tiempo y en el margen de la página; la onda (r.wave) se mide mientras se graba.
 // =============================================================================
 const VOICE_SIZE = { w: 220, h: 48 };
+const VOICE_WAVE_STEP = 500;   // ms de audio por carácter de r.wave
+const VOICE_LEAD = 2;          // s antes del trazo tocado: se oye lo que se decía al empezar a escribirlo
+const VOICE_SYNC_MS = 100;     // atenuado: como mucho 10 repintados por segundo
+const VOICE_RATES = [1, 1.5, 2];
+// Iconos propios de la reproducción (no están en icons.js).
+Object.assign(ICONS, {
+  vStar: '<path d="M12 2.8l2.75 5.6 6.15.9-4.45 4.33 1.05 6.12L12 16.86l-5.5 2.9 1.05-6.13L3.1 9.3l6.15-.9z" fill="currentColor" stroke-width="1.2"/>',
+  vListen: '<path d="M9 11.5V5.2a1.7 1.7 0 0 1 3.4 0v5.3"/><path d="M12.4 10V8.7a1.7 1.7 0 0 1 3.4 0V11"/><path d="M15.8 10.4a1.7 1.7 0 0 1 3.4 0v3.4a7.2 7.2 0 0 1-7.2 7.2h-.6a6.8 6.8 0 0 1-5.5-2.8l-2.6-3.6a1.6 1.6 0 0 1 2.5-2L9 15"/><path d="M4.5 4.5 3 3"/><path d="M4 8H2"/><path d="M8 2.5V1"/>',
+  vBack10: '<path d="M3.5 12a8.5 8.5 0 1 0 2.6-6.1"/><path d="M3 3.5v4h4"/><text x="12.6" y="15.6" font-size="7.4" font-weight="700" text-anchor="middle" fill="currentColor" stroke="none" font-family="system-ui,sans-serif">10</text>',
+  vFwd10: '<path d="M20.5 12a8.5 8.5 0 1 1-2.6-6.1"/><path d="M21 3.5v4h-4"/><text x="11.4" y="15.6" font-size="7.4" font-weight="700" text-anchor="middle" fill="currentColor" stroke="none" font-family="system-ui,sans-serif">10</text>',
+});
 
 const Voice = {
-  rec: null, // grabando: { nbId, start, recorder, stream, chunks, timer }
-  player: null, // reproduciendo: { recId, audio, url }
+  rec: null, // grabando: { id, nbId, start, recorder, stream, chunks, timer, marks, wave, meter }
+  player: null, // reproduciendo: { recId, audio, url, nbId, segs }
   raf: 0,
+  rate: 1,          // velocidad (en memoria; se mantiene entre grabaciones)
+  listen: false,    // «Escuchar»: tocar lo escrito salta el audio
+  replay: null,     // { rec, ms }: instante que se ve ahora en las páginas (null = todo normal)
+  painted: new Map(),   // página o post-it → ms con el que se pintó su tinta atenuada
+  timeline: new Map(),  // página o post-it → { src, len, ms: [ms ordenados de los trazos de la grabación] }
+  peaks: new Map(),     // grabación → onda calculada al reproducir (grabaciones antiguas sin r.wave)
+  lastSync: 0,
 
   recordings(nb) { return (nb.recordings = nb.recordings || []); },
   find(nb, id) { return this.recordings(nb).find((r) => r.id === id); },
@@ -6349,6 +6630,30 @@ const Voice = {
   },
   format(s) { s = Math.max(0, Math.round(s || 0)); return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`; },
   placedCount(nb, id) { return nb.pages.reduce((n, p) => n + p.items.filter((i) => i.type === 'voice' && i.rec === id).length, 0); },
+
+  // ---------- Formato: limpiar lo que llegue roto (normalizeNotebook) ----------
+  okT: (t) => !!t && typeof t === 'object' && typeof t.rec === 'string' && !!t.rec && Number.isFinite(t.ms) && t.ms >= 0,
+  normalize(nb) {
+    const fixT = (o) => { if (o && 't' in o && !this.okT(o.t)) delete o.t; };
+    if ('recordings' in nb && !Array.isArray(nb.recordings)) nb.recordings = [];
+    for (const r of nb.recordings || []) {
+      if (!r || typeof r !== 'object') continue;
+      if ('marks' in r) {
+        if (!Array.isArray(r.marks)) delete r.marks;
+        else r.marks = r.marks.filter((m) => m && Number.isFinite(m.ms) && m.ms >= 0).map((m) => {
+          if ('pageId' in m && typeof m.pageId !== 'string') delete m.pageId;
+          if ('y' in m && !Number.isFinite(m.y)) delete m.y;
+          if (typeof m.id !== 'string') m.id = uid();
+          return m;
+        });
+      }
+      if ('wave' in r && !(typeof r.wave === 'string' && /^[0-9a-z]*$/.test(r.wave))) delete r.wave;
+    }
+    for (const page of nb.pages || []) {
+      for (const s of page.strokes || []) fixT(s);
+      for (const it of page.items || []) { fixT(it); for (const s of Array.isArray(it?.strokes) ? it.strokes : []) fixT(s); }
+    }
+  },
 
   // ---------- Grabar ----------
   async toggleRecording() {
@@ -6362,19 +6667,41 @@ const Voice = {
     }
     const mime = ['audio/webm;codecs=opus', 'audio/mp4', 'audio/ogg;codecs=opus', 'audio/webm'].find((m) => MediaRecorder.isTypeSupported?.(m)) || '';
     const recorder = new MediaRecorder(stream, mime ? { mimeType: mime } : undefined);
-    const rec = { nbId: nb.id, start: Date.now(), recorder, stream, chunks: [] };
+    // El id nace ya al empezar: los trazos de mientras se graba lo apuntan en su `t`.
+    const rec = { id: uid(), nbId: nb.id, start: Date.now(), recorder, stream, chunks: [], marks: [], wave: '' };
     recorder.ondataavailable = (e) => { if (e.data.size) rec.chunks.push(e.data); };
     recorder.onstop = () => this.saved(rec);
     recorder.start(1000);
     this.rec = rec;
+    this.meter(rec);
     rec.timer = setInterval(() => this.renderButton(), 500);
     this.renderButton();
+    this.paintMarks();
   },
+  /** Mide el volumen mientras se graba (10 veces por segundo) y guarda el pico de cada medio segundo en rec.wave. */
+  meter(rec) {
+    try {
+      const AC = window.AudioContext || window.webkitAudioContext;
+      const ctx = new AC(), an = ctx.createAnalyser();
+      an.fftSize = 1024;
+      ctx.createMediaStreamSource(rec.stream).connect(an);
+      const buf = new Float32Array(an.fftSize);
+      let peak = 0;
+      rec.meter = { ctx, timer: setInterval(() => {
+        an.getFloatTimeDomainData(buf);
+        for (let i = 0; i < buf.length; i++) peak = Math.max(peak, Math.abs(buf[i]));
+        const n = Math.floor((Date.now() - rec.start) / VOICE_WAVE_STEP);
+        while (rec.wave.length < n) { rec.wave += this.waveChar(peak); peak = 0; }
+      }, 100) };
+    } catch (e) { rec.meter = null; }   // sin Web Audio: sin onda (se calcula al reproducir)
+  },
+  waveChar: (peak) => Math.round(Math.min(1, Math.sqrt(Math.max(0, peak))) * 35).toString(36),
   stop() {
     const rec = this.rec;
     if (!rec) return;
     this.rec = null;
     clearInterval(rec.timer);
+    if (rec.meter) { clearInterval(rec.meter.timer); rec.meter.ctx.close?.().catch(() => {}); }
     rec.duration = (Date.now() - rec.start) / 1000;
     try { rec.recorder.stop(); } catch (e) { this.saved(rec); }
     rec.stream.getTracks().forEach((t) => t.stop());
@@ -6382,14 +6709,35 @@ const Voice = {
   },
   async saved(rec) {
     const nb = nbById(rec.nbId);
-    if (!nb || !rec.chunks.length) return;
+    if (!nb || !rec.chunks.length || this.find(nb, rec.id)) return;
     const blob = new Blob(rec.chunks, { type: rec.recorder.mimeType || 'audio/webm' });
-    const r = { id: uid(), start: rec.start, duration: rec.duration || (Date.now() - rec.start) / 1000, title: null };
+    const r = { id: rec.id, start: rec.start, duration: rec.duration || (Date.now() - rec.start) / 1000, title: null };
+    if (rec.marks.length) r.marks = rec.marks;
+    if (rec.wave) r.wave = rec.wave;
     await Store.putAudio(r.id, blob);
     this.recordings(nb).push(r);
     touch(nb); Store.put(nb);
     this.renderButton();
+    this.paintMarks();
     toast(`Grabación guardada (${this.format(r.duration)}). Está en el menú del micrófono › Grabaciones.`);
+  },
+  /** Mientras se graba en esta libreta, apunta en `obj` (trazo o elemento nuevo) cuándo se hizo. */
+  stamp(obj) {
+    const r = this.rec;
+    if (r && obj && r.nbId === S.active) obj.t = { rec: r.id, ms: Math.max(0, Date.now() - r.start) };
+    return obj;
+  },
+  /** ★ «Importante»: una marca en este instante, con una estrella en el margen de la página que se está viendo. */
+  mark() {
+    const rec = this.rec, nb = activeNb();
+    if (!rec || !nb || rec.nbId !== nb.id) return;
+    updateCurrentPage();
+    const page = nb.pages[currentPageIndex] || nb.pages[0], v = views.get(page.id), desk = $('#desk');
+    const y = v && desk ? (desk.scrollTop + desk.clientHeight / 2 - v.wrap.offsetTop) / S.zoom : page.h / 2;
+    rec.marks.push({ id: uid(), ms: Math.max(0, Date.now() - rec.start), pageId: page.id, y: Math.round(Math.min(Math.max(y, 24), page.h - 24)) });
+    this.paintMarks();
+    const b = $('#mic-slot [data-mic="mark"]');
+    if (b && !reduceMotion()) softAnimate(b, [{ transform: 'scale(1.35)' }, { transform: 'scale(1)' }], { duration: 260, easing: 'ease-out' });
   },
 
   // ---------- Botón del micrófono ----------
@@ -6398,22 +6746,31 @@ const Voice = {
     return `<div class="mic-pill ${this.rec ? 'recording' : ''}">
       <button class="icon-btn mic-main" data-mic="toggle" aria-label="${this.rec ? 'Detener grabación' : 'Grabar audio'}" title="${this.rec ? 'Detener grabación' : 'Grabar audio'} ${Shortcuts.bindings('record')[0] ? ` (${Shortcuts.display(Shortcuts.bindings('record')[0])})` : ''}">
         ${this.rec ? `<span class="rec-dot"></span><span class="rec-time">${elapsed}</span>` : icon('mic')}</button>
+      ${this.rec ? `<button class="icon-btn mic-mark" data-mic="mark" aria-label="Marcar como importante" title="Marcar como importante">${icon('vStar')}</button>` : ''}
       <button class="icon-btn mic-more" data-mic="menu" aria-label="Grabaciones y notas de voz" aria-haspopup="menu" title="Grabaciones y notas de voz">${icon('chevronDown')}</button></div>`;
   },
   renderButton() {
     const slot = $('#mic-slot');
-    if (slot) slot.innerHTML = this.buttonHTML();
+    if (!slot) return;
+    // Grabando, solo cambia el tiempo: rehacer el botón cada medio segundo se comería los clics (★ o parar).
+    const pill = slot.querySelector('.mic-pill'), time = pill?.querySelector('.rec-time');
+    if (this.rec && time && pill.classList.contains('recording')) { time.textContent = this.format((Date.now() - this.rec.start) / 1000); return; }
+    slot.innerHTML = this.buttonHTML();
+    if (!slot._vmark) { slot._vmark = true; slot.addEventListener('click', (e) => { if (e.target.closest('[data-mic="mark"]')) this.mark(); }); }
   },
   menu(anchor) {
     const nb = activeNb();
     if (!nb) return;
     const list = this.recordings(nb), last = list[list.length - 1];
     popover(anchor, `<button data-act="toggle">${icon(this.rec ? 'stop' : 'mic')}${this.rec ? 'Detener grabación' : 'Grabar audio'}</button>
+      ${this.rec ? `<button data-act="mark">${icon('vStar')}Marcar como importante</button>` : ''}
       <button data-act="list" ${list.length ? '' : 'disabled'}>${icon('waveform')}Grabaciones (${list.length})</button>
-      ${last ? `<button data-act="last">${icon('waveformPlus')}Poner la última grabación en la página</button>` : ''}<hr>
+      ${last ? `<button data-act="play-last">${icon('play')}Reproducir la última con lo escrito</button><button data-act="last">${icon('waveformPlus')}Poner la última grabación en la página</button>` : ''}<hr>
       <button data-act="show" role="menuitemcheckbox" aria-checked="${S.showVoiceNotes}">${S.showVoiceNotes ? icon('check') : '<span class="menu-spacer"></span>'}Mostrar notas de voz en la página</button>`, (act) => {
       if (act === 'toggle') this.toggleRecording();
+      if (act === 'mark') this.mark();
       if (act === 'list') this.listDialog();
+      if (act === 'play-last') this.togglePlay(nb, last.id);
       if (act === 'last') this.place(nb, last.id);
       if (act === 'show') this.setShown(!S.showVoiceNotes);
     });
@@ -6464,21 +6821,85 @@ const Voice = {
     }
   },
 
+  // ---------- Marcas ★ en el margen de las páginas ----------
+  /** Las marcas de la libreta abierta (las guardadas y las de la grabación en curso), cada una con su grabación. */
+  allMarks(nb) {
+    const out = [];
+    for (const r of nb.recordings || []) for (const m of r.marks || []) out.push({ ...m, rec: r.id });
+    if (this.rec?.nbId === nb.id) for (const m of this.rec.marks) out.push({ ...m, rec: this.rec.id, live: true });
+    return out;
+  },
+  /** Pinta las estrellas en la capa de encima (.layer.over) de cada página; se llama al montar las páginas y al marcar. */
+  paintMarks() {
+    const nb = activeNb();
+    if (!nb || S.view !== 'editor') return;
+    const marks = this.allMarks(nb);
+    for (const page of nb.pages) {
+      const v = views.get(page.id);
+      if (!v) continue;
+      const list = marks.filter((m) => m.pageId === page.id);
+      let box = v.over.querySelector(':scope > .vmarks');
+      if (!list.length) { box?.remove(); continue; }
+      if (!box) { box = document.createElement('div'); box.className = 'vmarks'; v.over.appendChild(box); }
+      box.innerHTML = list.map((m) => {
+        const label = `${tr('Importante')} · ${this.format(m.ms / 1000)}`;
+        return `<button class="vmark${m.live ? ' live' : ''}" data-rec="${m.rec}" data-ms="${m.ms}" style="top:${Number.isFinite(m.y) ? m.y : page.h / 2}px;--zi:${(1 / S.zoom).toFixed(3)}" aria-label="${label}" title="${label}">${icon('vStar')}</button>`;
+      }).join('');
+    }
+  },
+  markTap(btn) {
+    const nb = activeNb();
+    if (!nb) return;
+    if (btn.classList.contains('live')) return toast('Se podrá escuchar al terminar la grabación.');
+    if (this.find(nb, btn.dataset.rec)) this.playAt(nb, btn.dataset.rec, Number(btn.dataset.ms) / 1000 - VOICE_LEAD);
+  },
+
   // ---------- Reproducir ----------
+  async open(nb, recId) {
+    this.stopPlayback();
+    const blob = await Store.getAudio(recId);
+    if (!blob) { toast('No se encuentra el audio de esta grabación.'); return null; }
+    const url = URL.createObjectURL(blob);
+    const audio = new Audio(url);
+    audio.preload = 'auto';
+    audio.playbackRate = this.rate;
+    this.player = { recId, audio, url, nbId: nb.id };
+    audio.onplay = audio.onpause = audio.onended = audio.onseeked = () => { this.sync(true); this.update(); };
+    audio.onratechange = () => this.update();
+    this.player.segs = this.segments(nb, recId);
+    // «Escuchar» encendido si hay algo escrito durante esta grabación (se apaga con su botón o al elegir una herramienta).
+    this.setListen(this.player.segs.length > 0, false);
+    this.loadPeaks(nb, recId, blob);
+    return this.player;
+  },
   async togglePlay(nb, recId) {
     if (this.player?.recId === recId) {
       const a = this.player.audio;
       if (a.paused) { if (a.ended) a.currentTime = 0; await a.play().catch(() => {}); } else a.pause();
       return this.update();
     }
-    this.stopPlayback();
-    const blob = await Store.getAudio(recId);
-    if (!blob) return toast('No se encuentra el audio de esta grabación.');
-    const url = URL.createObjectURL(blob);
-    const audio = new Audio(url);
-    this.player = { recId, audio, url, nbId: nb.id };
-    audio.onplay = audio.onpause = audio.onended = () => this.update();
-    try { await audio.play(); } catch (e) { toast('No se ha podido reproducir.'); }
+    if (!(await this.open(nb, recId))) return;
+    try { await this.player.audio.play(); } catch (e) { toast('No se ha podido reproducir.'); }
+    this.sync(true);
+    this.update();
+  },
+  /** Reproduce `recId` desde el segundo `sec` (abre la grabación si no lo estaba). */
+  async playAt(nb, recId, sec) {
+    if (this.player?.recId !== recId && !(await this.open(nb, recId))) return;
+    const a = this.player.audio;
+    this.seek(sec);
+    if (a.paused) await a.play().catch(() => toast('No se ha podido reproducir.'));
+    this.update();
+  },
+  total() {
+    const p = this.player, nb = p && nbById(p.nbId), r = nb && this.find(nb, p.recId);
+    return p && Number.isFinite(p.audio.duration) && p.audio.duration > 0 ? p.audio.duration : r?.duration || 0;
+  },
+  seek(sec) {
+    const p = this.player;
+    if (!p) return;
+    p.audio.currentTime = Math.min(Math.max(0, sec), Math.max(0, this.total() - 0.05));
+    this.sync(true);
     this.update();
   },
   stopPlayback() {
@@ -6489,46 +6910,301 @@ const Voice = {
     URL.revokeObjectURL(p.url);
     cancelAnimationFrame(this.raf);
     this.refreshNotes(p.recId);
+    this.barObserver?.disconnect();
     $('#playback-bar')?.remove();
+    this.setListen(false, false);
+    this.sync(true);   // todo vuelve a verse normal
+    this.timeline.clear(); this.painted.clear();   // sin reproducción no hace falta recordar nada
   },
   update() {
     const p = this.player;
     if (!p) return;
     const nb = nbById(p.nbId), r = nb && this.find(nb, p.recId);
-    this.refreshNotes(p.recId);
+    if (performance.now() - this.lastSync >= VOICE_SYNC_MS) { this.sync(); this.refreshNotes(p.recId); }
     this.renderBar(r);
     cancelAnimationFrame(this.raf);
     if (!p.audio.paused) this.raf = requestAnimationFrame(() => this.update());
+  },
+
+  // ---------- Atenuado sincronizado (lo escrito «aparece» al ritmo del audio) ----------
+  /** ¿`o` (trazo o elemento) se escribió después del instante que se está oyendo? */
+  future(o) { const R = this.replay; return !!(R && o.t && o.t.rec === R.rec && o.t.ms > R.ms); },
+  /** Pinta trazos con el atenuado (lo usan paintStrokes de editor.js y paintNoteInk de ink.js). `key`: página o post-it. */
+  paint(ctx, strokes, paper, key) {
+    const R = this.replay;
+    if (!R) { for (const s of strokes) drawStroke(ctx, s, paper); this.painted.delete(key); return; }
+    for (const s of strokes) if (this.future(s)) drawStroke(ctx, s, paper, true);   // lo de después, debajo y tenue
+    for (const s of strokes) if (!this.future(s)) drawStroke(ctx, s, paper);
+    this.painted.set(key, R.ms);
+  },
+  /** Instantes (ordenados) de los trazos de la grabación `rec` en `strokes`; se recalcula si la lista cambia. */
+  times(key, strokes, rec) {
+    let c = this.timeline.get(key);
+    if (!c || c.src !== strokes || c.len !== strokes.length || c.rec !== rec) {
+      c = { src: strokes, len: strokes.length, rec, ms: strokes.filter((s) => s.t?.rec === rec).map((s) => s.t.ms).sort((a, b) => a - b) };
+      this.timeline.set(key, c);
+    }
+    return c.ms;
+  },
+  /** Cuántos instantes de `ms` (ordenados) son ≤ t. */
+  upTo(ms, t) { let lo = 0, hi = ms.length; while (lo < hi) { const m = (lo + hi) >> 1; if (ms[m] <= t) lo = m + 1; else hi = m; } return lo; },
+  /** Pone las páginas en el instante del audio. Solo repinta la tinta de las páginas montadas en las que algún trazo
+   *  cambia de estado; avanzando, si los trazos nuevos son opacos, solo se pintan esos encima (sin repintar la página). */
+  sync(force = false) {
+    const now = performance.now();
+    if (!force && now - this.lastSync < VOICE_SYNC_MS) return;
+    this.lastSync = now;
+    const p = this.player, nb = activeNb();
+    const R = p && nb && p.nbId === nb.id ? { rec: p.recId, ms: p.audio.currentTime * 1000 } : null;
+    const was = this.replay;
+    this.replay = R;
+    if (!nb) return;
+    for (const page of nb.pages) {
+      const v = views.get(page.id);
+      if (!v) continue;
+      // Elementos con tiempo (texto, post-it, comentario, imagen): una clase, sin repintar.
+      for (const it of page.items) if (it.t) v.items.querySelector(`:scope > [data-id="${it.id}"]`)?.classList.toggle('vfuture', this.future(it));
+      if (!v.ink._scale) continue;   // desmontada: se pintará bien al montarse
+      if (this.changed(page.id, page.strokes, was, R)) this.advance(page, v, was, R);
+      for (const it of page.items) if (it.type === 'sticky' && it.strokes?.length && this.changed(it.id, it.strokes, was, R)) paintNoteInk(page, it);
+    }
+  },
+  /** ¿La tinta de `key` se ve distinta en R que como se pintó? */
+  changed(key, strokes, was, R) {
+    const at = this.painted.get(key);
+    if (!R) {   // ya no hay reproducción: solo se repinta lo que tenía algo atenuado
+      if (at !== undefined && was && this.times(key, strokes, was.rec).length) return true;
+      this.painted.delete(key);
+      return false;
+    }
+    if (at === undefined) { if (!this.times(key, strokes, R.rec).length) return false; return true; }
+    if (was?.rec !== R.rec) return true;
+    const ms = this.times(key, strokes, R.rec);
+    return this.upTo(ms, at) !== this.upTo(ms, R.ms);
+  },
+  advance(page, v, was, R) {
+    const at = this.painted.get(page.id);
+    const fresh = R && was?.rec === R.rec && at !== undefined && R.ms > at
+      ? page.strokes.filter((s) => s.t?.rec === R.rec && s.t.ms > at && s.t.ms <= R.ms) : null;
+    // Hacia delante y solo tinta opaca (bolígrafo/pluma): basta pintarla encima, al 100 %, de su versión tenue.
+    if (fresh && !v.sharp?.ink && fresh.every((s) => s.tool !== 'highlighter' && s.kind !== 'pencil')) {
+      const ctx = ctxFor(v.ink);
+      for (const s of fresh) drawStroke(ctx, s, page.paper);
+      this.painted.set(page.id, R.ms);
+      ZoomWin.dirty(page);
+    } else renderInk(page);
+  },
+
+  // ---------- «Escuchar»: tocar lo escrito salta el audio a ese momento ----------
+  setListen(on, announce = true) {
+    this.listen = !!on;
+    document.getElementById('app')?.classList.toggle('voice-listen', this.listen && !!this.player);
+    const b = $('#playback-bar [data-pb="listen"]');
+    if (b) b.setAttribute('aria-pressed', String(this.listen));
+    if (announce && on) toast('Toca lo escrito para oír ese momento');
+  },
+  /** Lo que se escribió durante la grabación `rec` más cerca del punto (px de página), o null. */
+  hitAt(page, x, y, rec) {
+    const tol = 12 / Math.max(S.zoom, 0.3);
+    let best = null, bestD = Infinity;
+    const test = (s, ox = 0, oy = 0) => {
+      if (s.t?.rec !== rec) return;
+      const pts = s.points, lim = tol + s.width / 2;
+      for (let i = 0; i < pts.length; i++) {
+        const a = pts[i], b = pts[i + 1] || a;
+        const ax = a[0] + ox, ay = a[1] + oy, dx = b[0] - a[0], dy = b[1] - a[1], l2 = dx * dx + dy * dy;
+        const k = l2 ? Math.max(0, Math.min(1, ((x - ax) * dx + (y - ay) * dy) / l2)) : 0;
+        const d = Math.hypot(x - ax - k * dx, y - ay - k * dy);
+        if (d <= lim && d < bestD) { bestD = d; best = s.t; }
+      }
+    };
+    for (const s of page.strokes) test(s);
+    for (const it of page.items) if (it.type === 'sticky') for (const s of it.strokes || []) test(s, it.x, it.y);
+    if (best) return best;
+    const v = views.get(page.id);
+    for (const it of [...page.items].reverse()) {
+      if (it.t?.rec !== rec) continue;
+      const h = it.h || (v?.items.querySelector(`[data-id="${it.id}"]`)?.offsetHeight || 40);
+      if (x >= it.x && x <= it.x + (it.w || 40) && y >= it.y && y <= it.y + h) return it.t;
+    }
+    return null;
+  },
+  /** pointerdown en captura (document): con «Escuchar», un toque en la página no escribe: busca y salta. */
+  listenDown(e) {
+    const p = this.player;
+    if (!p || !this.listen || S.view !== 'editor' || p.nbId !== S.active || !e.isPrimary || (e.pointerType === 'mouse' && e.button !== 0)) return;
+    if (e.pointerType === 'touch' && PenInput.fingerBlocked()) return;   // modo lápiz: la palma no salta el audio
+    const wrap = e.target.closest?.('#pages .page[data-id]');
+    if (!wrap || e.target.closest('.item.voice, .vmark, .pin, .comment-panel, .tape-tab, .resize')) return;
+    e.stopPropagation();
+    if (e.pointerType === 'mouse') e.preventDefault();
+    const tap = { id: e.pointerId, x: e.clientX, y: e.clientY, at: performance.now(), pageId: wrap.dataset.id };
+    const up = (ev) => {
+      if (ev.pointerId !== tap.id) return;
+      removeEventListener('pointerup', up, true); removeEventListener('pointercancel', up, true);
+      if (ev.type !== 'pointerup' || Math.hypot(ev.clientX - tap.x, ev.clientY - tap.y) > 10 || performance.now() - tap.at > 700) return;   // desplazar no salta
+      ev.stopPropagation();
+      this.tapAt(tap.pageId, tap.x, tap.y);
+    };
+    addEventListener('pointerup', up, true); addEventListener('pointercancel', up, true);
+  },
+  tapAt(pageId, cx, cy) {
+    const nb = activeNb(), page = nb?.pages.find((pg) => pg.id === pageId), v = views.get(pageId), p = this.player;
+    if (!page || !v || !p) return;
+    const r = v.inner.getBoundingClientRect(), x = (cx - r.left) / S.zoom, y = (cy - r.top) / S.zoom;
+    const t = this.hitAt(page, x, y, p.recId);
+    this.ripple(v, x, y, !!t);
+    if (t) this.playAt(nb, p.recId, t.ms / 1000 - VOICE_LEAD);
+  },
+  /** Un aro donde se tocó: naranja si había algo de la grabación, gris si no. */
+  ripple(v, x, y, hit) {
+    const el = document.createElement('i');
+    el.className = 'vtap' + (hit ? ' hit' : '');
+    el.style.cssText = `left:${x}px;top:${y}px;--zi:${1 / S.zoom}`;
+    v.over.appendChild(el);
+    setTimeout(() => el.remove(), 600);
+  },
+
+  // ---------- Línea de tiempo: onda, páginas y marcas ----------
+  /** Tramos de la grabación por página: [{ a, b (ms), page (índice) }], de lo escrito durante ella. */
+  segments(nb, recId) {
+    const ev = [];
+    nb.pages.forEach((page, i) => {
+      for (const s of page.strokes) if (s.t?.rec === recId) ev.push([s.t.ms, i]);
+      for (const it of page.items) {
+        if (it.t?.rec === recId) ev.push([it.t.ms, i]);
+        for (const s of it.strokes || []) if (s.t?.rec === recId) ev.push([s.t.ms, i]);
+      }
+    });
+    ev.sort((a, b) => a[0] - b[0]);
+    const segs = [];
+    for (const [ms, i] of ev) {
+      const last = segs[segs.length - 1];
+      if (last && last.page === i) continue;
+      if (last) last.b = ms;
+      segs.push({ a: ms, b: null, page: i });
+    }
+    const r = this.find(nb, recId), end = (r?.duration || 0) * 1000;
+    for (const s of segs) if (s.b === null) s.b = Math.max(end, s.a + 1000);
+    return segs;
+  },
+  /** La onda (0–1 por cada medio segundo): la medida al grabar o, en grabaciones antiguas cortas, del propio audio. */
+  wave(r) {
+    if (r?.wave) return [...r.wave].map((ch) => parseInt(ch, 36) / 35);
+    return this.peaks.get(r?.id) || null;
+  },
+  async loadPeaks(nb, recId, blob) {
+    const r = this.find(nb, recId);
+    if (!r || r.wave || this.peaks.has(recId) || r.duration > 20 * 60) return;   // larga: decodificarla entera pesaría demasiado
+    try {
+      const OAC = window.OfflineAudioContext || window.webkitOfflineAudioContext;
+      const buf = await new OAC(1, 1, 8000).decodeAudioData(await blob.arrayBuffer());
+      const d = buf.getChannelData(0), step = Math.max(1, Math.round(buf.sampleRate * VOICE_WAVE_STEP / 1000)), out = [];
+      for (let i = 0; i < d.length; i += step) { let m = 0; for (let j = i; j < Math.min(d.length, i + step); j++) m = Math.max(m, Math.abs(d[j])); out.push(Math.min(1, Math.sqrt(m))); }
+      this.peaks.set(recId, out);
+      const bar = $('#playback-bar');
+      if (bar) { bar._waveKey = null; this.update(); }
+    } catch (e) { /* sin onda: se ven barras planas */ }
   },
   renderBar(r) {
     const p = this.player, host = $('.desk-wrap');
     if (!host) return;
     if (!p || !r || S.view !== 'editor') return $('#playback-bar')?.remove();
     let bar = $('#playback-bar');
-    const total = Number.isFinite(p.audio.duration) ? p.audio.duration : r.duration;
-    if (!bar) {
-      bar = document.createElement('div');
-      bar.id = 'playback-bar';
-      bar.className = 'playback-bar';
-      bar.innerHTML = `<button class="icon-btn" data-pb="play"></button><span class="pb-cur"></span>
-        <input type="range" min="0" step="0.01" aria-label="Posición"><span class="pb-total"></span>
-        <button class="icon-btn" data-pb="close" aria-label="Cerrar">${icon('close')}</button>`;
-      host.appendChild(bar);
-      bar.addEventListener('click', (e) => {
-        const b = e.target.closest('[data-pb]');
-        if (b?.dataset.pb === 'play') this.togglePlay(nbById(this.player.nbId), this.player.recId);
-        if (b?.dataset.pb === 'close') this.stopPlayback();
-      });
-      bar.querySelector('input').addEventListener('input', (e) => { if (this.player) { this.player.audio.currentTime = Number(e.target.value); this.update(); } });
-    }
+    const total = this.total();
+    if (!bar) bar = this.buildBar(host);
     bar.title = this.title(r);
-    const playing = !p.audio.paused;
+    const a = p.audio, playing = !a.paused;
     const pb = bar.querySelector('[data-pb="play"]');
     if (pb.dataset.state !== String(playing)) { pb.dataset.state = playing; pb.innerHTML = icon(playing ? 'pause' : 'play'); pb.setAttribute('aria-label', playing ? 'Pausa' : 'Reproducir'); }
+    const rate = bar.querySelector('[data-pb="rate"]'), rl = `${String(this.rate).replace('.', ',')}×`;
+    if (rate.textContent !== rl) rate.textContent = rl;
+    bar.querySelector('[data-pb="listen"]').setAttribute('aria-pressed', String(this.listen));
     const range = bar.querySelector('input');
-    range.max = total; if (document.activeElement !== range) range.value = p.audio.currentTime;
-    bar.querySelector('.pb-cur').textContent = this.format(p.audio.currentTime);
+    range.max = total; if (document.activeElement !== range) range.value = a.currentTime;
+    range.setAttribute('aria-valuetext', `${this.format(a.currentTime)} / ${this.format(total)}`);
+    bar.querySelector('.pb-cur').textContent = this.format(a.currentTime);
     bar.querySelector('.pb-total').textContent = this.format(total);
+    // Tramos por página: se rehacen solo si cambia el total (la duración real llega tarde en algunos audios).
+    const key = `${p.recId}|${Math.round(total)}|${p.segs.length}`;
+    if (bar._segKey !== key) { bar._segKey = key; this.renderSegs(bar, p.segs, total, r); }
+    this.drawWave(bar, r, total ? a.currentTime / total : 0);
+  },
+  buildBar(host) {
+    const bar = document.createElement('div');
+    bar.id = 'playback-bar';
+    bar.className = 'playback-bar';
+    bar.innerHTML = `<div class="pb-ctrls">
+        <button class="icon-btn" data-pb="back" aria-label="Retroceder 10 segundos" title="Retroceder 10 segundos">${icon('vBack10')}</button>
+        <button class="icon-btn pb-play" data-pb="play"></button>
+        <button class="icon-btn" data-pb="fwd" aria-label="Avanzar 10 segundos" title="Avanzar 10 segundos">${icon('vFwd10')}</button></div>
+      <span class="pb-cur"></span>
+      <div class="pb-track"><canvas class="pb-wave" aria-hidden="true"></canvas>
+        <input type="range" min="0" step="0.01" aria-label="Posición"><div class="pb-pages"></div></div>
+      <span class="pb-total"></span>
+      <div class="pb-ctrls pb-end">
+        <button class="pb-rate" data-pb="rate" aria-label="Velocidad" title="Velocidad">1×</button>
+        <button class="pb-listen" data-pb="listen" aria-pressed="false" title="Toca lo escrito para oír ese momento">${icon('vListen')}<span>Escuchar</span></button>
+        <button class="icon-btn" data-pb="close" aria-label="Cerrar" title="Cerrar">${icon('close')}</button></div>`;
+    host.appendChild(bar);
+    bar.addEventListener('click', (e) => {
+      const b = e.target.closest('[data-pb]'), p = this.player;
+      if (!b || !p) return;
+      const act = b.dataset.pb;
+      if (act === 'play') this.togglePlay(nbById(p.nbId), p.recId);
+      if (act === 'back') this.seek(p.audio.currentTime - 10);
+      if (act === 'fwd') this.seek(p.audio.currentTime + 10);
+      if (act === 'rate') { this.rate = VOICE_RATES[(VOICE_RATES.indexOf(this.rate) + 1) % VOICE_RATES.length]; p.audio.playbackRate = this.rate; this.update(); }
+      if (act === 'listen') this.setListen(!this.listen);
+      if (act === 'seg') { this.seek(Number(b.dataset.ms) / 1000); const nb = nbById(p.nbId), page = nb?.pages[Number(b.dataset.page)]; if (page) scrollToPage(page.id); }
+      if (act === 'close') this.stopPlayback();
+    });
+    bar.querySelector('input').addEventListener('input', (e) => this.seek(Number(e.target.value)));
+    if (window.ResizeObserver) { this.barObserver?.disconnect(); this.barObserver = new ResizeObserver(() => { bar._waveKey = null; bar._segKey = null; this.update(); }); this.barObserver.observe(bar.querySelector('.pb-track')); }
+    return bar;
+  },
+  renderSegs(bar, segs, total, r) {
+    const box = bar.querySelector('.pb-pages'), W = box.clientWidth || 1, T = Math.max(total * 1000, 1);
+    const pageNo = (i) => tr('Pág. ' + (i + 1));
+    box.innerHTML = segs.map((s, k) => {
+      const l = Math.min(1, s.a / T), w = Math.max(0.004, Math.min(1, s.b / T) - l);
+      return `<button data-pb="seg" data-ms="${s.a}" data-page="${s.page}" class="pb-seg ${k % 2 ? 'alt' : ''}" style="left:${l * 100}%;width:${w * 100}%" title="${pageNo(s.page)} · ${this.format(s.a / 1000)}" aria-label="${pageNo(s.page)} · ${this.format(s.a / 1000)}">${w * W > 30 ? `<span>${s.page + 1}</span>` : ''}</button>`;
+    }).join('');
+    bar.classList.toggle('has-pages', segs.length > 0);
+    bar._marks = (r.marks || []).map((m) => m.ms / T);
+    bar._waveKey = null;
+  },
+  /** La onda con lo ya oído en naranja y las marcas ★ encima; solo se repinta si cambia algún píxel. */
+  drawWave(bar, r, frac) {
+    const c = bar.querySelector('.pb-wave'), dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const w = c.clientWidth, h = c.clientHeight;
+    if (!w || !h) return;
+    const key = `${w}|${h}|${Math.round(frac * w * dpr)}|${r.id}`;
+    if (bar._waveKey === key) return;
+    bar._waveKey = key;
+    if (c.width !== Math.round(w * dpr)) c.width = Math.round(w * dpr);
+    if (c.height !== Math.round(h * dpr)) c.height = Math.round(h * dpr);
+    const ctx = c.getContext('2d');
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, w, h);
+    const peaks = this.wave(r), n = Math.max(8, Math.floor(w / 3)), mid = h / 2 + 3, hmax = h - 10;
+    const rest = getComputedStyle(bar).getPropertyValue('--pb-rest').trim() || 'rgba(120,120,128,.45)';
+    for (let i = 0; i < n; i++) {
+      let v = 0.08;
+      if (peaks?.length) { const i0 = Math.floor(i * peaks.length / n), i1 = Math.max(i0 + 1, Math.floor((i + 1) * peaks.length / n)); for (let j = i0; j < i1 && j < peaks.length; j++) v = Math.max(v, peaks[j]); }
+      const bh = Math.max(2, v * hmax), x = i * w / n;
+      ctx.fillStyle = (i + 0.5) / n <= frac ? '#FF9500' : rest;
+      ctx.fillRect(x + 0.5, mid - bh / 2, Math.max(1, w / n - 1.2), bh);
+    }
+    ctx.fillStyle = '#FF9500';
+    for (const m of bar._marks || []) {   // estrellas pequeñas arriba
+      const x = Math.min(w - 4, Math.max(4, m * w));
+      ctx.beginPath();
+      for (let k = 0; k < 10; k++) { const a = -Math.PI / 2 + k * Math.PI / 5, rr = k % 2 ? 1.8 : 4.2; ctx.lineTo(x + rr * Math.cos(a), 4.6 + rr * Math.sin(a)); }
+      ctx.fill();
+    }
+    const px = Math.min(w - 1, Math.max(0, frac * w));
+    ctx.fillStyle = '#FF9500'; ctx.fillRect(px - 1, 8, 2, h - 8);   // cabezal
   },
 
   // ---------- Ventana «Grabaciones» ----------
@@ -6544,10 +7220,10 @@ const Voice = {
     const render = () => {
       const recs = this.recordings(nb);
       list.innerHTML = recs.length ? recs.map((r) => {
-        const n = this.placedCount(nb, r.id), playing = this.player?.recId === r.id && !this.player.audio.paused;
+        const n = this.placedCount(nb, r.id), playing = this.player?.recId === r.id && !this.player.audio.paused, marks = (r.marks || []).length;
         return `<div class="rec-row" data-rec="${r.id}">
           <button class="rec-play" data-r="play" aria-label="${playing ? 'Pausa' : 'Reproducir'}">${icon(playing ? 'pause' : 'play')}</button>
-          <div class="rec-text"><b ${r.title ? 'translate="no"' : ''}>${esc(this.title(r))}</b><span>${this.format(r.duration)}${n ? ` · en la libreta ${n === 1 ? '1 vez' : `${n} veces`}` : ''}</span></div>
+          <div class="rec-text"><b ${r.title ? 'translate="no"' : ''}>${esc(this.title(r))}</b><span>${this.format(r.duration)}${n ? ` · en la libreta ${n === 1 ? '1 vez' : `${n} veces`}` : ''}${marks ? ` · ★ ${marks}` : ''}</span></div>
           <button class="btn tinted" data-r="place">${icon('waveformPlus')} Añadir a la página</button>
           <button class="icon-btn" data-r="more" aria-label="Más opciones">${icon('more')}</button></div>`;
       }).join('') : `<div class="empty-state">${icon('waveform')}<b>Sin grabaciones</b><span>Pulsa el micrófono para grabar mientras tomas apuntes.</span></div>`;
@@ -6555,10 +7231,12 @@ const Voice = {
     const more = (anchor, r) => {
       const others = S.notebooks.filter((n) => n.id !== nb.id);
       popover(anchor, `<button data-act="place">${icon('waveformPlus')}Añadir a la página</button><button data-act="rename">${icon('rename')}Renombrar…</button>
+        <button data-act="download">${icon('download')}Descargar el audio</button>
         <button data-act="copy" ${others.length ? '' : 'disabled'}>${icon('copy')}Copiar a otra libreta…</button><hr>
         <button data-act="del" class="danger">${icon('trash')}Eliminar</button>`, (act) => {
         if (act === 'place') { scrim.remove(); this.place(nb, r.id); }
         if (act === 'rename') promptDialog('Nombre de la nota de voz', r.title || '', (t) => { r.title = t.trim() || null; touch(nb); Store.put(nb); render(); this.refreshNotes(r.id); });
+        if (act === 'download') this.download(r);
         if (act === 'copy') popover(anchor, `<div class="label">Copiar a…</div>${others.map((o) => `<button data-act="${o.id}">${esc(o.title)}</button>`).join('')}`, (id) => {
           const target = nbById(id);
           this.copyTo(nb, r, target);
@@ -6584,6 +7262,14 @@ const Voice = {
     });
     render();
   },
+  /** Guarda el audio de la grabación como archivo (webm, m4a u ogg, según lo grabó el navegador). */
+  async download(r) {
+    const blob = await Store.getAudio(r.id);
+    if (!blob) return toast('No se encuentra el audio de esta grabación.');
+    const ext = /mp4|m4a|aac/.test(blob.type) ? 'm4a' : /ogg/.test(blob.type) ? 'ogg' : 'webm';
+    const name = this.title(r).replace(/[\\/:*?"<>|]+/g, '-').slice(0, 80);
+    await saveFile(`${name}.${ext}`, blob);
+  },
   /** Añade a `target` la grabación (si no la tenía) y la pone como nota de voz en su primera página. */
   copyTo(from, r, target) {
     this.receive(target, r);
@@ -6605,6 +7291,7 @@ const Voice = {
     }
     if (S.selected && !findItem(S.selected)) { S.selected = null; renderOptions(); }
     touch(nb); Store.put(nb);
+    this.paintMarks();
     this.forgetIfUnused(id);
   },
   /** Borra el audio si ya no lo usa ninguna libreta. */
@@ -6612,6 +7299,14 @@ const Voice = {
     if (!S.notebooks.some((n) => (n.recordings || []).some((r) => r.id === id))) Store.removeAudio(id);
   },
 };
+// «Escuchar» y las estrellas del margen: en captura, antes que la tinta y los elementos.
+document.addEventListener('pointerdown', (e) => Voice.listenDown(e), true);
+document.addEventListener('click', (e) => {
+  const m = e.target.closest?.('.vmark');
+  if (m) { e.stopPropagation(); Voice.markTap(m); return; }
+  // Elegir una herramienta de la barra apaga «Escuchar» (para volver a escribir).
+  if (Voice.listen && e.target.closest?.('.group[role="toolbar"] [data-tool]')) Voice.setListen(false, false);
+}, true);
 
 // =============================================================================
 // Texto de los PDF: seleccionarlo con la herramienta de seleccionar (arrastrando, o doble clic
@@ -6910,6 +7605,7 @@ function openNotebook(id, opts = {}) {
 /** Al salir de una libreta: recordar la página y actualizar la portada si es una vista previa. */
 function leaveNotebook(nb) {
   if (Tape.review) Tape.endReview();   // el repaso por color es de esta visita: no se queda en memoria
+  Voice.stopPlayback();                // el audio y «Escuchar» son de esta libreta
   if (!nb) return;
   stopEditing();
   updateCurrentPage();
@@ -7416,6 +8112,7 @@ function buildPages() {
   const nb = activeNb();
   const container = $('#pages');
   for (const v of views.values()) Sharp.release(v);   // las capas nítidas de las páginas de antes
+  ShapeEdit.hide();   // los tiradores eran de las páginas de antes
   container.innerHTML = '';
   views.clear();
   nb.pages.forEach((page, index) => {
@@ -7430,6 +8127,9 @@ function buildPages() {
       </div><div class="page-number">${index + 1} / ${nb.pages.length}</div>`;
     container.appendChild(wrap);
     const v = { wrap, inner: $('.page-inner', wrap), paper: $('.paper', wrap), ink: $('.ink', wrap), live: $('.live', wrap), bg: $('.bg', wrap), items: $('.layer.items', wrap), over: $('.layer.over', wrap) };
+    // Lienzo del trazo en curso con poca latencia (Chrome: se pinta sin esperar al resto de la página); los navegadores
+    // que no lo admiten lo ignoran. Tiene que ser el primer getContext del lienzo.
+    try { v.live.getContext('2d', { desynchronized: true }); } catch (err) { /* sin la opción */ }
     views.set(page.id, v);
     attachInk(page, v);
     attachItemsLayer(page, v);
@@ -7457,6 +8157,7 @@ function layoutPages(redraw = true) {
   if (redraw) redrawPages(pageDpr());
   Ruler.sync();   // la regla mide en mm de la página: con otro zoom, otras marcas
   ZoomWin.sync();   // lupa: con otro zoom, otra guía en px de página
+  Voice.paintMarks();   // estrellas ★ de las grabaciones en el margen
   const label = $('#zoom-fit');
   if (label) label.textContent = Math.round(S.zoom * 100) + '%';
 }
@@ -7521,7 +8222,7 @@ function renderInk(page) {
 /** Los trazos de la página (y el brillo de los elegidos con el lazo) en `ctx`, ya con su escala. */
 function paintStrokes(ctx, page) {
   const sel = S.lasso && S.lasso.pageId === page.id && !S.lasso.noteId ? new Set(S.lasso.ids) : null;
-  for (const s of page.strokes) drawStroke(ctx, s, page.paper);
+  Voice.paint(ctx, page.strokes, page.paper, page.id);   // reproduciendo una grabación: lo de después, atenuado
   if (sel) { ctx.save(); ctx.globalAlpha = 0.25; for (const s of page.strokes) if (sel.has(s.id)) { ctx.shadowColor = '#2F4FD8'; ctx.shadowBlur = 6; drawStroke(ctx, s, page.paper); } ctx.restore(); }
 }
 /** Capa «nítida» de la zona visible de cada página montada (como las teselas de Goodnotes): los lienzos de la página
@@ -8287,7 +8988,7 @@ setInterval(updateStudyBadge, 60000);
 function studyMenu(anchor) {
   updateCurrentPage();
   const nb = activeNb(), n = Cards.due(nb).length;
-  popover(anchor, `<div class="label">Tarjetas</div>
+  popover(anchor, `${Daily.menuHtml()}<hr><div class="label">Tarjetas</div>
     <button data-act="cards-review">${icon('lightbulb')} Repasar <span class="study-count${n ? ' on' : ''}">${n === 1 ? '1 pendiente' : `${n} pendientes`}</span></button>
     <button data-act="cards-all" ${Cards.all(nb).length ? '' : 'disabled'} title="Practicar también las que aún no tocan: no cambia cuándo vuelven">${icon('rotate')} Repasar todas (aunque no toquen)</button>
     <button data-act="cards-new">${icon('plus')} Nueva tarjeta…</button><button data-act="cards-list">${icon('pages')} Todas las tarjetas…</button>
@@ -8302,6 +9003,7 @@ function studyMenu(anchor) {
     <button data-act="ai:ocr">${icon('scanText')} Transcribir esta página</button>
     <button data-act="ai-key">${icon('key')} Clave de IA…</button>
     <hr><button data-act="pomo">${icon('timer')} Temporizador de estudio…</button>`, (act) => {
+    if (Daily.menuAct(act)) return;   // «Repaso de hoy» (daily.js), de todas las libretas
     if (act === 'cards-review') return Cards.review(nb);
     if (act === 'cards-all') return Cards.review(nb, { all: true });
     if (act === 'cards-new') return Cards.createDialog(nb);
@@ -8425,6 +9127,7 @@ function newPageDialog() {
 function setTool(tool) {
   stopEditing();
   clearLasso();
+  ShapeEdit.hide();   // los tiradores de una forma recién enderezada
   PdfText.clear();
   if (tool !== 'lasso') LassoFilter.picking = false;   // el cuentagotas del lazo se cancela al cambiar de herramienta
   if (tool !== 'highlighter') Tape.drawing = false;    // y el modo «Cinta» del subrayador
@@ -9131,7 +9834,7 @@ function attachPenTouch(desk) {
     // lápiz (no desplaza) y la palma; fuera, solo la palma: el lápiz sigue pulsando botones, enlaces y cuadros de texto
     // en los que se escribe. El dedo sí desplaza sobre los elementos (touch-action en style.css).
     const t = e.target.closest ? e.target : null;
-    const drags = t && (t.closest('.ink') || (t.closest('.item, .pin, .lasso-box') && !t.closest('.rich[contenteditable="true"], a[data-link]')));
+    const drags = t && (t.closest('.ink') || (t.closest('.item, .pin, .lasso-box, .shape-handles') && !t.closest('.rich[contenteditable="true"], a[data-link]')));
     if (drags ? stylus || PenInput.down.size : !stylus && PenInput.down.size) e.preventDefault();
   };
   desk.addEventListener('touchstart', block, { passive: false });
@@ -9148,6 +9851,11 @@ function attachInk(page, v) {
   // recta, su final sigue al lápiz hasta soltar. snap = { pressure, a?, cardinal? } (a: inicio fijo de la recta).
   let holdTimer = 0, snap = null;
   let guide = null;      // regla (ruler.js): el trazo pegado a su borde (guide.map) o midiendo con el transportador
+  // Trazo en directo por fotogramas (paintLiveInk): una vez por fotograma y solo la zona nueva. liveN: puntos ya pintados
+  // (0 o liveFull = repintar entero); predicted: 1–2 puntos predichos (getPredictedEvents) que se pintan pero no se
+  // guardan; predBox: dónde se pintaron, para borrarlos en el fotograma siguiente.
+  let raf = 0, liveFull = true, liveN = 0, liveK = 0, predicted = [], predBox = null;   // liveK: escala del lienzo al pintar
+  const liveStats = { full: 0, zone: 0 };   // cuántas veces se pintó entero o por zona (pruebas)
   const armHold = () => { clearTimeout(holdTimer); if (S.holdToSnap && stroke && !snap && !guide?.map) holdTimer = setTimeout(snapNow, holdMs(pointerType)); };
   const onLine = (pts) => {
     const a = pts[0], b = pts[pts.length - 1], len = Math.hypot(b[0] - a[0], b[1] - a[1]);
@@ -9158,18 +9866,29 @@ function attachInk(page, v) {
     const a = snap.a, b = !snap.cardinal ? [x, y] : Math.abs(x - a[0]) >= Math.abs(y - a[1]) ? [x, a[1]] : [a[0], y];
     stroke.points = Shapes.densify([a, b]).map(([px, py]) => [px, py, snap.pressure]);
   };
+  /** Forma cerrada ya enderezada: la escala según lo lejos que esté el lápiz de su centro (respecto a donde se enderezó). */
+  const scaleSnap = ([x, y]) => {
+    const { c, d0, at, base, pressure } = snap;
+    if (d0 < 8 || Math.hypot(x - at[0], y - at[1]) * S.zoom < 3) return;
+    const f = Math.min(10, Math.max(0.1, Math.hypot(x - c[0], y - c[1]) / d0));
+    stroke.points = base.map(([px, py]) => [c[0] + (px - c[0]) * f, c[1] + (py - c[1]) * f, pressure]);
+    drawLive();
+  };
   function snapNow() {
     if (!stroke || snap || activeId === null) return;
     const xy = stroke.points.map((q) => [q[0], q[1]]), pressure = stroke.points[Math.floor(stroke.points.length / 2)][2];
     // Con el bolígrafo, una pausa a mitad de una letra no la endereza: solo cuenta un dibujo grande.
     if (stroke.tool === 'pen') { const bb = Shapes.bounds(xy); if (Math.hypot(bb.w, bb.h) * S.zoom < 40) return; }
-    const pts = stroke.tool === 'highlighter' ? (S.hlMode === 'cardinal' ? Shapes.cardinal(xy) : Shapes.straight(xy)) : Shapes.recognize(xy);
+    const found = stroke.tool === 'highlighter' ? { type: 'line', points: S.hlMode === 'cardinal' ? Shapes.cardinal(xy) : Shapes.straight(xy) } : Shapes.classify(xy);
+    const pts = found?.points;
     if (!pts) return;
     if (onLine(pts)) {
-      snap = { pressure, a: pts[0], cardinal: stroke.tool === 'highlighter' && S.hlMode === 'cardinal' };
+      snap = { pressure, type: 'line', a: pts[0], cardinal: stroke.tool === 'highlighter' && S.hlMode === 'cardinal' };
       setLineEnd(pts[pts.length - 1]);
     } else {
-      snap = { pressure };
+      // Forma cerrada: sin soltar, al alejar o acercar el lápiz de su centro crece o encoge (como en Goodnotes).
+      const b = Shapes.bounds(pts), c = [b.x + b.w / 2, b.y + b.h / 2], at = xy[xy.length - 1];
+      snap = { pressure, type: found.type, base: pts, c, at, d0: Math.hypot(at[0] - c[0], at[1] - c[1]) };
       stroke.points = pts.map(([x, y]) => [x, y, pressure]);
     }
     drawLive();
@@ -9180,6 +9899,7 @@ function attachInk(page, v) {
     activeId = null; PenInput.live = null;
     if (erased && before) { restoreInk(page, before); renderInk(page); }
     stroke = null; note = null; lassoPath = null; tapeDrag = null; erased = false; snap = null; clearTimeout(holdTimer);
+    stopLive();
     guide?.end(); guide = null;
     if (v.live._scale) ctxFor(v.live).clearRect(0, 0, page.w, page.h);
   };
@@ -9212,6 +9932,7 @@ function attachInk(page, v) {
     if (S.tool === 'lasso') { clearLasso(); lassoPath = [p]; return; }
     if (S.tool === 'highlighter' && Tape.drawing) { tapeDrag = [p, p]; return; }   // modo «Cinta»: rectángulo
     stroke = { id: uid(), tool: S.tool === 'highlighter' ? 'highlighter' : 'pen', kind: S.penKind, color: S.tool === 'highlighter' ? S.hlColor : S.penColor, width: S.tool === 'highlighter' ? S.hlWidth : S.penWidth, points: [p] };
+    Voice.stamp(stroke);   // grabando: cuándo se escribió (t)
     note = hit?.note || null;   // empieza dentro de un post-it (el de encima): el trazo es del post-it
     guide = Ruler.guide(e, stroke);
     if (guide?.map) stroke.points = [point(e)];   // cerca del borde de la regla: pegado a él
@@ -9233,7 +9954,7 @@ function attachInk(page, v) {
     }
     if (tapeDrag) { tapeDrag[1] = point(e); Tape.preview(ctxFor(v.live), page, tapeDrag); return; }
     if (!stroke) return;
-    if (snap) { if (snap.a) { setLineEnd(point(e)); drawLive(); } return; }   // ya enderezado: solo se mueve el final
+    if (snap) { if (snap.a) { setLineEnd(point(e)); drawLive(); } else scaleSnap(point(e)); return; }   // ya enderezado: el final o el tamaño
     if (guide?.map) {
       // Pegado a la regla: siempre la recta del inicio a donde está el lápiz, así se alarga o se acorta en directo.
       const a = stroke.points[0], q = point(e);
@@ -9244,9 +9965,12 @@ function attachInk(page, v) {
     }
     const events = e.getCoalescedEvents ? e.getCoalescedEvents() : [e];
     for (const ev of (events.length ? events : [e])) stroke.points.push(point(ev));
+    // Puntos predichos (Chrome, Safari 18.2+): se pintan para acortar el retraso y se descartan en el evento siguiente.
+    const pe = e.getPredictedEvents ? e.getPredictedEvents() : [];
+    predicted = pe.length ? pe.slice(0, 2).map(point) : [];
     guide?.move(e.clientX, e.clientY);   // medida en directo (se pinta una vez por fotograma)
     if (Math.hypot(e.clientX - lastPoint[0], e.clientY - lastPoint[1]) > 4) { lastMove = performance.now(); lastPoint = [e.clientX, e.clientY]; armHold(); }
-    drawLive();
+    scheduleLive();
   };
   v.ink.addEventListener('pointerdown', down);
   v.ink.addEventListener('pointermove', move);
@@ -9290,16 +10014,19 @@ function attachInk(page, v) {
       if (e.type === 'pointerup' && r.w >= 10 && r.h >= 8) Tape.add(page, r);   // un toque o un rectángulo diminuto no crea nada
       return;
     }
+    stopLive();
     if (!stroke) return;
     const held = S.holdToSnap && performance.now() - lastMove > holdMs(pointerType);
     const xy = stroke.points.map((q) => [q[0], q[1]]);
-    let snapped = null;
+    let snapped = null, shapeType = snap?.type || null;
+    const live = !!snap;
     if (snap || ruled) snap = null;   // ya se enderezó en directo o va pegado a la regla: se guarda tal como se ve
     else if (stroke.tool === 'highlighter') {
       if (S.hlMode === 'cardinal') snapped = Shapes.cardinal(xy);
       else if (S.hlMode === 'straight' || held) snapped = Shapes.straight(xy);
-      if (snapped) snapped = Shapes.densify(snapped);
-    } else if (S.penShapes || held) snapped = Shapes.recognize(xy);
+      if (snapped) { snapped = Shapes.densify(snapped); shapeType = 'line'; }
+    } else if (S.penShapes || held) { const f = Shapes.classify(xy); snapped = f?.points || null; shapeType = f?.type || null; }
+    if (shapeType) stroke.shape = { type: shapeType };   // forma enderezada: se podrá editar con sus tiradores
     const pressure = stroke.points[Math.floor(stroke.points.length / 2)][2];
     // Tinta del post-it: coordenadas relativas a su esquina (si el post-it sigue en la página).
     const own = note && page.items.includes(note) ? note : null, ox = own ? own.x : 0, oy = own ? own.y : 0;
@@ -9311,21 +10038,51 @@ function attachInk(page, v) {
     ctxFor(v.live).clearRect(0, 0, page.w, page.h);
     if (own) paintNoteInk(page, own); else renderInk(page);
     commit(page, before);
+    // Enderezada manteniendo quieto: sus tiradores, para estirarla o escalarla al momento.
+    const done = own ? own.strokes.at(-1) : page.strokes.at(-1);
+    if (shapeType && (live || held)) ShapeEdit.show(page, done, own, 'snap');
   };
   v.ink.addEventListener('pointerup', finish);
   v.ink.addEventListener('pointercancel', finish);
   v.ink.addEventListener('lostpointercapture', (e) => { if (e.pointerId === activeId) finish(e); });   // sin pointerup: no se queda bloqueado
   // Lupa (zoomwin.js): escribe en esta página desde su panel con eventos propios (clientX/Y ya llevados a la página)
   // y pinta en él el trazo en curso. Mismo camino que el lápiz: bolígrafo, formas, regla, post-its y deshacer.
-  v.port = { down, move, up: finish, stroke: () => stroke, note: () => note };
-  function drawLive() {
-    const ctx = ctxFor(v.live);
-    ctx.clearRect(0, 0, page.w, page.h);
-    if (!note) return drawStroke(ctx, stroke, page.paper);
+  // flush y stats: pintar ya lo pendiente y el recuento de repintados (solo pruebas y medidas).
+  v.port = { down, move, up: finish, stroke: () => stroke, note: () => note, flush: () => { if (raf) { cancelAnimationFrame(raf); paintLiveInk(); } }, stats: liveStats };
+  /** El trazo cambió entero (empieza, se endereza, va pegado a la regla): se repinta entero en el próximo fotograma. */
+  function drawLive() { liveFull = true; predicted = []; scheduleLive(); }
+  function scheduleLive() { if (!raf) raf = requestAnimationFrame(paintLiveInk); }
+  function stopLive() { if (raf) cancelAnimationFrame(raf); raf = 0; liveFull = true; liveN = 0; predicted = []; predBox = null; }
+  /** Pinta el trazo en curso en el lienzo en directo: entero si hace falta, si no solo la zona del tramo nuevo (y la de
+   *  los puntos predichos de antes, que así se borran). drawStrokeZone repinta todo lo que cae en esa zona: el resultado
+   *  es el mismo que pintarlo entero, sin rehacer las miles de piezas de un trazo largo en cada movimiento. */
+  function paintLiveInk() {
+    raf = 0;
+    if (!stroke || !v.live._scale) return;
+    const ctx = ctxFor(v.live), k = v.live._scale, paper = note ? 'white' : page.paper;
+    const view = predicted.length ? { ...stroke, points: stroke.points.concat(predicted) } : stroke;
+    ctx.save();
     // Dentro de un post-it: recortado a su borde, con los colores sobre fondo claro.
-    ctx.save(); ctx.beginPath(); ctx.rect(note.x, note.y, note.w, note.h); ctx.clip();
-    drawStroke(ctx, stroke, 'white');
+    if (note) { ctx.beginPath(); ctx.rect(note.x, note.y, note.w, note.h); ctx.clip(); }
+    if (liveFull || !liveN || liveK !== k) {   // otra escala (zoom, pantalla): el lienzo se borró, entero
+      ctx.clearRect(0, 0, page.w, page.h);
+      drawStroke(ctx, view, paper);
+      liveStats.full++;
+    } else {
+      const pts = view.points.slice(Math.max(0, liveN - 3));
+      if (predBox) pts.push([predBox.x, predBox.y], [predBox.x + predBox.w, predBox.y + predBox.h]);
+      // La zona, a píxeles enteros del lienzo: se borra y se recorta sin bordes a medias.
+      const b = Shapes.bounds(pts), pad = stroke.width + 2;
+      const x0 = Math.floor((b.x - pad) * k) / k, y0 = Math.floor((b.y - pad) * k) / k;
+      const z = { x: x0, y: y0, w: Math.ceil((b.x + b.w + pad) * k) / k - x0, h: Math.ceil((b.y + b.h + pad) * k) / k - y0 };
+      ctx.beginPath(); ctx.rect(z.x, z.y, z.w, z.h); ctx.clip();
+      ctx.clearRect(z.x, z.y, z.w, z.h);
+      drawStrokeZone(ctx, view, paper, z);
+      liveStats.zone++;
+    }
     ctx.restore();
+    liveFull = false; liveN = stroke.points.length; liveK = k;
+    predBox = predicted.length ? Shapes.bounds(predicted) : null;
   }
 }
 /** Deshace lo borrado a medias (toque o trazo descartado): la tinta de la página y la de los post-its. */
@@ -9374,7 +10131,7 @@ function paintNoteInk(page, item, el = views.get(page.id)?.items.querySelector(`
   if (!scale) return;
   const ctx = ctxFor(c);
   const sel = S.lasso?.noteId === item.id ? new Set(S.lasso.ids) : null;
-  for (const s of item.strokes) drawStroke(ctx, s, 'white');
+  Voice.paint(ctx, item.strokes, 'white', item.id);   // reproduciendo una grabación: lo de después, atenuado
   if (sel) { ctx.save(); ctx.globalAlpha = 0.25; ctx.shadowColor = '#2F4FD8'; ctx.shadowBlur = 6; for (const s of item.strokes) if (sel.has(s.id)) drawStroke(ctx, s, 'white'); ctx.restore(); }
 }
 /** El enlace bajo un punto de la pantalla (zona de enlace o enlace dentro de un texto). Con una herramienta de tinta
@@ -9437,11 +10194,12 @@ function eraseIn(strokes, p, r) {
     const hit = s.points.map((q) => Math.hypot(q[0] - p[0], q[1] - p[1]) < r + s.width / 2);
     if (!hit.some(Boolean)) { out.push(s); continue; }
     changed = true;
+    const piece = (points) => { const t = { ...s, id: uid(), points }; delete t.shape; return t; };   // un trozo ya no es la forma
     let run = [];
     s.points.forEach((q, i) => {
-      if (hit[i]) { if (run.length > 1) out.push({ ...s, id: uid(), points: run }); run = []; } else run.push(q);
+      if (hit[i]) { if (run.length > 1) out.push(piece(run)); run = []; } else run.push(q);
     });
-    if (run.length > 1) out.push({ ...s, id: uid(), points: run });
+    if (run.length > 1) out.push(piece(run));
   }
   return changed ? out : null;
 }
@@ -9537,6 +10295,7 @@ function lassoTakesItem(page, item, poly) {
 }
 function drawLassoBox() {
   $$('.lasso-box').forEach((x) => x.remove());
+  ShapeEdit.hide();
   if (!S.lasso) return;
   const page = activeNb().pages.find((p) => p.id === S.lasso.pageId), v = views.get(page.id);
   const strokes = lassoStrokes(), items = lassoItems();
@@ -9549,6 +10308,8 @@ function drawLassoBox() {
   box.className = 'lasso-box';
   box.style.cssText = `left:${b.x - pad}px;top:${b.y - pad}px;width:${b.w + pad * 2}px;height:${b.h + pad * 2}px`;
   v.over.appendChild(box);
+  // Una forma enderezada sola: además, sus tiradores (estirar y escalar).
+  if (!items.length && strokes.length === 1 && strokes[0].shape) ShapeEdit.show(page, strokes[0], note, 'lasso');
   box.addEventListener('pointerdown', (e) => {
     if (e.pointerType === 'touch' && PenInput.fingerBlocked()) return;   // modo lápiz: el dedo desplaza, no arrastra
     e.preventDefault(); e.stopPropagation();
@@ -9566,6 +10327,7 @@ function drawLassoBox() {
         if (els[i]) { els[i].style.left = it.x + 'px'; els[i].style.top = it.y + 'px'; }
       });
       box.style.left = b.x - pad + dx + 'px'; box.style.top = b.y - pad + dy + 'px';
+      if (ShapeEdit.el) ShapeEdit.el.style.transform = `translate(${dx}px, ${dy}px)`;
       renderInk(page);
     };
     const up = () => { box.removeEventListener('pointermove', move); box.removeEventListener('pointerup', up); box.removeEventListener('pointercancel', up); if (moved) { commit(page, before); if (items.length) renderItems(page); else drawLassoBox(); } };
@@ -9580,6 +10342,7 @@ function clearLasso() {
   const hadItems = S.lasso.itemIds?.length;
   S.lasso = null;
   $$('.lasso-box').forEach((x) => x.remove());
+  ShapeEdit.hide();
   if (page) { renderInk(page); if (hadItems) renderItems(page); }
   renderOptions();
 }
@@ -9590,6 +10353,120 @@ function recolorLasso(color) {
   for (const s of lassoStrokes()) s.color = color;
   commit(page, before); renderInk(page);
 }
+
+// ---------- Editar formas: tiradores (como en Goodnotes) ----------
+// Un trazo con `shape` (forma enderezada) enseña tiradores al enderezarlo manteniendo quieto (modo 'snap': se quitan al
+// tocar cualquier otra cosa) o al cogerlo solo con el lazo (modo 'lasso': van con el recuadro del lazo).
+// Recta: sus dos extremos. Las demás: esquinas = escalar sin deformar (desde la esquina contraria), lados = estirar en
+// un eje. Moverla: con el recuadro del lazo (sin tirador en el centro: escribir dentro de un círculo recién hecho no lo
+// mueve). Cada arrastre es un paso de deshacer.
+const ShapeEdit = {
+  el: null, mode: null,
+  hide() { this.el?.remove(); this.el = null; this.mode = null; },
+  /** Tiradores de `stroke` (de la página o, con `note`, de la tinta de ese post-it). */
+  show(page, stroke, note = null, mode = 'snap') {
+    this.hide();
+    const v = views.get(page.id);
+    if (!v || !stroke?.shape || !(stroke.points?.length >= 2)) return;
+    const el = document.createElement('div');
+    el.className = 'shape-handles';
+    el.style.cssText = 'position:absolute;left:0;top:0;width:0;height:0;pointer-events:none';
+    const line = stroke.shape.type === 'line';
+    const kinds = line ? ['p0', 'p1'] : ['nw', 'n', 'ne', 'e', 'se', 's', 'sw', 'w'];
+    const size = 16 / S.zoom, cursors = { nw: 'nwse', se: 'nwse', ne: 'nesw', sw: 'nesw', n: 'ns', s: 'ns', e: 'ew', w: 'ew' };
+    for (const k of kinds) {
+      const h = document.createElement('div');
+      h.dataset.h = k;
+      h.setAttribute('aria-hidden', 'true');
+      h.style.cssText = `position:absolute;width:${size}px;height:${size}px;margin:${-size / 2}px 0 0 ${-size / 2}px;box-sizing:border-box;border-radius:50%;`
+        + `border:${2 / S.zoom}px solid #fff;background:${k === 'move' ? '#2F4FD8' : '#007AFF'};box-shadow:0 ${1 / S.zoom}px ${3 / S.zoom}px rgba(0,0,0,.35);`
+        + `pointer-events:auto;touch-action:none;cursor:${k === 'move' ? 'move' : (cursors[k] || 'move') + (cursors[k] ? '-resize' : '')}`;
+      h.addEventListener('pointerdown', (e) => this.drag(e, page, stroke.id, note?.id || null, k));
+      el.appendChild(h);
+    }
+    v.over.appendChild(el);
+    this.el = el; this.mode = mode;
+    this.place(stroke, note);
+  },
+  /** Coloca los tiradores en la forma tal como está ahora. */
+  place(stroke, note) {
+    if (!this.el) return;
+    const ox = note ? note.x : 0, oy = note ? note.y : 0, p = stroke.points, b = Shapes.bounds(p), pad = stroke.width / 2 + 4;
+    const x0 = b.x - pad + ox, y0 = b.y - pad + oy, x1 = b.x + b.w + pad + ox, y1 = b.y + b.h + pad + oy, mx = (x0 + x1) / 2, my = (y0 + y1) / 2;
+    const at = { nw: [x0, y0], n: [mx, y0], ne: [x1, y0], e: [x1, my], se: [x1, y1], s: [mx, y1], sw: [x0, y1], w: [x0, my], move: [mx, my],
+      p0: [p[0][0] + ox, p[0][1] + oy], p1: [p[p.length - 1][0] + ox, p[p.length - 1][1] + oy] };
+    for (const h of this.el.children) {
+      const k = h.dataset.h, [x, y] = at[k];
+      h.style.left = x + 'px'; h.style.top = y + 'px';
+      // Estirar en un eje que no tiene tamaño (una quebrada vertical) no tiene sentido.
+      h.hidden = ((k === 'e' || k === 'w') && b.w < 2) || ((k === 'n' || k === 's') && b.h < 2);
+    }
+  },
+  /** Los puntos de la forma tras llevar el tirador `k` a q (coordenadas del trazo); orig: los puntos al empezar. */
+  reshape(orig, k, q0, start) {
+    const pr = orig[0][2];
+    if (k === 'move') { const dx = q0[0] - start[0], dy = q0[1] - start[1]; return orig.map(([x, y, p]) => [x + dx, y + dy, p]); }
+    // El tirador está algo fuera de la forma: cuenta cuánto se ha movido, desde el punto de la forma al que corresponde.
+    const ob = Shapes.bounds(orig), ref = k === 'p0' ? orig[0] : k === 'p1' ? orig[orig.length - 1]
+      : [k.includes('w') ? ob.x : k.includes('e') ? ob.x + ob.w : ob.x + ob.w / 2, k.includes('n') ? ob.y : k.includes('s') ? ob.y + ob.h : ob.y + ob.h / 2];
+    const q = [ref[0] + q0[0] - start[0], ref[1] + q0[1] - start[1]];
+    if (k === 'p0' || k === 'p1') {
+      const a = k === 'p0' ? q : orig[0], z = k === 'p1' ? q : orig[orig.length - 1];
+      return Shapes.densify([[a[0], a[1]], [z[0], z[1]]]).map(([x, y]) => [x, y, pr]);
+    }
+    const b = ob, X0 = b.x, Y0 = b.y, X1 = b.x + b.w, Y1 = b.y + b.h, min = 4;
+    let ax = k.includes('w') ? X1 : X0, ay = k.includes('n') ? Y1 : Y0, sx = 1, sy = 1;
+    if (k.length === 2) {
+      // Esquina: escala igual en los dos ejes (proyección del puntero sobre la diagonal desde la esquina contraria).
+      const dx = (k.includes('w') ? X0 : X1) - ax, dy = (k.includes('n') ? Y0 : Y1) - ay, d2 = dx * dx + dy * dy || 1;
+      sx = sy = Math.max(min / Math.max(b.w, b.h, 1), ((q[0] - ax) * dx + (q[1] - ay) * dy) / d2);
+    } else if (k === 'e' || k === 'w') {
+      sx = Math.max(min / Math.max(b.w, 1), (k === 'e' ? q[0] - X0 : X1 - q[0]) / Math.max(b.w, 1));
+      if (k === 'e') ax = X0; else ax = X1;
+    } else {
+      sy = Math.max(min / Math.max(b.h, 1), (k === 's' ? q[1] - Y0 : Y1 - q[1]) / Math.max(b.h, 1));
+      ay = k === 's' ? Y0 : Y1;
+    }
+    return orig.map(([x, y, p]) => [ax + (x - ax) * sx, ay + (y - ay) * sy, p]);
+  },
+  drag(e, page, id, noteId, k) {
+    if (e.pointerType === 'touch' && PenInput.fingerBlocked()) return;   // modo lápiz: el dedo desplaza
+    e.preventDefault(); e.stopPropagation();
+    const note = noteId ? page.items.find((i) => i.id === noteId) : null, s = (note ? note.strokes : page.strokes)?.find((x) => x.id === id);
+    const v = views.get(page.id);
+    if (!s || !v) return this.hide();   // ya no está (deshacer, borrado)
+    const h = e.currentTarget, mode = this.mode;
+    try { h.setPointerCapture(e.pointerId); } catch (err) { /* puntero sintético */ }
+    const before = snapshotPage(page), orig = s.points.map((q) => [...q]), ox = note ? note.x : 0, oy = note ? note.y : 0;
+    const at = (ev) => { const r = v.ink.getBoundingClientRect(); return [(ev.clientX - r.left) / S.zoom - ox, (ev.clientY - r.top) / S.zoom - oy]; };
+    const start = at(e);
+    let moved = false, raf = 0;
+    const paint = () => { raf = 0; if (note) paintNoteInk(page, note); else renderInk(page); this.place(s, note); };
+    const move = (ev) => {
+      if (ev.pointerId !== e.pointerId) return;
+      const q = at(ev);
+      moved = moved || Math.hypot(q[0] - start[0], q[1] - start[1]) * S.zoom > 1;
+      if (!moved) return;
+      s.points = this.reshape(orig, k, q, start);
+      if (!raf) raf = requestAnimationFrame(paint);   // una vez por fotograma
+    };
+    const up = (ev) => {
+      if (ev.pointerId !== e.pointerId) return;
+      h.removeEventListener('pointermove', move); h.removeEventListener('pointerup', up); h.removeEventListener('pointercancel', up);
+      if (raf) cancelAnimationFrame(raf);
+      if (!moved) return;
+      s.points = s.points.map(([x, y, p]) => [Math.round(x * 10) / 10, Math.round(y * 10) / 10, p]);
+      paint();
+      commit(page, before);
+      if (mode === 'lasso' && S.lasso) drawLassoBox(); else this.show(page, s, note, mode);
+    };
+    h.addEventListener('pointermove', move);
+    h.addEventListener('pointerup', up);
+    h.addEventListener('pointercancel', up);
+  },
+};
+// Los tiradores de una forma recién enderezada se quitan al tocar cualquier otra cosa (seguir escribiendo, la barra…).
+addEventListener('pointerdown', (e) => { if (ShapeEdit.mode === 'snap' && !e.target.closest?.('.shape-handles')) ShapeEdit.hide(); }, true);
 
 // ---------- Filtro del lazo (popover «Herramienta Lazo») ----------
 // Qué tipos coge el lazo (S.lassoFilter, se guarda en las preferencias) y «Solo este color» (S.lassoColor, cuentagotas).
@@ -11073,6 +11950,7 @@ function addTextBox(page, x, y) {
 function addRichItem(page, props, size = null, base = null) {
   const item = Object.assign({ id: uid(), html: '', base: base || Object.assign({}, S.textDefault, { bg: '', border: false, align: 'left', color: luminance(S.textDefault.color) > 0.8 ? '#1C1C1E' : S.textDefault.color }) }, props);
   if (size) item.base.size = size;
+  Voice.stamp(item);   // grabando: cuándo se creó (t)
   const before = snapshotPage(page);
   page.items.push(item);
   renderItems(page);
@@ -11117,6 +11995,7 @@ async function placeImageFile(file, at, remaining) {
   const cx = at ? at.x : page.w / 2;
   const cy = at ? at.y : Math.min(page.h - h / 2, Math.max(h / 2, (desk.scrollTop + desk.clientHeight / 2 - v.wrap.offsetTop) / S.zoom));
   const item = { id: uid(), type: 'image', x: Math.min(page.w - fw, Math.max(0, cx - fw / 2)), y: Math.min(page.h - h, Math.max(0, cy - h / 2)), w: fw, h, src: edited.src, alt: file.name || 'Imagen' };
+  Voice.stamp(item);
   const before = snapshotPage(page);
   page.items.push(item);
   commit(page, before);
@@ -11562,6 +12441,7 @@ function commit(page, before) {
 }
 function restore(from, to) {
   if (S.editing) { document.activeElement?.blur?.(); stopEditing(); }
+  ShapeEdit.hide();   // los tiradores de una forma: la forma vuelve a como estaba
   const nb = activeNb();
   const entry = (from[nb.id] || []).pop();
   if (!entry) return;
@@ -12092,6 +12972,380 @@ function sortMenu(anchor) {
     Recall.refreshLibrary();
   });
 }
+
+// =============================================================================
+// Repaso de hoy (`Daily`, idea propia de Folia pensada para el MIR): una sesión diaria corta (5, 10 o 15 min) que
+// mezcla lo más útil para no olvidar:
+//   · las tarjetas pendientes de TODAS las libretas (nunca las de los ejemplos ni las de la demo «Así es Folia»),
+//     mezcladas por libreta (una de cada libreta por turnos);
+//   · de las libretas que se están olvidando (curva del olvido, recall.js): lo tapado con cinta y lo de un color
+//     con significado (leyenda, meaning.js; «Cae en el MIR» primero), como «¿lo recuerdas?» con su recorte.
+// Respuesta Bien / Mal. Las tarjetas se actualizan con su algoritmo (Cards.answer: Bien = «Bien», Mal = «Otra vez»);
+// al acabar, cada libreta tocada cuenta como repasada (Recall.mark).
+// Racha y progreso: kv `daily` de IndexedDB y campo `daily` de la copia de seguridad (ARQUITECTURA §2.1):
+//   { goal: 5|10|15, days: { 'AAAA-MM-DD' (día local): { n, ok, ms, done? } } }
+//   n = respuestas, ok = las «Bien», ms = tiempo de repaso, done = objetivo del día cumplido.
+// Primero la lógica pura (sin DOM: se prueba sola), después la interfaz.
+// =============================================================================
+const DAILY_GOALS = [5, 10, 15];        // minutos de la sesión (el objetivo diario)
+const DAILY_CARD_S = 20;                // segundos estimados por tarjeta
+const DAILY_ZONE_S = 30;                // segundos estimados por zona («¿lo recuerdas?»)
+const DAILY_ZONE_SHARE = 0.4;           // parte de la sesión para zonas cuando también hay tarjetas
+const DAILY_ZONES_PER_NB = 3;           // zonas como mucho por libreta y día
+const DAILY_OVER_S = 60;                // pasado el tiempo + esto, la sesión termina aunque queden cosas
+const DAILY_STEP_MS = 2 * 60e3;         // entre dos respuestas cuenta como mucho esto (si te vas, no suma)
+const DAILY_KEEP = 400;                 // días guardados
+const DAILY_MIR = /MIR|examen|importante|esame/i;   // significados que van primero
+
+const Daily = {
+  data: { goal: 5, days: {} },
+  now: () => Date.now(),   // las pruebas lo cambian para simular otros días
+
+  // ---------- Días, racha y progreso ----------
+  /** Día local «AAAA-MM-DD». */
+  dayKey(t) { const d = new Date(t); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; },
+  /** El mismo día de hace `n` días (por calendario: los cambios de hora no lo descolocan). */
+  dayBack(t, n) { const d = new Date(t); d.setHours(12, 0, 0, 0); d.setDate(d.getDate() - n); return Daily.dayKey(d.getTime()); },
+  /** Datos guardados (o llegados de una copia) sin nada raro: se queda lo válido. */
+  clean(raw) {
+    const out = { goal: 5, days: {} };
+    if (!raw || typeof raw !== 'object') return out;
+    if (DAILY_GOALS.includes(raw.goal)) out.goal = raw.goal;
+    const days = raw.days && typeof raw.days === 'object' && !Array.isArray(raw.days) ? raw.days : {};
+    const num = (v) => (Number.isFinite(v) && v > 0 ? Math.round(v) : 0);
+    const keys = Object.keys(days).filter((k) => /^\d{4}-\d{2}-\d{2}$/.test(k) && days[k] && typeof days[k] === 'object').sort().slice(-DAILY_KEEP);
+    for (const k of keys) {
+      const d = days[k], e = { n: num(d.n), ok: Math.min(num(d.ok), num(d.n)), ms: num(d.ms) };
+      if (d.done === true) e.done = true;
+      if (e.n || e.ms || e.done) out.days[k] = e;
+    }
+    return out;
+  },
+  /** Junta dos historiales (el de aquí y el de una copia): por día, lo mayor de cada cosa. El objetivo, el de aquí. */
+  merge(a, b) {
+    const A = Daily.clean(a), B = Daily.clean(b), days = Object.assign({}, B.days);
+    for (const [k, d] of Object.entries(A.days)) {
+      const o = days[k];
+      days[k] = o ? Object.assign({ n: Math.max(d.n, o.n), ok: Math.max(d.ok, o.ok), ms: Math.max(d.ms, o.ms) }, d.done || o.done ? { done: true } : {}) : d;
+    }
+    return Daily.clean({ goal: A.goal, days });
+  },
+  done(data, key) { return !!data.days[key]?.done; },
+  /** Días seguidos con el repaso hecho hasta hoy (si hoy aún no, la racha de hasta ayer sigue viva). */
+  streak(data = Daily.data, now = Daily.now()) {
+    let i = Daily.done(data, Daily.dayKey(now)) ? 0 : 1, n = 0;
+    while (Daily.done(data, Daily.dayBack(now, i))) { n++; i++; }
+    return n;
+  },
+  /** La racha más larga que hay guardada. */
+  best(data = Daily.data) {
+    const keys = Object.keys(data.days).filter((k) => data.days[k].done).sort();
+    let best = 0, run = 0, prev = null;
+    for (const k of keys) {
+      const t = new Date(k + 'T12:00:00').getTime();
+      run = prev != null && Daily.dayBack(t, 1) === prev ? run + 1 : 1;
+      best = Math.max(best, run); prev = k;
+    }
+    return best;
+  },
+  /** Los últimos 30 días, del más antiguo a hoy: [{ key, n, ok, ms, done }]. */
+  last30(data = Daily.data, now = Daily.now()) {
+    return Array.from({ length: 30 }, (_, i) => { const key = Daily.dayBack(now, 29 - i), d = data.days[key] || {}; return { key, n: d.n || 0, ok: d.ok || 0, ms: d.ms || 0, done: !!d.done }; });
+  },
+  today(now = Daily.now()) { return Daily.data.days[Daily.dayKey(now)] || { n: 0, ok: 0, ms: 0 }; },
+  /** Apunta en el día de hoy (respuestas, aciertos, tiempo y si se cumplió el objetivo) y lo guarda. */
+  record(patch, now = Daily.now()) {
+    const key = Daily.dayKey(now), d = Object.assign({ n: 0, ok: 0, ms: 0 }, Daily.data.days[key]);
+    d.n += patch.n || 0; d.ok += patch.ok || 0; d.ms += patch.ms || 0;
+    if (patch.done || d.ms >= Daily.data.goal * 60e3) d.done = true;
+    Daily.data.days[key] = d;
+    Daily.data = Daily.clean(Daily.data);
+    Daily.save();
+    return d;
+  },
+  setGoal(min) { if (DAILY_GOALS.includes(min)) { Daily.data.goal = min; Daily.save(); } },
+
+  // ---------- Guardar ----------
+  async load() { Daily.data = Daily.clean(await Store.get('daily', null)); },
+  save() { Store.set('daily', Daily.data); },
+  /** Para la copia de seguridad: null si aún no hay nada (las copias no cambian para quien no lo usa). */
+  backup() { return Object.keys(Daily.data.days).length ? Daily.clean(Daily.data) : null; },
+  /** Al recuperar una copia: se juntan los dos historiales (no se pierde ningún día). */
+  restore(raw) { if (!raw || typeof raw !== 'object') return; Daily.data = Daily.merge(Daily.data, raw); Daily.save(); },
+
+  // ---------- Qué entra en la sesión ----------
+  /** ¿Se estudia en el repaso de hoy? Los ejemplos y la demo «Así es Folia», nunca. */
+  eligible(nb) { return !!nb && !nb.example && !(typeof onbIsDemo === 'function' && onbIsDemo(nb)); },
+  /** ¿Se está olvidando? (retención por debajo de «conviene repasar»; nunca repasada y con más de un día). */
+  forgetting(nb, now = Daily.now()) {
+    const r = Recall.retention(nb, now);
+    return r == null ? now - (nb.created || nb.modified || now) > CARD_DAY : r < RECALL_DUE;
+  },
+  /** Generador de números al azar con semilla (el mismo día da las mismas zonas; otro día, otras). */
+  rand(seed) {
+    let h = 2166136261;
+    for (const ch of String(seed)) h = Math.imul(h ^ ch.charCodeAt(0), 16777619);
+    return () => { h = (h + 0x6D2B79F5) | 0; let t = Math.imul(h ^ (h >>> 15), 1 | h); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+  },
+  shuffle(list, seed) { const r = Daily.rand(seed), a = list.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(r() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; },
+  /** Zonas «¿lo recuerdas?» de una libreta: cintas y lo de los colores con significado (sin las que ya tienen tarjeta). */
+  zones(nb, now = Daily.now()) {
+    const out = [];
+    nb.pages.forEach((page, index) => {
+      for (const t of page.items) {
+        if (t.type !== 'tape') continue;
+        const pad = 36, x = Math.max(0, Math.floor(t.x - pad)), y = Math.max(0, Math.floor(t.y - pad));
+        const rect = Meaning.atLeast(page, { x, y, w: Math.ceil(Math.min(page.w, t.x + t.w + pad)) - x, h: Math.ceil(Math.min(page.h, t.y + t.h + pad)) - y });
+        out.push({ kind: 'tape', nb, page, index, rect, tapeId: t.id, label: t.label || '', prio: 1 });
+      }
+    });
+    const key = (pageId, r) => `${pageId}:${r.x},${r.y},${r.w},${r.h}`;
+    const had = new Set(Cards.all(nb).filter((c) => c.pageId && c.rect).map((c) => key(c.pageId, c.rect)));
+    for (const [color, label] of Object.entries(Meaning.legend(nb))) {
+      for (const z of Meaning.zones(nb, color)) {
+        const page = nb.pages[z.index];
+        if (!page || had.has(key(z.pageId, z.rect))) continue;
+        out.push({ kind: 'mean', nb, page, index: z.index, rect: z.rect, color, label, prio: DAILY_MIR.test(label) ? 0 : 2 });
+      }
+    }
+    // Al azar con la semilla del día, y los de «Cae en el MIR» delante.
+    return Daily.shuffle(out, Daily.dayKey(now) + nb.id).sort((a, b) => a.prio - b.prio).slice(0, DAILY_ZONES_PER_NB);
+  },
+  cost(it) { return it.kind === 'card' ? DAILY_CARD_S : DAILY_ZONE_S; },
+  /** Coge por turnos (una de cada libreta) mientras quepa en `budget` segundos. Devuelve los segundos usados. */
+  take(queues, out, budget) {
+    let used = 0, moved = true;
+    while (moved) {
+      moved = false;
+      for (const q of queues) {
+        if (!q.length || used + Daily.cost(q[0]) > budget) continue;
+        const it = q.shift(); used += Daily.cost(it); out.push(it); moved = true;
+      }
+    }
+    return used;
+  },
+  /** Arma la sesión: tarjetas pendientes de todas las libretas y zonas de las que se olvidan, en ~`minutes` min,
+   *  mezcladas por libreta. Devuelve [{ kind:'card', nb, card } | { kind:'tape'|'mean', nb, page, rect, … }]. */
+  plan(pool = S.notebooks, minutes = Daily.data.goal, now = Daily.now()) {
+    const budget = minutes * 60, nbs = pool.filter(Daily.eligible);
+    const cardQ = nbs.map((nb) => Cards.due(nb, now).map((card) => ({ kind: 'card', nb, card }))).filter((q) => q.length);
+    const zoneQ = nbs.filter((nb) => Daily.forgetting(nb, now)).map((nb) => Daily.zones(nb, now)).filter((q) => q.length);
+    const picked = [];
+    let used = Daily.take(zoneQ, picked, cardQ.length ? budget * DAILY_ZONE_SHARE : budget);
+    used += Daily.take(cardQ, picked, budget - used);
+    Daily.take(zoneQ, picked, budget - used);   // sobra tiempo: más zonas
+    // Mezcla: por turnos de libreta y, dentro de cada una, tarjeta y zona alternadas.
+    const by = new Map();
+    for (const it of picked) { if (!by.has(it.nb.id)) by.set(it.nb.id, { card: [], zone: [] }); by.get(it.nb.id)[it.kind === 'card' ? 'card' : 'zone'].push(it); }
+    const lanes = [...by.values()].map(({ card, zone }) => { const l = []; while (card.length || zone.length) { if (card.length) l.push(card.shift()); if (zone.length) l.push(zone.shift()); } return l; });
+    const out = [];
+    while (lanes.some((l) => l.length)) for (const l of lanes) if (l.length) out.push(l.shift());
+    return out;
+  },
+  /** Segundos estimados de una sesión. */
+  estimate(items) { return items.reduce((s, it) => s + Daily.cost(it), 0); },
+  /** Resumen rápido para la biblioteca (sin calcular zonas: solo cuenta). */
+  quick(pool = S.notebooks, now = Daily.now()) {
+    let cards = 0; const nbs = new Set();
+    for (const nb of pool) {
+      if (!Daily.eligible(nb)) continue;
+      const n = Recall.dueCards(nb, now);
+      if (n) { cards += n; nbs.add(nb.id); }
+    }
+    return { cards, nbs: nbs.size, users: pool.some(Daily.eligible) };
+  },
+
+  // ---------- Recortes de las zonas ----------
+  /** Imágenes de una zona: la pregunta (tapada) y la respuesta (destapada). Se calculan una vez. */
+  images(z) {
+    if (z.imgs) return z.imgs;
+    const page = z.page, r = z.rect;
+    let q, a;
+    if (z.kind === 'tape') {
+      q = Object.assign({}, page, { items: page.items.map((i) => (i.id === z.tapeId && i.open ? Object.assign({}, i, { open: undefined }) : i)) });
+      a = Object.assign({}, page, { items: page.items.filter((i) => i.id !== z.tapeId) });
+    } else {
+      // Lo del color se tapa con cintas solo para la pregunta (no se guardan).
+      const covers = Meaning.pieces(page, z.color).map((p) => p.box).filter((b) => b.x < r.x + r.w && b.x + b.w > r.x && b.y < r.y + r.h && b.y + b.h > r.y)
+        .map((b, i) => ({ id: 'daily-cover-' + i, type: 'tape', x: b.x - 3, y: b.y - 3, w: b.w + 6, h: b.h + 6, color: TAPE_COLORS[0] }));
+      q = Object.assign({}, page, { items: [...page.items, ...covers] });
+      a = page;
+    }
+    const scale = Math.min(2, CARD_IMG_MAX / Math.max(r.w, r.h));
+    z.imgs = (async () => {
+      const shot = async (p) => (await renderPageZone(p, r, scale)).toDataURL('image/jpeg', 0.85);
+      return { q: await shot(q), a: await shot(a) };
+    })();
+    return z.imgs;
+  },
+
+  // ---------- Interfaz ----------
+  minText(min) { return `Repaso de hoy · ~${min} min`; },
+  daysText(n) { return n === 1 ? '1 día seguido' : `${n} días seguidos`; },
+  cardsText(n) { return n === 1 ? '1 tarjeta' : `${n} tarjetas`; },
+  zonesText(n) { return n === 1 ? '1 zona para recordar' : `${n} zonas para recordar`; },
+  nbsText(n) { return n === 1 ? '1 libreta' : `${n} libretas`; },
+  /** Llama dibujada (no es un icono de la barra): la racha. */
+  flame(cls = '') {
+    return `<svg class="daily-flame ${cls}" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5c.6 3.2 4.9 5.6 4.9 10.4a4.9 4.9 0 0 1-9.8 0c0-2.3 1.2-3.7 2.2-4.8.2 1.6.9 2.6 1.8 3.1-.4-3.4.3-6.4.9-8.7z"/><path class="df-core" d="M12 21.5a2.6 2.6 0 0 1-2.6-2.6c0-1.6 1.3-2.4 2.1-3.6.5 1.2 3.1 2 3.1 3.6a2.6 2.6 0 0 1-2.6 2.6z"/></svg>`;
+  },
+  /** Acceso de la biblioteca (junto a «Para repasar hoy»). Vacío si solo hay ejemplos. */
+  libHTML(pool = S.notebooks) {
+    const q = Daily.quick(pool);
+    if (!q.users) return '';
+    const st = Daily.streak(), today = Daily.today(), done = !!today.done, goal = Daily.data.goal;
+    const pct = Math.min(100, Math.round((today.ms / (goal * 60e3)) * 100));
+    const sub = done ? `Hecho hoy · ${Daily.daysText(st)}` : q.cards ? `${Daily.cardsText(q.cards)} · ${Daily.nbsText(q.nbs)}` : 'Lo que se te está olvidando';
+    return `<section class="daily-lib" aria-label="Repaso de hoy"><button class="daily-go${done ? ' done' : ''}" data-daily title="Una sesión corta que mezcla tus tarjetas pendientes y lo que se te está olvidando">
+      <span class="dy-ring" style="--p:${done ? 100 : pct}" aria-hidden="true">${done ? icon('check') : Daily.flame()}</span>
+      <span class="dy-body"><b>${Daily.minText(goal)}</b><small>${sub}</small></span>
+      ${st ? `<span class="dy-streak" title="${Daily.daysText(st)}">${Daily.flame('mini')}<b>${st}</b></span>` : ''}${icon('chevronRight')}</button></section>`;
+  },
+  /** Gráfico pequeño: minutos de repaso de los últimos 30 días, con la línea del objetivo. */
+  chartHTML(now = Daily.now()) {
+    const days = Daily.last30(Daily.data, now), goal = Daily.data.goal * 60e3;
+    const top = Math.max(goal * 1.5, ...days.map((d) => d.ms)), W = 300, H = 64, bw = W / 30;
+    const y = (ms) => H - Math.max(ms ? 3 : 0, (ms / top) * H);
+    const gy = y(goal).toFixed(1), fmt = (k) => new Date(k + 'T12:00:00').toLocaleDateString(LOCALE(), { day: 'numeric', month: 'short' });
+    const bars = days.map((d, i) => {
+      const min = Math.round(d.ms / 60e3), label = `${fmt(d.key)}: ${min} min${d.done ? ' · hecho' : ''}`;
+      return `<g class="dc-day${d.done ? ' done' : ''}${i === 29 ? ' today' : ''}"><title>${label}</title><rect class="dc-hit" x="${(i * bw).toFixed(1)}" y="0" width="${bw.toFixed(1)}" height="${H}"/>
+        <rect class="dc-bar" x="${(i * bw + 1.5).toFixed(1)}" y="${y(d.ms).toFixed(1)}" width="${(bw - 3).toFixed(1)}" height="${(H - y(d.ms)).toFixed(1)}" rx="2"/>${d.ms ? '' : `<circle class="dc-none" cx="${(i * bw + bw / 2).toFixed(1)}" cy="${H - 2}" r="1.4"/>`}</g>`;
+    }).join('');
+    const n = days.filter((d) => d.done).length;
+    return `<figure class="daily-chart"><figcaption><span>Últimos 30 días</span><small>${n === 1 ? '1 día hecho' : `${n} días hechos`}</small></figcaption>
+      <svg viewBox="0 0 ${W} ${H + 2}" preserveAspectRatio="none" role="img" aria-label="Minutos de repaso de los últimos 30 días">${bars}<line class="dc-goal" x1="0" x2="${W}" y1="${gy}" y2="${gy}"/></svg>
+      <div class="dc-axis" aria-hidden="true"><span translate="no">${fmt(days[0].key)}</span><span class="dc-goal-l">Objetivo: ${Daily.data.goal} min</span><span>Hoy</span></div></figure>`;
+  },
+  /** Pantalla de inicio: racha, progreso, duración y qué entra hoy. */
+  open() {
+    let items = Daily.plan();
+    const head = () => {
+      const st = Daily.streak(), best = Daily.best(), today = Daily.today(), goal = Daily.data.goal;
+      const cards = items.filter((i) => i.kind === 'card'), zones = items.length - cards.length, nbs = new Set(items.map((i) => i.nb.id)).size;
+      const what = items.length ? [cards.length ? Daily.cardsText(cards.length) : '', zones ? Daily.zonesText(zones) : ''].filter(Boolean).join(' · ') + ` · ${Daily.nbsText(nbs)}` : '';
+      return `<div class="daily-head"><span class="dh-flame${st ? ' on' : ''}">${Daily.flame()}</span><div><h2>Repaso de hoy</h2>
+          <p class="dh-streak"><b>${Daily.daysText(st)}</b>${best > st ? `<span> · Récord: ${best}</span>` : ''}</p></div>
+          <button class="icon-btn" data-act="close" aria-label="Cerrar" title="Cerrar">${icon('close')}</button></div>
+        ${today.done ? '<p class="daily-note ok">Hoy ya lo has hecho. Puedes repasar más si quieres.</p>' : ''}
+        ${Daily.chartHTML()}
+        <div class="daily-goal"><span>Duración (objetivo diario)</span><div class="seg" role="group" aria-label="Duración">${DAILY_GOALS.map((m) => `<button data-act="goal" data-v="${m}" aria-pressed="${m === goal}">${m} min</button>`).join('')}</div></div>
+        ${items.length ? `<p class="daily-what">${what}</p>` : '<p class="daily-what">Hoy no hay nada que repasar: ni tarjetas pendientes ni libretas que se estén olvidando. Vuelve mañana.</p>'}
+        <div class="actions"><button class="btn" data-act="close">Ahora no</button><button class="btn primary" data-act="start" ${items.length ? '' : 'disabled'}>Empezar · ~${Math.max(1, Math.round(Daily.estimate(items) / 60))} min</button></div>`;
+    };
+    const scrim = dialog('<div class="daily"></div>', (act, b, close) => {
+      if (act === 'close') return close();
+      if (act === 'goal') { Daily.setGoal(+b.dataset.v); items = Daily.plan(); box.innerHTML = head(); return box.querySelector(`[data-act="goal"][data-v="${b.dataset.v}"]`)?.focus(); }
+      if (act === 'start' && items.length) { close(); Daily.run(items); }
+    });
+    scrim.querySelector('.dialog').classList.add('daily-dialog');
+    const box = $('.daily', scrim);
+    box.innerHTML = head();
+    setTimeout(() => box.querySelector('[data-act="start"]:not([disabled])')?.focus(), 40);
+    return scrim;
+  },
+  /** La sesión: pregunta → «Mostrar» → Mal / Bien → … → celebración. */
+  run(items) {
+    const t0 = Daily.now(), budget = Daily.data.goal * 60e3;
+    const st = { queue: items.slice(), total: items.length, done: 0, ok: 0, bad: 0, shown: false, last: t0, touched: new Set(), finished: false, again: new Set() };
+    const scrim = dialog('<div class="daily daily-run"></div>', (act, b, close) => {
+      if (act === 'close') { finish(false); return close(); }
+      if (act === 'show') { st.shown = true; return paint(); }
+      if (act === 'answer' && st.shown && st.queue[0]) return answer(b.dataset.v === 'good');
+    });
+    scrim.querySelector('.dialog').classList.add('daily-dialog');
+    const box = $('.daily', scrim);
+    const step = () => { const now = Daily.now(), ms = Math.min(DAILY_STEP_MS, Math.max(0, now - st.last)); st.last = now; return ms; };
+    const answer = (good) => {
+      const it = st.queue.shift();
+      if (it.kind === 'card') {
+        Cards.answer(it.card, good ? 'good' : 'again', Daily.now()); touch(it.nb);
+        // Mal: vuelve una vez al final de la sesión (como en el repaso de tarjetas).
+        if (!good && !st.again.has(it.card.id)) { st.again.add(it.card.id); st.queue.push(it); }
+      }
+      st.touched.add(it.nb.id);
+      if (good) st.ok++; else st.bad++;
+      st.done++;
+      Daily.record({ n: 1, ok: good ? 1 : 0, ms: step() });
+      st.shown = false;
+      if (Daily.now() - t0 > budget + DAILY_OVER_S * 1000) st.timeUp = st.queue.length > 0;
+      if (!st.queue.length || st.timeUp) return finish(true);
+      paint();
+    };
+    /** Al acabar (o al cerrar a medias): las libretas tocadas cuentan como repasadas. */
+    const finish = (complete) => {
+      if (st.finished) return;
+      st.finished = true;
+      const before = Daily.streak();
+      if (complete && st.done) Daily.record({ done: true });
+      for (const id of st.touched) { const nb = nbById(id); if (nb) Recall.mark(nb); }
+      if (complete) Daily.celebrate(box, { ok: st.ok, bad: st.bad, ms: Daily.now() - t0, timeUp: !!st.timeUp, left: st.queue.length, before, streak: Daily.streak() });
+    };
+    const paint = () => {
+      const it = st.queue[0], card = it.kind === 'card';
+      const where = `<span translate="no">${esc(it.nb.title)}</span>${card ? '' : `<span class="dw-page">Página ${it.index + 1}</span>`}`;
+      const left = Math.max(0, Math.ceil((budget - (Daily.now() - t0)) / 60e3));
+      const q = card ? `<div class="cardz-face">${Cards.face(it.card, 'front', st.shown)}</div>`
+        : `<div class="daily-ask"><b>${it.kind === 'tape' ? (it.label ? `<span translate="no">${esc(it.label)}</span>` : '¿Qué hay debajo de la cinta?') : `<span class="mean-dot" style="background:${esc(it.color)}" aria-hidden="true"></span><span translate="no">${esc(it.label)}</span>`}</b><span>¿Lo recuerdas?</span></div>
+          <div class="cardz-face daily-zone"><img alt="${st.shown ? 'Zona destapada' : 'Zona tapada'}" hidden></div>`;
+      box.innerHTML = `<div class="daily-top"><span class="dt-n">${Math.min(st.done + 1, st.done + st.queue.length)} / ${st.done + st.queue.length}</span>
+          <span class="dt-bar" aria-hidden="true"><i style="width:${Math.round((st.done / (st.done + st.queue.length)) * 100)}%"></i></span>
+          <span class="dt-time">${left ? `~${left} min` : 'Último'}</span>
+          <button class="icon-btn" data-act="close" aria-label="Cerrar el repaso" title="Cerrar el repaso">${icon('close')}</button></div>
+        <div class="daily-where">${card ? icon('lightbulb') : icon('eye')}${where}</div>
+        ${card ? '<div class="cardz-side-label">Pregunta</div>' : ''}${q}
+        ${card && st.shown ? `<div class="cardz-side-label">Respuesta</div><div class="cardz-face">${Cards.face(it.card, 'back')}</div>` : ''}
+        ${st.shown ? `<div class="daily-answers"><button class="daily-ans bad" data-act="answer" data-v="bad" title="Mal (1)">${icon('rotate')}<b>Mal</b></button><button class="daily-ans good" data-act="answer" data-v="good" title="Bien (2)">${icon('check')}<b>Bien</b></button></div>`
+          : `<div class="actions"><button class="btn primary daily-show" data-act="show">${card ? 'Mostrar respuesta' : 'Destapar'}</button></div>`}`;
+      if (!card) {
+        const img = box.querySelector('.daily-zone img'), face = img.parentElement;
+        face.classList.add('loading');
+        Daily.images(it).then((im) => { if (st.queue[0] !== it || !img.isConnected) return; img.src = st.shown ? im.a : im.q; img.hidden = false; face.classList.remove('loading'); }).catch(() => face.classList.remove('loading'));
+      }
+      const nx = st.queue[1];
+      if (nx && nx.kind !== 'card') Daily.images(nx);   // la siguiente, preparada
+      (box.querySelector('.daily-show') || box.querySelector('[data-v="good"]'))?.focus({ preventScroll: true });
+    };
+    // Cerrar a medias con Esc o tocando fuera también cuenta lo hecho.
+    scrim.addEventListener('click', (e) => { if (e.target === scrim) finish(false); });
+    // Teclado: espacio muestra; 1 = Mal, 2 = Bien.
+    scrim.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') return finish(false);
+      if (e.metaKey || e.ctrlKey || e.altKey || st.finished) return;
+      if (e.key === ' ' && !st.shown) { e.preventDefault(); e.stopPropagation(); box.querySelector('.daily-show')?.click(); }
+      const k = { 1: 'bad', 2: 'good' }[e.key];
+      if (k && st.shown) { e.preventDefault(); e.stopPropagation(); box.querySelector(`[data-v="${k}"]`)?.click(); }
+    });
+    paint();
+    Daily.session = st;   // para las pruebas
+    return scrim;
+  },
+  /** Celebración al acabar: un círculo que se cierra, el «hecho» escrito a mano, gotas de tinta y la racha que sube. */
+  celebrate(box, r) {
+    const up = r.streak > r.before, min = Math.max(1, Math.round(r.ms / 60e3));
+    const inks = ['#FFD60A', '#E0362C', '#2E9E4F', '#1E5BD8', '#AF52DE', '#FF9500'];
+    const drops = Array.from({ length: 14 }, (_, i) => {
+      const a = (i / 14) * Math.PI * 2 + (i % 2) * 0.2, d = 62 + (i % 3) * 14;
+      return `<i style="--dx:${Math.round(Math.cos(a) * d)}px;--dy:${Math.round(Math.sin(a) * d)}px;--c:${inks[i % inks.length]};--d:${(i % 4) * 40}ms;--s:${5 + (i % 3) * 2}px"></i>`;
+    }).join('');
+    const week = Daily.last30().slice(-7);
+    box.innerHTML = `<div class="daily-done${up ? ' up' : ''}">
+        <div class="dd-mark" aria-hidden="true"><span class="dd-drops">${drops}</span>
+          <svg viewBox="0 0 120 120"><circle class="dd-ring-bg" cx="60" cy="60" r="50"/><circle class="dd-ring" cx="60" cy="60" r="50" pathLength="100"/>
+            <path class="dd-check" d="M38 62c5 4 9 9 13 15 7-14 17-26 32-37" pathLength="100"/></svg></div>
+        <h2>${r.timeUp ? 'Se acabó el tiempo' : '¡Repaso hecho!'}</h2>
+        <p class="dd-streak">${Daily.flame()}<span class="dd-num"><span class="dd-roll">${up ? `<b>${r.before}</b>` : ''}<b>${r.streak}</b></span></span><span>${r.streak === 1 ? 'día seguido' : 'días seguidos'}</span></p>
+        <div class="dd-week" aria-label="Últimos 7 días">${week.map((d, i) => `<span translate="no" class="${d.done ? 'on' : ''}${i === 6 ? ' today' : ''}" title="${new Date(d.key + 'T12:00:00').toLocaleDateString(LOCALE(), { weekday: 'long' })}">${new Date(d.key + 'T12:00:00').toLocaleDateString(LOCALE(), { weekday: 'narrow' })}</span>`).join('')}</div>
+        <div class="dd-tally"><div><b>${r.ok}</b><span>Bien</span></div><div><b>${r.bad}</b><span>Mal</span></div><div><b>${min}</b><span>min</span></div></div>
+        ${r.timeUp ? `<p class="cardz-muted cardz-center">${r.left === 1 ? 'Queda 1 cosa para mañana.' : `Quedan ${r.left} cosas para mañana.`}</p>` : ''}
+        <div class="actions"><button class="btn primary" data-act="close">Cerrar</button></div></div>`;
+    box.querySelector('[data-act="close"]').focus({ preventScroll: true });
+    if (S.view === 'library') setTimeout(() => Recall.refreshLibrary(), 0);
+  },
+  /** Botón del menú «Estudio» del editor. */
+  menuHtml() { return `<button data-act="daily">${Daily.flame('menu')} ${Daily.minText(Daily.data.goal)}</button>`; },
+  menuAct(act) { if (act !== 'daily') return false; Daily.open(); return true; },
+};
 
 // =============================================================================
 // Tarjetas con IA (`AI`): la IA lee lo seleccionado con el lazo, lo resume y propone varias tarjetas de repaso,
@@ -16758,6 +18012,7 @@ async function start() {
   if (spaces.length) Store.set('spaces', []);
   Folders.save();
   OnbFilm.restOld();   // la demo «Así es Folia» nunca deja tarjetas pendientes
+  await Daily.load();   // racha y progreso del «Repaso de hoy» (kv `daily`; sin la clave = nada aún)
   S.dynpos = await Store.get('dynpos', {});
   // Las posiciones del modo dinámico iban por nombre de espacio: ahora, por carpeta.
   for (const f of Folders.list) if (!before.has(f.id) && S.dynpos[f.name]) { S.dynpos[f.id] = S.dynpos[f.name]; delete S.dynpos[f.name]; Store.set('dynpos', S.dynpos); }
