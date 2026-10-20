@@ -490,6 +490,9 @@ html.pen-mode .ink { touch-action: pan-x pan-y; }
 .resize { position: absolute; right: -11px; bottom: -11px; width: 22px; height: 22px; border-radius: 50%; background: #007AFF; border: 2px solid #fff; cursor: nwse-resize; display: none; box-shadow: 0 1px 3px rgba(0,0,0,.3); }
 .item.selected .resize { display: block; }
 .item.lassoed .resize { display: none; }
+/* Borde «agarrable» (comments.js, watchItemEdge): ahí se selecciona el elemento como objeto, sin escribir */
+.item.edge, .item.edge .rich { cursor: move; }
+.item.edge:not(.selected):not(.lassoed) { border-color: rgba(0, 122, 255, .5); outline: 3px solid rgba(0, 122, 255, .14); outline-offset: 1px; }
 /* Círculo del comentario: su diámetro sale de la preferencia commentSize (html[data-pin], COMMENT_SIZES en core.js). */
 :root { --pin: 26px; }
 :root[data-pin="s"] { --pin: 20px; }
@@ -1613,8 +1616,11 @@ body.is-card-dragging .crumbs button { box-shadow: inset 0 0 0 1.5px color-mix(i
 .onb.peek { background: rgba(0,0,0,.25); cursor: pointer; }
 .onb.peek > .onb-aurora, .onb.peek > .onb-stages, .onb.peek > .onb-skip { opacity: 0; pointer-events: none; }
 .onb.peek > .onb-return { display: inline-flex; }
-.onb-ring { position: fixed; z-index: 201; pointer-events: none; border-radius: 14px; border: 3px solid #BF59FF; box-shadow: 0 0 0 4px rgba(191,89,255,.3), 0 0 24px rgba(191,89,255,.8); animation: onb-ring 1.1s ease-in-out infinite; }
-@keyframes onb-ring { 50% { transform: scale(1.12); box-shadow: 0 0 0 8px rgba(191,89,255,.15), 0 0 30px rgba(191,89,255,.9); } }
+.onb-ring { position: fixed; z-index: 201; pointer-events: none; border-radius: 14px; border: 3px solid #BF59FF; box-shadow: 0 0 0 4px rgba(191,89,255,.3), 0 0 24px rgba(191,89,255,.8); }
+/* Pulso estable: un halo aparte que crece y se desvanece (el aro no cambia de tamaño ni de sitio). */
+.onb-ring::after { content: ""; position: absolute; inset: -3px; border-radius: inherit; border: 3px solid #BF59FF; pointer-events: none; animation: onb-ring 1.4s ease-out infinite; }
+@keyframes onb-ring { from { opacity: .9; transform: scale(1); } to { opacity: 0; transform: scale(1.25); } }
+@media (prefers-reduced-motion: reduce) { .onb-ring::after { animation: none; opacity: 0; } }
 /* Entrada «Tutorial» de los menús (⋯ y ⚙︎) */
 .popover .onb-menu-new { font: 700 11px var(--font); padding: 2px 7px; border-radius: 999px; color: #1C1C1E; background: linear-gradient(90deg, #FFD60A, #FF9F0A); }
 /* Libreta de demostración «Así es Folia» (película del final) */
@@ -9271,8 +9277,8 @@ function attachInk(page, v) {
       const noteIds = inNote ? inNote.strokes.filter((s) => LassoFilter.takesStroke(s) && strokeTouchesPolygon(s.points.map(([x, y]) => [x + inNote.x, y + inNote.y]), poly)).map((s) => s.id) : [];
       if (noteIds.length) return setLasso(page, noteIds, [], inNote.id);
       const ids = page.strokes.filter((s) => LassoFilter.takesStroke(s) && strokeTouchesPolygon(s.points, poly)).map((s) => s.id);
-      // Los elementos solo entran si el lazo los rodea de verdad (~60 % dentro), no con rozarlos: así rodear un
-      // post-it no coge el cuadro grande de detrás, y un lazo dentro de un cuadro no lo coge (lassoTakesItem).
+      // Los elementos entran con cualquier trozo que se vea dentro del lazo (lassoTakesItem); lo tapado o pegado a lo
+      // de encima no cuenta, así rodear un post-it no coge el cuadro de detrás.
       const itemIds = page.items.filter((it) => LassoFilter.takesItem(it) && lassoTakesItem(page, it, poly)).map((it) => it.id);
       if (ids.length || itemIds.length) setLasso(page, ids, itemIds);
       return;
@@ -9512,22 +9518,22 @@ function itemContentRects(page, item) {
 /** ¿Coge el lazo este elemento? Hay que rodearlo de verdad. En los cuadros de texto cuenta lo escrito
  *  (no el cuadro entero, que puede ser mucho más ancho) y lo que tapan los elementos de encima no cuenta. */
 function lassoTakesItem(page, item, poly) {
-  // Como en Goodnotes: basta con rodear un trozo del elemento (desde un 6 % de lo que se ve de él). Lo tapado por
+  // Como en Goodnotes: basta con rodear o pisar cualquier trozo que se vea del elemento. Lo tapado por
   // elementos de encima no cuenta, y así rodear un post-it que está sobre un cuadro de texto no coge el cuadro.
   const r = itemRect(page, item);
   if (poly.length < 3 || !(r.w > 0) || !(r.h > 0)) return false;
   const above = page.items.slice(page.items.indexOf(item) + 1).filter((i) => i.type !== 'tape' && i.type !== 'comment').map((i) => itemRect(page, i));
   // Lo tapado, y lo pegado (16 px) a lo que hay encima: es el margen que queda al rodear el elemento de encima.
   const m = 16, hidden = (p) => above.some((c) => p[0] >= c.x - m && p[0] <= c.x + c.w + m && p[1] >= c.y - m && p[1] <= c.y + c.h + m);
-  const n = 16;
-  let seen = 0, inside = 0;
+  // Basta cualquier trozo que se vea: un punto del lazo encima del elemento o un punto del elemento dentro del lazo.
+  const inRect = (p) => p[0] >= r.x && p[0] <= r.x + r.w && p[1] >= r.y && p[1] <= r.y + r.h;
+  if (poly.some((p) => inRect(p) && !hidden(p))) return true;
+  const n = 24;
   for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) {
     const p = [r.x + r.w * (i + 0.5) / n, r.y + r.h * (j + 0.5) / n];
-    if (hidden(p)) continue;
-    seen++;
-    if (pointInPolygon(p, poly)) inside++;
+    if (!hidden(p) && pointInPolygon(p, poly)) return true;
   }
-  return seen > 0 && inside >= Math.max(1, seen * 0.06);
+  return false;
 }
 function drawLassoBox() {
   $$('.lasso-box').forEach((x) => x.remove());
@@ -10637,7 +10643,11 @@ function richElement(page, item, editable) {
   rich.setAttribute('role', 'textbox');
   rich.setAttribute('aria-multiline', 'true');
   rich.setAttribute('aria-label', item.type === 'sticky' ? 'Post-it' : item.type === 'comment' ? `Comentario ${item.title}` : 'Cuadro de texto');
-  rich.addEventListener('focus', () => beginEditing(page, item));
+  rich.addEventListener('focus', () => {
+    // Recién seleccionado por el borde: el foco que trae el toque no empieza a escribir.
+    if (itemEdgeHold?.id === item.id && performance.now() < itemEdgeHold.until) { rich.blur(); return; }
+    beginEditing(page, item);
+  });
   rich.addEventListener('input', () => { item.html = sanitizeHTML(rich.innerHTML); touch(); });
   rich.addEventListener('blur', () => setTimeout(() => {
     const a = document.activeElement;
@@ -10707,7 +10717,8 @@ function itemElement(page, item) {
   }
   if (item.type === 'sticky') paintNoteInk(page, item, el);   // la tinta escrita dentro del post-it
   el.addEventListener('pointerdown', (e) => onItemPointerDown(e, page, item, el));
-  el.addEventListener('dblclick', (e) => { if (RICH_TYPES.includes(item.type) && S.tool === 'select') { setTool(item.type === 'sticky' ? 'sticky' : 'text'); const r = richFor(page.id, item.id); r?.focus(); } });
+  watchItemEdge(el, item);
+  el.addEventListener('dblclick', (e) => { if (RICH_TYPES.includes(item.type) && S.tool === 'select') { itemEdgeHold = null; setTool(item.type === 'sticky' ? 'sticky' : 'text'); const r = richFor(page.id, item.id); r?.focus(); } });
   return el;
 }
 
@@ -10863,17 +10874,52 @@ function toggleComment(found) {
   renderOptions();
 }
 
-/** Arrastrar mueve el elemento. Escribiendo en un texto, se arrastra desde su borde. */
-function onItemPointerDown(e, page, item, el) {
+// ---------- Borde «agarrable»: seleccionar el elemento como objeto (sin escribir), como en Goodnotes ----------
+/** Ancho (px de pantalla) de la franja del borde, hacia dentro del contorno; y hacia fuera, del marco de selección. */
+const ITEM_EDGE_PX = 10, ITEM_FRAME_PX = 12;
+/** Distancia (px de pantalla) del punto al contorno del elemento: positiva dentro, negativa fuera. */
+function itemEdgeDist(e, el) {
+  const r = el.getBoundingClientRect();
+  return Math.min(e.clientX - r.left, r.right - e.clientX, e.clientY - r.top, r.bottom - e.clientY);
+}
+/** ¿El toque cae en el borde del elemento? (no en el botón de reproducir, la etiqueta del enlace ni la pestaña de la
+ *  cinta). En los elementos pequeños la franja se estrecha (un cuarto del lado corto) para que el centro siga
+ *  sirviendo para escribir, abrir o destapar. */
+function onItemEdge(e, el, item) {
+  if (item.type === 'comment' || item.open || S.reading || e.target.closest('.vplay, .tag, .resize, .tape-tab')) return false;
+  const r = el.getBoundingClientRect(), d = itemEdgeDist(e, el);
+  return d >= -2 && d <= Math.min(ITEM_EDGE_PX, Math.min(r.width, r.height) / 4);
+}
+/** Tras seleccionar por el borde con el dedo, el foco que el navegador da enseguida al texto no empieza a escribir
+ *  (con ratón y lápiz ya lo evita el preventDefault del pointerdown). */
+let itemEdgeHold = null;
+/** Al pasar el ratón o el lápiz por el borde: cursor de mover y contorno tenue (clase .edge de style.css). */
+function watchItemEdge(el, item) {
+  el.addEventListener('pointermove', (e) => { if (!e.buttons && e.pointerType !== 'touch') el.classList.toggle('edge', onItemEdge(e, el, item)); });
+  el.addEventListener('pointerleave', () => el.classList.remove('edge'));
+}
+/** Deja de escribir (en este o en otro cuadro) para quedarse con el elemento seleccionado como objeto. */
+function leaveTypingForObject(item, e) {
+  itemEdgeHold = e.pointerType === 'touch' ? { id: item.id, until: performance.now() + 600 } : null;
+  if (document.activeElement?.closest?.('.rich')) document.activeElement.blur();
+  if (S.editing) stopEditing();
+}
+
+/** Arrastrar mueve el elemento. Escribiendo en un texto, se arrastra desde su borde. Tocar el borde (o el marco de
+ *  selección, `edge` = true) selecciona el elemento como objeto: Retroceso o Supr lo borran. */
+function onItemPointerDown(e, page, item, el, edge) {
   if (e.button !== 0 && e.pointerType === 'mouse') return;
   const onResize = e.target.classList.contains('resize');
+  if (edge === undefined) edge = !onResize && onItemEdge(e, el, item);
+  if (!edge) itemEdgeHold = null;   // un toque dentro del texto sí entra a escribir
   const inRich = e.target.closest('.rich') && e.target.closest('.rich').isContentEditable;
-  if (inRich && !onResize) return; // clic dentro del texto: colocar el cursor
-  if (e.pointerType === 'touch' && PenInput.fingerBlocked()) return fingerTapItem(e, page, item);
+  if (inRich && !onResize && !edge) return; // clic dentro del texto: colocar el cursor
+  if (e.pointerType === 'touch' && PenInput.fingerBlocked()) return fingerTapItem(e, page, item, edge);
   e.preventDefault();
   e.stopPropagation();
   clearLasso();
-  if (S.editing && S.editing.itemId !== item.id) stopEditing();
+  if (edge) { leaveTypingForObject(item, e); if (!page.items.includes(item)) return; }   // un cuadro vacío desaparece
+  else if (S.editing && S.editing.itemId !== item.id) stopEditing();
   const wasSelected = S.selected?.itemId === item.id;
   select({ pageId: page.id, itemId: item.id }, false);
   const before = snapshotPage(page);
@@ -10901,7 +10947,7 @@ function onItemPointerDown(e, page, item, el) {
     removeEventListener('pointerup', up);
     removeEventListener('pointercancel', up);
     if (moved) { commit(page, before); if (item.type === 'comment' && item.expanded) showCommentPanel(page, item); return; }
-    if (ev.type !== 'pointercancel' && !NoteZoom.held) itemTap(page, item, wasSelected);   // la pulsación larga ya amplió
+    if (ev.type !== 'pointercancel' && !NoteZoom.held) itemTap(page, item, wasSelected, edge);   // la pulsación larga ya amplió
   };
   addEventListener('pointermove', move);
   addEventListener('pointerup', up);
@@ -10910,7 +10956,7 @@ function onItemPointerDown(e, page, item, el) {
 /** Modo lápiz: el dedo desplaza la libreta sobre los elementos (no los arrastra). Un toque sin moverse sí hace lo
  *  de un clic: abre el comentario, el enlace o la nota de voz, o selecciona. Si el navegador se lo lleva para
  *  desplazar, llega pointercancel y no se hace nada. */
-function fingerTapItem(e, page, item) {
+function fingerTapItem(e, page, item, edge) {
   e.preventDefault();   // sin los eventos de ratón de compatibilidad, que quitarían el foco al empezar a escribir
   e.stopPropagation();
   const start = [e.clientX, e.clientY];
@@ -10921,17 +10967,23 @@ function fingerTapItem(e, page, item) {
     removeEventListener('pointermove', move); removeEventListener('pointerup', end); removeEventListener('pointercancel', end);
     if (moved || ev.type === 'pointercancel' || NoteZoom.held) return;
     clearLasso();
-    if (S.editing && S.editing.itemId !== item.id) stopEditing();
+    if (edge) { leaveTypingForObject(item, ev); if (!page.items.includes(item)) return; }
+    else if (S.editing && S.editing.itemId !== item.id) stopEditing();
     const wasSelected = S.selected?.itemId === item.id;
     select({ pageId: page.id, itemId: item.id }, false);
-    itemTap(page, item, wasSelected);
+    itemTap(page, item, wasSelected, edge);
   };
   addEventListener('pointermove', move); addEventListener('pointerup', end); addEventListener('pointercancel', end);
 }
-/** Lo que hace un clic (sin mover) sobre un elemento. */
-function itemTap(page, item, wasSelected) {
+/** Lo que hace un clic (sin mover) sobre un elemento. Por el borde (`edge`) solo se selecciona. */
+function itemTap(page, item, wasSelected, edge) {
+  if (edge) return;
   if (item.type === 'tape') return wasSelected && Tape.toggle(page, item);   // el primer toque la selecciona; el segundo la destapa
-  if (item.type === 'comment') return toggleComment({ page, item });
+  if (item.type === 'comment') {
+    toggleComment({ page, item });
+    if (!item.expanded) select({ pageId: page.id, itemId: item.id });   // plegado sigue seleccionado (Retroceso lo borra)
+    return;
+  }
   if (item.type === 'voice') return Voice.togglePlay(activeNb(), item.rec);
   if (item.type === 'link' && (item.target ? !['select'].includes(S.tool) || wasSelected : false)) return showLinkPreview(item.target, { item, page });
   if (item.type === 'link' && !item.target) return linkPicker((target) => editItem({ page, item }, (it) => { it.target = target; }));
@@ -10987,6 +11039,10 @@ function attachItemsLayer(page, v) {
     if (e.target !== v.items) return;
     currentPageIndex = activeNb().pages.indexOf(page);
     clearLasso();
+    // Justo fuera del elemento seleccionado (su marco): se queda seleccionado como objeto y se puede arrastrar.
+    const sel = S.selected?.pageId === page.id ? page.items.find((i) => i.id === S.selected.itemId) : null;
+    const selEl = sel && sel.type !== 'comment' && !S.reading && v.items.querySelector(`.item[data-id="${sel.id}"]`);
+    if (selEl && itemEdgeDist(e, selEl) >= -ITEM_FRAME_PX) return onItemPointerDown(e, page, sel, selEl, true);
     // Con un elemento seleccionado o en edición, el primer toque fuera solo lo suelta (no crea otro cuadro).
     if (S.editing || S.selected) { e.preventDefault(); deselectAll(); return; }
     // Texto del PDF: con la herramienta de seleccionar, arrastrar sobre él lo selecciona.
@@ -11541,7 +11597,8 @@ document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && document.activeElement.isContentEditable) document.activeElement.blur();
     return;
   }
-  if ((e.key === 'Delete' || e.key === 'Backspace') && (S.selected || S.lasso)) { e.preventDefault(); return deleteSelection(); }
+  // Retroceso o Supr borran el elemento seleccionado como objeto o lo del lazo (escribiendo, borran letras: arriba).
+  if ((e.key === 'Delete' || e.key === 'Backspace') && (S.selected || S.lasso) && !S.reading) { e.preventDefault(); return deleteSelection(); }
   if (e.key === 'Escape') { PdfText.clear(); closePopover(); closeLinkPreview(); closeSearchPanel(); $('#pomo-panel')?.remove(); clearLasso(); return select(null); }
 });
 
@@ -13604,10 +13661,12 @@ const Tape = {
     el.dataset.id = item.id;
     el.addEventListener('pointerdown', (e) => {
       if (e.button !== 0 && e.pointerType === 'mouse') return;
-      if (S.tool === 'select') return onItemPointerDown(e, page, item, el);   // seleccionar, mover y cambiar el tamaño
+      // Seleccionar, mover y cambiar el tamaño; con otra herramienta, tocar su borde también la selecciona.
+      if (S.tool === 'select' || e.target.classList.contains('resize') || onItemEdge(e, el, item)) return onItemPointerDown(e, page, item, el);
       this.onTap(e, () => this.toggle(page, item));
     });
     el.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); this.toggle(page, item); } });
+    watchItemEdge(el, item);
     return el;
   },
   reviewElement(r) {
@@ -14964,10 +15023,7 @@ const ROUNDED = 'ui-rounded, "SF Pro Rounded", "Segoe UI Variable Display", syst
 const OnbDemos = {
   language(ctx, W, H, t) {
     this.paper(ctx, W, H);
-    const p = onbCycle(t, 4), it = p > 0.5;
-    // El menú gira (se encoge en vertical y vuelve) solo un momento al cambiar de idioma: a mitad y al final
-    // del ciclo. Antes `flip` se quedaba en 1 toda la mitad italiana y el menú salía aplastado en 2 px.
-    const flip = Math.max(0, 1 - Math.abs(p - 0.5) / 0.06, 1 - Math.min(p, 1 - p) / 0.06);
+    const st = this.languageState(onbCycle(t, 4)), it = st.it, flip = st.flip;
     // Dos banderas; la elegida, más grande y con anillo
     const flags = [['es', W / 2 - 60], ['it', W / 2 + 60]];
     for (const [k, x] of flags) {
@@ -14987,13 +15043,25 @@ const OnbDemos = {
     rows.forEach((r, i) => this.label(ctx, r, -88, -34 + i * 34, `500 16px ${ROUNDED}`, onbGray(0.15), 'left'));
     ctx.restore();
     // Cursor que va a la bandera
-    const target = it ? W / 2 + 60 : W / 2 - 60, from = it ? W / 2 - 60 : W / 2 + 60;
-    const mv = onbSmooth(onbRamp((p % 0.5) * 2, 0.55, 0.85));
-    const cx = from + (target - from) * mv, cy = 80 + 20 * Math.sin(mv * Math.PI);
+    const cx = W / 2 + 60 * st.cursor, cy = 80 + 20 * Math.sin(st.travel * Math.PI);
+    if (st.click) { ctx.strokeStyle = `rgba(0,122,255,${st.click})`; ctx.lineWidth = 2.5; ctx.beginPath(); ctx.arc(cx, cy, 6 + 12 * (1 - st.click), 0, Math.PI * 2); ctx.stroke(); }
     ctx.fillStyle = '#1C1C1E'; ctx.strokeStyle = '#fff'; ctx.lineWidth = 1.5;
     ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(cx, cy + 20); ctx.lineTo(cx + 5, cy + 15); ctx.lineTo(cx + 9, cy + 23); ctx.lineTo(cx + 12, cy + 21); ctx.lineTo(cx + 8, cy + 14); ctx.lineTo(cx + 14, cy + 14); ctx.closePath(); ctx.fill(); ctx.stroke();
   },
 
+  /** Estado del paso de idiomas en el momento p (0…1) del ciclo. El cursor va de España a Italia en la primera mitad
+   *  y vuelve en la segunda; el idioma (bandera resaltada y menú) cambia justo cuando hace clic (p = 0,45 y 0,95).
+   *  Antes cambiaba a mitad de ciclo y el menú salía en el idioma de la bandera contraria. */
+  languageState(p) {
+    const CLICK = [0.45, 0.95], first = p < 0.5;
+    const it = p >= CLICK[0] && p < CLICK[1];
+    // Giro (se encoge en vertical y vuelve) solo un momento alrededor de cada clic; el resto del ciclo, plano.
+    const near = Math.min(...CLICK.map((c) => { const d = Math.abs(p - c); return Math.min(d, 1 - d); }));
+    const flip = Math.max(0, 1 - near / 0.06);
+    const travel = onbSmooth(onbRamp((p % 0.5) * 2, 0.55, 0.85));   // llega en p = 0,425 / 0,925, antes del clic
+    const cursor = first ? -1 + 2 * travel : 1 - 2 * travel;           // −1 = España, +1 = Italia
+    return { it, flip, travel, cursor, click: Math.max(0, 1 - near / 0.03) };
+  },
   paper(ctx, W, H) { ctx.fillStyle = onbGray(0.97); ctx.beginPath(); ctx.roundRect(0, 0, W, H, 14); ctx.fill(); },
   lines(ctx, x, y, w, widths = [0.9, 0.75, 0.85, 0.6], color = onbGray(0.78), gap = 22) {
     ctx.fillStyle = color;
@@ -15764,14 +15832,28 @@ function onbFilmBuild() {
   Cloze.create(nb, Cloze.propose(nb).filter((c) => !seen.has(c.answer) && seen.add(c.answer)).slice(0, 2));
   Cards.addMany(nb, [{ front: L('¿Qué produce la mitocondria?', 'Cosa produce il mitocondrio?'), back: L('ATP, la energía de la célula.', 'ATP, l’energia della cellula.'), pageId: p1.id }]).forEach((c) => { c.origin = 'ai'; });
   nb.outline = [{ id: uid(), title: L('Así es Folia', 'Ecco Folia'), pageId: p1.id, level: 0 }, { id: uid(), title: L('Caso clínico', 'Caso clinico'), pageId: p2.id, level: 0 }];
+  onbDemoRest(nb);
   return { nb, parts: P };
+}
+/** ¿Es la libreta de demostración? (su título en una carpeta principal «Ejemplos»/«Esempi»; no lleva campo propio). */
+function onbIsDemo(nb) {
+  const f = nb && typeof Folders !== 'undefined' ? Folders.byId(nb.folder) : null;
+  return !!f && !f.parent && ['Ejemplos', 'Esempi'].includes(f.name) && ['Así es Folia', 'Ecco Folia'].includes(nb.title);
+}
+const ONB_DEMO_REST = 3650 * 24 * 3600 * 1000;   // 10 años: las tarjetas de la demo nunca salen como pendientes
+/** Pone «al día» las tarjetas sin repasar de la demo (no borra nada). Devuelve si cambió algo. */
+function onbDemoRest(nb, now = Date.now()) {
+  let changed = false;
+  for (const c of nb.cards || []) if (!c.reps && (c.due || 0) < now + ONB_DEMO_REST / 2) { c.due = now + ONB_DEMO_REST; changed = true; }
+  return changed;
 }
 
 const OnbFilm = {
   GAP: 40,
   /** La libreta de esta sesión (o la ya creada con ese título): no se duplica al verla otra vez. */
   ensure() {
-    let nb = nbById(this.nbId) || null;
+    let nb = nbById(this.nbId) || S.notebooks.find(onbIsDemo) || null;
+    if (nb) this.nbId = nb.id;
     const built = onbFilmBuild();
     if (!nb) {
       nb = built.nb;
@@ -15782,6 +15864,8 @@ const OnbFilm = {
     }
     return built;   // la película se dibuja con su propia copia (misma forma que la guardada)
   },
+  /** Al arrancar: la demo creada con versiones anteriores tenía tarjetas pendientes; se ponen al día. */
+  restOld() { for (const nb of S.notebooks) if (onbIsDemo(nb) && onbDemoRest(nb)) Store.put(nb); },
   /** Pasos: [segundos, cámara [x, y, aumento] o función, rótulo, qué enseña]. */
   steps(P) {
     const p2y = PORTRAIT.h + this.GAP;
@@ -16395,14 +16479,26 @@ const Onboarding = {
     const inMore = !!el.closest('.opt-more-pop');
     if (inMore && typeof setOptMore === 'function') setOptMore(true);
     this.el.classList.add('peek');
-    const r = el.getBoundingClientRect(), ring = document.createElement('div');
-    ring.className = 'onb-ring';
-    ring.style.cssText = `left:${r.left - 6}px;top:${r.top - 6}px;width:${r.width + 12}px;height:${r.height + 12}px`;
+    // El aro no recibe el puntero y se coloca una sola vez; solo se recoloca si la ventana cambia de tamaño o se
+    // desplaza algo (una vez por fotograma). El pulso va en su ::after, así el aro en sí nunca cambia de caja.
+    const ring = document.createElement('div');
+    ring.className = 'onb-ring'; ring.setAttribute('aria-hidden', 'true');
+    const place = () => {
+      const r = el.getBoundingClientRect();
+      ring.style.cssText = `left:${Math.round(r.left - 6)}px;top:${Math.round(r.top - 6)}px;width:${Math.round(r.width + 12)}px;height:${Math.round(r.height + 12)}px`;
+    };
+    // En pantallas estrechas el botón puede quedar fuera de la barra desplazable: se trae a la vista primero.
+    if (!inMore) { const r = el.getBoundingClientRect(); if (r.right > innerWidth || r.left < 0) el.scrollIntoView({ block: 'nearest', inline: 'nearest' }); }
+    let raf = 0;
+    const later = () => { if (!raf) raf = requestAnimationFrame(() => { raf = 0; place(); }); };
+    place();
     document.body.appendChild(ring);
+    addEventListener('resize', later); addEventListener('scroll', later, true);
     const timer = setTimeout(() => this.unpoint?.(), 3600);
     this.unpoint = () => {
       this.unpoint = null;
-      clearTimeout(timer); ring.remove();
+      clearTimeout(timer); cancelAnimationFrame(raf); ring.remove();
+      removeEventListener('resize', later); removeEventListener('scroll', later, true);
       if (inMore && typeof setOptMore === 'function') setOptMore(false);
       this.el?.classList.remove('peek');
       this.el?.querySelector('[data-onb="show"]')?.focus({ preventScroll: true });
@@ -16661,6 +16757,7 @@ async function start() {
   for (const nb of S.notebooks) if (nb._migrated) { delete nb._migrated; Store.put(nb); }
   if (spaces.length) Store.set('spaces', []);
   Folders.save();
+  OnbFilm.restOld();   // la demo «Así es Folia» nunca deja tarjetas pendientes
   S.dynpos = await Store.get('dynpos', {});
   // Las posiciones del modo dinámico iban por nombre de espacio: ahora, por carpeta.
   for (const f of Folders.list) if (!before.has(f.id) && S.dynpos[f.name]) { S.dynpos[f.id] = S.dynpos[f.name]; delete S.dynpos[f.name]; Store.set('dynpos', S.dynpos); }
