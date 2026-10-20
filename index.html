@@ -145,6 +145,50 @@ svg { display: block; }
 .card .more { position: absolute; top: 6px; right: 6px; width: 30px; height: 30px; border-radius: 50%; border: 0; background: rgba(0,0,0,.35); color: #fff; display: grid; place-items: center; opacity: 0; transition: opacity .15s; padding: 0; }
 .card .more svg { width: 18px; height: 18px; }
 .card:hover .more, .card .more:focus-visible, .card .more[aria-expanded="true"] { opacity: 1; }
+/* ---------- Curva del olvido (recall.js): barra bajo el título, tira «Para repasar hoy» y «Ordenar por» ---------- */
+:root { --recall-fresh: #248A3D; --recall-soon: #C27C0E; --recall-fading: #D70015; --recall-never: rgba(120, 120, 128, .32); }
+:root[data-theme="dark"] { --recall-fresh: #30D158; --recall-soon: #FFB340; --recall-fading: #FF6961; --recall-never: rgba(160, 160, 170, .3); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --recall-fresh: #30D158; --recall-soon: #FFB340; --recall-fading: #FF6961; --recall-never: rgba(160, 160, 170, .3); } }
+.recall[data-state="fresh"], .rs-item[data-state="fresh"], .recall-pop[data-state="fresh"] { --rc: var(--recall-fresh); }
+.recall[data-state="soon"], .rs-item[data-state="soon"], .recall-pop[data-state="soon"] { --rc: var(--recall-soon); }
+.recall[data-state="fading"], .rs-item[data-state="fading"], .recall-pop[data-state="fading"] { --rc: var(--recall-fading); }
+.recall[data-state="never"], .rs-item[data-state="never"], .recall-pop[data-state="never"] { --rc: var(--recall-never); }
+.card .recall { display: flex; align-items: center; gap: 6px; width: 100%; height: 12px; border: 0; background: transparent; padding: 0; margin: 1px 0 -1px; color: var(--accent); cursor: pointer; }
+.recall .rc-track { flex: 1; height: 3px; border-radius: 2px; background: var(--fill); overflow: hidden; }
+.recall .rc-track i { display: block; height: 100%; border-radius: 2px; background: var(--rc); transition: width .3s; }
+.recall[data-state="never"] .rc-track i { width: 100% !important; }
+.recall:hover .rc-track { height: 5px; }
+.recall .rc-cards, .rs-cards { flex: none; display: inline-flex; align-items: center; gap: 2px; font: 600 11px/1 var(--font); color: var(--accent); font-variant-numeric: tabular-nums; }
+.recall .rc-cards svg, .rs-cards svg { width: 12px; height: 12px; }
+.popover .recall-pop { display: flex; flex-direction: column; gap: 2px; padding: 6px 10px 8px; max-width: 260px; font-size: 13px; }
+.recall-pop b { font-weight: 600; color: var(--ink); display: flex; align-items: center; gap: 6px; }
+.recall-pop b::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--rc); flex: none; }
+.recall-pop span { color: var(--ink-2); line-height: 1.35; }
+.recall-strip { margin: 0 0 20px; border-radius: 14px; background: var(--fill); padding: 4px 6px 6px; max-width: 100%; }
+.recall-strip.folded { display: inline-block; padding: 2px 4px; }
+.rs-head { display: inline-flex; align-items: center; gap: 6px; border: 0; background: transparent; color: var(--ink-2); font: 600 13px var(--font); padding: 6px 8px; border-radius: 10px; }
+.rs-head svg { width: 16px; height: 16px; }
+.rs-head svg:last-child { width: 14px; height: 14px; transition: transform .2s; }
+.recall-strip.folded .rs-head svg:last-child { transform: rotate(-90deg); }
+.rs-head .rs-n { font-variant-numeric: tabular-nums; color: var(--muted); font-weight: 500; }
+.rs-head:hover { background: var(--fill); }
+.rs-list { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; padding: 2px 2px 2px; }
+.rs-list::-webkit-scrollbar { display: none; }
+.rs-item { flex: none; display: flex; align-items: center; gap: 9px; max-width: 250px; min-width: 0; padding: 8px 12px 8px 10px; border-radius: 10px; border: 1px solid var(--hairline); background: var(--bar); text-align: left; color: var(--ink); }
+.rs-item:hover { border-color: var(--rc); }
+.rs-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--rc); flex: none; }
+.rs-body { display: flex; flex-direction: column; min-width: 0; }
+.rs-body b { font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rs-body small { color: var(--muted); font-size: 12px; white-space: nowrap; }
+.title-row { position: relative; }
+.title-row:has(.lib-sort) .large-title { padding-right: 160px; }
+.lib-sort { position: absolute; right: 24px; bottom: 16px; height: 30px; border: 0; border-radius: 15px; background: var(--fill); color: var(--ink-2); display: inline-flex; align-items: center; gap: 4px; padding: 0 12px 0 8px; font: 500 13px var(--font); }
+.lib-sort svg { width: 14px; height: 14px; }
+@media (max-width: 760px) {
+  .lib-sort { right: 16px; }
+  .title-row:has(.lib-sort) .large-title { padding-right: 140px; }
+  .rs-item { max-width: 210px; }
+}
 .badge { font-size: 10.5px; letter-spacing: .04em; text-transform: uppercase; background: var(--accent-soft); color: var(--accent); padding: 1px 6px; border-radius: 4px; font-weight: 600; }
 .empty { color: var(--muted); padding: 60px 0; text-align: center; }
 .results { display: flex; flex-direction: column; gap: 22px; max-width: 760px; }
@@ -338,6 +382,32 @@ html.pen-mode .ink { touch-action: pan-x pan-y; }
 .page-indicator button:disabled { color: var(--muted); }
 .page-indicator svg { width: 16px; height: 16px; stroke-width: 2.2; }
 .desk-wrap { flex: 1; display: flex; position: relative; min-width: 0; }
+/* Regla (ruler.js): capa encima de las páginas que no recibe el puntero (se reconoce por geometría) */
+.ruler-layer { position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: 4; }
+.ruler { position: absolute; left: 0; top: 0; height: 76px; color: #3A3A3C; background: rgba(250, 250, 247, .66); border-radius: 4px;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, .22), 0 3px 12px rgba(0, 0, 0, .14); will-change: transform; }
+.ruler[hidden] { display: none; }
+.reading .ruler-layer { display: none; }
+.ruler-ticks { position: absolute; left: 0; top: 0; }
+.ruler-proto { position: absolute; bottom: 100%; display: none; }
+.ruler.protractor .ruler-proto { display: block; }
+.ruler-angle { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -38%); font: 600 26px/1 -apple-system, system-ui, sans-serif;
+  font-variant-numeric: tabular-nums; letter-spacing: -.02em; opacity: .78; transition: color .15s; }
+.ruler-angle.flip { transform: translate(-50%, -62%) rotate(180deg); }
+.ruler-angle.snapped { color: var(--accent); opacity: 1; }
+.ruler.active .ruler-angle { opacity: 1; }
+.ruler-knob { position: absolute; left: calc(50% + 120px); top: 50%; width: 30px; height: 30px; margin: -15px 0 0 -15px; border-radius: 50%;
+  display: grid; place-items: center; background: rgba(0, 0, 0, .07); box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .18); color: inherit; opacity: .8; }
+.ruler-knob svg { width: 16px; height: 16px; }
+.ruler-measure { position: absolute; left: 0; top: 0; padding: 4px 10px; border-radius: 999px; background: var(--accent); color: #fff; white-space: nowrap;
+  font: 600 13px/1.2 -apple-system, system-ui, sans-serif; font-variant-numeric: tabular-nums; box-shadow: 0 2px 8px rgba(0, 0, 0, .2); }
+.ruler-measure[hidden] { display: none; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .ruler { color: #E5E5EA; background: rgba(52, 52, 56, .68); box-shadow: 0 0 0 1px rgba(255, 255, 255, .22), 0 3px 12px rgba(0, 0, 0, .4); }
+  :root:not([data-theme="light"]) .ruler-knob { background: rgba(255, 255, 255, .1); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .22); }
+}
+:root[data-theme="dark"] .ruler { color: #E5E5EA; background: rgba(52, 52, 56, .68); box-shadow: 0 0 0 1px rgba(255, 255, 255, .22), 0 3px 12px rgba(0, 0, 0, .4); }
+:root[data-theme="dark"] .ruler-knob { background: rgba(255, 255, 255, .1); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .22); }
 .ribbon { position: absolute; top: 0; right: 36px; width: 28px; height: 46px; background: #FF3B30; clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 78%, 0 100%); pointer-events: none; filter: drop-shadow(0 1px 1px rgba(0,0,0,.3)); }
 .flash { position: absolute; border-radius: 6px; background: rgba(255, 214, 10, .45); border: 2px solid #FF9500; pointer-events: none; animation: flash 2.6s ease forwards; }
 @keyframes flash { 0% { opacity: 0; } 8% { opacity: 1; } 20% { opacity: .4; } 32% { opacity: 1; } 75% { opacity: 1; } 100% { opacity: 0; } }
@@ -1376,6 +1446,7 @@ body.is-card-dragging .crumbs button { box-shadow: inset 0 0 0 1.5px color-mix(i
 // (símbolos de Apple), más la plumilla y «Aa» dibujados a mano. Generado por web/tools/icons.py.
 const ICONS = {
  "back": "<path d=\"m15 18-6-6 6-6\" />",
+ "textMark": "<rect x=\"3\" y=\"11\" width=\"18\" height=\"8\" rx=\"2\" fill=\"currentColor\" fill-opacity=\".22\" stroke=\"none\" /> <path d=\"m7.5 17 4.5-12 4.5 12\" /> <path d=\"M9.2 12.6h5.6\" />",
  "highlighter": "<path d=\"m9 11-6 6v3h9l3-3\" /> <path d=\"m22 12-4.6 4.6a2 2 0 0 1-2.8 0l-5.2-5.2a2 2 0 0 1 0-2.8L14 4\" />",
  "eraser": "<path d=\"m7 21-4.3-4.3c-1-1-1-2.5 0-3.4l9.6-9.6c1-1 2.5-1 3.4 0l5.6 5.6c1 1 1 2.5 0 3.4L13 21\" /> <path d=\"M22 21H7\" /> <path d=\"m5 11 9 9\" />",
  "lasso": "<path d=\"M7 22a5 5 0 0 1-2-4\" /> <path d=\"M3.3 14A6.8 6.8 0 0 1 2 10c0-4.4 4.5-8 10-8s10 3.6 10 8-4.5 8-10 8a12 12 0 0 1-5-1\" /> <path d=\"M5 18a2 2 0 1 0 0-4 2 2 0 0 0 0 4z\" />",
@@ -1449,6 +1520,7 @@ const ICONS = {
  "alignCenter": "<path d=\"M17 12H7\" /> <path d=\"M19 18H5\" /> <path d=\"M21 6H3\" />",
  "alignRight": "<path d=\"M21 12H9\" /> <path d=\"M21 18H7\" /> <path d=\"M21 6H3\" />",
  "palette": "<circle cx=\"13.5\" cy=\"6.5\" r=\".5\" fill=\"currentColor\" /> <circle cx=\"17.5\" cy=\"10.5\" r=\".5\" fill=\"currentColor\" /> <circle cx=\"8.5\" cy=\"7.5\" r=\".5\" fill=\"currentColor\" /> <circle cx=\"6.5\" cy=\"12.5\" r=\".5\" fill=\"currentColor\" /> <path d=\"M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z\" />",
+ "ruler": "<path d=\"M21.3 15.3a2.4 2.4 0 0 1 0 3.4l-2.6 2.6a2.4 2.4 0 0 1-3.4 0L2.7 8.7a2.41 2.41 0 0 1 0-3.4l2.6-2.6a2.41 2.41 0 0 1 3.4 0Z\" /> <path d=\"m14.5 12.5 2-2\" /> <path d=\"m11.5 9.5 2-2\" /> <path d=\"m8.5 6.5 2-2\" /> <path d=\"m17.5 15.5 2-2\" />",
  "rotate": "<path d=\"M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8\" /> <path d=\"M3 3v5h5\" />",
  "download": "<path d=\"M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4\" /> <polyline points=\"7 10 12 15 17 10\" /> <line x1=\"12\" x2=\"12\" y1=\"15\" y2=\"3\" />",
  "upload": "<path d=\"M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4\" /> <polyline points=\"17 8 12 3 7 8\" /> <line x1=\"12\" x2=\"12\" y1=\"3\" y2=\"15\" />",
@@ -1716,6 +1788,7 @@ I18N.dict.it = {
   'Tema': 'Argomento', 'Preguntas clave': 'Domande chiave', 'Notas': 'Appunti', 'Resumen / Lo que cae en el MIR': 'Riassunto / Cosa esce al MIR',
   'Blanco': 'Bianco', 'Crema': 'Crema', 'Gris': 'Grigio', 'Oscuro': 'Scuro',
   // --- Opciones de herramientas ---
+  'Regla': 'Righello', 'Regla: líneas rectas y medidas': 'Righello: linee rette e misure', 'Mostrar u ocultar la regla': 'Mostra o nascondi il righello',
   'Formas': 'Forme', 'Para una forma perfecta, al acabar el trazo mantén quieto 1 segundo antes de soltar': 'Per una forma perfetta, alla fine del tratto tieni fermo 1 secondo prima di rilasciare',
   'Cada trazo se convierte en línea, círculo, rectángulo…': 'Ogni tratto diventa linea, cerchio, rettangolo…', 'Grosor': 'Spessore', 'Otro color': 'Altro colore',
   'Libre': 'Libero', 'Recto': 'Dritto', 'H / V': 'O / V', 'Forma del subrayado': 'Forma dell’evidenziatura', 'Trazo entero': 'Tratto intero', 'Parcial': 'Parziale',
@@ -1848,7 +1921,7 @@ I18N.dict.it = {
   'La clave se guarda solo en este dispositivo: no va en la copia de seguridad. Puedes borrarla cuando quieras.': 'La chiave si salva solo su questo dispositivo: non va nel backup. Puoi eliminarla quando vuoi.',
   'Borrar la clave': 'Elimina la chiave', 'Guardar y seguir': 'Salva e continua', 'Clave de IA borrada de este dispositivo': 'Chiave IA eliminata da questo dispositivo',
   'Esa clave no parece válida: cópiala entera': 'Questa chiave non sembra valida: copiala per intero', 'Este navegador no deja guardar la clave': 'Questo browser non permette di salvare la chiave',
-  'La IA está leyendo tu selección…': 'L’IA sta leggendo la tua selezione…', 'Suele tardar unos segundos (como mucho 30).': 'Di solito ci mette qualche secondo (al massimo 30).',
+  'La IA está leyendo tu selección…': 'L’IA sta leggendo la tua selezione…', 'Suele tardar unos segundos (como mucho 1 minuto).': 'Di solito ci mette qualche secondo (al massimo 1 minuto).',
   'No se han podido hacer las tarjetas': 'Impossibile creare le flashcard', 'Cambiar la clave…': 'Cambia la chiave…', 'Reintentar': 'Riprova',
   'No se ha podido conectar con Google. Comprueba tu conexión a internet y vuelve a intentarlo.': 'Impossibile collegarsi a Google. Controlla la connessione a internet e riprova.',
   'Google no acepta la clave. Revisa que la copiaste entera o crea otra en Google AI Studio.': 'Google non accetta la chiave. Controlla di averla copiata per intero o creane un’altra in Google AI Studio.',
@@ -1856,7 +1929,7 @@ I18N.dict.it = {
   'El modelo de IA ya no está disponible. Actualiza Folia o inténtalo más tarde.': 'Il modello di IA non è più disponibile. Aggiorna Folia o riprova più tardi.',
   'Google no ofrece la IA gratuita en tu país.': 'Google non offre l’IA gratuita nel tuo paese.',
   'El servicio de Google no responde ahora mismo. Inténtalo en un rato.': 'Il servizio di Google non risponde in questo momento. Riprova tra poco.',
-  'La IA ha tardado demasiado (más de 30 segundos). Prueba con una selección más pequeña o inténtalo de nuevo.': 'L’IA ci ha messo troppo (più di 30 secondi). Prova con una selezione più piccola o riprova.',
+  'La IA ha tardado demasiado (más de 1 minuto). Prueba con una selección más pequeña o inténtalo de nuevo.': 'L’IA ci ha messo troppo (più di 1 minuto). Prova con una selezione più piccola o riprova.',
   'Google no ha querido procesar esta selección.': 'Google non ha voluto elaborare questa selezione.',
   'La IA no ha encontrado nada que convertir en tarjetas en esta selección.': 'L’IA non ha trovato niente da trasformare in flashcard in questa selezione.',
   'La IA ha devuelto una respuesta no válida. Vuelve a intentarlo.': 'L’IA ha restituito una risposta non valida. Riprova.',
@@ -1936,6 +2009,11 @@ I18N.dict.it = {
   'Esta libreta aún no tiene trazos que tapar': 'Questo quaderno non ha ancora tratti da coprire', 'No hay trazos de ese color': 'Non ci sono tratti di quel colore',
   'Repaso por color': 'Ripasso per colore', 'Tapar todas': 'Copri tutti', 'Repaso: 1 zona tapada. Tócala para destapar.': 'Ripasso: 1 zona coperta. Toccala per scoprirla.',
   '1 cinta tapada otra vez': '1 nastro ricoperto',
+  // --- Curva del olvido (recall.js) ---
+  'Fresca': 'Fresco', 'Toca pronto': 'Da ripassare presto', 'Se está olvidando': 'Si sta dimenticando', 'Nunca repasada': 'Mai ripassato',
+  'Repasada hoy': 'Ripassato oggi', 'Repasada ayer': 'Ripassato ieri', 'conviene repasar hoy': 'conviene ripassare oggi', 'conviene repasar mañana': 'conviene ripassare domani',
+  'Marcar como repasada': 'Segna come ripassato', 'Marcada como repasada': 'Segnato come ripassato', 'Para repasar hoy': 'Da ripassare oggi',
+  '1 tarjeta pendiente': '1 flashcard da ripassare', 'Ordenar por': 'Ordina per', 'Por repasar': 'Da ripassare',
 };
 
 /** Textos con nombres o números dentro. */
@@ -1951,6 +2029,10 @@ I18N.patterns.it = [
   [/^Caben (\d+) colores: quita uno para añadir otro(\.?)$/, 'Ci stanno $1 colori: togline uno per aggiungerne un altro$2'],
   [/^Máximo (\d+) colores: quita uno para añadir otro(\.?)$/, 'Massimo $1 colori: togline uno per aggiungerne un altro$2'],
   [/^Tus colores \((\d+); máximo (\d+)\)$/, 'I tuoi colori ($1; massimo $2)'],
+  // Curva del olvido (recall.js): antes que las reglas generales de «·»
+  [/^(Fresca|Toca pronto|Se está olvidando|Nunca repasada): (.+)$/, (m, t) => `${t(m[1])}: ${t(m[2]) ?? m[2]}`],
+  [/^Repasada hace (\d+) días$/, 'Ripassato $1 giorni fa'], [/^conviene repasar en (\d+) días$/, 'conviene ripassare tra $1 giorni'],
+  [/^(\d+) tarjetas pendientes$/, '$1 flashcard da ripassare'],
   // Tarjetas de repaso (cards.js): antes que las reglas generales de «(…)» y «·»
   [/^Repasar tarjetas \((\d+) pendientes?\)$/, 'Ripassa le flashcard ($1 da ripassare)'], [/^Repasar \((\d+)\)$/, 'Ripassa ($1)'],
   [/^Tarjeta creada · (\d+) pendientes?$/, 'Flashcard creata · $1 da ripassare'],
@@ -2619,6 +2701,7 @@ function normalizeNotebook(nb) {
   nb.recordings = nb.recordings || [];
   if (Array.isArray(nb.cards)) nb.cards = nb.cards.map((c) => Cards.normalize(c)).filter(Boolean);   // tarjetas (opcional, cards.js)
   if ('legend' in nb) Meaning.normalize(nb);   // leyenda de colores (opcional, meaning.js)
+  if ('reviews' in nb || 'lastReviewed' in nb) Recall.normalize(nb);   // curva del olvido (opcional, recall.js)
   for (const page of nb.pages) {
     page.w = page.w || PORTRAIT.w; page.h = page.h || PORTRAIT.h;
     page.strokes = page.strokes || []; page.items = page.items || [];
@@ -2684,6 +2767,8 @@ const S = {
   stickyColor: STICKY_COLORS[0], commentColor: COMMENT_COLORS[0],
   // Tamaño del círculo de los comentarios (2026-10-19), para todos: 's' | 'm' | 'l'. Sin guardar = 'm'.
   commentSize: COMMENT_SIZES[saved.commentSize] ? saved.commentSize : 'm',
+  // Regla (2026-10-20, ruler.js): visible, centro en px del escritorio (null = en medio), ángulo en grados y transportador.
+  ruler: Object.assign({ on: false, x: null, y: null, angle: 0, protractor: false }, saved.ruler && typeof saved.ruler === 'object' ? saved.ruler : {}),
   zoom: 1,
   textDefault: Object.assign({}, DEFAULT_TEXT, saved.textDefault || {}),
   sidebar: saved.sidebar !== false, sidebarMode: saved.sidebarMode || 'thumbs',
@@ -2695,7 +2780,7 @@ const S = {
 function savePrefs() {
   Prefs.save({ dynamic: S.dynamic, penKind: S.penKind, penColor: S.penColor, penWidth: S.penWidth, hlColor: S.hlColor, hlWidth: S.hlWidth,
     hlMode: S.hlMode, eraserMode: S.eraserMode, textDefault: S.textDefault, sidebar: S.sidebar, sidebarMode: S.sidebarMode, holdToSnap: S.holdToSnap, showVoiceNotes: S.showVoiceNotes, lassoFilter: S.lassoFilter,
-    penColors: S.penColors, hlColors: S.hlColors, textColors: S.textColors, recentColors: S.recentColors, commentSize: S.commentSize, seeded: Prefs.load().seeded });
+    penColors: S.penColors, hlColors: S.hlColors, textColors: S.textColors, recentColors: S.recentColors, commentSize: S.commentSize, ruler: S.ruler, seeded: Prefs.load().seeded });
 }
 /** Diámetro (px de página, a zoom 1) del círculo de los comentarios; el CSS lo lee de html[data-pin]. */
 const pinPx = () => COMMENT_SIZES[S.commentSize].px;
@@ -3400,7 +3485,7 @@ function renderLibrary() {
   const q = S.query.trim();
   const here = S.folder || null;
   const folders = Folders.children(here);
-  const notebooks = S.notebooks.filter((nb) => (nb.folder || null) === here).sort((a, b) => b.modified - a.modified);
+  const notebooks = sortNotebooks(S.notebooks.filter((nb) => (nb.folder || null) === here));   // «Ordenar por» (recall.js)
   const dark = S.dynamic && !q;
   const sel = S.selecting;
   const n = S.picked.size;
@@ -3433,9 +3518,11 @@ function renderLibrary() {
   $('#app').innerHTML = `<div class="${dark ? 'dark-zone' : ''}" style="display:contents">${header}
     ${q ? `<main class="library" id="lib-main">${resultsHTML(q)}</main>`
       : S.dynamic ? '<div class="dyn" id="dyn"></div>'
-      : `<div class="title-row">${breadcrumb}<h1 class="large-title">${crumbs.length ? `<button class="back-folder" data-go-folder="${crumbs.length > 1 ? crumbs[crumbs.length - 2].id : ''}" aria-label="Volver">${icon('back')}</button><span translate="no">${esc(crumbs[crumbs.length - 1].name)}</span>` : 'Libretas'}</h1></div>
+      : `<div class="title-row">${breadcrumb}<h1 class="large-title">${crumbs.length ? `<button class="back-folder" data-go-folder="${crumbs.length > 1 ? crumbs[crumbs.length - 2].id : ''}" aria-label="Volver">${icon('back')}</button><span translate="no">${esc(crumbs[crumbs.length - 1].name)}</span>` : 'Libretas'}</h1>
+      ${notebooks.length > 1 && !sel ? `<button class="lib-sort" id="sort-btn" aria-haspopup="menu" aria-expanded="false" title="Ordenar por">${icon('chevronUpDown')}<span>${LIB_SORTS.find(([k]) => k === libSort())[1]}</span></button>` : ''}</div>
     <main class="library ${sel ? 'selecting' : ''}" id="lib-main">
       ${Store.working ? '' : '<p class="notice">Este navegador no permite guardar (puede ser una ventana privada). Lo que hagas se perderá al cerrar: haz una copia desde Ajustes › Almacenamiento y copia de seguridad.</p>'}
+      ${sel ? '' : Recall.stripHTML(S.notebooks.filter((nb) => Folders.inSubtree(nb, here)))}
       ${folders.length || notebooks.length ? `<div class="shelf">${folders.map(folderCardHTML).join('')}${notebooks.map(cardHTML).join('')}</div>`
         : `<p class="empty">${here ? 'Esta carpeta está vacía. Crea aquí una libreta o una carpeta con +, o mueve otras con «Mover».' : 'Aún no tienes libretas. Crea la primera con +.'}</p>`}
     </main>`}</div>`;
@@ -3464,7 +3551,10 @@ function renderLibrary() {
     // El indicador de la copia se vuelve a pintar solo (refreshNag): el clic se recoge en la cabecera.
     $('.lib-header').addEventListener('click', (e) => { const b = e.target.closest('#safety-btn'); if (b) DataSafety.menu(b); });
   }
-  $('.title-row')?.addEventListener('click', (e) => { const b = e.target.closest('[data-go-folder]'); if (b) goFolder(b.dataset.goFolder || null); });
+  $('.title-row')?.addEventListener('click', (e) => {
+    if (e.target.closest('#sort-btn')) return sortMenu(e.target.closest('#sort-btn'));
+    const b = e.target.closest('[data-go-folder]'); if (b) goFolder(b.dataset.goFolder || null);
+  });
   $('#lib-main')?.addEventListener('click', onLibraryClick);
   if (!q && !S.dynamic) attachCardDrag($('#lib-main'));
   if (S.dynamic && !q) startDynamic($('#dyn'));
@@ -3478,6 +3568,7 @@ function cardHTML(nb) {
     ${coverHTML(nb, { extra: S.selecting ? `data-pick="${key}" aria-pressed="${picked}" aria-label="Seleccionar ${esc(nb.title)}"` : `data-open="${nb.id}" aria-label="Abrir ${esc(nb.title)}"` })}
     ${S.selecting ? `<span class="pick-mark" aria-hidden="true">${picked ? icon('check') : ''}</span>` : `<button class="more" data-more="${nb.id}" aria-label="Opciones de ${esc(nb.title)}" aria-haspopup="menu" aria-expanded="false">${icon('more')}</button>`}
     <div class="name" translate="no">${esc(nb.title)}</div>
+    ${S.selecting ? '' : Recall.barHTML(nb)}
     <div class="meta"><span>${pages} ${pages === 1 ? 'página' : 'páginas'} · ${formatDate(nb.modified)}</span></div>
   </div>`;
 }
@@ -3542,6 +3633,12 @@ function onLibraryClick(e) {
   if (go) return goFolder(go.dataset.goFolder || null);
   const fmore = e.target.closest('[data-fmore]');
   if (fmore) return folderMenu(fmore, Folders.byId(fmore.dataset.fmore));
+  // Curva del olvido (recall.js): la barra de la libreta y la tira «Para repasar hoy».
+  const rc = e.target.closest('[data-recall]');
+  if (rc) return Recall.barMenu(rc, nbById(rc.dataset.recall));
+  if (e.target.closest('[data-recall-fold]')) return Recall.toggleFold();
+  const ro = e.target.closest('[data-recall-open]');
+  if (ro) return Recall.openFromStrip(nbById(ro.dataset.recallOpen));
   const more = e.target.closest('[data-more]');
   if (more) return notebookMenu(more, nbById(more.dataset.more));
   const open = e.target.closest('[data-open]');
@@ -3569,6 +3666,7 @@ function notebookMenu(anchor, nb) {
     <button data-act="move">${icon('folder')} Mover a…</button>
     <button data-act="duplicate">Duplicar</button>
     <button data-act="pdf">Descargar PDF</button>
+    <hr><button data-act="recall">${icon('checkCircle')} Marcar como repasada</button>
     ${S.dynamic ? '' : `<hr><button data-act="select">${icon('checkCircle')} Seleccionar</button>`}
     <hr><button data-act="delete" class="danger">Eliminar…</button>`, (act) => {
     if (act === 'rename') promptDialog('Renombrar libreta', nb.title, (v) => { nb.title = v; touch(nb); Store.put(nb); refresh(); }, 'Título');
@@ -3576,6 +3674,7 @@ function notebookMenu(anchor, nb) {
     if (act === 'move') moveDialog([{ kind: 'nb', id: nb.id }]);
     if (act === 'duplicate') { duplicateNotebook(nb, nb.folder); refresh(); toast('Libreta duplicada'); }
     if (act === 'pdf') exportPDF(nb);
+    if (act === 'recall') Recall.markByHand(nb);
     if (act === 'select') { S.selecting = true; S.picked = new Set([`nb:${nb.id}`]); renderLibrary(); }
     if (act === 'delete') confirmDialog(`¿Eliminar «${nb.title}»?`, 'Se borrarán todas sus páginas de este navegador. No se puede deshacer.', 'Eliminar', () => { deleteNotebook(nb); refresh(); });
   });
@@ -3880,7 +3979,7 @@ function attachCardDrag(main) {
 function onCardPointerDown(e) {
   if (CardDrag.s || e.button !== 0 || !e.isPrimary) return;
   const card = e.target.closest('.shelf > .card');
-  if (!card || e.target.closest('.more')) return;
+  if (!card || e.target.closest('.more, .recall')) return;
   const kind = e.pointerType === 'touch' ? 'touch' : e.pointerType === 'pen' ? 'pen' : 'mouse';
   const d = CardDrag.s = { card, kind, id: e.pointerId, x0: e.clientX, y0: e.clientY, x: e.clientX, y: e.clientY, t: e.timeStamp,
     armed: kind !== 'touch', active: false, timer: 0, raf: 0, vx: 0, tilt: 0, lift: 1, target: null, shifted: new Map() };
@@ -6731,6 +6830,7 @@ function layoutPages(redraw = true) {
   }
   $$('.comment-panel').forEach(placeCommentPanel);   // los globos de comentario no cambian de tamaño con el zoom
   if (redraw) redrawPages(pageDpr());
+  Ruler.sync();   // la regla mide en mm de la página: con otro zoom, otras marcas
   const label = $('#zoom-fit');
   if (label) label.textContent = Math.round(S.zoom * 100) + '%';
 }
@@ -7098,6 +7198,7 @@ function pageMenu(anchor) {
     <hr><div class="label">Tarjetas de repaso</div>
     <button data-act="cards-review">${icon('lightbulb')} Repasar tarjetas (${Cards.pendingText(nb)})</button>
     <button data-act="cards-new">${icon('plus')} Nueva tarjeta…</button><button data-act="cards-list">${icon('pages')} Todas las tarjetas…</button>
+    ${Recall.menuHtml(nb)}
     <hr><div class="label">Colores con significado</div>
     <button data-act="legend">${icon('palette')} Leyenda de colores…</button><button data-act="color-sum">${icon('layers')} Resumen por color</button>
     ${Tape.menuHtml(nb)}
@@ -7107,6 +7208,7 @@ function pageMenu(anchor) {
     if (act === 'cards-review') return Cards.review(nb);
     if (act === 'cards-new') return Cards.createDialog(nb);
     if (act === 'cards-list') return Cards.listDialog(nb);
+    if (Recall.menuAct(act, nb)) return;   // «Marcar como repasada» (curva del olvido)
     if (act === 'legend') return Meaning.legendDialog(nb);
     if (act === 'color-sum') return Meaning.summaryDialog(nb);
     if (Tape.menuAct(act, nb, anchor)) return;   // «Repaso activo»: cintas y repaso por color
@@ -7413,7 +7515,7 @@ function renderOptions() {
   } else if (item && item.type === 'comment') {
     html = `<input type="text" id="comment-title" value="${esc(item.title)}" aria-label="Nombre del comentario" class="opt-field">
       ${swatches(COMMENT_COLORS, item.color, 'comment-color')}
-      <button class="btn" data-act="toggle-comment">${item.expanded ? 'Cerrar' : 'Abrir'}</button>${optGroup(1, `<div class="sep"></div>${commentSizeControl(item.color)}`)}
+      <button class="btn" data-act="toggle-comment">${item.expanded ? 'Cerrar' : 'Abrir'}</button><div class="sep"></div>${commentSizeControl(item.color)}
       ${S.editing ? '<div class="sep"></div>' + textBar(item) : ''}${itemActions(false)}`;
   } else if (item && item.type === 'sticky') {
     html = `${swatches(STICKY_COLORS, item.color, 'sticky-color')}${optBtn('note-zoom', 'zoomIn', 'Ampliar', '', 'Ampliar: acercar el post-it para escribir en él')}<div class="sep"></div>${textBar(item)}${itemActions()}`;
@@ -7472,6 +7574,7 @@ function renderOptions() {
   el.onchange = onOptionsInput;
   LassoFilter.bindBar(el);   // botón «Filtro» y chip «Solo este color» del lazo
   Tape.bindBar(el);          // cinta de repaso: «Tapar con cinta», modo «Cinta» y la cinta seleccionada
+  Ruler.bindBar(el);         // regla: la monta en el editor y pone su botón en la barra del bolígrafo y del subrayador
   Palette.sync();
 }
 /** Tamaño del círculo de los comentarios (Pequeño, Mediano, Grande): es uno para todos (preferencia commentSize),
@@ -7511,7 +7614,7 @@ function textBar(item) {
       <button data-act="italic" aria-pressed="${state('italic', base.italic)}" style="font-style:italic" aria-label="Cursiva" title="Cursiva">I</button>
       <button data-act="underline" aria-pressed="${state('underline', base.underline)}" style="text-decoration:underline" aria-label="Subrayado" title="Subrayado">U</button>
       <button data-act="strike" aria-pressed="${state('strikeThrough', base.strike)}" style="text-decoration:line-through" aria-label="Tachado" title="Tachado">S</button></div>
-    <button class="icon-btn mark-btn" data-act="mark-menu" aria-haspopup="menu" aria-label="Resaltar" title="Resaltar: color de fondo de las letras" style="--c:${TextMark.last}">${icon('highlighter')}<span class="ink-bar"></span></button>
+    <button class="icon-btn mark-btn" data-act="mark-menu" aria-haspopup="menu" aria-label="Resaltar" title="Resaltar: color de fondo de las letras" style="--c:${TextMark.last}">${icon('textMark')}<span class="ink-bar"></span></button>
     ${item?.type === 'text' || !item ? optGroup(4, `<div class="seg align-seg" role="group" aria-label="Alineación">${[['left', 'alignLeft', 'Alinear a la izquierda'], ['center', 'alignCenter', 'Centrar'], ['right', 'alignRight', 'Alinear a la derecha']].map(([k, ic, n]) => `<button data-act="align" data-v="${k}" aria-pressed="${base.align === k}" aria-label="${n}" title="${n}">${icon(ic)}</button>`).join('')}</div>
       ${optBtn('box-menu', 'boxBg', 'Fondo y borde', '', 'Fondo y borde del cuadro', 'aria-haspopup="menu"')}`) : ''}
     ${item && S.editing ? optGroup(3, optBtn('inline-image', 'image', 'Imagen', '', 'Insertar una imagen donde está el cursor')) : ''}
@@ -7900,7 +8003,8 @@ function attachInk(page, v) {
   // Forma en directo (como en Goodnotes): al quedarse quieto sin soltar, el trazo se endereza al momento; si es una
   // recta, su final sigue al lápiz hasta soltar. snap = { pressure, a?, cardinal? } (a: inicio fijo de la recta).
   let holdTimer = 0, snap = null;
-  const armHold = () => { clearTimeout(holdTimer); if (S.holdToSnap && stroke && !snap) holdTimer = setTimeout(snapNow, holdMs(pointerType)); };
+  let guide = null;      // regla (ruler.js): el trazo pegado a su borde (guide.map) o midiendo con el transportador
+  const armHold = () => { clearTimeout(holdTimer); if (S.holdToSnap && stroke && !snap && !guide?.map) holdTimer = setTimeout(snapNow, holdMs(pointerType)); };
   const onLine = (pts) => {
     const a = pts[0], b = pts[pts.length - 1], len = Math.hypot(b[0] - a[0], b[1] - a[1]);
     return len > 2 && pts.every((q) => Math.abs((b[0] - a[0]) * (a[1] - q[1]) - (a[0] - q[0]) * (b[1] - a[1])) / len < 0.5);
@@ -7932,12 +8036,14 @@ function attachInk(page, v) {
     activeId = null; PenInput.live = null;
     if (erased && before) { restoreInk(page, before); renderInk(page); }
     stroke = null; note = null; lassoPath = null; tapeDrag = null; erased = false; snap = null; clearTimeout(holdTimer);
+    guide?.end(); guide = null;
     if (v.live._scale) ctxFor(v.live).clearRect(0, 0, page.w, page.h);
   };
   const point = (e) => {
     const r = v.ink.getBoundingClientRect();
     const pressure = e.pointerType === 'mouse' ? 0.5 : (e.pressure || 0.5);
-    return [(e.clientX - r.left) / S.zoom, (e.clientY - r.top) / S.zoom, Math.round(pressure * 100) / 100];
+    const [cx, cy] = guide?.map ? guide.map(e.clientX, e.clientY) : [e.clientX, e.clientY];
+    return [(cx - r.left) / S.zoom, (cy - r.top) / S.zoom, Math.round(pressure * 100) / 100];
   };
   v.ink.addEventListener('pointerdown', (e) => {
     if (e.button !== 0 && e.pointerType === 'mouse') return;
@@ -7962,6 +8068,8 @@ function attachInk(page, v) {
     if (S.tool === 'highlighter' && Tape.drawing) { tapeDrag = [p, p]; return; }   // modo «Cinta»: rectángulo
     stroke = { id: uid(), tool: S.tool === 'highlighter' ? 'highlighter' : 'pen', kind: S.penKind, color: S.tool === 'highlighter' ? S.hlColor : S.penColor, width: S.tool === 'highlighter' ? S.hlWidth : S.penWidth, points: [p] };
     note = hit?.note || null;   // empieza dentro de un post-it (el de encima): el trazo es del post-it
+    guide = Ruler.guide(e, stroke);
+    if (guide?.map) stroke.points = [point(e)];   // cerca del borde de la regla: pegado a él
     lastMove = performance.now(); lastPoint = [e.clientX, e.clientY];
     snap = null; armHold();
     drawLive();
@@ -7983,6 +8091,7 @@ function attachInk(page, v) {
     if (snap) { if (snap.a) { setLineEnd(point(e)); drawLive(); } return; }   // ya enderezado: solo se mueve el final
     const events = e.getCoalescedEvents ? e.getCoalescedEvents() : [e];
     for (const ev of (events.length ? events : [e])) stroke.points.push(point(ev));
+    guide?.move(e.clientX, e.clientY);   // medida en directo (se pinta una vez por fotograma)
     if (Math.hypot(e.clientX - lastPoint[0], e.clientY - lastPoint[1]) > 4) { lastMove = performance.now(); lastPoint = [e.clientX, e.clientY]; armHold(); }
     drawLive();
   });
@@ -7990,6 +8099,8 @@ function attachInk(page, v) {
     if (e.pointerId !== activeId) return;
     activeId = null;
     clearTimeout(holdTimer);
+    const ruled = !!guide?.map;
+    guide?.end(); guide = null;
     if (PenInput.live?.cancel === cancel) PenInput.live = null;
     const tap = linkTap;
     linkTap = null;
@@ -8028,7 +8139,7 @@ function attachInk(page, v) {
     const held = S.holdToSnap && performance.now() - lastMove > holdMs(pointerType);
     const xy = stroke.points.map((q) => [q[0], q[1]]);
     let snapped = null;
-    if (snap) snap = null;   // ya se enderezó en directo: se guarda tal como se ve
+    if (snap || ruled) snap = null;   // ya se enderezó en directo o va pegado a la regla: se guarda tal como se ve
     else if (stroke.tool === 'highlighter') {
       if (S.hlMode === 'cardinal') snapped = Shapes.cardinal(xy);
       else if (S.hlMode === 'straight' || held) snapped = Shapes.straight(xy);
@@ -8423,6 +8534,335 @@ const LassoFilter = {
     toast('El lazo solo cogerá trazos de este color');
   },
 };
+
+// =============================================================================
+// Regla (como la de Goodnotes, con medida en directo y transportador)
+// =============================================================================
+// Es una capa propia encima de las páginas (dentro de .desk-wrap, en px de pantalla): no se guarda en la libreta; solo su
+// estado va en las preferencias (S.ruler = { on, x, y, angle, protractor }). Un dedo o el ratón la mueven; dos dedos la
+// giran y la mueven; con el ratón, la rueda o el tirador la giran. Se ajusta sola a 0°, 45°, 90°… (imán suave).
+// El bolígrafo y el subrayador que empiezan a ≤ 16 px de un borde se pegan a él (Ruler.guide, desde ink.js).
+// El lápiz pasa a través (escribe encima); el dedo en modo lápiz la mueve pero no escribe.
+// La regla no recibe el puntero (pointer-events: none): se reconoce por geometría al tocar el escritorio.
+const RULER_W = 76;                      // ancho de la regla en px de pantalla
+const RULER_SNAP_PX = 16;                // a esta distancia del borde (px de pantalla) el trazo se pega
+const RULER_MAGNET = 2.5;                // grados del imán a 0°, 45°, 90°…
+const RULER_PX_MM = PORTRAIT.w / 210;    // px de página (zoom 1) por milímetro: la página vertical es un A4
+const RULER_PROTO_R = 150;               // radio máximo del transportador (px de pantalla)
+const RULER_KNOB = 120;                  // distancia del tirador al centro de la regla
+const Ruler = {
+  el: null, wrap: null, ticks: null, proto: null, label: null, measureEl: null,
+  len: 0, protoR: RULER_PROTO_R, drawn: '', gesture: null, lastTap: null, wheelAt: 0, wheelRaw: 0, saveTimer: 0, ro: null,
+  /** El estado de las preferencias, con valores válidos. */
+  st() {
+    const r = S.ruler;
+    if (!Number.isFinite(r.angle)) r.angle = 0;
+    if (!Number.isFinite(r.x)) r.x = null;
+    if (!Number.isFinite(r.y)) r.y = null;
+    r.on = !!r.on; r.protractor = !!r.protractor;
+    return r;
+  },
+  visible() { return this.st().on && !!this.el?.isConnected && !S.reading; },
+  /** Crea la capa en el editor actual (cada renderEditor hace un escritorio nuevo). */
+  mount() {
+    const wrap = $('#desk')?.parentElement;
+    if (!wrap) return;
+    if (this.el?.isConnected && this.wrap === wrap) return;
+    this.ro?.disconnect();
+    this.wrap = wrap; this.drawn = ''; this.gesture = null;
+    const el = document.createElement('div');
+    el.className = 'ruler'; el.setAttribute('translate', 'no'); el.setAttribute('aria-hidden', 'true');
+    el.innerHTML = `<canvas class="ruler-proto" width="0" height="0"></canvas><canvas class="ruler-ticks" width="0" height="0"></canvas>
+      <span class="ruler-knob">${icon('rotate')}</span><b class="ruler-angle"></b>`;
+    const m = document.createElement('span');
+    m.className = 'ruler-measure'; m.hidden = true; m.setAttribute('translate', 'no'); m.setAttribute('aria-live', 'off');
+    const layer = document.createElement('div');   // recorta la regla (es más larga que la pantalla) sin tocar el escritorio
+    layer.className = 'ruler-layer';
+    layer.append(el, m);
+    wrap.appendChild(layer);
+    Object.assign(this, { el, measureEl: m, ticks: $('.ruler-ticks', el), proto: $('.ruler-proto', el), label: $('.ruler-angle', el) });
+    // En captura y en el marco del escritorio: se entera antes que la tinta, el pellizco y los elementos.
+    wrap.addEventListener('pointerdown', (e) => this.down(e), true);
+    wrap.addEventListener('touchstart', (e) => this.touch(e), { capture: true, passive: false });
+    wrap.addEventListener('touchmove', (e) => { if (this.gesture && e.cancelable) e.preventDefault(); }, { capture: true, passive: false });
+    wrap.addEventListener('wheel', (e) => this.wheel(e), { capture: true, passive: false });
+    if (window.ResizeObserver) (this.ro = new ResizeObserver(() => this.layout())).observe(wrap);
+    this.layout();
+  },
+  /** Muestra u oculta la regla (botón de la barra y atajo R). */
+  toggle(on = !this.st().on) {
+    this.st().on = !!on;
+    savePrefs();
+    this.mount();
+    this.layout();
+    $$('#options [data-ruler]').forEach((b) => b.setAttribute('aria-pressed', String(!!on)));
+  },
+  /** Tamaño, pintado (solo si cambió el zoom, el tamaño o el tema) y posición. Con la regla oculta, lienzos a 0×0. */
+  layout() {
+    if (!this.el?.isConnected) return;
+    const r = this.st(), w = this.wrap.clientWidth, h = this.wrap.clientHeight;
+    this.el.hidden = !r.on;
+    if (!r.on || !w || !h) {
+      for (const c of [this.ticks, this.proto]) { c.width = 0; c.height = 0; }
+      this.drawn = ''; this.measureEl.hidden = true;
+      return;
+    }
+    if (r.x === null || r.y === null) { r.x = w / 2; r.y = Math.min(h / 2, 260); }
+    r.x = Math.max(24, Math.min(w - 24, r.x)); r.y = Math.max(24, Math.min(h - 24, r.y));
+    this.protoR = Math.min(RULER_PROTO_R, Math.round(w * 0.3));   // en el móvil, más pequeño
+    this.len = Math.min(4000, Math.ceil(Math.hypot(w, h) * 2 / 100) * 100);   // cruza siempre la pantalla
+    this.draw();
+    this.place();
+  },
+  /** Lo llama layoutPages: con otro zoom cambian los milímetros. */
+  sync() { if (this.st().on && this.el?.isConnected) this.layout(); },
+  place() {
+    const r = this.st(), L = this.len;
+    this.el.style.width = L + 'px';
+    this.el.style.transformOrigin = `${L / 2}px ${RULER_W / 2}px`;
+    this.el.style.transform = `translate(${r.x - L / 2}px, ${r.y - RULER_W / 2}px) rotate(${r.angle}deg)`;
+    const d = ((Math.round(r.angle) % 180) + 180) % 180, a360 = ((r.angle % 360) + 360) % 360;
+    this.label.textContent = (d > 90 ? 180 - d : d) + '°';
+    this.label.classList.toggle('flip', a360 > 90 && a360 < 270);   // que el número no quede del revés
+    this.label.classList.toggle('snapped', Math.abs(r.angle / 45 - Math.round(r.angle / 45)) < 1e-6);
+    this.el.classList.toggle('protractor', r.protractor);
+  },
+  /** Las marcas en mm/cm (y el transportador). Se pintan una vez por zoom, tamaño y tema, nunca al moverla. */
+  draw() {
+    const dpr = Math.min(window.devicePixelRatio || 1, 2), cs = getComputedStyle(this.el), ink = cs.color, bg = cs.backgroundColor;
+    const key = [this.len, this.protoR, S.zoom, dpr, ink, bg, this.st().protractor].join('|');
+    if (key === this.drawn) return;
+    this.drawn = key;
+    const L = this.len, W = RULER_W, c = this.ticks;
+    c.width = Math.round(L * dpr); c.height = Math.round(W * dpr); c.style.width = L + 'px'; c.style.height = W + 'px';
+    const ctx = c.getContext('2d');
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.strokeStyle = ink; ctx.fillStyle = ink; ctx.lineWidth = 1;
+    const mm = RULER_PX_MM * S.zoom, step = mm >= 4 ? 1 : mm * 5 >= 4 ? 5 : 10;
+    const labelEvery = mm * 10 >= 26 ? 1 : mm * 50 >= 26 ? 5 : 10, n = Math.floor(L / 2 / mm);
+    ctx.beginPath();
+    for (let i = -n - (-n % step); i <= n; i += step) {
+      const x = Math.round(L / 2 + i * mm) + 0.5, t = i % 10 === 0 ? 16 : i % 5 === 0 ? 11 : 6;
+      ctx.moveTo(x, 0); ctx.lineTo(x, t); ctx.moveTo(x, W); ctx.lineTo(x, W - t);
+    }
+    ctx.stroke();
+    ctx.font = '600 10px -apple-system, system-ui, sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+    for (let cm = -Math.floor(n / 10); cm <= n / 10; cm++) {
+      if (cm % labelEvery || !cm) continue;
+      ctx.fillText(String(Math.abs(cm)), L / 2 + cm * 10 * mm, 19);
+    }
+    this.drawProto(dpr, ink, bg);
+  },
+  drawProto(dpr, ink, bg) {
+    const c = this.proto, R = this.protoR;
+    if (!this.st().protractor) { c.width = 0; c.height = 0; return; }
+    c.width = Math.round(2 * R * dpr); c.height = Math.round(R * dpr); c.style.width = 2 * R + 'px'; c.style.height = R + 'px';
+    c.style.left = (this.len / 2 - R) + 'px';
+    const ctx = c.getContext('2d');
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.fillStyle = bg; ctx.strokeStyle = ink; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.arc(R, R, R, Math.PI, 0); ctx.arc(R, R, R - 38, 0, Math.PI, true); ctx.closePath(); ctx.fill(); ctx.stroke();
+    ctx.beginPath();
+    for (let g = 0; g <= 180; g++) {
+      const t = g % 10 === 0 ? 12 : g % 5 === 0 ? 8 : 4, a = Math.PI + g * Math.PI / 180, cos = Math.cos(a), sin = Math.sin(a);
+      ctx.moveTo(R + cos * R, R + sin * R); ctx.lineTo(R + cos * (R - t), R + sin * (R - t));
+    }
+    ctx.moveTo(R - 6, R - 0.5); ctx.lineTo(R + 6, R - 0.5); ctx.moveTo(R, R); ctx.lineTo(R, R - 8);   // centro
+    ctx.stroke();
+    ctx.fillStyle = ink; ctx.font = '600 9px -apple-system, system-ui, sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    for (let g = 10; g < 180; g += 10) {
+      const a = Math.PI + g * Math.PI / 180;
+      ctx.fillText(String(g), R + Math.cos(a) * (R - 22), R + Math.sin(a) * (R - 22));
+    }
+  },
+  /** Punto de pantalla → coordenadas de la regla: u a lo largo (desde el centro), v a lo ancho (negativo = borde de arriba). */
+  local(cx, cy, rect) {
+    const r = this.st(), a = r.angle * Math.PI / 180, dx = cx - rect.left - r.x, dy = cy - rect.top - r.y;
+    return { u: dx * Math.cos(a) + dy * Math.sin(a), v: -dx * Math.sin(a) + dy * Math.cos(a) };
+  },
+  /** ¿Qué parte de la regla hay bajo el punto? 'knob' (tirador), 'body' (la regla o el aro del transportador) o null. */
+  hit(cx, cy, rect) {
+    if (!this.visible()) return null;
+    const { u, v } = this.local(cx, cy, rect), h = RULER_W / 2;
+    if (Math.abs(u) <= this.len / 2 && Math.abs(v) <= h) return Math.hypot(u - RULER_KNOB, v) <= 18 ? 'knob' : 'body';
+    const d = Math.hypot(u, v + h);
+    return this.st().protractor && v < -h && d <= this.protoR && d >= this.protoR - 38 ? 'body' : null;
+  },
+  /** Imán: a menos de RULER_MAGNET grados de un múltiplo de 45°, se queda en él. */
+  magnet(raw) { const m = Math.round(raw / 45) * 45; return Math.abs(raw - m) <= RULER_MAGNET ? m : raw; },
+  setAngle(raw) { let a = this.magnet(raw) % 360; if (a > 180) a -= 360; if (a <= -180) a += 360; this.st().angle = Math.round(a * 100) / 100; },
+  // ---------- Mover y girar ----------
+  down(e) {
+    if (!this.visible() || !e.target.closest?.('#desk')) return;
+    const g = this.gesture;
+    if (g) {
+      // Un segundo dedo (en cualquier sitio) mientras uno mueve la regla: los dos la giran y la mueven.
+      if (e.pointerType !== 'touch' || g.type !== 'body' || g.pts.size !== 1) return;
+      e.preventDefault(); e.stopPropagation();
+      g.pts.set(e.pointerId, [e.clientX, e.clientY]); g.moved = true;
+      return this.rebase();
+    }
+    if (e.pointerType === 'pen' || (e.pointerType === 'mouse' && e.button !== 0)) return;   // el lápiz escribe a través
+    const rect = this.wrap.getBoundingClientRect(), part = this.hit(e.clientX, e.clientY, rect);
+    if (!part) return;
+    e.preventDefault(); e.stopPropagation();
+    this.gesture = { type: part, rect, pts: new Map([[e.pointerId, [e.clientX, e.clientY]]]), at: [e.clientX, e.clientY], t: performance.now(), moved: false, raf: 0 };
+    this.rebase();
+    this.el.classList.add('active');
+    for (const t of ['pointermove', 'pointerup', 'pointercancel']) addEventListener(t, this, true);
+  },
+  /** Punto de partida del gesto (al empezar y cada vez que se pone o se quita un dedo). */
+  rebase() {
+    const g = this.gesture, r = this.st(), pts = [...g.pts.values()];
+    g.x0 = r.x; g.y0 = r.y; g.a0 = r.angle; g.p0 = pts.map((p) => p.slice());
+    if (g.type === 'knob') g.k0 = Math.atan2(pts[0][1] - g.rect.top - r.y, pts[0][0] - g.rect.left - r.x) * 180 / Math.PI;
+  },
+  handleEvent(e) {
+    const g = this.gesture;
+    if (!g || !g.pts.has(e.pointerId)) return;
+    if (e.type === 'pointermove') {
+      g.pts.set(e.pointerId, [e.clientX, e.clientY]);
+      if (Math.hypot(e.clientX - g.at[0], e.clientY - g.at[1]) > 8) g.moved = true;
+      if (!g.raf) g.raf = requestAnimationFrame(() => { g.raf = 0; if (this.gesture === g) this.apply(); });
+      return;
+    }
+    this.apply();
+    g.pts.delete(e.pointerId);
+    if (g.pts.size) return this.rebase();   // queda un dedo: sigue moviendo desde aquí
+    this.end(e.type === 'pointerup');
+  },
+  apply() {
+    const g = this.gesture, r = this.st(), pts = [...g.pts.values()], ox = g.rect.left, oy = g.rect.top;
+    if (g.type === 'knob') {
+      const k = Math.atan2(pts[0][1] - oy - g.y0, pts[0][0] - ox - g.x0) * 180 / Math.PI;
+      this.setAngle(g.a0 + k - g.k0);
+    } else if (pts.length === 1 || g.p0.length === 1) {
+      r.x = g.x0 + pts[0][0] - g.p0[0][0]; r.y = g.y0 + pts[0][1] - g.p0[0][1];
+    } else {
+      // Dos dedos: el giro de la recta entre ellos gira la regla alrededor de su punto medio, que la arrastra.
+      const ang = (p) => Math.atan2(p[1][1] - p[0][1], p[1][0] - p[0][0]) * 180 / Math.PI;
+      const mid = (p) => [(p[0][0] + p[1][0]) / 2, (p[0][1] + p[1][1]) / 2];
+      let d = ang(pts) - ang(g.p0); d = ((d + 540) % 360) - 180;
+      this.setAngle(g.a0 + d);
+      const t = (r.angle - g.a0) * Math.PI / 180, m0 = mid(g.p0), m1 = mid(pts);
+      const rx = g.x0 + ox - m0[0], ry = g.y0 + oy - m0[1];
+      r.x = m1[0] - ox + rx * Math.cos(t) - ry * Math.sin(t); r.y = m1[1] - oy + rx * Math.sin(t) + ry * Math.cos(t);
+    }
+    this.place();
+  },
+  end(up) {
+    const g = this.gesture;
+    cancelAnimationFrame(g.raf);
+    this.gesture = null;
+    for (const t of ['pointermove', 'pointerup', 'pointercancel']) removeEventListener(t, this, true);
+    this.el.classList.remove('active');
+    this.layout();   // dentro de la pantalla
+    if (g.moved || !up || g.type !== 'body') { this.lastTap = null; return savePrefs(); }
+    // Doble toque en la regla: transportador sí/no.
+    const now = performance.now(), last = this.lastTap;
+    if (now - g.t < 350 && last && now - last.t < 400 && Math.hypot(g.at[0] - last.at[0], g.at[1] - last.at[1]) < 30) {
+      this.lastTap = null;
+      this.st().protractor = !this.st().protractor;
+      savePrefs(); this.drawn = ''; this.layout();
+    } else this.lastTap = { t: now, at: g.at };
+  },
+  /** Con un dedo sobre la regla (o un gesto suyo en marcha) no se desplaza ni se pellizca el escritorio. */
+  touch(e) {
+    if (!this.visible()) return;
+    const rect = this.wrap.getBoundingClientRect();
+    const on = this.gesture || [...e.changedTouches].some((t) => t.touchType !== 'stylus' && this.hit(t.clientX, t.clientY, rect));
+    if (!on) return;
+    if (e.cancelable) e.preventDefault();
+    e.stopPropagation();
+  },
+  /** Rueda del ratón encima de la regla: la gira (con el imán). Ctrl/⌘ + rueda sigue siendo el zoom. */
+  wheel(e) {
+    if (e.ctrlKey || e.metaKey || !this.visible() || this.gesture) return;
+    if (!this.hit(e.clientX, e.clientY, this.wrap.getBoundingClientRect())) return;
+    e.preventDefault(); e.stopPropagation();
+    const now = performance.now();
+    if (now - this.wheelAt > 600) this.wheelRaw = this.st().angle;
+    this.wheelAt = now;
+    this.wheelRaw += Math.max(-100, Math.min(100, e.deltaY || e.deltaX)) * 0.04;   // una muesca ≈ 4°
+    this.setAngle(this.wheelRaw);
+    this.place();
+    clearTimeout(this.saveTimer); this.saveTimer = setTimeout(savePrefs, 400);
+  },
+  // ---------- Trazo pegado al borde (lo usa attachInk) ----------
+  /** Al empezar un trazo de bolígrafo o subrayador: si empieza a ≤ RULER_SNAP_PX de un borde, devuelve
+   *  { map(cx, cy) → [cx, cy] sobre el borde, move(cx, cy), end() }; si empieza en el centro del transportador, solo
+   *  mide el ángulo (map null). Si no, null. Todo es aritmética: nada pesado en pointermove. */
+  guide(e, stroke) {
+    if (!this.visible() || this.gesture || (stroke.tool !== 'pen' && stroke.tool !== 'highlighter')) return null;
+    const rect = this.wrap.getBoundingClientRect(), r = this.st(), { u, v } = this.local(e.clientX, e.clientY, rect), h = RULER_W / 2;
+    const a = r.angle * Math.PI / 180, cos = Math.cos(a), sin = Math.sin(a), cx = rect.left + r.x, cy = rect.top + r.y;
+    if (r.protractor && Math.hypot(u, v + h) <= 24) return this.angleGuide(rect, cx - h * -sin, cy - h * cos, a);
+    if (Math.abs(u) > this.len / 2) return null;
+    const edge = Math.abs(v + h) <= Math.abs(v - h) ? -h : h;
+    if (Math.abs(v - edge) > RULER_SNAP_PX) return null;
+    // Por el lado del borde en que empezó, y a medio grosor: la tinta toca el borde sin meterse debajo.
+    const side = v === edge ? Math.sign(edge) : Math.sign(v - edge), off = edge + side * stroke.width * S.zoom / 2;
+    let last = null, first = null;
+    const map = (px, py) => {
+      const uu = (px - cx) * cos + (py - cy) * sin;
+      last = [cx + uu * cos - off * sin, cy + uu * sin + off * cos];
+      if (!first) first = last;
+      return last;
+    };
+    return {
+      map,
+      move: () => this.measure(() => {
+        const cm = Math.hypot(last[0] - first[0], last[1] - first[1]) / S.zoom / RULER_PX_MM / 10;
+        return [`${cm.toFixed(1).replace('.', ',')} cm`, last[0] - rect.left - sin * side * 30, last[1] - rect.top + cos * side * 30];
+      }),
+      end: () => this.measure(null),
+    };
+  },
+  /** Trazo desde el centro del transportador: muestra el ángulo que forma con la regla (0°–180°). */
+  angleGuide(rect, ox, oy, a) {
+    let at = null;
+    const fn = () => {
+      const dx = at[0] - ox, dy = at[1] - oy, u = dx * Math.cos(a) + dy * Math.sin(a), v = -dx * Math.sin(a) + dy * Math.cos(a);
+      const g = Math.round((Math.atan2(-v, u) * 180 / Math.PI + 360) % 360);
+      return [`${g > 180 ? 360 - g : g}°`, at[0] - rect.left + 22, at[1] - rect.top - 26];
+    };
+    return { map: null, move: (cx, cy) => { at = [cx, cy]; this.measure(fn); }, end: () => this.measure(null) };
+  },
+  /** La etiqueta de la medida en directo, una vez por fotograma. */
+  measure(fn) {
+    const m = this.measureEl;
+    if (!m) return;
+    if (!fn) { cancelAnimationFrame(this.mraf); this.mraf = 0; m.hidden = true; return; }
+    this.mfn = fn;
+    if (this.mraf) return;
+    this.mraf = requestAnimationFrame(() => {
+      this.mraf = 0;
+      const out = this.mfn?.();
+      if (!out) return;
+      m.textContent = out[0]; m.style.transform = `translate(${out[1]}px, ${out[2]}px) translate(-50%, -50%)`; m.hidden = false;
+    });
+  },
+  // ---------- Botón de la barra de opciones ----------
+  /** Lo llama renderOptions: monta la regla en el editor y añade su botón a la barra del bolígrafo y del subrayador. */
+  bindBar(el) {
+    this.mount();
+    const item = findItem(S.editing || S.selected)?.item;
+    if (S.lasso || item || S.reading || !(S.tool === 'pen' || (S.tool === 'highlighter' && !Tape.drawing))) return;
+    const on = this.st().on, key = onbKey('toggleRuler');
+    const sep = document.createElement('div'), b = document.createElement('button');
+    sep.className = 'sep';
+    b.className = 'pill-toggle'; b.dataset.ruler = 'toggle'; b.setAttribute('aria-pressed', String(on));
+    b.title = `Regla: líneas rectas y medidas${key ? ` (${key})` : ''}`;
+    b.innerHTML = `${icon('ruler')} <span>Regla</span>`;
+    b.addEventListener('click', () => this.toggle());
+    const hint = el.querySelector(':scope > .hint');
+    el.insertBefore(sep, hint); el.insertBefore(b, hint);
+  },
+};
+// El tema (claro u oscuro) cambia los colores de las marcas: se vuelven a pintar.
+const rulerRepaint = () => { Ruler.drawn = ''; Ruler.sync(); };
+try { matchMedia('(prefers-color-scheme: dark)').addEventListener('change', rulerRepaint); } catch (e) { /* navegador antiguo */ }
+new MutationObserver(rulerRepaint).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
 
 // =============================================================================
 // Editor: elementos de la página (texto, post-it, imagen, enlace, voz) y su arrastre
@@ -9595,6 +10035,7 @@ const Cards = {
       const c = st.queue[0];
       if (!c) {
         const t = st.tally, reviewed = t.hard + t.good + t.easy;
+        if (reviewed && !st.counted) { st.counted = true; Recall.mark(nb); }   // sesión terminada = libreta repasada (recall.js)
         box.innerHTML = `<h2>Repaso terminado</h2>
           <p class="cardz-center">${reviewed === 1 ? 'Has repasado 1 tarjeta' : `Has repasado ${reviewed} tarjetas`}.</p>
           <div class="cardz-tally">${CARD_GRADES.map(([k, n]) => `<div class="cardz-t cardz-${k}"><b>${t[k]}</b><span>${n}</span></div>`).join('')}</div>
@@ -9637,6 +10078,224 @@ const Cards = {
     }, 450);
   },
 };
+
+// =============================================================================
+// Curva del olvido (`Recall`): cuándo se repasó cada libreta y cuánto se recuerda de ella.
+// Formato (ARQUITECTURA §2.1): campos opcionales `nb.lastReviewed` (ms) y `nb.reviews` ([ms…], como mucho 30).
+// Cuenta como repaso: terminar una sesión de tarjetas, «Marcar como repasada» o ≥ 5 min de tiempo activo en ella.
+//
+// Fórmula (Ebbinghaus simple): R = e^(−t/S)
+//   t = días desde el último repaso; S = «estabilidad» en días (cuánto aguanta el recuerdo).
+//   Primer repaso: S = RECALL_S0. En cada repaso siguiente, hecho g días después del anterior:
+//     r = e^(−g/S)                          (lo que se recordaba justo antes de repasar)
+//     S = S · (1 + RECALL_GROWTH · (1 − r))  (cuanto más olvidado, más crece: el repaso espaciado cunde más;
+//                                             repasar dos veces seguidas casi no cambia nada)
+//   S nunca pasa de RECALL_S_MAX. Con la lista recortada a 30 repasos, se empieza a contar desde el más antiguo que queda.
+// Colores: verde R ≥ RECALL_FRESH · ámbar R ≥ RECALL_FADING · rojo por debajo · gris si nunca se repasó.
+// «Conviene repasar» cuando R baja de RECALL_DUE (al cabo de S·ln(1/RECALL_DUE) días).
+// =============================================================================
+const RECALL_S0 = 3;                  // días: con un solo repaso, al cabo de 3 días queda ~37 %
+const RECALL_GROWTH = 3;              // repasar justo cuando R ≈ 37 % multiplica S por ~2,9
+const RECALL_S_MAX = 365;
+const RECALL_FRESH = 0.8, RECALL_DUE = 0.7, RECALL_FADING = 0.5;
+const RECALL_MAX = 30;                // repasos guardados por libreta
+const RECALL_MERGE_MS = 3600e3;       // dos repasos a menos de 1 h son el mismo (se queda la hora del último)
+const RECALL_ACTIVE_MS = 5 * 60e3;    // tiempo activo en una libreta que cuenta como repaso
+const RECALL_IDLE_MS = 2 * 60e3;      // sin tocar nada durante más de esto, el tiempo no cuenta
+const RECALL_TICK_MS = 15e3;
+const RECALL_STATES = { fresh: 'Fresca', soon: 'Toca pronto', fading: 'Se está olvidando', never: 'Nunca repasada' };
+
+const Recall = {
+  // ---------- Lógica pura (sin DOM) ----------
+  /** Repasos válidos de la libreta, del más antiguo al más reciente (libretas antiguas: ninguno). */
+  reviews(nb) {
+    // Un repaso con fecha futura (copia de un dispositivo con el reloj mal) no se usa, pero tampoco se borra.
+    const ok = (t) => Number.isFinite(t) && t > 0 && t <= Date.now() + CARD_DAY;
+    const list = Array.isArray(nb?.reviews) ? nb.reviews.filter(ok) : [];
+    if (ok(nb?.lastReviewed) && !list.includes(nb.lastReviewed)) list.push(nb.lastReviewed);
+    return list.sort((a, b) => a - b);
+  },
+  /** Estabilidad S (días) tras una lista ordenada de repasos. */
+  stability(list) {
+    let s = RECALL_S0;
+    for (let i = 1; i < list.length; i++) {
+      const g = Math.max(0, (list[i] - list[i - 1]) / CARD_DAY);
+      s = Math.min(RECALL_S_MAX, s * (1 + RECALL_GROWTH * (1 - Math.exp(-g / s))));
+    }
+    return s;
+  },
+  /** Retención estimada (0…1) ahora; null si nunca se repasó. */
+  retention(nb, now = Date.now()) {
+    const list = this.reviews(nb);
+    if (!list.length) return null;
+    const t = Math.max(0, (now - list[list.length - 1]) / CARD_DAY);
+    return Math.exp(-t / this.stability(list));
+  },
+  state(r) { return r == null ? 'never' : r >= RECALL_FRESH ? 'fresh' : r >= RECALL_FADING ? 'soon' : 'fading'; },
+  /** Tarjetas pendientes (sin ordenar: solo se cuentan). */
+  dueCards(nb, now = Date.now()) { let n = 0; for (const c of Cards.all(nb)) if (Cards.isDue(c, now)) n++; return n; },
+  daysBetween(a, b) { return Math.round((Cards.startOfDay(b) - Cards.startOfDay(a)) / CARD_DAY); },
+  /** Todo lo que pinta la biblioteca de una libreta. */
+  info(nb, now = Date.now()) {
+    const list = this.reviews(nb), last = list[list.length - 1] || 0;
+    const r = list.length ? Math.exp(-Math.max(0, (now - last) / CARD_DAY) / this.stability(list)) : null;
+    const st = this.state(r), cards = this.dueCards(nb, now);
+    // Día en que la retención baja de RECALL_DUE: 0 = hoy (o ya pasó).
+    const dueAt = last ? last + this.stability(list) * Math.log(1 / RECALL_DUE) * CARD_DAY : 0;
+    const dueDays = last ? Math.max(0, this.daysBetween(now, dueAt)) : 0;
+    return { r, state: st, last, ago: last ? this.daysBetween(last, now) : null, dueDays: r != null && r < RECALL_DUE ? 0 : dueDays, cards };
+  },
+  /** «Repasada hace 6 días · conviene repasar hoy». */
+  text(info) {
+    if (info.state === 'never') return info.cards ? `Nunca repasada · ${this.cardsText(info.cards)}` : 'Nunca repasada';
+    const a = info.ago, when = a <= 0 ? 'Repasada hoy' : a === 1 ? 'Repasada ayer' : `Repasada hace ${a} días`;
+    const d = info.dueDays, next = d <= 0 ? 'conviene repasar hoy' : d === 1 ? 'conviene repasar mañana' : `conviene repasar en ${d} días`;
+    return `${when} · ${next}`;
+  },
+  cardsText(n) { return n === 1 ? '1 tarjeta pendiente' : `${n} tarjetas pendientes`; },
+  /** Para la tira «Para repasar hoy»: las más olvidadas (o con tarjetas pendientes), la peor primero. */
+  today(pool, now = Date.now(), max = 5) {
+    const out = [];
+    for (const nb of pool) {
+      if (nb.example) continue;   // los ejemplos sin abrir no se estudian
+      const info = this.info(nb, now);
+      if ((info.r != null && info.r < RECALL_DUE) || info.cards) out.push({ nb, info });
+    }
+    return out.sort((a, b) => (a.info.r ?? 0) - (b.info.r ?? 0) || b.info.cards - a.info.cards).slice(0, max);
+  },
+  /** Para normalizeNotebook: solo toca las libretas que ya traen los campos (no los inventa). */
+  normalize(nb) {
+    if ('reviews' in nb) {
+      const raw = Array.isArray(nb.reviews) ? nb.reviews : Number.isFinite(nb.reviews) ? [nb.reviews] : [];
+      nb.reviews = [...new Set(raw.filter((t) => Number.isFinite(t) && t > 0))].sort((a, b) => a - b).slice(-RECALL_MAX);
+    }
+    if ('lastReviewed' in nb && !(Number.isFinite(nb.lastReviewed) && nb.lastReviewed > 0)) {
+      const list = Array.isArray(nb.reviews) ? nb.reviews : [];
+      if (list.length) nb.lastReviewed = list[list.length - 1]; else delete nb.lastReviewed;   // valor roto, sin nada que perder
+    }
+    return nb;
+  },
+
+  // ---------- Guardar un repaso ----------
+  /** Apunta un repaso (tarjetas, a mano o por tiempo activo) y lo guarda. Devuelve la libreta. */
+  mark(nb, now = Date.now()) {
+    if (!nb) return nb;
+    const list = this.reviews(nb);
+    const last = list[list.length - 1];
+    if (last && now - last < RECALL_MERGE_MS) list[list.length - 1] = Math.max(last, now); else list.push(now);
+    nb.reviews = list.slice(-RECALL_MAX);
+    nb.lastReviewed = nb.reviews[nb.reviews.length - 1];
+    touch(nb);
+    if (S.view === 'library') this.refreshLibrary();
+    return nb;
+  },
+  /** «Marcar como repasada» (biblioteca y «⋯» del editor), con un aviso de cuándo toca la próxima. */
+  markByHand(nb) {
+    this.mark(nb);
+    toast(`Marcada como repasada · ${this.text(this.info(nb)).split(' · ')[1]}`);
+  },
+  /** Repinta la biblioteca sin perder el desplazamiento (nunca en mitad de un arrastre ni en el modo dinámico). */
+  refreshLibrary() {
+    if (S.view !== 'library' || CardDrag.s || S.dynamic) return;   // el modo dinámico no muestra barras: no se reinicia
+    const y = $('#lib-main')?.scrollTop || 0;
+    renderLibrary();
+    const m = $('#lib-main'); if (m) m.scrollTop = y;
+  },
+
+  // ---------- Tiempo activo en el editor ----------
+  // Cuenta solo con la libreta abierta, la pestaña visible y alguien tocando, escribiendo o desplazándose
+  // (sin nada durante RECALL_IDLE_MS, el reloj se para). Vive en memoria: no se guarda.
+  active: {}, lastInput: 0, lastTick: 0, timer: 0,
+  input() { this.lastInput = Date.now(); },
+  tick(now = Date.now()) {
+    const dt = this.lastTick ? Math.min(Math.max(0, now - this.lastTick), 2 * RECALL_TICK_MS) : 0;
+    this.lastTick = now;
+    if (S.view !== 'editor' || !S.active || document.visibilityState === 'hidden' || now - this.lastInput > RECALL_IDLE_MS) return;
+    const id = S.active;
+    this.active[id] = (this.active[id] || 0) + dt;
+    if (this.active[id] < RECALL_ACTIVE_MS) return;
+    this.active[id] = 0;   // otros 5 min, otro repaso (los de menos de 1 h se juntan en uno)
+    const nb = nbById(id);
+    if (nb) this.mark(nb, now);
+  },
+  start() { clearInterval(this.timer); this.lastTick = 0; this.timer = setInterval(() => this.tick(), RECALL_TICK_MS); },
+
+  // ---------- Interfaz ----------
+  COLORS: { fresh: 'var(--recall-fresh)', soon: 'var(--recall-soon)', fading: 'var(--recall-fading)', never: 'var(--recall-never)' },
+  /** Barra fina bajo el título de la tarjeta de libreta (y las tarjetas pendientes, si hay). */
+  barHTML(nb, info = this.info(nb)) {
+    const text = this.text(info), pct = info.r == null ? 100 : Math.max(4, Math.round(info.r * 100));
+    const label = `${RECALL_STATES[info.state]}: ${text}`;
+    return `<button class="recall" data-recall="${nb.id}" data-state="${info.state}" title="${esc(label)}" aria-label="${esc(label)}" aria-haspopup="menu" aria-expanded="false">
+      <span class="rc-track" aria-hidden="true"><i style="width:${pct}%"></i></span>${info.cards ? `<span class="rc-cards" aria-hidden="true">${icon('lightbulb')}${info.cards}</span>` : ''}</button>`;
+  },
+  /** Menú al tocar la barra: el estado y qué hacer. */
+  barMenu(anchor, nb) {
+    const info = this.info(nb);
+    popover(anchor, `<div class="recall-pop" data-state="${info.state}"><b>${RECALL_STATES[info.state]}${info.r == null ? '' : ` · ${Math.round(info.r * 100)} %`}</b><span>${this.text(info)}</span></div>
+      ${info.cards ? `<button data-act="cards">${icon('lightbulb')} Repasar tarjetas (${Cards.pendingText(nb)})</button>` : ''}
+      <button data-act="mark">${icon('checkCircle')} Marcar como repasada</button>
+      <button data-act="open">${icon('book')} Abrir</button>`, (act) => {
+      if (act === 'cards') Cards.review(nb);
+      if (act === 'mark') this.markByHand(nb);
+      if (act === 'open') openNotebook(nb.id);
+    });
+  },
+  folded() { return !!libPrefs().recallFolded; },
+  /** Tira «Para repasar hoy» de la biblioteca (vacía si no hay nada que repasar). */
+  stripHTML(pool) {
+    const list = this.today(pool);
+    if (!list.length) return '';
+    const folded = this.folded();
+    return `<section class="recall-strip ${folded ? 'folded' : ''}" aria-label="Para repasar hoy">
+      <button class="rs-head" data-recall-fold aria-expanded="${!folded}">${icon('lightbulb')}<b>Para repasar hoy</b><span class="rs-n">${list.length}</span>${icon('chevronDown')}</button>
+      ${folded ? '' : `<div class="rs-list">${list.map(({ nb, info }) => `<button class="rs-item" data-recall-open="${nb.id}" data-state="${info.state}" title="${esc(this.text(info))}">
+        <span class="rs-dot" aria-hidden="true"></span><span class="rs-body"><b translate="no">${esc(nb.title)}</b><small>${this.text(info).split(' · ')[0]}</small></span>
+        ${info.cards ? `<span class="rs-cards" title="${this.cardsText(info.cards)}">${icon('lightbulb')}${info.cards}</span>` : ''}</button>`).join('')}</div>`}
+    </section>`;
+  },
+  /** Tocar una libreta de la tira: su repaso de tarjetas si tiene pendientes; si no, abrirla. */
+  openFromStrip(nb) { if (this.dueCards(nb)) Cards.review(nb); else openNotebook(nb.id); },
+  toggleFold() { setLibPrefs({ recallFolded: !this.folded() }); this.refreshLibrary(); },
+  /** Botón del «⋯» del editor (sección «Tarjetas de repaso»). */
+  menuHtml(nb) { return `<button data-act="recall-mark" title="${esc(this.text(this.info(nb)))}">${icon('checkCircle')} Marcar como repasada</button>`; },
+  menuAct(act, nb) { if (act !== 'recall-mark') return false; this.markByHand(nb); return true; },
+};
+// Cualquier toque, tecla, rueda o desplazamiento cuenta como «estar ahí» (también al leer bajando páginas).
+for (const ev of ['pointerdown', 'keydown', 'wheel', 'scroll', 'input']) document.addEventListener(ev, () => Recall.input(), { capture: true, passive: true });
+Recall.start();
+
+// ---------- Preferencias de la biblioteca (este dispositivo): orden y tira plegada ----------
+// localStorage `libreta-library`: { sort?: 'recent'|'name'|'recall', recallFolded?: true }. Sin la clave = «Recientes», desplegada.
+const LIB_SORTS = [['recent', 'Recientes'], ['name', 'Nombre'], ['recall', 'Por repasar']];
+function libPrefs() {
+  try { const v = JSON.parse(localStorage.getItem('libreta-library') || '{}'); return v && typeof v === 'object' ? v : {}; } catch (e) { return {}; }
+}
+function setLibPrefs(patch) {
+  try { localStorage.setItem('libreta-library', JSON.stringify(Object.assign(libPrefs(), patch))); } catch (e) { /* sin almacenamiento */ }
+}
+function libSort() { const s = libPrefs().sort; return LIB_SORTS.some(([k]) => k === s) ? s : 'recent'; }
+/** Ordena las libretas de la estantería según «Ordenar por». «Por repasar»: rojo, ámbar, verde (menos retención
+ *  primero) y al final las nunca repasadas (las más recientes antes). */
+function sortNotebooks(list, sort = libSort(), now = Date.now()) {
+  if (sort === 'name') return list.sort((a, b) => (a.title || '').localeCompare(b.title || '', LOCALE(), { sensitivity: 'base', numeric: true }));
+  if (sort === 'recall') {
+    const r = new Map(list.map((nb) => [nb.id, Recall.retention(nb, now)]));   // una vez por libreta (100 libretas: rápido)
+    return list.sort((a, b) => {
+      const ra = r.get(a.id), rb = r.get(b.id);
+      if (ra == null || rb == null) return ra == null && rb == null ? b.modified - a.modified : ra == null ? 1 : -1;
+      return ra - rb;
+    });
+  }
+  return list.sort((a, b) => b.modified - a.modified);
+}
+function sortMenu(anchor) {
+  const cur = libSort();
+  popover(anchor, `<div class="label">Ordenar por</div>${LIB_SORTS.map(([k, n]) => `<button data-act="${k}">${k === cur ? icon('check') : '<svg width="17" height="17"></svg>'} ${n}</button>`).join('')}`, (act) => {
+    setLibPrefs({ sort: act });
+    Recall.refreshLibrary();
+  });
+}
 
 // =============================================================================
 // Tarjetas con IA (`AI`): la IA lee lo seleccionado con el lazo, lo resume y propone varias tarjetas de repaso,
@@ -9701,7 +10360,7 @@ class AIError extends Error {
 const AI = {
   /** Cómo se habla con la red. Las pruebas lo cambian por uno simulado (misma firma que fetch). */
   transport: (url, init) => fetch(url, init),
-  timeout: 30000,    // ms como mucho por petición
+  timeout: 60000,    // ms como mucho por petición
 
   // ---------- Clave (solo en este dispositivo) ----------
   key() { try { return localStorage.getItem(AI_KEY) || ''; } catch (e) { return ''; } },
@@ -9742,7 +10401,10 @@ const AI = {
     const sel = Cards.lassoRect();
     if (!sel) return null;
     const img = await Cards.crop(sel.page, sel.rect);
-    return { img, pageId: sel.page.id, rect: sel.rect, text: AI.selectionText(sel.page, sel.rect) };
+    const text = AI.selectionText(sel.page, sel.rect);
+    // La imagen solo se envía si hace falta leerla (escritura a mano, imágenes o un PDF sin texto): es lo que más tarda.
+    const send = lassoStrokes().length > 0 || lassoItems().some((it) => it.type === 'image') || (!!sel.page.bg && !text.trim()) || !text.trim();
+    return { img, send, pageId: sel.page.id, rect: sel.rect, text };
   },
   /** El cuerpo de la petición a generateContent. `avoid`: preguntas que ya hay (para «Más preguntas»). */
   buildRequest({ text = '', img = null, lang = I18N.lang, avoid = [] }) {
@@ -9799,7 +10461,14 @@ const AI = {
     for (const model of AI_MODELS) {
       let res;
       try {
-        res = await AI.transport(AI_URL(model), { method: 'POST', headers: { 'content-type': 'application/json', 'x-goog-api-key': key }, body: JSON.stringify(body), signal });
+        // Pensar poco: es mucho más rápido y para resumir y preguntar basta (gemini-3.x: thinkingLevel, ai.google.dev 2026-10).
+        const fast = { ...body, generationConfig: { ...body.generationConfig, thinkingConfig: { thinkingLevel: /lite/.test(model) ? 'minimal' : 'low' } } };
+        res = await AI.transport(AI_URL(model), { method: 'POST', headers: { 'content-type': 'application/json', 'x-goog-api-key': key }, body: JSON.stringify(fast), signal });
+        if (res.status === 400) {
+          const err = await (res.clone ? res.clone() : res).json().catch(() => null);
+          // Si un modelo no admitiera esa opción, se repite sin ella.
+          if (/thinking/i.test(err?.error?.message || '')) res = await AI.transport(AI_URL(model), { method: 'POST', headers: { 'content-type': 'application/json', 'x-goog-api-key': key }, body: JSON.stringify(body), signal });
+        }
       } catch (e) {
         if (signal?.aborted) throw e;
         throw new AIError('offline');
@@ -9830,7 +10499,7 @@ const AI = {
       model: 'El modelo de IA ya no está disponible. Actualiza Folia o inténtalo más tarde.',
       region: 'Google no ofrece la IA gratuita en tu país.',
       server: 'El servicio de Google no responde ahora mismo. Inténtalo en un rato.',
-      timeout: 'La IA ha tardado demasiado (más de 30 segundos). Prueba con una selección más pequeña o inténtalo de nuevo.',
+      timeout: 'La IA ha tardado demasiado (más de 1 minuto). Prueba con una selección más pequeña o inténtalo de nuevo.',
       blocked: 'Google no ha querido procesar esta selección.',
       empty: 'La IA no ha encontrado nada que convertir en tarjetas en esta selección.',
       invalid: 'La IA ha devuelto una respuesta no válida. Vuelve a intentarlo.',
@@ -9856,7 +10525,7 @@ const AI = {
   },
   /** Pide las tarjetas y abre la revisión. Si falla, explica por qué. */
   async generate(nb, zone) {
-    try { AI.review(nb, zone, await AI.call(AI.buildRequest({ text: zone.text, img: zone.img }))); }
+    try { AI.review(nb, zone, await AI.call(AI.buildRequest({ text: zone.text, img: zone.send === false ? null : zone.img }))); }
     catch (e) { AI.showError(e, () => AI.generate(nb, zone)); }
   },
   showError(e, retry) {
@@ -9901,7 +10570,7 @@ const AI = {
   },
   busyDialog(onCancel) {
     const scrim = dialog(`<div class="aiz-busy" role="status"><span class="aiz-spin" aria-hidden="true"></span>
-      <h2>La IA está leyendo tu selección…</h2><p class="aiz-small">Suele tardar unos segundos (como mucho 30).</p></div>
+      <h2>La IA está leyendo tu selección…</h2><p class="aiz-small">Suele tardar unos segundos (como mucho 1 minuto).</p></div>
       <div class="actions"><button class="btn" data-act="cancel">Cancelar</button></div>`, (act, _b, close) => { close(); onCancel(); });
     scrim.querySelector('.dialog').classList.add('aiz-dialog');
     // Tocar fuera o Esc también cancela (dialog() ya cierra la ventana).
@@ -9919,7 +10588,7 @@ const AI = {
       if (act === 'regen' || act === 'more') {
         const more = act === 'more';
         try {
-          const r = await AI.call(AI.buildRequest({ text: zone.text, img: zone.img, avoid: more ? st.cards.map((c) => c.pregunta) : [] }));
+          const r = await AI.call(AI.buildRequest({ text: zone.text, img: zone.send === false ? null : zone.img, avoid: more ? st.cards.map((c) => c.pregunta) : [] }));
           if (more) {
             const seen = new Set(st.cards.map((c) => c.pregunta.toLowerCase()));
             const fresh = r.tarjetas.filter((t) => !seen.has(t.pregunta.toLowerCase()));
@@ -11226,6 +11895,7 @@ const SHORTCUT_ACTIONS = [
   ['toolLink', 'Herramientas', 'Enlace', 'editor', [K('k')]],
   ['toolSelect', 'Herramientas', 'Seleccionar', 'editor', [K('v')]],
   ['insertImage', 'Herramientas', 'Insertar imagen', 'editor', [K('i', { alt: true })]],
+  ['toggleRuler', 'Herramientas', 'Mostrar u ocultar la regla', 'editor', [K('r')]],
   ['closeTab', 'Pestañas', 'Cerrar pestaña', 'editor', [K('w', { alt: true })]],
   ['nextTab', 'Pestañas', 'Pestaña siguiente', 'editor', [K('right', { alt: true })]],
   ['previousTab', 'Pestañas', 'Pestaña anterior', 'editor', [K('left', { alt: true })]],
@@ -11343,6 +12013,7 @@ const Shortcuts = {
     const tabIndex = S.tabs.indexOf(S.active);
     switch (id) {
       case 'insertImage': return $('#add-image')?.click();
+      case 'toggleRuler': return Ruler.toggle();
       case 'closeTab': return S.active && closeTab(S.active);
       case 'nextTab': case 'previousTab':
         if (S.tabs.length > 1) openNotebook(S.tabs[(tabIndex + (id === 'nextTab' ? 1 : -1) + S.tabs.length) % S.tabs.length]);
