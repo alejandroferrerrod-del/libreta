@@ -426,6 +426,44 @@ html.pen-mode .ink { touch-action: pan-x pan-y; }
 }
 :root[data-theme="dark"] .ruler { color: #E5E5EA; background: rgba(52, 52, 56, .68); box-shadow: 0 0 0 1px rgba(255, 255, 255, .22), 0 3px 12px rgba(0, 0, 0, .4); }
 :root[data-theme="dark"] .ruler-knob { background: rgba(255, 255, 255, .1); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .22); }
+/* Lupa (zoomwin.js): panel ampliado debajo de las páginas (el escritorio se acorta) y guía sobre la página */
+.desk-wrap.zw-on { flex-direction: column; }
+.desk-wrap.zw-on > .desk { min-height: 0; }
+.desk-wrap.zw-on .page-indicator { bottom: calc(var(--zw-h, 200px) + 12px); }
+.zw-panel { flex: none; height: var(--zw-h, 200px); display: flex; flex-direction: column; position: relative; z-index: 5; background: var(--surface);
+  border-top: 1px solid var(--hairline); box-shadow: 0 -4px 16px rgba(0, 0, 0, .1); padding-bottom: env(safe-area-inset-bottom, 0px); box-sizing: border-box; }
+.reading .zw-panel { display: none; }
+.zw-bar { flex: none; display: flex; align-items: center; gap: 2px; height: 40px; padding: 4px 8px 0; position: relative; touch-action: none; cursor: ns-resize; user-select: none; -webkit-user-select: none; }
+.zw-bar button, .zw-bar .seg { cursor: pointer; }
+.zw-grip { position: absolute; left: 50%; top: 4px; width: 38px; height: 5px; margin-left: -19px; border-radius: 3px; background: var(--hairline); }
+.zw-title { display: inline-flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 600; margin-right: 8px; color: var(--ink); }
+.zw-title svg { width: 18px; height: 18px; color: var(--accent); }
+.zw-zoom button { padding: 3px 10px; font-size: 16px; }
+.zw-z { align-self: center; min-width: 38px; text-align: center; font-size: 13px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.zw-flex { flex: 1; }
+.zw-bar .icon-btn { width: 40px; height: 34px; }
+.zw-panel.zw-eol .zw-ret { background: var(--accent); color: #fff; animation: zw-pulse .7s ease-in-out 3; }
+@keyframes zw-pulse { 50% { transform: scale(1.12); } }
+.zw-stage { flex: 1; min-height: 0; position: relative; margin: 2px 8px 8px; border-radius: 10px; overflow: hidden; touch-action: none; cursor: crosshair;
+  box-shadow: inset 0 0 0 1px var(--hairline), 0 1px 3px rgba(0, 0, 0, .08); background: #fff; }
+.zw-stage canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+.zw-zone { position: absolute; top: 0; bottom: 0; right: 0; width: 25%; pointer-events: none; border-left: 1.5px dashed color-mix(in srgb, var(--accent) 40%, transparent);
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--accent) 9%, transparent)); }
+.zw-msg { display: none; position: absolute; inset: 0; align-items: center; justify-content: center; text-align: center; padding: 0 16px; font-size: 14px; font-weight: 500;
+  color: var(--ink); background: color-mix(in srgb, var(--surface) 72%, transparent); pointer-events: none; }
+.zw-panel.zw-off .zw-msg { display: flex; }
+.zw-panel.zw-off .zw-stage { cursor: default; }
+/* La guía está en la capa de encima de la página (px de página): bordes y asas a escala de pantalla con --zi = 1/zoom. */
+.layer.over > .zw-guide { position: absolute; pointer-events: none; box-sizing: border-box; border-radius: calc(5px * var(--zi, 1));
+  box-shadow: 0 0 0 calc(2px * var(--zi, 1)) var(--accent), 0 0 0 calc(5px * var(--zi, 1)) color-mix(in srgb, var(--accent) 22%, transparent);
+  background: color-mix(in srgb, var(--accent) 5%, transparent); z-index: 3; }
+.zw-gzone { position: absolute; top: 0; bottom: 0; right: 0; width: 25%; background: color-mix(in srgb, var(--accent) 12%, transparent); border-left: calc(1px * var(--zi, 1)) dashed var(--accent); }
+.zw-move, .zw-size { position: absolute; pointer-events: auto; touch-action: none; background: var(--accent); }
+.zw-move { left: 50%; top: 0; width: calc(46px * var(--zi, 1)); height: calc(14px * var(--zi, 1)); margin-left: calc(-23px * var(--zi, 1));
+  border-radius: 0 0 calc(7px * var(--zi, 1)) calc(7px * var(--zi, 1)); cursor: move; }
+.zw-size { right: calc(-9px * var(--zi, 1)); bottom: calc(-9px * var(--zi, 1)); width: calc(20px * var(--zi, 1)); height: calc(20px * var(--zi, 1)); border-radius: 50%;
+  box-shadow: 0 0 0 calc(2.5px * var(--zi, 1)) #fff; cursor: nwse-resize; }
+@media (max-width: 520px) { .zw-title span { display: none; } .zw-title { margin-right: 2px; } .zw-bar .icon-btn { width: 36px; } }
 .ribbon { position: absolute; top: 0; right: 36px; width: 28px; height: 46px; background: #FF3B30; clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 78%, 0 100%); pointer-events: none; filter: drop-shadow(0 1px 1px rgba(0,0,0,.3)); }
 .flash { position: absolute; border-radius: 6px; background: rgba(255, 214, 10, .45); border: 2px solid #FF9500; pointer-events: none; animation: flash 2.6s ease forwards; }
 @keyframes flash { 0% { opacity: 0; } 8% { opacity: 1; } 20% { opacity: .4; } 32% { opacity: 1; } 75% { opacity: 1; } 100% { opacity: 0; } }
@@ -1074,6 +1112,31 @@ html.pen-mode .item, html.pen-mode .pin, html.pen-mode .lasso-box { touch-action
   .mean-summary .actions [data-act="legend"] { margin-right: auto; }
   .mean-res { max-height: 46vh; }
 }
+/* ---------- Tarjetas de huecos (cloze.js) ---------- */
+.cloze-box { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.cloze-box h2, .cloze-box p { margin: 0; }
+.cloze-intro, .cloze-small { font-size: 13.5px; color: var(--muted); }
+.cloze-scope { align-self: flex-start; }
+.cloze-chips { margin: 0 -22px; }
+.cloze-tools { display: flex; align-items: center; gap: 14px; font-size: 13px; color: var(--muted); }
+.cloze-tools span { margin-right: auto; font-variant-numeric: tabular-nums; }
+.cloze-list { display: flex; flex-direction: column; gap: 8px; max-height: 48vh; overflow: auto; margin: 0 -4px; padding: 0 4px; }
+.cloze-card { border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; display: flex; flex-direction: column; gap: 8px; transition: opacity .15s; }
+.cloze-card.off { opacity: .5; }
+.cloze-inc { display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: var(--muted); min-width: 0; }
+.cloze-inc small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cloze-inc .mean-dot { width: 14px; height: 14px; }
+.cloze-card .field { gap: 4px; }
+.cloze-card .field span { font-size: 12px; color: var(--muted); }
+.cardz-dialog .cloze-card textarea { min-height: 44px; padding: 7px 10px; }
+.cloze-card input[type="text"] { border: 0; background: var(--surface-2); border-radius: 8px; padding: 8px 10px; font-size: 15px; font-weight: 600; min-width: 0; width: 100%; }
+.cloze-empty { text-align: center; padding: 14px 4px; color: var(--muted); }
+/* En el repaso: el hueco se ve marcado y, al mostrar la respuesta, se rellena con el trozo. */
+.cloze-gap { display: inline-block; min-width: 3.2em; padding: 0 .35em; margin: 0 .1em; border-radius: 6px; background: var(--accent-soft); color: var(--accent); font-weight: 600; text-align: center; }
+.cloze-fill { padding: 0 .2em; border-radius: 4px; background: rgba(255, 214, 10, .45); color: inherit; font-weight: 600; }
+.cloze-ans { font-weight: 600; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .cloze-fill { background: rgba(255, 214, 10, .3); } }
+:root[data-theme="dark"] .cloze-fill { background: rgba(255, 214, 10, .3); }
 /* Tarjetas con IA (ai.js) */
 .aiz-dialog h2 { display: flex; align-items: center; justify-content: center; gap: 8px; }
 .aiz-dialog h2 svg { width: 20px; height: 20px; color: var(--accent); }
@@ -1373,6 +1436,19 @@ body.is-card-dragging .crumbs button { box-shadow: inset 0 0 0 1.5px color-mix(i
 
 /* Segundos que lleva la IA (ventana de espera) */
 .aiz-busy .aiz-secs { margin: 2px 0 0; font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+
+/* Menú «+» (abrir otra libreta): como el de pestañas, con la portada de cada libreta en pequeño */
+.tabs-menu .om-head { cursor: default; padding-left: 10px; }
+.popover.tabs-menu .om-row { display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 6px 10px; border-radius: 8px; color: var(--ink); font-size: 14px; }
+.popover.tabs-menu .om-row:hover:not(:disabled) { background: var(--fill); color: var(--ink); }
+.tabs-menu .om-row .cover { width: 24px; height: 32px; flex: none; border-radius: 3px 5px 5px 3px; font-size: 0; box-shadow: 0 1px 3px rgba(0,0,0,.25); overflow: hidden; }
+.tabs-menu .om-row .cover img { width: 100%; height: 100%; object-fit: cover; }
+.tabs-menu .om-row .t { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: left; }
+.tabs-menu .om-row small { flex: none; color: var(--muted); font-size: 11.5px; }
+
+/* Barra de pestañas como Chrome: ⌄ a la izquierda del todo, «+» pegado a la última pestaña */
+.tabs .tab-all { margin: 0 4px 0 6px; flex: none; }
+.tabs .plus { flex: none; margin-left: 4px; }
 /* =============================================================================
    Tutorial de la primera vez (siempre en oscuro, como en la app nativa)
    ============================================================================= */
@@ -1874,6 +1950,15 @@ I18N.dict.it = {
   'Blanco': 'Bianco', 'Crema': 'Crema', 'Gris': 'Grigio', 'Oscuro': 'Scuro',
   // --- Opciones de herramientas ---
   'Regla': 'Righello', 'Regla: líneas rectas y medidas': 'Righello: linee rette e misure', 'Mostrar u ocultar la regla': 'Mostra o nascondi il righello',
+  // Lupa (zoomwin.js)
+  'Lupa': 'Lente', 'Lupa: escribir ampliado y con precisión': 'Lente: scrivere ingrandito e con precisione', 'Mostrar u ocultar la lupa': 'Mostra o nascondi la lente',
+  'Arrastra para cambiar la altura del panel': "Trascina per cambiare l'altezza del pannello", 'Aumento': 'Ingrandimento', 'Menos aumento': 'Meno ingrandimento', 'Más aumento': 'Più ingrandimento',
+  'Mover la guía a la izquierda': 'Sposta la guida a sinistra', 'Mover la guía a la derecha': 'Sposta la guida a destra', 'Siguiente línea': 'Riga successiva',
+  'Siguiente línea (Intro, o desliza a la izquierda con dos dedos)': 'Riga successiva (Invio, o scorri a sinistra con due dita)', 'Cerrar la lupa': 'Chiudi la lente',
+  'Elige el bolígrafo o el subrayador para escribir aquí': "Scegli la penna o l'evidenziatore per scrivere qui", 'Mover la guía': 'Sposta la guida',
+  'Cambiar el tamaño de la guía (aumento)': 'Cambia le dimensioni della guida (ingrandimento)',
+  'Lupa: escribe en el panel de abajo. Al llegar a la derecha, la guía avanza sola': 'Lente: scrivi nel pannello in basso. Arrivando a destra, la guida avanza da sola',
+  'Es la última línea de la libreta': "È l'ultima riga del quaderno", 'Elige el bolígrafo o el subrayador para escribir en la lupa': "Scegli la penna o l'evidenziatore per scrivere nella lente",
   'Formas': 'Forme', 'Para una forma perfecta, al acabar el trazo mantén quieto 1 segundo antes de soltar': 'Per una forma perfetta, alla fine del tratto tieni fermo 1 secondo prima di rilasciare',
   'Cada trazo se convierte en línea, círculo, rectángulo…': 'Ogni tratto diventa linea, cerchio, rettangolo…', 'Grosor': 'Spessore', 'Otro color': 'Altro colore',
   'Libre': 'Libero', 'Recto': 'Dritto', 'H / V': 'O / V', 'Forma del subrayado': 'Forma dell’evidenziatura', 'Trazo entero': 'Tratto intero', 'Parcial': 'Parziale',
@@ -2132,11 +2217,23 @@ I18N.dict.it = {
   'Fresca': 'Fresco', 'Toca pronto': 'Da ripassare presto', 'Se está olvidando': 'Si sta dimenticando', 'Nunca repasada': 'Mai ripassato',
   'Repasada hoy': 'Ripassato oggi', 'Repasada ayer': 'Ripassato ieri', 'conviene repasar hoy': 'conviene ripassare oggi', 'conviene repasar mañana': 'conviene ripassare domani',
   'Marcar como repasada': 'Segna come ripassato', 'Marcada como repasada': 'Segnato come ripassato', 'Para repasar hoy': 'Da ripassare oggi',
-  '1 tarjeta pendiente': '1 flashcard da ripassare', 'Ordenar por': 'Ordina per', 'Por repasar': 'Da ripassare',
+  '1 tarjeta pendiente': '1 flashcard da ripassare', 'Ordenar por': 'Ordina per', 'Creación: más nuevas': 'Creazione: più recenti', 'Creación: más antiguas': 'Creazione: più vecchi', 'Por repasar': 'Da ripassare',
+  // Tarjetas de huecos (cloze.js)
+  'Tarjetas de huecos de lo subrayado…': 'Flashcard a completamento dal sottolineato…', 'Tarjetas de huecos': 'Flashcard a completamento',
+  'Cada frase con algo subrayado o resaltado se convierte en una tarjeta con ese trozo escondido: «[…]».': 'Ogni frase con qualcosa di sottolineato o evidenziato diventa una flashcard con quel pezzo nascosto: «[…]».',
+  'De dónde': 'Da dove', 'Esta página': 'Questa pagina', 'Toda la libreta': 'Tutto il quaderno', 'Todos los colores': 'Tutti i colori',
+  'Marcar todas': 'Seleziona tutte', 'Ninguna': 'Nessuna', 'Respuesta (el hueco)': 'Risposta (lo spazio vuoto)', 'Hueco': 'Spazio vuoto',
+  'En esta página no hay frases subrayadas nuevas.': 'In questa pagina non ci sono nuove frasi sottolineate.',
+  'En esta libreta no hay frases subrayadas nuevas.': 'In questo quaderno non ci sono nuove frasi sottolineate.',
+  'Subraya con el subrayador el texto de un PDF, de un cuadro de texto o de un post-it, o resalta texto, y vuelve aquí.': 'Sottolinea con l’evidenziatore il testo di un PDF, di una casella di testo o di un post-it, oppure evidenzia del testo, e torna qui.',
+  '1 frase': '1 frase', '1 frase ya tenía su tarjeta y no se repite.': '1 frase aveva già la sua flashcard e non si ripete.', 'Crear 1 tarjeta': 'Crea 1 flashcard',
 };
 
 /** Textos con nombres o números dentro. */
 I18N.patterns.it = [
+  // Tarjetas de huecos (cloze.js)
+  [/^(\d+) frases$/, '$1 frasi'], [/^Crear (\d+) tarjetas$/, 'Crea $1 flashcard'],
+  [/^(\d+) frases ya tenían su tarjeta y no se repiten\.$/, '$1 frasi avevano già la loro flashcard e non si ripetono.'],
   // Menú de pestañas: al arrastrar una fila a otra carpeta (editor.js, TabsMenuDrag)
   [/^Se moverá a «(.+)»$/, (m, t) => `Verrà spostata in «${m[1] === 'Sin carpeta' ? t(m[1]) : m[1]}»`],
   // Cinta de repaso (tape.js)
@@ -2897,6 +2994,8 @@ const S = {
   scrollMode: PAGE_MODES.includes(saved.scrollMode) ? saved.scrollMode : 'continuous',
   // Regla (2026-10-20, ruler.js): visible, centro en px del escritorio (null = en medio), ángulo en grados y transportador.
   ruler: Object.assign({ on: false, x: null, y: null, angle: 0, protractor: false }, saved.ruler && typeof saved.ruler === 'object' ? saved.ruler : {}),
+  // Lupa (2026-10-20, zoomwin.js): aumento del panel (×2–×4) y su alto en px (null = el de serie).
+  zoomWin: Object.assign({ zoom: 3, height: null }, saved.zoomWin && typeof saved.zoomWin === 'object' ? saved.zoomWin : {}),
   zoom: 1,
   textDefault: Object.assign({}, DEFAULT_TEXT, saved.textDefault || {}),
   sidebar: saved.sidebar !== false, sidebarMode: saved.sidebarMode || 'thumbs',
@@ -2908,7 +3007,7 @@ const S = {
 function savePrefs() {
   Prefs.save({ dynamic: S.dynamic, penKind: S.penKind, penColor: S.penColor, penWidth: S.penWidth, hlColor: S.hlColor, hlWidth: S.hlWidth,
     hlMode: S.hlMode, eraserMode: S.eraserMode, textDefault: S.textDefault, sidebar: S.sidebar, sidebarMode: S.sidebarMode, holdToSnap: S.holdToSnap, showVoiceNotes: S.showVoiceNotes, lassoFilter: S.lassoFilter,
-    penColors: S.penColors, hlColors: S.hlColors, textColors: S.textColors, recentColors: S.recentColors, commentSize: S.commentSize, ruler: S.ruler, scrollMode: S.scrollMode, seeded: Prefs.load().seeded });
+    penColors: S.penColors, hlColors: S.hlColors, textColors: S.textColors, recentColors: S.recentColors, commentSize: S.commentSize, ruler: S.ruler, zoomWin: { zoom: S.zoomWin.zoom, height: S.zoomWin.height }, scrollMode: S.scrollMode, seeded: Prefs.load().seeded });
 }
 /** Diámetro (px de página, a zoom 1) del círculo de los comentarios; el CSS lo lee de html[data-pin]. */
 const pinPx = () => COMMENT_SIZES[S.commentSize].px;
@@ -3117,6 +3216,51 @@ function medLabelColor(paper) {
   const c = (v) => Math.round(v * k).toString(16).padStart(2, '0');
   return `#${c((n >> 16) & 255)}${c((n >> 8) & 255)}${c(n & 255)}`;
 }
+// Geometría de las plantillas de Medicina (px de página): la usan el dibujo y la lupa (zoomwin.js, renglones y columnas).
+const MED_FIELDS = {
+  clinical: [[['Paciente', 0.72], ['Edad', 0.28]], [['Motivo de consulta', 1]]],
+  drug: [[['Nombre', 0.6], ['Grupo', 0.4]]],
+  ddx: [[['Síntoma o signo guía', 1]]],
+};
+const MED_SECTIONS = {
+  clinical: [['Anamnesis', 4], ['Exploración', 3], ['Pruebas complementarias', 3], ['Diagnóstico diferencial', 2], ['Diagnóstico', 1], ['Tratamiento', 2]],
+  drug: [['Mecanismo', 3], ['Indicaciones', 3], ['Dosis', 2], ['Efectos adversos', 3], ['Contraindicaciones', 2], ['Interacciones', 2]],
+};
+const MED_DDX_COLS = [['Entidad', 0.22], ['Clínica', 0.3], ['Pruebas', 0.26], ['Claves', 0.22]];
+/** Casillas de la cabecera { x, y, w, h, text }, bloques { x0, x1, y, bottom, title } (y = franja del título; los
+ *  renglones van de y + MED_ROW a bottom) y la tabla del diferencial { top, bottom, cols: [{ x, w, text }] }. */
+function medLayout(page) {
+  const W = page.w, H = page.h, X0 = 40, X1 = W - 40, Y0 = 40, Y1 = H - 40;
+  const out = { fields: [], sections: [], table: null };
+  let y = Y0;
+  for (const row of MED_FIELDS[page.template] || []) {
+    let x = X0;
+    for (const [text, frac] of row) { const w = (X1 - X0) * frac; out.fields.push({ x, y, w, h: 52, text }); x += w; }
+    y += 52;
+  }
+  const list = MED_SECTIONS[page.template];
+  if (list) {
+    // Repartidos por peso en una o dos columnas (horizontal).
+    const y0 = y + 20, cols = W > H ? 2 : 1, gap = 24, colW = (X1 - X0 - gap * (cols - 1)) / cols, per = Math.ceil(list.length / cols);
+    for (let c = 0; c < cols; c++) {
+      const part = list.slice(c * per, (c + 1) * per), x0 = X0 + c * (colW + gap), x1 = x0 + colW;
+      const total = part.reduce((s, [, w]) => s + w, 0), rows = Math.floor((Y1 - y0) / MED_ROW);
+      let yy = y0, left = rows;
+      part.forEach(([title, wgt], i) => {
+        const n = i === part.length - 1 ? left : Math.max(2, Math.round(rows * wgt / total));
+        left -= n;
+        out.sections.push({ x0, x1, y: yy, bottom: yy + n * MED_ROW, title });
+        yy += n * MED_ROW;
+      });
+    }
+  }
+  if (page.template === 'ddx') {
+    const top = y + 20, rows = Math.floor((Y1 - top - 40) / MED_ROW);
+    let x = X0;
+    out.table = { top, bottom: top + 40 + rows * MED_ROW, cols: MED_DDX_COLS.map(([text, frac]) => { const c = { x, w: (X1 - X0) * frac, text }; x += c.w; return c; }) };
+  }
+  return out;
+}
 function drawMedPaper(ctx, page, paper) {
   const W = page.w, H = page.h, X0 = 40, X1 = W - 40, Y0 = 40, Y1 = H - 40;
   const ink = medLabelColor(paper);
@@ -3129,68 +3273,33 @@ function drawMedPaper(ctx, page, paper) {
     ctx.fillText(upper ? t.toLocaleUpperCase(LOCALE()) : t, x, y);
   };
   const ruled = (x0, x1, y0, y1) => { for (let y = y0; y < y1 - 6; y += MED_ROW) line(x0, y, x1, y); };
-  // Casillas rotuladas de la cabecera: filas de [rótulo, fracción del ancho].
-  const fields = (rows, y) => {
-    for (const row of rows) {
-      let x = X0;
-      for (const [text, frac] of row) {
-        const w = (X1 - X0) * frac;
-        band(x, y, w, 52, 0.1);
-        ctx.beginPath(); ctx.lineWidth = 1.5; ctx.strokeStyle = paper.line; ctx.strokeRect(x, y, w, 52);
-        label(text, x + 8, y + 16, 11, false, false);
-        x += w;
-      }
-      y += 52;
+  const L = medLayout(page);
+  // Casillas rotuladas de la cabecera.
+  for (const f of L.fields) {
+    band(f.x, f.y, f.w, f.h, 0.1);
+    ctx.beginPath(); ctx.lineWidth = 1.5; ctx.strokeStyle = paper.line; ctx.strokeRect(f.x, f.y, f.w, f.h);
+    label(f.text, f.x + 8, f.y + 16, 11, false, false);
+  }
+  // Bloques con título y renglones.
+  for (const b of L.sections) {
+    band(b.x0, b.y, b.x1 - b.x0, MED_ROW);
+    line(b.x0, b.y, b.x1, b.y, 2);
+    label(b.title, b.x0 + 8, b.y + 21);
+    ruled(b.x0, b.x1, b.y + MED_ROW, b.bottom);
+  }
+  // Tabla del diagnóstico diferencial.
+  const T = L.table;
+  if (T) {
+    band(X0, T.top, X1 - X0, 40);
+    for (let y = T.top + 40 + MED_ROW; y < T.bottom; y += MED_ROW) line(X0, y, X1, y, (y - T.top - 40) % (MED_ROW * 3) ? 1 : 1.5);
+    line(X0, T.top + 40, X1, T.top + 40, 2);
+    for (const c of T.cols) {
+      label(c.text, c.x + 8, T.top + 26);
+      if (c.x + c.w < X1 - 1) line(c.x + c.w, T.top, c.x + c.w, T.bottom, 1.5);
     }
-    return y;
-  };
-  // Bloques con título y renglones, repartidos por peso en una o dos columnas (horizontal).
-  const sections = (list, y0) => {
-    const cols = W > H ? 2 : 1, gap = 24, colW = (X1 - X0 - gap * (cols - 1)) / cols;
-    const per = Math.ceil(list.length / cols);
-    for (let c = 0; c < cols; c++) {
-      const part = list.slice(c * per, (c + 1) * per), x0 = X0 + c * (colW + gap), x1 = x0 + colW;
-      const total = part.reduce((s, [, w]) => s + w, 0), rows = Math.floor((Y1 - y0) / MED_ROW);
-      let y = y0, left = rows;
-      part.forEach(([title, wgt], i) => {
-        const n = i === part.length - 1 ? left : Math.max(2, Math.round(rows * wgt / total));
-        left -= n;
-        const bottom = y + n * MED_ROW;
-        band(x0, y, colW, MED_ROW);
-        line(x0, y, x1, y, 2);
-        label(title, x0 + 8, y + 21);
-        ruled(x0, x1, y + MED_ROW, bottom);
-        y = bottom;
-      });
-    }
-  };
+    ctx.beginPath(); ctx.lineWidth = 2; ctx.strokeStyle = paper.line; ctx.strokeRect(X0, T.top, X1 - X0, T.bottom - T.top);
+  }
   switch (page.template) {
-    case 'clinical': {
-      const y = fields([[['Paciente', 0.72], ['Edad', 0.28]], [['Motivo de consulta', 1]]], Y0);
-      sections([['Anamnesis', 4], ['Exploración', 3], ['Pruebas complementarias', 3], ['Diagnóstico diferencial', 2], ['Diagnóstico', 1], ['Tratamiento', 2]], y + 20);
-      break;
-    }
-    case 'drug': {
-      const y = fields([[['Nombre', 0.6], ['Grupo', 0.4]]], Y0);
-      sections([['Mecanismo', 3], ['Indicaciones', 3], ['Dosis', 2], ['Efectos adversos', 3], ['Contraindicaciones', 2], ['Interacciones', 2]], y + 20);
-      break;
-    }
-    case 'ddx': {
-      const top = fields([[['Síntoma o signo guía', 1]]], Y0) + 20;
-      const cols = [['Entidad', 0.22], ['Clínica', 0.3], ['Pruebas', 0.26], ['Claves', 0.22]];
-      const rows = Math.floor((Y1 - top - 40) / MED_ROW), bottom = top + 40 + rows * MED_ROW;
-      band(X0, top, X1 - X0, 40);
-      for (let y = top + 40 + MED_ROW; y < bottom; y += MED_ROW) line(X0, y, X1, y, (y - top - 40) % (MED_ROW * 3) ? 1 : 1.5);
-      line(X0, top + 40, X1, top + 40, 2);
-      let x = X0;
-      for (const [text, frac] of cols) {
-        label(text, x + 8, top + 26);
-        x += (X1 - X0) * frac;
-        if (x < X1 - 1) line(x, top, x, bottom, 1.5);
-      }
-      ctx.beginPath(); ctx.lineWidth = 2; ctx.strokeStyle = paper.line; ctx.strokeRect(X0, top, X1 - X0, bottom - top);
-      break;
-    }
     case 'cornellMir': {
       // Como «Cornell», con la columna de preguntas, las notas y la franja del resumen rotuladas.
       const head = 90, cue = 220, summary = H - 230;
@@ -6347,16 +6456,29 @@ const PdfText = {
   },
   text(page, a, b) {
     const chars = this.chars(page).slice(Math.min(a, b), Math.max(a, b));
-    let out = '';
+    const SUB = '₀₁₂₃₄₅₆₇₈₉', SUP = '⁰¹²³⁴⁵⁶⁷⁸⁹';
+    let out = '', base = null;   // base: la letra «normal» de la línea (para saber si otra va más baja o más alta)
     chars.forEach((c, i) => {
       const prev = chars[i - 1];
+      // Misma línea si las alturas se solapan (un subíndice más pequeño y algo más bajo no es otra línea).
+      const overlap = prev ? Math.min(prev.y + prev.h, c.y + c.h) - Math.max(prev.y, c.y) : 0;
       if (prev && prev.run !== c.run) {
-        const newLine = Math.abs(prev.y - c.y) > Math.min(prev.h, c.h) * 0.5;
-        if (newLine) out = out.replace(/-$/, '') + (out.endsWith('-') ? '' : '\n');
-        else if (c.x0 - prev.x1 > c.h * 0.15 && !out.endsWith(' ') && c.ch !== ' ') out += ' ';
+        const newLine = overlap < Math.min(prev.h, c.h) * 0.35;
+        if (newLine) { out = out.replace(/-$/, '') + (out.endsWith('-') ? '' : '\n'); base = null; }
+        else if (c.x0 - prev.x1 > Math.min(c.h, prev.h) * 0.15 && !out.endsWith(' ') && c.ch !== ' ') out += ' ';
       }
-      out += c.ch;
+      if (!base || c.h > base.h * 1.05) base = c;
+      let ch = c.ch;
+      // Cifras pequeñas por debajo o por encima de la línea: subíndice (D₃) o superíndice (mm²).
+      if (/\d/.test(ch) && c.h < base.h * 0.8) {
+        const mid = c.y + c.h / 2, bmid = base.y + base.h / 2;
+        if (mid > bmid + base.h * 0.12) ch = SUB[ch]; else if (mid < bmid - base.h * 0.12) ch = SUP[ch];
+      }
+      out += ch;
     });
+    // Viñetas de fuentes de símbolos (Wingdings) que salen como letras sueltas al principio de la línea.
+    const BULLETS = { 'Þ': '➔', 'Ø': '➢', '§': '▪', 'ü': '✓', '': '•', '·': '•' };
+    out = out.replace(/(^|\n)[ \t]*([ÞØ§ü·])(?=\s)/g, (m, nl, ch) => nl + BULLETS[ch]);
     return out.replace(/[ \t]+\n/g, '\n').trim();
   },
 
@@ -6582,7 +6704,10 @@ function renderTabs() {
   const groups = tabGroups();
   const chips = groups.some((g) => g.space);
   // Las pestañas van en su propia franja desplazable; el reloj y los botones quedan siempre a la derecha.
-  el.innerHTML = '<div class="tabs-scroll" id="tabs-scroll">' + groups.map((g) => {
+  // Como en Chrome: ⌄ (todas las pestañas) a la izquierda, el «+» justo tras la última pestaña, y la hora y la pantalla
+  // completa a la derecha.
+  el.innerHTML = `<button class="icon-btn tab-all" id="tab-all" aria-haspopup="menu" aria-expanded="false" aria-label="Todas las pestañas" title="Todas las pestañas: ir a una, cerrarlas u ordenarlas">${icon('chevronDown')}</button>`
+    + '<div class="tabs-scroll" id="tabs-scroll">' + groups.map((g) => {
     const color = g.color;
     const collapsed = S.collapsed.includes(g.key);
     const chip = chips ? `<button class="chip" data-chip="${esc(g.key)}" style="--c:${color}" title="${collapsed ? 'Mostrar' : 'Plegar'} ${esc(g.space || 'Sin carpeta')} · arrastra para moverla">
@@ -6595,8 +6720,8 @@ function renderTabs() {
         <button class="x" data-close="${id}" aria-label="Cerrar ${esc(nb.title)}">${icon('close')}</button>
         ${chips ? '<span class="gline"></span>' : ''}</div>`;
     }).join('')) + '</div>';
-  }).join('') + `</div><span class="clock" data-clock></span><button class="icon-btn plus" id="tab-plus" aria-label="Abrir otra libreta" title="Abrir otra libreta">${icon('plus')}</button>
-    <button class="icon-btn tab-all" id="tab-all" aria-haspopup="menu" aria-expanded="false" aria-label="Todas las pestañas" title="Todas las pestañas: ir a una, cerrarlas u ordenarlas">${icon('chevronDown')}</button>${fullscreenButton()}`;
+  }).join('') + `</div><button class="icon-btn plus" id="tab-plus" aria-label="Abrir otra libreta" title="Abrir otra libreta">${icon('plus')}</button>
+    <span class="clock" data-clock></span>${fullscreenButton()}`;
   updateClocks();
   const sc = $('#tabs-scroll');
   sc.scrollLeft = prevScroll;
@@ -6822,12 +6947,30 @@ function moveTabToSpace(id, key) {
   S.collapsed = S.collapsed.filter((k) => k !== (key || ''));
   touch(nb); Store.put(nb); saveTabs(); renderTabs();
 }
+/** «+»: abrir otra libreta. Con el mismo aspecto que el menú de pestañas: carpetas con su color y cada libreta con su
+ *  portada en pequeño. */
 function openOtherMenu(anchor) {
   const closed = S.notebooks.filter((nb) => !S.tabs.includes(nb.id));
-  const label = (n) => Folders.topOf(n)?.name || '';
-  const bySpace = [...new Set(closed.map(label))];
-  popover(anchor, closed.length ? bySpace.map((sp) => `<div class="label" ${sp ? 'translate="no"' : ''}>${esc(sp || 'Sin carpeta')}</div>${closed.filter((n) => label(n) === sp).map((n) => `<button data-act="${n.id}" translate="no">${esc(n.title)}</button>`).join('')}`).join('')
-    : '<div class="label">Todas las libretas están abiertas</div>', (id) => openNotebook(id));
+  const groups = [];
+  for (const n of closed) {
+    const top = Folders.topOf(n), key = top?.id || '';
+    let g = groups.find((x) => x.key === key);
+    if (!g) groups.push(g = { key, name: top?.name || null, color: top ? Folders.color(top) : spaceColor(''), list: [] });
+    g.list.push(n);
+  }
+  const html = closed.length ? `<div class="label tm-title"><span>Abrir otra libreta</span><span class="tm-count">${closed.length}</span></div>` + groups.map((g) => `
+    <div class="tm-group" style="--c:${g.color}">
+      <div class="tm-ghead om-head">${icon('folder')}<span class="tm-gname" ${g.name ? 'translate="no"' : ''}>${esc(g.name || 'Sin carpeta')}</span><span class="tm-gcount">${g.list.length}</span></div>
+      ${g.list.map((n) => `<button class="om-row" data-act="${n.id}">${coverHTML(n, { label: false, tag: 'span', extra: 'aria-hidden="true"' })}<span class="t" translate="no">${esc(n.title)}</span><small>${n.pages.length === 1 ? '1 página' : `${n.pages.length} páginas`}</small></button>`).join('')}
+    </div>`).join('')
+    : '<div class="label">Todas las libretas están abiertas</div>';
+  popover(anchor, html, (id) => openNotebook(id));
+  const el = openPopover?.el;
+  if (!el) return;
+  el.classList.add('tabs-menu', 'open-menu');
+  // popover() colocó el menú antes de esta clase (más ancha): se recoloca para que no se salga de la ventana.
+  const r = el.getBoundingClientRect();
+  if (r.right > innerWidth - 8) el.style.left = Math.max(8, innerWidth - 8 - r.width) + 'px';
 }
 
 // ---------- Estructura del editor ----------
@@ -7051,6 +7194,7 @@ function layoutPages(redraw = true) {
   $$('.comment-panel').forEach(placeCommentPanel);   // los globos de comentario no cambian de tamaño con el zoom
   if (redraw) redrawPages(pageDpr());
   Ruler.sync();   // la regla mide en mm de la página: con otro zoom, otras marcas
+  ZoomWin.sync();   // lupa: con otro zoom, otra guía en px de página
   const label = $('#zoom-fit');
   if (label) label.textContent = Math.round(S.zoom * 100) + '%';
 }
@@ -7102,6 +7246,7 @@ function renderInk(page) {
   for (const s of page.strokes) drawStroke(ctx, s, page.paper);
   if (sel) { ctx.save(); ctx.globalAlpha = 0.25; for (const s of page.strokes) if (sel.has(s.id)) { ctx.shadowColor = '#2F4FD8'; ctx.shadowBlur = 6; drawStroke(ctx, s, page.paper); } ctx.restore(); }
   for (const it of page.items) if (it.type === 'sticky') paintNoteInk(page, it);   // la tinta de los post-its
+  ZoomWin.dirty(page);   // la lupa repinta su panel si muestra esta página
 }
 function setZoom(z) {
   const desk = $('#desk');
@@ -7642,6 +7787,7 @@ function studyMenu(anchor) {
     <button data-act="cards-review">${icon('lightbulb')} Repasar <span class="study-count${n ? ' on' : ''}">${n === 1 ? '1 pendiente' : `${n} pendientes`}</span></button>
     <button data-act="cards-all" ${Cards.all(nb).length ? '' : 'disabled'} title="Practicar también las que aún no tocan: no cambia cuándo vuelven">${icon('rotate')} Repasar todas (aunque no toquen)</button>
     <button data-act="cards-new">${icon('plus')} Nueva tarjeta…</button><button data-act="cards-list">${icon('pages')} Todas las tarjetas…</button>
+    <button data-act="cloze">${icon('textMark')} Tarjetas de huecos de lo subrayado…</button>
     ${Recall.menuHtml(nb)}
     ${Tape.menuHtml(nb)}
     <hr><div class="label">Colores</div>
@@ -7656,6 +7802,7 @@ function studyMenu(anchor) {
     if (act === 'cards-all') return Cards.review(nb, { all: true });
     if (act === 'cards-new') return Cards.createDialog(nb);
     if (act === 'cards-list') return Cards.listDialog(nb);
+    if (act === 'cloze') return Cloze.dialog(nb);   // huecos (cloze) de lo subrayado, sin IA
     if (act === 'color-sum') return Meaning.summaryDialog(nb);
     if (act.startsWith('ai:')) return AI.fromPage(act.slice(3));
     if (act === 'ai-key') return AI.keyDialog();
@@ -7995,7 +8142,7 @@ function renderOptions() {
     html = `<button class="menu-btn" data-act="pen-kind-menu" aria-haspopup="menu">${icon('pen')}${PEN_KINDS[S.penKind]}${icon('chevronUpDown')}</button>
       <div class="sep"></div>${colorRow('pen', S.penColor)}<div class="sep"></div>
       ${widthControl('pen-width', 1, 14, 0.5, S.penWidth, S.penColor)}
-      ${optGroup(2, `<div class="sep"></div><button class="pill-toggle" data-act="shapes" aria-pressed="${S.penShapes}">${icon('shapes')} Formas</button>${shapesMenuButton()}`)}
+      ${optGroup(2, `<div class="sep"></div><button class="pill-toggle" data-act="shapes" aria-pressed="${S.penShapes}">${icon('shapes')} Formas</button>${shapesMenuButton()}`)}${ZoomWin.barBtn()}
       <span class="hint">${S.penShapes ? 'Cada trazo se convierte en línea, círculo, rectángulo…' : 'Para una forma perfecta, al acabar el trazo mantén quieto 1 segundo antes de soltar'}</span>`;
   } else if (S.tool === 'highlighter') {
     html = Tape.drawing ? Tape.hlBarHtml() : `${colorRow('highlighter', S.hlColor)}<div class="sep"></div>
@@ -8004,7 +8151,7 @@ function renderOptions() {
         <button data-act="hl-mode" data-v="free" aria-pressed="${S.hlMode === 'free'}">Libre</button>
         <button data-act="hl-mode" data-v="straight" aria-pressed="${S.hlMode === 'straight'}">Recto</button>
         <button data-act="hl-mode" data-v="cardinal" aria-pressed="${S.hlMode === 'cardinal'}">H / V</button></div>${shapesMenuButton()}`)}
-      ${optGroup(1, `<div class="sep"></div>${Tape.hlBarHtml()}`)}`;
+      ${optGroup(1, `<div class="sep"></div>${Tape.hlBarHtml()}`)}${ZoomWin.barBtn()}`;
   } else if (S.tool === 'eraser') {
     html = `<div class="seg"><button data-act="eraser-mode" data-v="stroke" aria-pressed="${S.eraserMode === 'stroke'}">Trazo entero</button><button data-act="eraser-mode" data-v="partial" aria-pressed="${S.eraserMode === 'partial'}">Parcial</button></div>
       ${S.eraserMode === 'partial' ? `<div class="sep"></div><label class="range" for="er-size">Tamaño <input id="er-size" type="range" min="6" max="60" step="1" value="${S.eraserSize}"> <span>${S.eraserSize}</span></label>` : ''}`;
@@ -8034,6 +8181,7 @@ function renderOptions() {
   LassoFilter.bindBar(el);   // botón «Filtro» y chip «Solo este color» del lazo
   Tape.bindBar(el);          // cinta de repaso: «Tapar con cinta», modo «Cinta» y la cinta seleccionada
   Ruler.bindBar(el);         // regla: la monta en el editor y pone su botón en la barra del bolígrafo y del subrayador
+  ZoomWin.bindBar(el);       // lupa: su botón (bolígrafo y subrayador) y el panel, si está abierta
   Palette.sync();
 }
 /** Tamaño del círculo de los comentarios (Pequeño, Mediano, Grande): es uno para todos (preferencia commentSize),
@@ -8536,7 +8684,7 @@ function attachInk(page, v) {
     const [cx, cy] = guide?.map ? guide.map(e.clientX, e.clientY) : [e.clientX, e.clientY];
     return [(cx - r.left) / S.zoom, (cy - r.top) / S.zoom, Math.round(pressure * 100) / 100];
   };
-  v.ink.addEventListener('pointerdown', (e) => {
+  const down = (e) => {
     if (e.button !== 0 && e.pointerType === 'mouse') return;
     if (e.pointerType === 'touch' && PenInput.fingerBlocked()) return;   // sin preventDefault: el dedo desplaza
     if (activeId !== null) return;   // ya escribe otro puntero
@@ -8564,8 +8712,8 @@ function attachInk(page, v) {
     lastMove = performance.now(); lastPoint = [e.clientX, e.clientY];
     snap = null; armHold();
     drawLive();
-  });
-  v.ink.addEventListener('pointermove', (e) => {
+  };
+  const move = (e) => {
     if (e.pointerId !== activeId) return;
     if (linkTap && Math.hypot(e.clientX - linkTap.at[0], e.clientY - linkTap.at[1]) > 6) linkTap = null;
     if (S.tool === 'eraser') { if (e.buttons) erased = eraseAt(page, point(e)) || erased; return; }
@@ -8585,7 +8733,9 @@ function attachInk(page, v) {
     guide?.move(e.clientX, e.clientY);   // medida en directo (se pinta una vez por fotograma)
     if (Math.hypot(e.clientX - lastPoint[0], e.clientY - lastPoint[1]) > 4) { lastMove = performance.now(); lastPoint = [e.clientX, e.clientY]; armHold(); }
     drawLive();
-  });
+  };
+  v.ink.addEventListener('pointerdown', down);
+  v.ink.addEventListener('pointermove', move);
   const finish = (e) => {
     if (e.pointerId !== activeId) return;
     activeId = null;
@@ -8651,6 +8801,9 @@ function attachInk(page, v) {
   v.ink.addEventListener('pointerup', finish);
   v.ink.addEventListener('pointercancel', finish);
   v.ink.addEventListener('lostpointercapture', (e) => { if (e.pointerId === activeId) finish(e); });   // sin pointerup: no se queda bloqueado
+  // Lupa (zoomwin.js): escribe en esta página desde su panel con eventos propios (clientX/Y ya llevados a la página)
+  // y pinta en él el trazo en curso. Mismo camino que el lápiz: bolígrafo, formas, regla, post-its y deshacer.
+  v.port = { down, move, up: finish, stroke: () => stroke, note: () => note };
   function drawLive() {
     const ctx = ctxFor(v.live);
     ctx.clearRect(0, 0, page.w, page.h);
@@ -9259,7 +9412,7 @@ const Ruler = {
   },
   /** Con un dedo sobre la regla (o un gesto suyo en marcha) no se desplaza ni se pellizca el escritorio. */
   touch(e) {
-    if (!this.visible()) return;
+    if (!this.visible() || e.target.closest?.('.zw-panel')) return;   // el panel de la lupa va encima de la regla
     const rect = this.wrap.getBoundingClientRect();
     const on = this.gesture || [...e.changedTouches].some((t) => t.touchType !== 'stylus' && this.hit(t.clientX, t.clientY, rect));
     if (!on) return;
@@ -9268,7 +9421,7 @@ const Ruler = {
   },
   /** Rueda del ratón encima de la regla: la gira (con el imán). Ctrl/⌘ + rueda sigue siendo el zoom. */
   wheel(e) {
-    if (e.ctrlKey || e.metaKey || !this.visible() || this.gesture) return;
+    if (e.ctrlKey || e.metaKey || !this.visible() || this.gesture || e.target.closest?.('.zw-panel')) return;
     if (!this.hit(e.clientX, e.clientY, this.wrap.getBoundingClientRect())) return;
     e.preventDefault(); e.stopPropagation();
     const now = performance.now();
@@ -9354,6 +9507,553 @@ const Ruler = {
 const rulerRepaint = () => { Ruler.drawn = ''; Ruler.sync(); };
 try { matchMedia('(prefers-color-scheme: dark)').addEventListener('change', rulerRepaint); } catch (e) { /* navegador antiguo */ }
 new MutationObserver(rulerRepaint).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+
+// =============================================================================
+// Lupa (como la «ventana de zoom» de Goodnotes): escribir ampliado y con precisión
+// =============================================================================
+// Una guía (rectángulo) sobre la página marca la zona; abajo, un panel ancho la muestra ampliada (×2–×4 respecto a lo
+// que se ve en pantalla). Lo que se escribe en el panel va a la página en su sitio real: el panel manda a la tinta de esa
+// página (attachInk, v.port) eventos propios con las coordenadas ya llevadas a la página, así se usan el mismo
+// bolígrafo, color, grosor, presión, formas en directo, regla, post-its y deshacer que escribiendo directamente.
+// El panel se pinta en su propio lienzo a su escala (papel, plantilla, elementos y tinta de la zona; no el lienzo de la
+// página ampliado, que saldría borroso) y solo se repinta al cambiar la página o mover la guía; el trazo en curso se
+// pinta una vez por fotograma en una capa encima. Nada se guarda en la libreta: el aumento y el alto del panel van en
+// las preferencias (S.zoomWin = { zoom, height }).
+const ZW_MIN = 2, ZW_MAX = 4;   // aumento
+const ZW_ZONE = 0.25;           // franja derecha del panel: al levantar el lápiz en ella, la guía avanza
+const ZW_BASE = 0.7;            // el renglón va a esta altura de la guía
+const ZW_BOX = new WeakMap();   // puntos de un trazo → su rectángulo (para pintar solo lo que cae en la guía)
+// Icono de «Siguiente línea» (Lucide, ISC): corner-down-left.
+ICONS.cornerDownLeft = ICONS.cornerDownLeft || '<polyline points="9 10 4 15 9 20"/><path d="M20 4v7a4 4 0 0 1-4 4H4"/>';
+const ZoomWin = {
+  on: false,
+  g: null,                 // guía: { pageId, x, y } en px de página (el ancho y el alto salen del panel y del aumento)
+  panel: null, stage: null, base: null, live: null, guideEl: null, ro: null,
+  sw: 0, sh: 0,            // medidas del panel de escritura (px de pantalla)
+  pen: null,               // escritura en curso desde el panel
+  pan: null, swipe: null, drag: null,
+  touches: new Map(),
+  raf: 0, baseRaf: 0, painting: false, again: false, seen: '', advTimer: 0, saveTimer: 0,
+  /** Preferencias con valores válidos. */
+  st() {
+    const z = S.zoomWin;
+    z.zoom = Number.isFinite(z.zoom) ? Math.round(Math.max(ZW_MIN, Math.min(ZW_MAX, z.zoom)) * 100) / 100 : 3;
+    if (z.height != null && !Number.isFinite(z.height)) z.height = null;
+    return z;
+  },
+  page() { return this.g && activeNb()?.pages.find((p) => p.id === this.g.pageId); },
+  /** Se puede escribir en el panel con la herramienta actual. */
+  usable() { return INK_TOOLS.includes(S.tool) && !S.reading; },
+  /** Alto del panel: el elegido o, sin elegir, algo más de un cuarto de la ventana. */
+  height() {
+    const max = Math.max(150, Math.round(innerHeight * 0.5));
+    return Math.round(Math.max(120, Math.min(max, this.st().height ?? Math.max(140, Math.min(250, innerHeight * 0.27)))));
+  },
+  /** Tamaño de la guía (px de página) y k = px del panel por px de página. Nunca más grande que la página. */
+  dims(page = this.page()) {
+    const m = this.st().zoom * S.zoom, sw = this.sw || 600, sh = this.sh || 160;
+    const f = page ? Math.max(1, sw / m / page.w, sh / m / page.h) : 1;
+    const w = sw / m / f;
+    return { w, h: sh / m / f, k: sw / w };
+  },
+  // ---------- Renglones y márgenes de la plantilla ----------
+  /** Zonas de escritura de la página, en orden de lectura: { x0, x1, y0, y1, first, step } (first: primer renglón y
+   *  step: interlineado; null si la plantilla no tiene líneas). Respeta el margen del rayado, la columna de Cornell y
+   *  las casillas, bloques y columnas de las plantillas de Medicina. */
+  regions(page) {
+    const W = page.w, H = page.h, R = (x0, x1, y0, y1, first = null, step = null) => ({ x0, x1, y0, y1, first, step });
+    if (page.bg) return [R(24, W - 24, 24, H - 24)];
+    switch (page.template) {
+      case 'ruled': return [R(98, W - 16, 78, H - 20, 110, 32)];
+      case 'narrow': return [R(98, W - 16, 72, H - 20, 96, 24)];
+      case 'grid': case 'dots': return [R(24, W - 24, 24, H - 24, 48, 48)];
+      case 'cornell': case 'cornellMir': {
+        const s = H - 230, mir = page.template === 'cornellMir', first = mir ? 174 : 142;
+        return [R(228, W - 16, 90, s, first, 32), R(8, 212, 90, s, first, 32), R(16, W - 16, s, H - 20, mir ? s + 72 : s + 40, 32)];
+      }
+      case 'clinical': case 'drug': case 'ddx': {
+        const L = medLayout(page), out = L.fields.map((f) => R(f.x + 6, f.x + f.w - 6, f.y + 18, f.y + f.h, f.y + f.h - 8, f.h));
+        for (const b of L.sections) out.push(R(b.x0 + 6, b.x1 - 6, b.y + MED_ROW, b.bottom, b.y + 2 * MED_ROW, MED_ROW));
+        for (const c of L.table?.cols || []) out.push(R(c.x + 6, c.x + c.w - 6, L.table.top + 40, L.table.bottom, L.table.top + 40 + MED_ROW, MED_ROW));
+        return out;
+      }
+      default: return [R(40, W - 40, 40, H - 40)];
+    }
+  },
+  /** La zona que contiene el punto (la más pequeña) o, si ninguna, la más cercana. */
+  regionAt(regs, x, y) {
+    const inside = regs.filter((r) => x >= r.x0 - 12 && x <= r.x1 + 12 && y >= r.y0 - 2 && y <= r.y1 + 2);
+    if (inside.length) return inside.sort((a, b) => (a.x1 - a.x0) * (a.y1 - a.y0) - (b.x1 - b.x0) * (b.y1 - b.y0))[0];
+    const dist = (r) => Math.hypot(Math.max(r.x0 - x, 0, x - r.x1), Math.max(r.y0 - y, 0, y - r.y1));
+    return regs.slice().sort((a, b) => dist(a) - dist(b))[0];
+  },
+  /** El primer renglón de una zona que queda en `from` o más abajo (o null si no cabe). */
+  lineFrom(r, d, from) {
+    if (r.first == null) { const b = Math.max(from, r.y0 + d.h * ZW_BASE); return b <= r.y1 ? b : null; }
+    const b = r.first + Math.max(0, Math.ceil((from - r.first) / r.step - 1e-6)) * r.step;
+    return b <= r.y1 + 1 ? b : null;
+  },
+  /** Pone la guía al principio de un renglón (con el margen de su zona a la vista). */
+  setLine(page, r, base) {
+    const d = this.dims(page);
+    this.g = { pageId: page.id, x: r.x0 - 10, y: base - d.h * ZW_BASE };
+    this.clamp();
+  },
+  /** Primera línea que se ve de la página actual (al abrir la lupa). */
+  home() {
+    const nb = activeNb();
+    if (!nb) return;
+    updateCurrentPage();
+    const page = nb.pages[currentPageIndex] || nb.pages[0], v = views.get(page.id), desk = $('#desk');
+    const d = this.dims(page), regs = this.regions(page);
+    const top = v && desk ? Math.max(0, (desk.getBoundingClientRect().top - v.wrap.getBoundingClientRect().top) / S.zoom) : 0;
+    for (const r of regs) {
+      const b = this.lineFrom(r, d, top + d.h * ZW_BASE);
+      if (b != null) return this.setLine(page, r, b);
+    }
+    this.setLine(page, regs[0], this.lineFrom(regs[0], d, 0) ?? regs[0].y0 + d.h * ZW_BASE);
+  },
+  clamp() {
+    const page = this.page();
+    if (!page) return;
+    const d = this.dims(page);
+    this.g.x = Math.max(0, Math.min(page.w - d.w, this.g.x));
+    this.g.y = Math.max(0, Math.min(page.h - d.h, this.g.y));
+  },
+  // ---------- Mover la guía ----------
+  /** ↵: al principio del renglón siguiente (de la misma zona, de la de debajo o de la página siguiente). */
+  newline() {
+    const page = this.page();
+    if (!page) return;
+    const d = this.dims(page), regs = this.regions(page), base = this.g.y + d.h * ZW_BASE;
+    const r = this.regionAt(regs, this.g.x + Math.min(d.w * 0.25, 40), base);
+    const step = r.step || Math.max(24, Math.round(d.h * 0.55));
+    let b = r.first != null ? this.lineFrom(r, d, base + step * 0.4) : base + step <= r.y1 ? base + step : null;
+    if (b != null) this.setLine(page, r, b);
+    else {
+      const below = regs.filter((q) => q !== r && q.y0 >= r.y1 - 2 && q.x0 < r.x1 && q.x1 > r.x0).sort((a, c) => a.y0 - c.y0 || a.x0 - c.x0)[0];
+      b = below && this.lineFrom(below, d, below.y0);
+      if (below && b != null) this.setLine(page, below, b);
+      else {
+        const nb = activeNb(), next = nb.pages[nb.pages.indexOf(page) + 1];
+        if (!next) { this.flash(); return toast('Es la última línea de la libreta'); }
+        const nd = this.dims(next), rr = this.regions(next)[0];
+        this.setLine(next, rr, this.lineFrom(rr, nd, 0) ?? rr.y0 + nd.h * ZW_BASE);
+      }
+    }
+    this.place(true);
+  },
+  /** El borde derecho hasta el que puede llegar la guía en su renglón (px de página). */
+  maxX(page, d) {
+    const r = this.regionAt(this.regions(page), this.g.x + Math.min(d.w * 0.25, 40), this.g.y + d.h * ZW_BASE);
+    return Math.max(this.g.x, Math.min(page.w - d.w, r.x1 + 12 - d.w));
+  },
+  /** ‹ ›: media guía a la izquierda o a la derecha. Al final del renglón, avisa con «↵». */
+  shift(dir) {
+    const page = this.page();
+    if (!page) return;
+    const d = this.dims(page), max = dir > 0 ? this.maxX(page, d) : page.w - d.w;
+    if (dir > 0 && this.g.x >= max - 0.5) return this.flash();
+    this.g.x = Math.max(0, Math.min(max, this.g.x + dir * d.w * 0.5));
+    this.place(true);
+  },
+  /** Avance automático: lo escrito hasta `x` (px de página) queda a un tercio de la guía. */
+  advance(x) {
+    const page = this.page();
+    if (!page || this.pen) return;
+    const d = this.dims(page), max = this.maxX(page, d), to = Math.min(max, x - d.w * 0.3);
+    if (to <= this.g.x + 4) { if (this.g.x >= max - 0.5) this.flash(); return; }
+    this.g.x = to;
+    this.place(true);
+  },
+  /** Fin del renglón: el botón «↵» se ilumina. */
+  flash() { this.panel?.classList.remove('zw-eol'); void this.panel?.offsetWidth; this.panel?.classList.add('zw-eol'); },
+  /** Coloca la guía (lleva la vista a ella con `reveal`) y repinta el panel. */
+  place(reveal = false) {
+    const page = this.page(), v = page && views.get(page.id);
+    this.panel?.classList.remove('zw-eol');
+    if (!v || !this.guideEl) return;
+    if (this.guideEl.parentElement !== v.over) v.over.appendChild(this.guideEl);
+    const d = this.dims(page), el = this.guideEl;
+    el.style.cssText = `left:${this.g.x}px;top:${this.g.y}px;width:${d.w}px;height:${d.h}px;--zi:${1 / S.zoom}`;
+    const z = this.st().zoom;
+    if (this.zLabel) this.zLabel.textContent = '×' + String(Math.round(z * 10) / 10).replace('.', ',');
+    if (reveal) this.reveal();
+    this.scheduleBase();
+  },
+  /** Que la guía se vea en el escritorio (por encima del panel). */
+  reveal() {
+    const desk = $('#desk'), page = this.page(), v = page && views.get(page.id);
+    if (!desk || !v) return;
+    updateCurrentPage();
+    if (PageMode.snapped() && desk.classList.contains('pm-snap')) {   // por páginas: la página entera ya se ve
+      if (activeNb().pages[currentPageIndex] !== page) scrollToPage(page.id, false);
+      return;
+    }
+    const d = this.dims(page), dr = desk.getBoundingClientRect(), wr = v.wrap.getBoundingClientRect(), m = 20;
+    const top = wr.top + this.g.y * S.zoom, left = wr.left + this.g.x * S.zoom, h = d.h * S.zoom, w = d.w * S.zoom;
+    let dy = 0, dx = 0;
+    if (top < dr.top + m || top + h > dr.top + desk.clientHeight - m) dy = top - (dr.top + Math.max(m, desk.clientHeight * 0.3));
+    if (left < dr.left + m || left + w > dr.left + desk.clientWidth - m) dx = left - (dr.left + Math.max(m, (desk.clientWidth - w) / 2));
+    if (dx || dy) desk.scrollBy({ left: dx, top: dy });
+  },
+  /** Mueve la guía a otra posición de pantalla (arrastre): puede pasar a la página de al lado. */
+  moveScreen(g0, dx, dy) {
+    const p0 = activeNb()?.pages.find((p) => p.id === g0.pageId), v0 = p0 && views.get(p0.id);
+    if (!v0) return;
+    const d = this.dims(p0), r = v0.wrap.getBoundingClientRect();
+    const cx = r.left + (g0.x + d.w / 2) * S.zoom + dx, cy = r.top + (g0.y + d.h / 2) * S.zoom + dy;
+    const hit = pageAtPoint(cx, cy);
+    this.g = hit ? { pageId: hit.page.id, x: hit.x - d.w / 2, y: hit.y - d.h / 2 } : { pageId: p0.id, x: g0.x + dx / S.zoom, y: g0.y + dy / S.zoom };
+    this.clamp();
+    this.place();
+  },
+  // ---------- Mostrar y ocultar ----------
+  toggle(on = !this.on) {
+    if (on && (S.reading || S.view !== 'editor' || !activeNb())) return;
+    this.on = !!on;
+    if (this.on) {
+      if (!INK_TOOLS.includes(S.tool)) setTool('pen');
+      const keep = this.page() && this.page() === activeNb().pages[currentPageIndex];
+      this.mount();
+      this.relayout();
+      if (!keep) this.home();
+      this.clamp();
+      this.place(true);
+      toast('Lupa: escribe en el panel de abajo. Al llegar a la derecha, la guía avanza sola');
+    } else this.unmount();
+    $$('[data-zw-toggle]').forEach((b) => b.setAttribute('aria-pressed', String(this.on)));
+  },
+  /** El escritorio cambia de alto: las páginas se recolocan (por páginas, con el zoom de ajuste, se vuelven a ajustar). */
+  relayout() {
+    const desk = $('#desk');
+    if (!desk || !activeNb()) return;
+    const fit = PageMode.snapped() && desk.classList.contains('pm-snap');
+    layoutPages();
+    if (fit) fitZoom();
+  },
+  mount() {
+    const wrap = $('#desk')?.parentElement;
+    if (!wrap) return;
+    if (this.panel?.isConnected && this.panel.parentElement === wrap) return;
+    this.ro?.disconnect();
+    const panel = document.createElement('div');
+    panel.className = 'zw-panel';
+    panel.setAttribute('role', 'region'); panel.setAttribute('aria-label', 'Lupa');
+    const key = onbKey('toggleZoomWin');
+    panel.innerHTML = `<div class="zw-bar"><span class="zw-grip" title="Arrastra para cambiar la altura del panel"></span>
+        <b class="zw-title">${icon('zoomIn')}<span>Lupa</span></b>
+        <div class="seg zw-zoom" role="group" aria-label="Aumento"><button data-zw="out" aria-label="Menos aumento" title="Menos aumento">−</button><span class="zw-z" translate="no"></span><button data-zw="in" aria-label="Más aumento" title="Más aumento">+</button></div>
+        <span class="zw-flex"></span>
+        <button class="icon-btn" data-zw="left" aria-label="Mover la guía a la izquierda" title="Mover la guía a la izquierda">${icon('back')}</button>
+        <button class="icon-btn zw-ret" data-zw="ret" aria-label="Siguiente línea" title="Siguiente línea (Intro, o desliza a la izquierda con dos dedos)">${icon('cornerDownLeft')}</button>
+        <button class="icon-btn" data-zw="right" aria-label="Mover la guía a la derecha" title="Mover la guía a la derecha">${icon('chevronRight')}</button>
+        <button class="icon-btn" data-zw="close" aria-label="Cerrar la lupa" title="Cerrar la lupa${key ? ` (${key})` : ''}">${icon('close')}</button></div>
+      <div class="zw-stage"><canvas class="zw-base" width="0" height="0"></canvas><canvas class="zw-live" width="0" height="0"></canvas>
+        <span class="zw-zone" aria-hidden="true"></span><span class="zw-msg">Elige el bolígrafo o el subrayador para escribir aquí</span></div>`;
+    wrap.appendChild(panel);
+    wrap.classList.add('zw-on');
+    wrap.style.setProperty('--zw-h', this.height() + 'px');
+    Object.assign(this, { panel, stage: $('.zw-stage', panel), base: $('.zw-base', panel), live: $('.zw-live', panel), zLabel: $('.zw-z', panel) });
+    this.measure();
+    if (!this.guideEl) {
+      const el = document.createElement('div');
+      el.className = 'zw-guide'; el.setAttribute('aria-hidden', 'true');
+      el.innerHTML = '<span class="zw-gzone"></span><span class="zw-move" title="Mover la guía"></span><span class="zw-size" title="Cambiar el tamaño de la guía (aumento)"></span>';
+      el.addEventListener('pointerdown', (e) => this.guideDown(e));
+      this.guideEl = el;
+    }
+    panel.addEventListener('click', (e) => this.barClick(e));
+    $('.zw-bar', panel).addEventListener('pointerdown', (e) => this.gripDown(e));
+    for (const t of ['pointerdown', 'pointermove', 'pointerup', 'pointercancel']) this.stage.addEventListener(t, this);
+    this.stage.addEventListener('lostpointercapture', (e) => { if (this.pen?.id === e.pointerId) this.handleEvent(new PointerEvent('pointercancel', e)); });
+    if (window.ResizeObserver) (this.ro = new ResizeObserver(() => { this.measure(); this.place(); })).observe(this.stage);
+    this.syncTool();
+  },
+  unmount() {
+    clearTimeout(this.advTimer); cancelAnimationFrame(this.raf); cancelAnimationFrame(this.baseRaf);
+    this.raf = this.baseRaf = 0; this.pen = this.pan = this.swipe = this.drag = null; this.touches.clear();
+    this.ro?.disconnect(); this.ro = null;
+    for (const c of [this.base, this.live]) if (c) { c.width = 0; c.height = 0; }   // libera la memoria de los lienzos
+    const wrap = this.panel?.parentElement;
+    this.panel?.remove(); this.guideEl?.remove();
+    this.panel = this.stage = this.base = this.live = null; this.seen = '';
+    if (wrap) { wrap.classList.remove('zw-on'); this.relayout(); }
+  },
+  measure() { if (this.stage) { this.sw = this.stage.clientWidth; this.sh = this.stage.clientHeight; } },
+  /** Lo llama renderOptions: el botón de la barra y, si la lupa está abierta, que siga montada en este editor. */
+  bindBar(el) {
+    if (!el._zwBound) {
+      el._zwBound = true;
+      el.addEventListener('click', (e) => { if (e.target.closest('[data-zw-toggle]')) this.toggle(); });
+    }
+    if (!this.on) return;
+    if (S.reading || S.view !== 'editor') return this.toggle(false);
+    const fresh = !this.panel?.isConnected || this.panel.parentElement !== $('#desk')?.parentElement;
+    if (fresh) { this.mount(); this.relayout(); if (!this.page()) this.home(); this.place(); }
+    this.syncTool();
+  },
+  /** Botón «Lupa» de la barra del bolígrafo y del subrayador (pasa a «Más» si no cabe). */
+  barBtn() {
+    const key = onbKey('toggleZoomWin');
+    return optGroup(3, `<div class="sep"></div><button class="pill-toggle zw-btn" data-zw-toggle aria-pressed="${this.on}" title="Lupa: escribir ampliado y con precisión${key ? ` (${key})` : ''}">${icon('zoomIn')} <span>Lupa</span></button>`);
+  },
+  syncTool() { this.panel?.classList.toggle('zw-off', !this.usable()); },
+  /** Lo llama layoutPages (otro zoom: otra guía en px de página). */
+  sync() {
+    if (!this.on || !this.panel?.isConnected) return;
+    if (!this.page()) this.home();
+    this.clamp();
+    this.place();
+  },
+  /** Lo llama renderInk: la tinta de la página de la guía ha cambiado (trazo, goma, lazo, deshacer…). */
+  dirty(page) { if (this.on && this.g?.pageId === page.id) this.scheduleBase(); },
+  barClick(e) {
+    const b = e.target.closest('[data-zw]');
+    if (!b) return;
+    const act = b.dataset.zw;
+    if (act === 'close') return this.toggle(false);
+    if (act === 'ret') return this.newline();
+    if (act === 'left' || act === 'right') return this.shift(act === 'left' ? -1 : 1);
+    if (act === 'in' || act === 'out') this.setZoom(this.st().zoom + (act === 'in' ? 0.5 : -0.5));
+  },
+  setZoom(z) {
+    this.st().zoom = z;
+    this.st();
+    this.clamp(); this.place();
+    clearTimeout(this.saveTimer); this.saveTimer = setTimeout(savePrefs, 300);
+  },
+  // ---------- Pintar el panel ----------
+  scheduleBase() {
+    if (!this.on || this.baseRaf) return;
+    this.baseRaf = requestAnimationFrame(() => { this.baseRaf = 0; this.paintBase(); });
+  },
+  /** Lo de la página que cae en la guía (para no pintar la página entera). */
+  culled(page, g) {
+    const m = 40, hit = (b) => b.x < g.x + g.w + m && b.x + b.w > g.x - m && b.y < g.y + g.h + m && b.y + b.h > g.y - m;
+    const strokes = page.strokes.filter((s) => {
+      let b = ZW_BOX.get(s.points);
+      if (!b) { b = s.points.length ? Shapes.bounds(s.points) : { x: 0, y: 0, w: 0, h: 0 }; ZW_BOX.set(s.points, b); }
+      return hit({ x: b.x - s.width, y: b.y - s.width, w: b.w + s.width * 2, h: b.h + s.width * 2 });
+    });
+    const items = page.items.filter((it) => (it.type === 'text' ? it.y < g.y + g.h + m && it.x < g.x + g.w + m && it.x + (it.w || 300) > g.x - m : hit({ x: it.x, y: it.y, w: it.w || 40, h: it.h || 40 })));
+    return { ...page, strokes, items };
+  },
+  /** La zona de la página a la escala del panel: papel, plantilla, fondo del PDF, elementos y tinta. De uno en uno
+   *  (es asíncrono por las imágenes): si se pide otro mientras tanto, se repinta al acabar. */
+  async paintBase() {
+    const page = this.page(), c = this.base;
+    if (!page || !c || !this.sw) return;
+    if (this.painting) { this.again = true; return; }
+    this.painting = true;
+    try {
+      const dpr = pageDpr(), W = Math.round(this.sw * dpr), H = Math.round(this.sh * dpr), d = this.dims(page), s = d.k * dpr;
+      if (c.width !== W || c.height !== H) { c.width = W; c.height = H; }
+      const ctx = c.getContext('2d'), g = { x: this.g.x, y: this.g.y, w: d.w, h: d.h };
+      ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, W, H);
+      ctx.setTransform(s, 0, 0, s, -g.x * s, -g.y * s);
+      ctx.save(); ctx.beginPath(); ctx.rect(g.x, g.y, g.w, g.h); ctx.clip();
+      await drawPageQuick(ctx, this.culled(page, g));
+      ctx.restore();
+      // Sin renglones (en blanco, PDF…): una línea de ayuda muy suave para escribir recto (solo en el panel).
+      const r = this.regionAt(this.regions(page), g.x + Math.min(g.w * 0.25, 40), g.y + g.h * ZW_BASE);
+      if (r.first == null) {
+        ctx.save(); ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.strokeStyle = 'rgba(47, 79, 216, .28)'; ctx.lineWidth = dpr; ctx.setLineDash([6 * dpr, 6 * dpr]);
+        ctx.beginPath(); ctx.moveTo(0, Math.round(H * ZW_BASE) + 0.5); ctx.lineTo(W, Math.round(H * ZW_BASE) + 0.5); ctx.stroke(); ctx.restore();
+      }
+      this.seen = `${page.id}:${page._v || 0}:${activeNb()?._v || 0}`;
+      if (!this.pen) this.paintLive();   // quita el trazo recién terminado (ya está en la base) y pone la regla
+    } finally {
+      this.painting = false;
+      if (this.again) { this.again = false; this.scheduleBase(); }
+    }
+  },
+  /** Capa de encima: el trazo en curso (o el lazo) y los bordes de la regla. Una vez por fotograma mientras se escribe. */
+  paintLive() {
+    const c = this.live, page = this.page();
+    if (!c || !page || !this.sw) return;
+    const dpr = pageDpr(), W = Math.round(this.sw * dpr), H = Math.round(this.sh * dpr), d = this.dims(page), s = d.k * dpr;
+    if (c.width !== W || c.height !== H) { c.width = W; c.height = H; }
+    const ctx = c.getContext('2d');
+    ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, W, H);
+    const v = views.get(page.id), st = this.pen && v?.port?.stroke();
+    if (st) {
+      ctx.setTransform(s, 0, 0, s, -this.g.x * s, -this.g.y * s);
+      const note = v.port.note();
+      if (note) { ctx.save(); ctx.beginPath(); ctx.rect(note.x, note.y, note.w, note.h); ctx.clip(); drawStroke(ctx, st, 'white'); ctx.restore(); } else drawStroke(ctx, st, page.paper);
+    } else if (this.pen && v?.live._scale) {
+      // Lazo o cinta en curso: lo que hay en el lienzo en directo de la página.
+      const k = v.live._scale;
+      ctx.drawImage(v.live, this.g.x * k, this.g.y * k, d.w * k, d.h * k, 0, 0, W, H);
+    }
+    if (v && Ruler.visible()) this.paintRuler(ctx, v, s);
+  },
+  /** Los dos bordes de la regla, donde caen en la guía (la regla está en px de pantalla, encima del escritorio). */
+  paintRuler(ctx, v, s) {
+    const r = Ruler.st();
+    if (!Number.isFinite(r.x) || !Number.isFinite(r.y) || !Ruler.wrap) return;
+    const wr = Ruler.wrap.getBoundingClientRect(), ir = v.ink.getBoundingClientRect();
+    const a = r.angle * Math.PI / 180, cos = Math.cos(a), sin = Math.sin(a), h = RULER_W / 2 / S.zoom, L = 4000;
+    const cx = (wr.left + r.x - ir.left) / S.zoom, cy = (wr.top + r.y - ir.top) / S.zoom;
+    ctx.save();
+    ctx.setTransform(s, 0, 0, s, -this.g.x * s, -this.g.y * s);
+    ctx.strokeStyle = 'rgba(47, 79, 216, .6)'; ctx.lineWidth = 1.5 / (s / pageDpr());
+    ctx.beginPath();
+    for (const e of [-h, h]) { const ox = cx - sin * e, oy = cy + cos * e; ctx.moveTo(ox - cos * L, oy - sin * L); ctx.lineTo(ox + cos * L, oy + sin * L); }
+    ctx.stroke(); ctx.restore();
+  },
+  loop() {
+    if (this.raf) return;
+    const step = () => { this.raf = 0; this.paintLive(); if (this.pen) this.raf = requestAnimationFrame(step); };
+    this.raf = requestAnimationFrame(step);
+  },
+  // ---------- Escribir en el panel ----------
+  /** Evento para attachInk: el del panel llevado a la página (clientX/Y de la página en pantalla, con decimales). */
+  fake(e, type, ir, list = true) {
+    const p = this.pen, px = p.gx + (e.clientX - p.sr.left) / p.k, py = p.gy + (e.clientY - p.sr.top) / p.k;
+    const f = { type, pointerId: p.fid, pointerType: e.pointerType, isPrimary: true, button: 0, buttons: e.buttons, pressure: e.pressure,
+      clientX: ir.left + px * S.zoom, clientY: ir.top + py * S.zoom, zx: px, preventDefault() {}, stopPropagation() {} };
+    if (list) f.getCoalescedEvents = () => (e.getCoalescedEvents ? e.getCoalescedEvents() : []).map((c) => this.fake(c, type, ir, false));
+    return f;
+  },
+  handleEvent(e) {
+    if (e.type === 'pointerdown') return this.stageDown(e);
+    if (e.type === 'pointermove') return this.stageMove(e);
+    return this.stageUp(e);
+  },
+  stageDown(e) {
+    if (e.pointerType === 'mouse' && e.button !== 0) return;
+    if (e.pointerType === 'touch' && PenInput.down.size) return;   // palma: con el lápiz apoyado no cuenta
+    e.preventDefault();
+    try { this.stage.setPointerCapture(e.pointerId); } catch (err) { /* puntero sintético */ }
+    if (e.pointerType === 'touch') {
+      this.touches.set(e.pointerId, { s: [e.clientX, e.clientY], l: [e.clientX, e.clientY] });
+      if (this.touches.size === 2) {   // dos dedos: gesto (deslizar a la izquierda = siguiente línea)
+        if (this.pen?.type === 'touch' && PenInput.live?.type === 'touch') PenInput.live.cancel();
+        if (this.pen?.type === 'touch') this.pen = null;
+        this.pan = null; this.swipe = true;
+        return;
+      }
+      if (this.touches.size > 2 || this.swipe) return;
+      if (PenInput.fingerBlocked()) {   // modo lápiz: el dedo mueve la guía (como si arrastrara la hoja)
+        this.pan = { id: e.pointerId, at: [e.clientX, e.clientY], g0: { ...this.g }, k: this.dims().k };
+        return;
+      }
+    }
+    if (this.pen) return;   // ya escribe otro puntero
+    if (!this.usable()) return toast('Elige el bolígrafo o el subrayador para escribir en la lupa');
+    const page = this.page(), v = page && views.get(page.id);
+    if (!v?.port) return;
+    clearTimeout(this.advTimer);
+    // Se escribe encima: un toque en el panel no abre el post-it ni vuelve a tapar la cinta (como el punto de la «i»).
+    lastInkAt = performance.now();
+    const d = this.dims(page);
+    this.pen = { id: e.pointerId, fid: -7000 - e.pointerId, type: e.pointerType, page, v, sr: this.stage.getBoundingClientRect(), k: d.k, gx: this.g.x, gy: this.g.y, maxX: -Infinity };
+    const f = this.fake(e, 'pointerdown', v.ink.getBoundingClientRect());
+    this.pen.maxX = f.zx;
+    v.port.down(f);
+    this.loop();
+  },
+  stageMove(e) {
+    const t = this.touches.get(e.pointerId);
+    if (t) t.l = [e.clientX, e.clientY];
+    if (this.swipe) return;
+    if (this.pan && this.pan.id === e.pointerId) {
+      const p = this.pan;
+      this.moveScreen(p.g0, -(e.clientX - p.at[0]) / p.k * S.zoom, -(e.clientY - p.at[1]) / p.k * S.zoom);
+      return;
+    }
+    const p = this.pen;
+    if (!p || p.id !== e.pointerId) return;
+    const f = this.fake(e, 'pointermove', p.v.ink.getBoundingClientRect());
+    p.maxX = Math.max(p.maxX, f.zx);
+    p.v.port.move(f);
+  },
+  stageUp(e) {
+    const t = this.touches.get(e.pointerId);
+    if (t) { t.l = [e.clientX, e.clientY]; }
+    if (this.swipe) {
+      if (t) t.up = true;
+      if ([...this.touches.values()].every((x) => x.up)) {
+        const all = [...this.touches.values()], dx = all.reduce((a, x) => a + x.l[0] - x.s[0], 0) / all.length, dy = all.reduce((a, x) => a + x.l[1] - x.s[1], 0) / all.length;
+        this.touches.clear(); this.swipe = null;
+        if (dx < -50 && Math.abs(dy) < Math.abs(dx) * 0.6) this.newline();
+      }
+      return;
+    }
+    this.touches.delete(e.pointerId);
+    if (this.pan && this.pan.id === e.pointerId) { this.pan = null; return; }
+    const p = this.pen;
+    if (!p || p.id !== e.pointerId) return;
+    const f = this.fake(e, e.type === 'pointerup' ? 'pointerup' : 'pointercancel', p.v.ink.getBoundingClientRect());
+    const wrote = !!p.v.port.stroke() && (S.tool === 'pen' || S.tool === 'highlighter');
+    p.maxX = Math.max(p.maxX, f.zx);
+    this.pen = null;
+    cancelAnimationFrame(this.raf); this.raf = 0;
+    p.v.port.up(f);
+    this.scheduleBase();
+    // Avance automático: se levantó el lápiz en la franja derecha. Con un momento de espera: si se sigue escribiendo
+    // enseguida (la tilde, el punto de la «i»), avanza cuando se pare.
+    const d = this.dims(p.page);
+    if (wrote && f.type === 'pointerup' && p.maxX >= p.gx + d.w * (1 - ZW_ZONE)) this.advTimer = setTimeout(() => this.advance(p.maxX), 280);
+  },
+  // ---------- Arrastrar la guía, su tamaño y el alto del panel ----------
+  guideDown(e) {
+    const part = e.target.closest('.zw-move, .zw-size');
+    if (!part || (e.pointerType === 'mouse' && e.button !== 0)) return;
+    e.preventDefault(); e.stopPropagation();
+    const d = this.dims();
+    this.drag = { type: part.classList.contains('zw-size') ? 'size' : 'move', at: [e.clientX, e.clientY], g0: { ...this.g }, w0: d.w * S.zoom, id: e.pointerId };
+    this.watch();
+  },
+  gripDown(e) {
+    if (e.target.closest('button') || (e.pointerType === 'mouse' && e.button !== 0)) return;
+    e.preventDefault();
+    this.drag = { type: 'height', at: [e.clientX, e.clientY], h0: this.height(), id: e.pointerId };
+    this.watch();
+  },
+  /** Escucha el arrastre en la ventana (el puntero puede salir del asa). */
+  watch() {
+    const move = (ev) => {
+      const g = this.drag;
+      if (!g || ev.pointerId !== g.id) return;
+      const dx = ev.clientX - g.at[0], dy = ev.clientY - g.at[1];
+      if (g.type === 'move') this.moveScreen(g.g0, dx, dy);
+      else if (g.type === 'size') { this.st().zoom = this.sw / Math.max(40, g.w0 + dx); this.st(); this.clamp(); this.place(); }
+      else {
+        this.st().height = Math.round(g.h0 - dy);
+        this.panel?.parentElement?.style.setProperty('--zw-h', this.height() + 'px');
+      }
+    };
+    const up = (ev) => {
+      const g = this.drag;
+      if (!g || ev.pointerId !== g.id) return;
+      removeEventListener('pointermove', move, true); removeEventListener('pointerup', up, true); removeEventListener('pointercancel', up, true);
+      this.drag = null;
+      if (g.type === 'height') { this.st().height = this.height(); this.relayout(); }
+      savePrefs();
+      this.place(true);
+    };
+    addEventListener('pointermove', move, true); addEventListener('pointerup', up, true); addEventListener('pointercancel', up, true);
+  },
+};
+// Tras cualquier toque o tecla: si la página de la guía cambió (texto, post-it movido…), se repinta el panel; la regla
+// puede haberse movido. Es una comparación de números: no cuesta nada si no hay cambios.
+const zwCheck = () => {
+  if (!ZoomWin.on || ZoomWin.pen || !ZoomWin.panel) return;
+  const page = ZoomWin.page();
+  if (page && `${page.id}:${page._v || 0}:${activeNb()?._v || 0}` !== ZoomWin.seen) ZoomWin.scheduleBase();
+  else requestAnimationFrame(() => ZoomWin.paintLive());
+};
+addEventListener('pointerup', () => setTimeout(zwCheck, 0), true);
+addEventListener('keyup', () => setTimeout(zwCheck, 0), true);
+// Intro (fuera de un texto y sin menús abiertos): siguiente línea.
+addEventListener('keydown', (e) => {
+  if (!ZoomWin.on || e.key !== 'Enter' || e.defaultPrevented || e.metaKey || e.ctrlKey || e.altKey || e.shiftKey || S.view !== 'editor') return;
+  if (typingInField() || S.editing || document.querySelector('.scrim, .popover, .onb')) return;
+  e.preventDefault();
+  ZoomWin.newline();
+});
 
 // =============================================================================
 // Editor: elementos de la página (texto, post-it, imagen, enlace, voz) y su arrastre
@@ -10348,6 +11048,9 @@ const Cards = {
     if (f.pageId) c.pageId = String(f.pageId);
     const r = f.rect;
     if (r && [r.x, r.y, r.w, r.h].every(Number.isFinite)) c.rect = { x: Math.round(r.x), y: Math.round(r.y), w: Math.round(r.w), h: Math.round(r.h) };
+    // Opcionales (ARQUITECTURA §2.1): de dónde sale ('ai', 'cloze') y, en las de huecos, de qué trazo o resaltado.
+    if (f.origin === 'ai' || f.origin === 'cloze') c.origin = f.origin;
+    if (f.src && typeof f.src === 'object' && !Array.isArray(f.src)) c.src = JSON.parse(JSON.stringify(f.src));
     return c;
   },
   /** Completa una tarjeta guardada (o llegada de fuera) sin perder nada de lo que trae. */
@@ -10471,7 +11174,8 @@ const Cards = {
     return scrim;
   },
   /** Un lado de la tarjeta: su texto (lo escribe quien estudia: no se traduce) y, si es su lado, la imagen. */
-  face(c, side) {
+  face(c, side, filled = false) {
+    if (typeof Cloze !== 'undefined' && Cloze.is(c)) return Cloze.face(c, side, filled);   // tarjeta de huecos (cloze.js)
     const text = side === 'front' ? c.front : c.back;
     return `${text ? `<div class="cardz-text" translate="no">${esc(text)}</div>` : ''}${c.img && c.imgSide === side ? `<img class="cardz-img" src="${c.img}" alt="Zona de la página">` : ''}`;
   },
@@ -10556,7 +11260,7 @@ const Cards = {
       }
       box.innerHTML = `<div class="cardz-top"><span class="cardz-muted">${Math.min(st.done + 1, st.total)} / ${st.total}${practice && !real(c) ? ' · <b class="cardz-practice">Práctica: no cambia cuándo vuelve</b>' : ''}</span>
           <button class="icon-btn" data-act="close" aria-label="Cerrar el repaso" title="Cerrar el repaso">${icon('close')}</button></div>
-        <div class="cardz-side-label">Pregunta</div><div class="cardz-face">${Cards.face(c, 'front')}</div>
+        <div class="cardz-side-label">Pregunta</div><div class="cardz-face">${Cards.face(c, 'front', st.shown)}</div>
         ${st.shown ? `<div class="cardz-side-label">Respuesta</div><div class="cardz-face">${Cards.face(c, 'back')}</div>` : ''}
         ${c.pageId ? `<button class="btn tinted cardz-goto" data-act="goto">${icon('pages')} Ver en la página</button>` : ''}
         ${st.shown ? `<div class="cardz-grades">${CARD_GRADES.map(([k, n], i) => `<button class="cardz-grade cardz-${k}" data-act="grade" data-v="${k}" title="${n} (${i + 1})"><b>${n}</b><small>${real(c) ? Cards.span(Cards.schedule(c, k).interval) : k === 'again' ? 'otra vez' : '—'}</small></button>`).join('')}</div>`
@@ -10779,7 +11483,8 @@ Recall.start();
 
 // ---------- Preferencias de la biblioteca (este dispositivo): orden y tira plegada ----------
 // localStorage `libreta-library`: { sort?: 'recent'|'name'|'recall', recallFolded?: true }. Sin la clave = «Recientes», desplegada.
-const LIB_SORTS = [['recent', 'Recientes'], ['name', 'Nombre'], ['recall', 'Por repasar']];
+// «Recientes» = última modificación; «Creación» = cuándo se creó o se subió (al importar un PDF, la fecha de subida).
+const LIB_SORTS = [['recent', 'Recientes'], ['created', 'Creación: más nuevas'], ['createdOld', 'Creación: más antiguas'], ['name', 'Nombre'], ['recall', 'Por repasar']];
 function libPrefs() {
   try { const v = JSON.parse(localStorage.getItem('libreta-library') || '{}'); return v && typeof v === 'object' ? v : {}; } catch (e) { return {}; }
 }
@@ -10799,6 +11504,9 @@ function sortNotebooks(list, sort = libSort(), now = Date.now()) {
       return ra - rb;
     });
   }
+  const made = (nb) => nb.created || nb.modified || 0;
+  if (sort === 'created') return list.sort((a, b) => made(b) - made(a));
+  if (sort === 'createdOld') return list.sort((a, b) => made(a) - made(b));
   return list.sort((a, b) => b.modified - a.modified);
 }
 function sortMenu(anchor) {
@@ -11889,6 +12597,374 @@ const Meaning = {
 };
 
 // =============================================================================
+// Tarjetas de huecos (tipo «cloze» de Anki), SIN IA y sin red: de cada frase con algo subrayado con el
+// subrayador (sobre texto de PDF, cuadros de texto o post-its) o resaltado en un texto (fondo de color),
+// una tarjeta: pregunta = la frase con el trozo cambiado por «[…]», respuesta = el trozo (y la frase entera).
+// Las tarjetas llevan `origin:'cloze'` y `src` (de qué trazo o resaltado salieron: así no se repiten).
+// Formato en ARQUITECTURA §2.1. Primero la lógica (sin dibujar nada), después la ventana de revisión.
+// =============================================================================
+const CLOZE_GAP = '[…]';
+const CLOZE_MAX = 200;       // letras como mucho de la pregunta (las frases largas se cortan alrededor del hueco)
+const CLOZE_ANS_MAX = 160;   // un trozo más largo no es un hueco: no sale tarjeta
+const CLOZE_ABBR = new Set(['p', 'ej', 'pág', 'pag', 'dr', 'dra', 'sr', 'sra', 'srta', 'etc', 'fig', 'vs', 'aprox', 'máx', 'max', 'mín', 'min',
+  'núm', 'num', 'art', 'cap', 'vol', 'ed', 'es', 'cfr', 'cf', 'ca', 'nº', 'n', 'ss', 'pp', 'dott', 'sig']);
+
+const Cloze = {
+  // ---------- Textos de la página con su posición ----------
+  /** Texto plano de un HTML (o de un elemento .rich ya montado) con el color de fondo de cada letra
+   *  y, si es un elemento montado, de qué nodo sale cada letra (para medirla con Range). */
+  flatten(root) {
+    let text = '';
+    const colors = [], map = [];   // map: [{ node, at (índice en text) }]
+    const nl = () => { if (text && !text.endsWith('\n')) { text += '\n'; colors.push(''); } };
+    const walk = (el, bg) => {
+      for (const n of el.childNodes) {
+        if (n.nodeType === 3) {
+          map.push({ node: n, at: text.length });
+          text += n.data;
+          for (let i = 0; i < n.data.length; i++) colors.push(bg);
+        } else if (n.nodeType === 1) {
+          if (n.tagName === 'BR') { text += '\n'; colors.push(''); continue; }
+          const block = /^(DIV|P|LI|UL|OL|H[1-6]|BLOCKQUOTE)$/.test(n.tagName);
+          if (block) nl();
+          walk(n, Meaning.hex(n.style?.backgroundColor) || bg);
+          if (block) nl();
+        }
+      }
+    };
+    walk(root, '');
+    return { text, colors, map };
+  },
+  /** Trozos resaltados (fondo de color) de un texto plano: [{ a, b, color }]. */
+  marks(colors, text) {
+    const out = [];
+    for (let i = 0; i < colors.length; i++) {
+      const c = colors[i];
+      if (!c) continue;
+      const last = out[out.length - 1];
+      if (last && last.color === c && last.b === i) last.b = i + 1; else out.push({ a: i, b: i + 1, color: c });
+    }
+    // Los espacios sueltos resaltados entre dos trozos del mismo color los unen; los trozos sin letras no cuentan.
+    return out.filter((m) => /[\p{L}\p{N}]/u.test(text.slice(m.a, m.b)));
+  },
+  /** Palabras de un texto con su centro en px de página: [{ a, b, x, y }]. Medidas en pantalla si el cuadro está
+   *  montado (Range); si no, repartidas por líneas como en drawPageQuick (aproximado). */
+  words(page, it, flat, live) {
+    const out = [];
+    for (const m of flat.text.matchAll(/\S+/g)) out.push({ a: m.index, b: m.index + m[0].length, x: NaN, y: NaN });
+    const v = live && typeof views !== 'undefined' ? views.get(page.id) : null;
+    if (v && live.offsetWidth && S.zoom) {
+      const pr = v.inner.getBoundingClientRect(), range = document.createRange();
+      const where = (i) => {   // nodo y posición dentro de él de la letra i
+        let k = 0;
+        while (k + 1 < flat.map.length && flat.map[k + 1].at <= i) k++;
+        const e = flat.map[k];
+        return e ? [e.node, Math.min(e.node.data.length, Math.max(0, i - e.at))] : null;
+      };
+      for (const w of out) {
+        const s = where(w.a), e = where(w.b - 1);
+        if (!s || !e) continue;
+        try { range.setStart(s[0], s[1]); range.setEnd(e[0], Math.min(e[0].data.length, e[1] + 1)); } catch (err) { continue; }
+        const r = range.getBoundingClientRect();
+        if (r.width) { w.x = (r.left + r.width / 2 - pr.left) / S.zoom; w.y = (r.top + r.height / 2 - pr.top) / S.zoom; }
+      }
+      if (out.every((w) => Number.isFinite(w.x))) return out;
+    }
+    // Sin montar (o sin medidas): por líneas, con el ancho del cuadro.
+    const ctx = Meaning._ctx || (Meaning._ctx = document.createElement('canvas').getContext('2d'));
+    const base = it.base || DEFAULT_TEXT, pad = 8, lineH = base.size * 1.35, maxW = Math.max(20, Meaning.itemBox(page, it).w - pad * 2);
+    ctx.font = fontCSS(base);
+    const space = ctx.measureText(' ').width;
+    let x = 0, y = pad, prevB = 0;
+    for (const w of out) {
+      const gap = flat.text.slice(prevB, w.a), lines = (gap.match(/\n/g) || []).length;
+      if (lines) { y += lineH * lines; x = 0; }
+      const ww = ctx.measureText(flat.text.slice(w.a, w.b)).width;
+      if (x > 0 && x + ww > maxW) { x = 0; y += lineH; }
+      w.x = it.x + pad + x + ww / 2; w.y = it.y + y + lineH / 2;
+      x += ww + space; prevB = w.b;
+    }
+    return out;
+  },
+  /** Texto del PDF de una página en orden de lectura, con el centro de cada letra (null en los espacios añadidos). */
+  pdfSource(page) {
+    const chars = typeof PdfText !== 'undefined' ? PdfText.chars(page) : null;
+    if (!chars?.length) return null;
+    let text = '';
+    const pos = [];
+    let prev = null;
+    chars.forEach((c, ci) => {
+      if (prev && c.run !== prev.run) {
+        const run = page.pdfRuns[c.run], pr = page.pdfRuns[prev.run];
+        // Un salto grande (línea en blanco, otra columna) separa frases; si no, un espacio si hace falta.
+        const brk = run.y > pr.y + pr.h * 1.9 || run.y < pr.y - pr.h;
+        if (brk) { text += '\n'; pos.push(null); } else if (!/\s$/.test(text) && !/^\s/.test(c.ch)) { text += ' '; pos.push(null); }
+      }
+      text += c.ch; pos.push({ x: (c.x0 + c.x1) / 2, y: c.y + c.h / 2, ci });
+      prev = c;
+    });
+    // Los trozos se leen con PdfText.text (pdftext.js): une los renglones y respeta subíndices (D₃) y viñetas (➔).
+    // La frase se busca en `text` (aquí un renglón no acaba frase); los bordes en blanco se conservan.
+    const slice = (a, b) => {
+      let ca = -1, cb = -1;
+      for (let i = a; i < b; i++) if (pos[i]) { if (ca < 0) ca = pos[i].ci; cb = pos[i].ci + 1; }
+      if (ca < 0 || typeof PdfText.text !== 'function') return text.slice(a, b);
+      const raw = text.slice(a, b), lead = /^\s/.test(raw) ? ' ' : '', trail = /\s$/.test(raw) ? ' ' : '';
+      const mid = PdfText.text(page, ca, cb).replace(/\s+/g, ' ');
+      return mid ? lead + mid + trail : raw;
+    };
+    return { kind: 'pdf', text, pos, slice };
+  },
+
+  // ---------- Trozos subrayados ----------
+  /** Índices [a, b) del texto que quedan bajo una caja (por el centro de cada letra o palabra), o null. */
+  under(units, box) {
+    let a = Infinity, b = -Infinity;
+    for (const u of units) {
+      if (!u || !(u.x >= box.x && u.x <= box.x + box.w && u.y >= box.y && u.y <= box.y + box.h)) continue;
+      if (u.a < a) a = u.a;
+      if (u.b > b) b = u.b;
+    }
+    return a < b ? [a, b] : null;
+  },
+  /** Ajusta un trozo a palabras enteras y le quita espacios y signos de los bordes. */
+  snap(text, a, b) {
+    const wordCh = (ch) => /[\p{L}\p{N}_'’-]/u.test(ch || '');
+    while (a > 0 && wordCh(text[a - 1]) && wordCh(text[a])) a--;
+    while (b < text.length && wordCh(text[b]) && wordCh(text[b - 1])) b++;
+    while (a < b && /[\s.,;:!?¿¡()«»"“”…·-]/.test(text[a])) a++;
+    while (b > a && /[\s.,;:!?¿¡()«»"“”…·]/.test(text[b - 1])) b--;
+    return [a, b];
+  },
+  /** Todos los trozos subrayados o resaltados de una página: [{ src (fuente de texto), a, b, color, box, strokes?, itemId?, mark? }]. */
+  pieces(page) {
+    const out = [];
+    const hls = page.strokes.filter((s) => s.tool === 'highlighter');
+    const boxOf = (s, ox = 0, oy = 0) => Meaning.strokeBox(s.points, s.width, ox, oy);
+    const hit = (A, B) => A && B && A.x <= B.x + B.w && B.x <= A.x + A.w && A.y <= B.y + B.h && B.y <= A.y + A.h;
+    // PDF: subrayados de la página sobre su texto.
+    if (hls.length && page.pdfRuns?.length) {
+      const src = Cloze.pdfSource(page);
+      if (src) {
+        const units = src.pos.map((p, i) => (p ? { a: i, b: i + 1, x: p.x, y: p.y } : null));
+        for (const s of hls) {
+          const box = boxOf(s), r = box && Cloze.under(units, box);
+          if (r) out.push({ src, a: r[0], b: r[1], color: Meaning.hex(s.color), box, strokes: [s.id] });
+        }
+      }
+    }
+    // Cuadros de texto y post-its: resaltado del texto y subrayados encima (de la página o del propio post-it).
+    for (const it of page.items) {
+      if ((it.type !== 'text' && it.type !== 'sticky') || !it.html) continue;
+      const ibox = Meaning.itemBox(page, it);
+      const over = hls.filter((s) => hit(boxOf(s), ibox)).map((s) => ({ s, box: boxOf(s) }));
+      if (it.type === 'sticky') for (const s of it.strokes || []) if (s.tool === 'highlighter') over.push({ s, box: boxOf(s, it.x, it.y), note: true });
+      const hasMark = /background/i.test(it.html);
+      if (!over.length && !hasMark) continue;
+      const live = typeof richFor === 'function' && typeof views !== 'undefined' ? richFor(page.id, it.id) : null;
+      let root = live;
+      if (!root) { const t = document.createElement('template'); t.innerHTML = it.html; root = t.content; }
+      const flat = Cloze.flatten(root), src = { kind: 'item', itemId: it.id, text: flat.text };
+      if (hasMark) for (const m of Cloze.marks(flat.colors, flat.text)) out.push({ src, a: m.a, b: m.b, color: m.color, box: ibox, itemId: it.id, mark: true });
+      if (over.length) {
+        const words = Cloze.words(page, it, flat, live);
+        for (const { s, box, note } of over) {
+          const r = Cloze.under(words, box);
+          if (r) out.push({ src, a: r[0], b: r[1], color: Meaning.hex(s.color), box, strokes: [s.id], itemId: it.id, note: !!note });
+        }
+      }
+    }
+    // Cada trozo a palabras enteras; los del mismo color que se tocan (dos pasadas del subrayador) se juntan.
+    const groups = new Map();   // por fuente de texto, en orden de aparición
+    for (const p of out) {
+      [p.a, p.b] = Cloze.snap(p.src.text, p.a, p.b);
+      if (p.b <= p.a) continue;
+      if (!groups.has(p.src)) groups.set(p.src, []);
+      groups.get(p.src).push(p);
+    }
+    const merged = [];
+    for (const p of [...groups.values()].flatMap((g) => g.sort((x, y) => x.a - y.a))) {
+      const q = merged.find((m) => m.src === p.src && m.color === p.color && !m.mark === !p.mark && p.a <= m.b + 1 && m.a <= p.b + 1 && !/\S/.test(p.src.text.slice(Math.min(m.b, p.a), Math.max(m.b, p.a))));
+      if (!q) { merged.push(p); continue; }
+      q.a = Math.min(q.a, p.a); q.b = Math.max(q.b, p.b);
+      q.box = Shapes.bounds([[q.box.x, q.box.y], [q.box.x + q.box.w, q.box.y + q.box.h], [p.box.x, p.box.y], [p.box.x + p.box.w, p.box.y + p.box.h]]);
+      if (p.strokes) q.strokes = [...new Set([...(q.strokes || []), ...p.strokes])];
+    }
+    return merged;
+  },
+
+  // ---------- Frases ----------
+  /** ¿Acaba frase el signo de la posición i? (no en «p. ej.», «Dr.», «3.5»…). */
+  ends(text, i) {
+    const ch = text[i];
+    if (ch === '\n') return true;
+    if (!/[.!?…]/.test(ch)) return false;
+    if (i + 1 < text.length && !/\s/.test(text[i + 1])) return false;
+    if (ch !== '.') return true;
+    const word = (text.slice(0, i).match(/([\p{L}º]+)$/u) || [])[1] || '';
+    return !(word && (word.length === 1 || CLOZE_ABBR.has(word.toLowerCase())));
+  },
+  /** Límites [s, e) de la frase (o frases) que contiene el trozo [a, b). */
+  sentence(text, a, b) {
+    let s = a, e = b;
+    while (s > 0 && !Cloze.ends(text, s - 1)) s--;
+    while (e < text.length && !Cloze.ends(text, e)) e++;
+    if (e < text.length && text[e] !== '\n') e++;   // el punto final se queda en la frase
+    return [s, e];
+  },
+  /** Recorta el principio (por la izquierda) o el final de un trozo de frase a `n` letras, por palabras. */
+  cut(str, n, left) {
+    if (str.length <= n) return str;
+    if (n <= 0) return '…';
+    if (left) { const t = str.slice(str.length - n), k = t.indexOf(' '); return '…' + (k >= 0 && k < n - 1 ? t.slice(k + 1) : t); }
+    const t = str.slice(0, n), k = t.lastIndexOf(' ');
+    return (k > 0 ? t.slice(0, k) : t) + '…';
+  },
+  /** La tarjeta de un trozo: { before, answer, after } ya limpios y cortados, o null si no sirve como hueco. */
+  build(text, a, b, slice = (x, y) => text.slice(x, y)) {
+    const [s, e] = Cloze.sentence(text, a, b);
+    const clean = (t) => t.replace(/\s+/g, ' ');
+    const answer = clean(slice(a, b)).trim();
+    let before = clean(slice(s, a)).replace(/^\s+/, ''), after = clean(slice(b, e)).replace(/\s+$/, '');
+    if (!answer || answer.length > CLOZE_ANS_MAX) return null;
+    if (((before + after).match(/[\p{L}\p{N}]/gu) || []).length < 4) return null;   // sin contexto no hay pregunta
+    const room = CLOZE_MAX - CLOZE_GAP.length;
+    if (before.length + after.length > room) {
+      const half = Math.floor(room / 2);
+      const nBefore = before.length < half ? before.length : Math.max(half, room - after.length);
+      before = Cloze.cut(before, nBefore, true);
+      after = Cloze.cut(after, room - before.length, false);
+    }
+    return { before, answer, after };
+  },
+
+  // ---------- Propuestas y duplicados ----------
+  /** Claves estables del origen de una tarjeta (para no repetirla): una por trazo, o la del resaltado. */
+  keys(src) {
+    if (!src || typeof src !== 'object') return [];
+    if (Array.isArray(src.strokes) && src.strokes.length) return src.strokes.map((id) => `s:${src.pageId}:${src.note ? src.itemId : ''}:${id}`);
+    return src.itemId ? [`m:${src.pageId}:${src.itemId}:${String(src.text || '').trim().toLowerCase()}`] : [];
+  },
+  /** Las tarjetas de huecos que salen de la libreta (o de una página): [{ front, answer, back, color, pageId, index, rect, src, dup }].
+   *  `dup` = ese trozo ya tiene tarjeta. Mismo texto dos veces (repasado dos veces) = una sola propuesta. */
+  propose(nb, pageId = null) {
+    const had = new Set(), hadText = new Set();
+    for (const c of Cards.all(nb)) {
+      if (c.origin !== 'cloze') continue;
+      Cloze.keys(c.src).forEach((k) => had.add(k));
+      hadText.add(c.front.trim());
+    }
+    const out = [], seen = new Set();
+    nb.pages.forEach((page, index) => {
+      if (pageId && page.id !== pageId) return;
+      for (const p of Cloze.pieces(page)) {
+        const c = Cloze.build(p.src.text, p.a, p.b, p.src.slice);
+        if (!c) continue;
+        const front = c.before + CLOZE_GAP + c.after, full = c.before + c.answer + c.after;
+        if (seen.has(front)) continue;
+        seen.add(front);
+        const src = { pageId: page.id, text: c.answer };
+        if (p.itemId) src.itemId = p.itemId;
+        if (p.strokes) src.strokes = p.strokes;
+        if (p.note) src.note = true;
+        const x = Math.max(0, Math.floor(p.box.x - 8)), y = Math.max(0, Math.floor(p.box.y - 8));
+        const rect = { x, y, w: Math.max(8, Math.ceil(Math.min(page.w, p.box.x + p.box.w + 8)) - x), h: Math.max(8, Math.ceil(Math.min(page.h, p.box.y + p.box.h + 8)) - y) };
+        out.push({ front, answer: c.answer, back: `${c.answer}\n\n${full}`, color: p.color, pageId: page.id, index, rect, src,
+          dup: hadText.has(front) || Cloze.keys(src).some((k) => had.has(k)) });
+      }
+    });
+    return out;
+  },
+  /** Crea las tarjetas elegidas ({ front, answer, pageId, rect, src }); la respuesta lleva la frase entera debajo. */
+  create(nb, list) {
+    return Cards.addMany(nb, list.map((p) => {
+      const answer = String(p.answer || '').trim(), front = String(p.front || '').trim();
+      const back = front.includes(CLOZE_GAP) ? `${answer}\n\n${front.replace(CLOZE_GAP, answer)}` : answer;
+      return { front, back, origin: 'cloze', src: Object.assign({}, p.src, { text: answer }), pageId: p.pageId, rect: p.rect };
+    }));
+  },
+
+  // ---------- En el repaso ----------
+  /** La respuesta corta de una tarjeta de huecos (lo de antes de la frase entera). */
+  answerOf(c) { return String(c.back || '').split('\n\n')[0].trim(); },
+  /** Un lado de una tarjeta de huecos: la pregunta con el hueco resaltado (relleno si ya se mostró la respuesta). */
+  face(c, side, filled = false) {
+    const ans = Cloze.answerOf(c);
+    if (side === 'front') {
+      const [pre, ...rest] = c.front.split(CLOZE_GAP), post = rest.join(CLOZE_GAP);
+      const gap = filled ? `<mark class="cloze-fill">${esc(ans)}</mark>` : `<span class="cloze-gap" aria-label="Hueco">${CLOZE_GAP}</span>`;
+      return `<div class="cardz-text cloze-text" translate="no">${esc(pre)}${gap}${esc(post)}</div>`;
+    }
+    // La respuesta: el trozo; la frase entera ya se ve arriba con el hueco relleno. Si se cambió a mano, entera.
+    const auto = c.back === `${ans}\n\n${c.front.replace(CLOZE_GAP, ans)}`;
+    return `<div class="cardz-text cloze-ans" translate="no">${esc(auto ? ans : c.back)}</div>`;
+  },
+  is(c) { return c?.origin === 'cloze' && typeof c.front === 'string' && c.front.includes(CLOZE_GAP); },
+
+  // ---------- Ventana: revisar y crear ----------
+  dialog(nb) {
+    if (typeof updateCurrentPage === 'function') updateCurrentPage();
+    const page = nb.pages[typeof currentPageIndex === 'number' ? currentPageIndex : 0] || nb.pages[0];
+    const st = { scope: 'page', color: null, lists: {} };
+    const list = () => (st.lists[st.scope] ||= Cloze.propose(nb, st.scope === 'page' ? page?.id : null).map((p) => Object.assign({ on: !p.dup }, p)));
+    if (!list().some((p) => !p.dup)) { st.scope = 'all'; if (!list().some((p) => !p.dup)) st.scope = 'page'; }   // nada nuevo aquí: toda la libreta
+    const shown = () => list().filter((p) => !p.dup && (!st.color || p.color === st.color));
+    const name = (c) => Meaning.label(c, nb) || Meaning.colorName(c);
+    const scrim = dialog('<div class="cloze-box"></div>', (act, b, close) => {
+      sync();
+      if (act === 'cancel') return close();
+      if (act === 'scope') { st.scope = b.dataset.v; st.color = null; return paint(); }
+      if (act === 'pick') { st.color = b.dataset.c || null; return paint(); }
+      if (act === 'all-on' || act === 'all-off') { shown().forEach((p) => { p.on = act === 'all-on'; }); return paint(); }
+      if (act !== 'create') return;
+      const chosen = shown().filter((p) => p.on && p.front.trim() && p.answer.trim());
+      if (!chosen.length) return toast('Marca al menos una tarjeta con pregunta y respuesta');
+      const made = Cloze.create(nb, chosen);
+      close();
+      toast(`${made.length === 1 ? '1 tarjeta creada' : `${made.length} tarjetas creadas`} · ${Cards.pendingText(nb)}`);
+    });
+    const box = $('.cloze-box', scrim);
+    scrim.querySelector('.dialog').classList.add('cardz-dialog', 'cloze-dialog');
+    const sync = () => $$('.cloze-card', box).forEach((el) => {
+      const p = shown()[+el.dataset.i];
+      if (!p) return;
+      p.on = $('input[type="checkbox"]', el).checked;
+      p.front = $('.cloze-q', el).value;
+      p.answer = $('.cloze-a', el).value;
+    });
+    const count = () => {
+      const n = $$('.cloze-card input[type="checkbox"]', box).filter((x) => x.checked).length, bt = $('[data-act="create"]', box);
+      bt.textContent = n === 1 ? 'Crear 1 tarjeta' : `Crear ${n} tarjetas`;
+      bt.disabled = !n;
+      $$('.cloze-card', box).forEach((el) => el.classList.toggle('off', !$('input[type="checkbox"]', el).checked));
+    };
+    const paint = () => {
+      const all = list(), fresh = all.filter((p) => !p.dup), dups = all.length - fresh.length, items = shown();
+      const colors = [...new Set(fresh.map((p) => p.color))];
+      const chip = (c, n, label) => `<button class="mean-chip" data-act="pick" data-c="${c || ''}" aria-pressed="${(st.color || '') === (c || '')}">${c ? Meaning.dot(c, ' soft') : ''}${label}<small>${n}</small></button>`;
+      box.innerHTML = `<h2>Tarjetas de huecos</h2>
+        <p class="cloze-intro">Cada frase con algo subrayado o resaltado se convierte en una tarjeta con ese trozo escondido: «[…]».</p>
+        <div class="seg cloze-scope" role="group" aria-label="De dónde"><button data-act="scope" data-v="page" aria-pressed="${st.scope === 'page'}">Esta página</button><button data-act="scope" data-v="all" aria-pressed="${st.scope === 'all'}">Toda la libreta</button></div>
+        ${colors.length > 1 ? `<div class="mean-chips cloze-chips" role="group" aria-label="Color">${chip(null, fresh.length, '<span>Todos los colores</span>')}${colors.map((c) => chip(c, fresh.filter((p) => p.color === c).length, `<span${Meaning.label(c, nb) ? ' translate="no"' : ''}>${esc(name(c))}</span>`)).join('')}</div>` : ''}
+        ${items.length ? `<div class="cloze-tools"><span>${items.length === 1 ? '1 frase' : `${items.length} frases`}</span><button class="aiz-link" data-act="all-on">Marcar todas</button><button class="aiz-link" data-act="all-off">Ninguna</button></div>
+          <div class="cloze-list">${items.map((p, i) => `<div class="cloze-card" data-i="${i}">
+            <label class="cloze-inc"><input type="checkbox" ${p.on ? 'checked' : ''} aria-label="Incluir la tarjeta ${i + 1}">${Meaning.dot(p.color, ' soft')}<small><span>Página ${p.index + 1}</span>${Meaning.label(p.color, nb) ? ` · <span translate="no">${esc(Meaning.label(p.color, nb))}</span>` : ''}</small></label>
+            <label class="field"><span>Pregunta</span><textarea class="cloze-q" rows="2">${esc(p.front)}</textarea></label>
+            <label class="field"><span>Respuesta (el hueco)</span><input type="text" class="cloze-a" value="${esc(p.answer)}"></label></div>`).join('')}</div>`
+          : `<p class="cloze-empty"><b>${st.scope === 'page' ? 'En esta página no hay frases subrayadas nuevas.' : 'En esta libreta no hay frases subrayadas nuevas.'}</b><br><span>Subraya con el subrayador el texto de un PDF, de un cuadro de texto o de un post-it, o resalta texto, y vuelve aquí.</span></p>`}
+        ${dups ? `<p class="cloze-small">${dups === 1 ? '1 frase ya tenía su tarjeta y no se repite.' : `${dups} frases ya tenían su tarjeta y no se repiten.`}</p>` : ''}
+        <div class="actions"><button class="btn" data-act="cancel">Cancelar</button><button class="btn primary" data-act="create"></button></div>`;
+      count();
+    };
+    box.addEventListener('change', (e) => { if (e.target.type === 'checkbox') count(); });
+    paint();
+    // Se empieza a leer por arriba, sin abrir el teclado en pantallas táctiles.
+    setTimeout(() => { $('.cloze-card input[type="checkbox"]', box)?.focus({ preventScroll: true }); scrim.querySelector('.dialog').scrollTop = 0; }, 40);
+    return scrim;
+  },
+};
+
+// =============================================================================
 // Cinta de repaso (Tape): tapar una zona de la página para estudiar, como poner la mano encima de la respuesta.
 // Cada cinta es un elemento `tape` de page.items (ARQUITECTURA §2.1) y se pinta en la capa de encima (.layer.over):
 // tapa la tinta y los elementos. Un toque (con cualquier herramienta) la levanta y deja una marca fina; otro la pone.
@@ -12764,6 +13840,7 @@ const SHORTCUT_ACTIONS = [
   ['toolSelect', 'Herramientas', 'Seleccionar', 'editor', [K('v')]],
   ['insertImage', 'Herramientas', 'Insertar imagen', 'editor', [K('i', { alt: true })]],
   ['toggleRuler', 'Herramientas', 'Mostrar u ocultar la regla', 'editor', [K('r')]],
+  ['toggleZoomWin', 'Herramientas', 'Mostrar u ocultar la lupa', 'editor', [K('z')]],
   ['closeTab', 'Pestañas', 'Cerrar pestaña', 'editor', [K('w', { alt: true })]],
   ['nextTab', 'Pestañas', 'Pestaña siguiente', 'editor', [K('right', { alt: true })]],
   ['previousTab', 'Pestañas', 'Pestaña anterior', 'editor', [K('left', { alt: true })]],
@@ -12882,6 +13959,7 @@ const Shortcuts = {
     switch (id) {
       case 'insertImage': return $('#add-image')?.click();
       case 'toggleRuler': return Ruler.toggle();
+      case 'toggleZoomWin': return ZoomWin.toggle();
       case 'closeTab': return S.active && closeTab(S.active);
       case 'nextTab': case 'previousTab':
         if (S.tabs.length > 1) openNotebook(S.tabs[(tabIndex + (id === 'nextTab' ? 1 : -1) + S.tabs.length) % S.tabs.length]);
