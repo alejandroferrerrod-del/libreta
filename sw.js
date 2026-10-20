@@ -1,7 +1,7 @@
 // Folia sin conexión: la app se guarda al instalarla y se sirve desde aquí. Las fuentes de Google
 // se guardan la primera vez que se usan. Al publicar una versión nueva cambia VERSION y la app
 // avisa («Hay una versión nueva») en lugar de recargarse sola a mitad de lo que estés haciendo.
-const VERSION = '20261019224059';
+const VERSION = '20261020034534';
 const CACHE = `libreta-${VERSION}`;
 const SHELL = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './icon-maskable-512.png', './icon-180.png',
   './vendor/jspdf.umd.min.js', './vendor/html2canvas.min.js', './vendor/pdf.min.js', './vendor/pdf.worker.min.js'];
