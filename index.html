@@ -1366,7 +1366,7 @@ body.is-card-dragging .crumbs button { box-shadow: inset 0 0 0 1.5px color-mix(i
 .options select { height: 34px; border-radius: 9px; max-width: 150px; }
 .options select:hover { background: var(--fill); }
 .options .range input[type="range"] { width: 110px; }
-.options .hint { flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.options .hint { flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: clip; }   /* nunca «…»: si no cabe, se esconde (hideShortHints) */
 .options .opt-field { border: 1px solid var(--line); border-radius: 9px; padding: 0 10px; height: 34px; background: var(--surface-2); width: 170px; }
 .options .opt-label { display: inline-flex; align-items: center; gap: 6px; max-width: 260px; overflow: hidden; text-overflow: ellipsis; }
 .options .opt-label svg { width: 16px; height: 16px; flex: none; }
@@ -1576,7 +1576,7 @@ body.is-card-dragging .crumbs button { box-shadow: inset 0 0 0 1.5px color-mix(i
 .onb-confirm-card h2 { margin: 0; font: 700 22px var(--rounded); }
 .onb-confirm-card p { margin: 0; color: rgba(255,255,255,.7); }
 @media (max-width: 1000px) {
-  .onb-lesson-body { align-items: flex-start; gap: 24px; }
+  .onb-lesson-body { align-items: flex-start; align-content: center; gap: 24px; }
   .onb-demo { zoom: .8; }
   .onb-title { font-size: 34px; } .onb-copy h1 { font-size: 32px; }
 }
@@ -1591,6 +1591,68 @@ body.is-card-dragging .crumbs button { box-shadow: inset 0 0 0 1.5px color-mix(i
 .lang-btn svg { width: 26px; height: 17px; border-radius: 3px; box-shadow: 0 0 0 1px rgba(0,0,0,.15); flex: none; }
 .onb-copy.instant .onb-steps li, .onb-copy.instant .onb-tip { animation: none; }
 .onb-copy .onb-langs { justify-content: flex-start; }
+/* Capítulos (Escribir · Organizar · Estudiar) en la lista de temas */
+.onb-chap { grid-column: 1 / -1; position: relative; display: flex; align-items: center; gap: 10px; margin-top: 10px; padding: 8px 12px 8px 8px; border-radius: 14px; border: 0; background: transparent; color: #fff; font: inherit; text-align: left; cursor: pointer; }
+.onb-chap:first-child { margin-top: 0; }
+.onb-chap b { font: 700 20px var(--rounded); }
+.onb-chap .onb-chap-n { font-size: 13px; color: rgba(255,255,255,.55); }
+.onb-chap .onb-check { position: static; margin-left: auto; }
+.onb-chap[aria-pressed="true"] .onb-check { background: linear-gradient(var(--c1), var(--c2)); border-color: transparent; }
+.onb-chap[aria-pressed="true"] .onb-check svg { opacity: 1; }
+.onb-chap:hover { background: rgba(255,255,255,.05); }
+.onb-chap:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+.onb-new { flex: none; align-self: center; font: 700 11px var(--font); letter-spacing: .02em; padding: 3px 8px; border-radius: 999px; color: #1C1C1E; background: linear-gradient(90deg, #FFD60A, #FF9F0A); }
+.onb-topic .onb-new { position: absolute; right: 36px; top: 9px; }
+.onb-kicker .onb-new { margin-left: 4px; }
+.onb-chap-name { color: rgba(255,255,255,.8); }
+/* «Muéstramelo»: el tutorial se aparta y un anillo señala el botón en la app */
+.onb-show { align-self: flex-start; padding: 10px 16px; font-size: 15px; }
+.onb-show[hidden] { display: none; }
+.onb-return { position: absolute; left: 50%; bottom: 28px; transform: translateX(-50%); z-index: 6; display: none; }
+.onb > .onb-aurora, .onb > .onb-stages, .onb > .onb-skip { transition: opacity .3s ease; }
+.onb.peek { background: rgba(0,0,0,.25); cursor: pointer; }
+.onb.peek > .onb-aurora, .onb.peek > .onb-stages, .onb.peek > .onb-skip { opacity: 0; pointer-events: none; }
+.onb.peek > .onb-return { display: inline-flex; }
+.onb-ring { position: fixed; z-index: 201; pointer-events: none; border-radius: 14px; border: 3px solid #BF59FF; box-shadow: 0 0 0 4px rgba(191,89,255,.3), 0 0 24px rgba(191,89,255,.8); animation: onb-ring 1.1s ease-in-out infinite; }
+@keyframes onb-ring { 50% { transform: scale(1.12); box-shadow: 0 0 0 8px rgba(191,89,255,.15), 0 0 30px rgba(191,89,255,.9); } }
+/* Entrada «Tutorial» de los menús (⋯ y ⚙︎) */
+.popover .onb-menu-new { font: 700 11px var(--font); padding: 2px 7px; border-radius: 999px; color: #1C1C1E; background: linear-gradient(90deg, #FFD60A, #FF9F0A); }
+/* Libreta de demostración «Así es Folia» (película del final) */
+.onb-film { position: absolute; inset: 0; z-index: 3; }
+.onb-film-cv { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.onb-film-bar { position: absolute; left: 0; right: 0; top: 0; height: 4px; background: rgba(255,255,255,.12); }
+.onb-film-bar i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, #32D2FF, #AF52DE, #FF2D55); }
+.onb-film-cap { position: absolute; left: 50%; bottom: 26px; transform: translateX(-50%); margin: 0; max-width: calc(100% - 32px); padding: 10px 20px; border-radius: 999px; font: 600 18px var(--rounded); text-align: center; color: #fff; background: rgba(20,20,32,.78); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,.15); box-shadow: 0 6px 24px rgba(0,0,0,.35); }
+.onb-film-cap:empty { display: none; }
+.onb-film-cap.in { animation: onb-cap .35s cubic-bezier(.3,1.4,.5,1); }
+@keyframes onb-cap { from { opacity: 0; transform: translate(-50%, 10px); } }
+.onb-film-skip { position: absolute; top: 18px; right: 18px; z-index: 4; padding: 10px 18px; font-size: 15px; }
+.onb-film-skip[hidden], .onb-film-end[hidden] { display: none; }
+.onb-film-end { position: absolute; inset: 0; z-index: 5; display: flex; background: rgba(10,10,26,.72); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); animation: fade .4s ease-out; }
+/* Móvil (390 px) y tableta estrecha */
+@media (max-width: 700px) {
+  .onb-skip { top: 12px; right: 12px; padding: 8px 14px; font-size: 14px; }
+  .onb-center { padding: 56px 16px 24px; gap: 20px; }
+  .onb-title { font-size: 30px; } .onb-sub { font-size: 17px; }
+  .onb-word { font-size: 52px; }
+  .onb-choice { width: min(270px, 100%); height: auto; min-height: 170px; }
+  .onb-head { padding: 56px 16px 12px; gap: 18px; }
+  .onb-grid { padding: 8px 16px; grid-template-columns: 1fr; gap: 10px; }
+  .onb-topic { height: 76px; }
+  .onb-foot { padding: 14px 16px 20px; }
+  .onb-progress { padding: 62px 16px 0; gap: 3px; }
+  .onb-progress i { height: 4px; }
+  .onb-lesson-body { padding: 14px 16px; gap: 18px; justify-content: flex-start; flex-direction: column; flex-wrap: nowrap; align-items: center; }
+  .onb-demo { zoom: .74; }
+  .onb-copy { max-width: none; width: 100%; gap: 12px; }
+  .onb-copy h1 { font-size: 28px; } .onb-intro { font-size: 17px; }
+  .onb-steps { gap: 10px; } .onb-steps li { font-size: 15px; }
+  .onb-tip { font-size: 14px; }
+  .onb-nav { padding: 10px 16px 18px; }
+  .onb-film-cap { font-size: 15px; bottom: 16px; padding: 8px 14px; border-radius: 16px; }
+  .onb-film-skip { top: 12px; right: 12px; padding: 8px 14px; font-size: 14px; }
+}
+@media (max-width: 360px) { .onb-demo { zoom: .66; } }
 </style>
 <div id="app"></div>
 <script>
@@ -2185,6 +2247,43 @@ I18N.dict.it = {
   'Graba clases y pon el audio en la página.': 'Registra le lezioni e metti l’audio nella pagina.', 'Pomodoro con descansos y alarma.': 'Pomodoro con pause e sveglia.',
   'Encuentra cualquier palabra al instante.': 'Trova qualsiasi parola all’istante.', 'Todo con el teclado, a tu manera.': 'Tutto con la tastiera, a modo tuo.',
   'Compartir y exportar': 'Condividere ed esportare', 'PDF o imagen, listos para enviar.': 'PDF o immagine, pronti da inviare.',
+  // Tutorial, versión 2: capítulos, temas nuevos, «Novedades», «Muéstramelo» y la entrada de los menús
+  'Escribir': 'Scrivere', 'Organizar': 'Organizzare', 'Estudiar': 'Studiare', 'Nuevo': 'Nuovo', 'Novedades': 'Novità', 'Solo novedades': 'Solo novità',
+  'Tutorial': 'Tutorial', 'Todo el tutorial': 'Tutto il tutorial', 'Repetir un capítulo': 'Ripeti un capitolo', 'Muéstramelo': 'Mostramelo', 'Volver al tutorial': 'Torna al tutorial',
+  'Vuelve a verlo cuando quieras: ⚙︎ Ajustes o ⋯ › Tutorial (todo, novedades o un capítulo).': 'Rivedilo quando vuoi: ⚙︎ Impostazioni o ⋯ › Tutorial (tutto, novità o un capitolo).',
+  'Podrás verlo cuando quieras desde ⚙︎ Ajustes o ⋯ › Tutorial.': 'Potrai vederlo quando vuoi da ⚙︎ Impostazioni o ⋯ › Tutorial.',
+  'Pluma, bolígrafo y lápiz. Formas perfectas en directo.': 'Stilografica, penna e matita. Forme perfette dal vivo.',
+  'Paleta flotante': 'Tavolozza mobile', 'Tus colores siempre a mano.': 'I tuoi colori sempre a portata di mano.',
+  'Líneas rectas, medidas y ángulos.': 'Linee dritte, misure e angoli.', 'Escribe ampliado y con precisión.': 'Scrivi ingrandito e con precisione.',
+  'Lazo con filtros': 'Lazo con filtri', 'Coge solo lo que quieras, o solo un color.': 'Prendi solo ciò che vuoi, o solo un colore.',
+  'Notas de colores; dibuja dentro con «Ampliar».': 'Note colorate; disegnaci dentro con «Ingrandisci».',
+  'Pasar página': 'Sfogliare le pagine', 'Continuo, por páginas u horizontal.': 'Continuo, a pagine od orizzontale.',
+  'Carpetas': 'Cartelle', 'Arrastra libretas y archivos a una carpeta.': 'Trascina quaderni e file in una cartella.',
+  'Varias libretas abiertas: ⌄ y «+».': 'Più quaderni aperti: ⌄ e «+».', 'El escudo te avisa si toca hacer copia.': 'Lo scudo ti avvisa quando è ora del backup.',
+  'Menú Estudio': 'Menu Studio', 'Tarjetas de repaso y de huecos.': 'Flashcard di ripasso e a completamento.',
+  'Colores con significado': 'Colori con significato', 'Cada color, una idea; y su resumen.': 'Ogni colore, un’idea; e il suo riepilogo.',
+  'Cinta de repaso': 'Nastro di ripasso', 'Tapa la respuesta y ponte a prueba.': 'Copri la risposta e mettiti alla prova.',
+  'IA con tu clave': 'IA con la tua chiave', 'Tarjetas, resúmenes y transcribir tu letra.': 'Flashcard, riassunti e trascrizione della tua scrittura.',
+  'Curva del olvido': 'Curva dell’oblio', '«Para repasar hoy»: lo que vas olvidando.': '«Da ripassare oggi»: quello che stai dimenticando.',
+  'Arrastra hasta la carpeta': 'Trascina fino alla cartella', 'Biología': 'Biologia', 'Química': 'Chimica', 'Historia': 'Storia', 'Examen': 'Esame', '¿Capital de Italia?': 'Capitale d’Italia?',
+  'Transcribir': 'Trascrivi', '¡Repasada!': 'Ripassato!', 'Se va olvidando…': 'Si sta dimenticando…',
+  // Libreta de demostración «Así es Folia» (película del final del tutorial)
+  'Así es Folia': 'Ecco Folia', 'Saltar': 'Salta', 'Ver otra vez': 'Guarda di nuovo', 'Abrir la libreta': 'Apri il quaderno',
+  'Libreta de demostración': 'Quaderno dimostrativo', 'Ver la libreta de demostración': 'Guarda il quaderno dimostrativo',
+  'Tu libreta de demostración ya está en la biblioteca, en «Ejemplos». Ábrela y tócalo todo.': 'Il tuo quaderno dimostrativo è già nella libreria, in «Esempi». Aprilo e tocca tutto.',
+  'Escribe a mano, trazo a trazo': 'Scrivi a mano, tratto dopo tratto', 'Subraya lo importante': 'Evidenzia ciò che conta',
+  'Forma perfecta en directo: mantén quieto': 'Forma perfetta dal vivo: tieni fermo', 'La regla: líneas rectas y medidas': 'Il righello: linee dritte e misure',
+  'Lazo: rodea y cuenta lo que coge': 'Lazo: circonda e conta cosa prende', 'Filtro y «Solo este color»': 'Filtro e «Solo questo colore»',
+  'Mueve, cambia de color o copia': 'Sposta, cambia colore o copia', 'Post-it: «Ampliar» y dibuja dentro': 'Post-it: «Ingrandisci» e disegnaci dentro',
+  'Cinta: tapa la respuesta y destápala': 'Nastro: copri la risposta e scoprila', 'Comentarios con nombre': 'Commenti con nome',
+  'Enlaces a otra página': 'Collegamenti a un’altra pagina', 'Plantillas de Medicina': 'Modelli di Medicina',
+  'IA ▾ › Transcribir a texto': 'IA ▾ › Trascrivi in testo', 'IA › Resumen': 'IA › Riassunto', 'IA › Tarjetas con su cita': 'IA › Flashcard con la loro citazione',
+  'Lazo › Crear tarjeta': 'Lazo › Crea flashcard', 'Tarjetas de huecos de lo subrayado': 'Flashcard a completamento dal sottolineato',
+  'Repaso: Otra vez · Difícil · Bien · Fácil': 'Ripasso: Di nuovo · Difficile · Bene · Facile', 'Copia de seguridad: el escudo te avisa': 'Backup: lo scudo ti avvisa',
+  'Así es Folia: ya está en tu biblioteca': 'Ecco Folia: è già nella tua libreria', '4 trazos': '4 tratti', '1 trazo': '1 tratto', 'ejemplo': 'esempio',
+  'Dolor torácico de esfuerzo.': 'Dolore toracico da sforzo.', 'Pensar en angina estable.': 'Pensare ad angina stabile.', 'Pedir ECG y troponinas.': 'Richiedere ECG e troponine.',
+  '¿Qué produce la mitocondria?': 'Cosa produce il mitocondrio?', 'ATP, la energía de la célula.': 'ATP, l’energia della cellula.',
+  'La mitocondria produce ATP para la célula.': 'Il mitocondrio produce ATP per la cellula.', '¿Qué orgánulo es?': 'Che organello è?',
   // Textos dibujados en las animaciones del tutorial
   'Dibuja': 'Disegna', 'Mantén quieto…': 'Tieni fermo…', '¡Círculo perfecto!': 'Cerchio perfetto!', '¡Examen': 'Esame', 'el lunes!': 'lunedì!',
   'Revisar esta parte': 'Rivedere questa parte', 'pág. 3': 'pag. 3', 'Arrastra para ordenar': 'Trascina per ordinare', 'Cardiología': 'Cardiologia',
@@ -2229,11 +2328,18 @@ I18N.dict.it = {
   'En esta página no hay frases subrayadas nuevas.': 'In questa pagina non ci sono nuove frasi sottolineate.',
   'En esta libreta no hay frases subrayadas nuevas.': 'In questo quaderno non ci sono nuove frasi sottolineate.',
   'Subraya con el subrayador el texto de un PDF, de un cuadro de texto o de un post-it, o resalta texto, y vuelve aquí.': 'Sottolinea con l’evidenziatore il testo di un PDF, di una casella di testo o di un post-it, oppure evidenzia del testo, e torna qui.',
+  // PDF nítido (render.js, editor.js, library.js)
+  'Este PDF se importó con menos calidad': 'Questo PDF è stato importato con qualità inferiore', 'Volver a importar para verlo nítido…': 'Importalo di nuovo per vederlo nitido…',
+  'Este PDF se importó con menos calidad · Para verlo nítido: menú «Página» › «Volver a importar…»': 'Questo PDF è stato importato con qualità inferiore · Per vederlo nitido: menu «Pagina» › «Importalo di nuovo…»',
+  'Leyendo el PDF…': 'Lettura del PDF…', 'Ese PDF es demasiado grande para guardarlo entero.': 'Questo PDF è troppo grande per salvarlo intero.',
+  'Ese PDF no coincide con las páginas de esta libreta.': 'Questo PDF non corrisponde alle pagine di questo quaderno.', 'Listo: el PDF ya se ve nítido': 'Fatto: ora il PDF si vede nitido',
+  'Guardar copia sin los PDF originales (más pequeña)': 'Salva backup senza i PDF originali (più piccolo)',
   '1 frase': '1 frase', '1 frase ya tenía su tarjeta y no se repite.': '1 frase aveva già la sua flashcard e non si ripete.', 'Crear 1 tarjeta': 'Crea 1 flashcard',
 };
 
 /** Textos con nombres o números dentro. */
 I18N.patterns.it = [
+  [/^Listo: (\d+) de (\d+) páginas se ven nítidas$/, 'Fatto: $1 di $2 pagine si vedono nitide'],
   // Tarjetas de huecos (cloze.js)
   [/^(\d+) frases$/, '$1 frasi'], [/^Crear (\d+) tarjetas$/, 'Crea $1 flashcard'],
   [/^(\d+) frases ya tenían su tarjeta y no se repiten\.$/, '$1 frasi avevano già la loro flashcard e non si ripetono.'],
@@ -2898,6 +3004,14 @@ const Store = {
     });
   },
   removeAudio(id) { this.memAudio?.delete(id); try { this.db?.transaction('audio', 'readwrite').objectStore('audio').delete(id); } catch (e) { /* nada */ } },
+  /** PDF originales (Blob), en el mismo almacén que el audio con clave `pdf:<id>` (sin subir la versión de la base). */
+  putPdf(id, blob) { return this.putAudio('pdf:' + id, blob); },
+  getPdf(id) { return this.getAudio('pdf:' + id); },
+  removePdf(id) { this.removeAudio('pdf:' + id); },
+  /** Borra el PDF original si ya no lo usa ninguna libreta (duplicar una libreta comparte el mismo). */
+  forgetPdfIfUnused(id) {
+    if (!S.notebooks.some((n) => (n.pdfs || []).some((f) => f.id === id) || n.pages.some((p) => p.pdf?.id === id))) this.removePdf(id);
+  },
   fail() { if (this.working) { this.working = false; toast('Tu navegador no deja guardar más. Usa «Copia de seguridad» para no perder nada.'); } },
 };
 const Prefs = {
@@ -2925,6 +3039,9 @@ function normalizeNotebook(nb) {
   nb.recordings = nb.recordings || [];
   if (Array.isArray(nb.cards)) nb.cards = nb.cards.map((c) => Cards.normalize(c)).filter(Boolean);   // tarjetas (opcional, cards.js)
   if ('legend' in nb) Meaning.normalize(nb);   // leyenda de colores (opcional, meaning.js)
+  // PDF originales (opcional, nitidez): se quita lo mal formado, no se inventa nada.
+  if ('pdfs' in nb) { if (Array.isArray(nb.pdfs)) nb.pdfs = nb.pdfs.filter((f) => f && typeof f.id === 'string'); else delete nb.pdfs; }
+  for (const p of nb.pages || []) if ('pdf' in p && !(p.pdf && typeof p.pdf.id === 'string' && Number.isInteger(p.pdf.index) && p.pdf.index >= 0)) delete p.pdf;
   if ('scrollMode' in nb && !PAGE_MODES.includes(nb.scrollMode)) delete nb.scrollMode;   // modo de páginas (opcional)
   if ('reviews' in nb || 'lastReviewed' in nb) Recall.normalize(nb);   // curva del olvido (opcional, recall.js)
   for (const page of nb.pages) {
@@ -3502,13 +3619,66 @@ async function pageThumb(page, width = 180) {
   return url;
 }
 
+// ---------- PDF original (nitidez): abrir con pdf.js y pintar una zona a cualquier escala ----------
+// Las páginas importadas guardan `page.pdf = { id, index }`; el PDF (Blob) está en Store.getPdf(id).
+// Se tienen abiertos como mucho `max` documentos (los últimos usados); los demás se cierran (liberan memoria).
+const PDF_WORKER_URL = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+const PdfDocs = {
+  docs: new Map(),     // id → Promise<PDFDocumentProxy|null> (el orden de inserción es el de uso)
+  missing: new Set(),  // ids cuyo PDF no está guardado (o no se pudo abrir): se ve el JPEG
+  max: 2,
+  get(id) {
+    if (!window.pdfjsLib || this.missing.has(id)) return Promise.resolve(null);
+    let p = this.docs.get(id);
+    if (p) { this.docs.delete(id); this.docs.set(id, p); return p; }   // el último usado, al final
+    p = (async () => {
+      const blob = await Store.getPdf(id);
+      if (!blob) { this.missing.add(id); return null; }
+      if (!pdfjsLib.GlobalWorkerOptions.workerSrc) pdfjsLib.GlobalWorkerOptions.workerSrc = PDF_WORKER_URL;
+      try { return await pdfjsLib.getDocument({ data: new Uint8Array(await blob.arrayBuffer()), isEvalSupported: false }).promise; }
+      catch (e) { this.missing.add(id); return null; }
+    })();
+    this.docs.set(id, p);
+    while (this.docs.size > this.max) this.drop(this.docs.keys().next().value);
+    return p;
+  },
+  drop(id) { const p = this.docs.get(id); this.docs.delete(id); p?.then((d) => d?.destroy()).catch(() => {}); },
+  /** La página de pdf.js de una página de Folia (null si no hay original). */
+  async page(page) {
+    const ref = page.pdf, doc = ref && await this.get(ref.id);
+    if (!doc || ref.index >= doc.numPages) return null;
+    try { return await doc.getPage(ref.index + 1); } catch (e) { return null; }
+  },
+  /** ¿La página tiene un PDF original que se puede usar? (sin abrirlo: lo que se sabe ya) */
+  usable(page) { return !!page.pdf && !!window.pdfjsLib && !this.missing.has(page.pdf.id); },
+  /** Pinta en `canvas` la zona `r` (px de página) de `page` a `canvas.width / r.w` px por px de página.
+   *  Devuelve la tarea de pdf.js (con .promise y .cancel()) o null. */
+  render(pdfPage, page, canvas, r) {
+    const k = canvas.width / r.w, vp1 = pdfPage.getViewport({ scale: 1 });
+    const viewport = pdfPage.getViewport({ scale: k * page.w / vp1.width });
+    const ctx = canvas.getContext('2d');
+    ctx.setTransform(1, 0, 0, 1, 0, 0);   // pdf.js multiplica por la transformación que ya tenga el lienzo
+    return pdfPage.render({ canvasContext: ctx, viewport, transform: [1, 0, 0, 1, -r.x * k, -r.y * k], background: PAPERS[page.paper]?.fill || '#fff' });
+  },
+  /** La página entera a `scale` px por px de página como dataURL JPEG (exportar), o null si no hay original. */
+  async image(page, scale = 2) {
+    const pp = await this.page(page);
+    if (!pp) return null;
+    const c = document.createElement('canvas');
+    c.width = Math.round(page.w * scale); c.height = Math.round(page.h * scale);
+    try { await this.render(pp, page, c, { x: 0, y: 0, w: page.w, h: page.h }).promise; return c.toDataURL('image/jpeg', 0.92); }
+    catch (e) { return null; }
+    finally { c.width = c.height = 0; try { pp.cleanup(); } catch (e) { /* ya libre */ } }   // pdf.js no libera la página solo
+  },
+};
+
 // ---------- Exportación fiel (con el formato del texto), mediante html2canvas ----------
 
 /** Página completa como lienzo, con el texto enriquecido tal cual se ve. */
-async function renderPageCanvas(page, scale = 2) {
+async function renderPageCanvas(page, scale = 2, bg = null) {
   const stage = document.createElement('div');
   stage.className = 'hidden-stage';
-  const el = buildStaticPage(page);
+  const el = buildStaticPage(page, bg);
   stage.appendChild(el);
   document.body.appendChild(stage);
   await Promise.all($$('img', el).map((img) => (img.complete ? null : new Promise((r) => { img.onload = img.onerror = r; }))));
@@ -3546,8 +3716,8 @@ async function renderPageZone(page, rect, scale = 2) {
     return await window.html2canvas(win, { scale, backgroundColor: PAPERS[page.paper]?.fill || '#fff', logging: false, useCORS: true, width: rect.w, height: rect.h });
   } finally { stage.remove(); }
 }
-/** Página en DOM sin interacción (para exportar). */
-function buildStaticPage(page) {
+/** Página en DOM sin interacción (para exportar). `bgSrc`: otro fondo para el PDF (el original pintado más nítido). */
+function buildStaticPage(page, bgSrc = null) {
   const el = document.createElement('div');
   Object.assign(el.style, { position: 'relative', width: page.w + 'px', height: page.h + 'px', overflow: 'hidden', background: PAPERS[page.paper]?.fill || '#fff' });
   const paper = document.createElement('canvas');
@@ -3555,7 +3725,7 @@ function buildStaticPage(page) {
   Object.assign(paper.style, { position: 'absolute', left: 0, top: 0, width: page.w + 'px', height: page.h + 'px' });
   const pctx = paper.getContext('2d'); pctx.scale(2, 2); drawPaper(pctx, page);
   el.appendChild(paper);
-  if (page.bg) { const bg = document.createElement('img'); bg.src = page.bg; Object.assign(bg.style, { position: 'absolute', left: 0, top: 0, width: page.w + 'px', height: page.h + 'px' }); el.appendChild(bg); }
+  if (page.bg) { const bg = document.createElement('img'); bg.src = bgSrc || page.bg; Object.assign(bg.style, { position: 'absolute', left: 0, top: 0, width: page.w + 'px', height: page.h + 'px' }); el.appendChild(bg); }
   for (const it of page.items) {
     if (it.type === 'link' || it.type === 'comment' || it.type === 'tape') continue;
     el.appendChild(staticItem(it, page));
@@ -3631,15 +3801,17 @@ async function exportPDF(nb, pages = nb.pages) {
   for (let i = 0; i < pages.length; i++) {
     const page = pages[i];
     if (i) pdf.addPage([page.w, page.h], page.w > page.h ? 'landscape' : 'portrait');
-    const canvas = await renderPageCanvas(page, 2);
+    const canvas = await renderPageCanvas(page, 2, await PdfDocs.image(page, 2));   // con original: fondo nítido
     pdf.addImage(canvas.toDataURL('image/jpeg', 0.9), 'JPEG', 0, 0, page.w, page.h);
   }
+  if (S.view !== 'editor') for (const id of [...PdfDocs.docs.keys()]) PdfDocs.drop(id);   // exportado desde la biblioteca: se cierran
   pdf.setProperties({ title: nb.title, creator: 'Folia' });
   const name = (nb.title || 'libreta').replace(/[\\/:*?"<>|]/g, '-');
   if (await saveFile(`${name}${pages.length === 1 && nb.pages.length > 1 ? ' - página ' + (nb.pages.indexOf(pages[0]) + 1) : ''}.pdf`, pdf.output('blob'))) toast('PDF descargado');
 }
 async function exportPNG(nb, page) {
-  const canvas = await renderPageCanvas(page, 2);
+  const canvas = await renderPageCanvas(page, 2, await PdfDocs.image(page, 2));
+  if (S.view !== 'editor') for (const id of [...PdfDocs.docs.keys()]) PdfDocs.drop(id);
   const blob = await new Promise((r) => canvas.toBlob(r, 'image/png'));
   const name = (nb.title || 'libreta').replace(/[\\/:*?"<>|]/g, '-');
   if (await saveFile(`${name} - página ${nb.pages.indexOf(page) + 1}.png`, blob)) toast('Imagen descargada');
@@ -3852,7 +4024,7 @@ function settingsMenu(anchor) {
     <hr><button data-act="fullscreen">${icon(isFullscreen() ? 'shrink' : 'expand')} ${isFullscreen() ? 'Salir de pantalla completa' : 'Pantalla completa'} <span class="kbd-hint">${onbKey('fullscreen')}</span></button>
     ${fingerSwitch()}
     <button data-act="shortcuts">${icon('keyboard')} Atajos de teclado…</button>
-    <button data-act="tutorial">${icon('tutorial')} Ver el tutorial</button>
+    ${Onboarding.menuHtml()}
     <hr><div class="label">Almacenamiento y copia de seguridad</div>
     ${DataSafety.boxHTML()}
     <button data-act="save">${icon('download')} Hacer copia ahora</button>
@@ -3863,9 +4035,10 @@ function settingsMenu(anchor) {
     if (act === 'shortcuts') shortcutsDialog();
     if (act === 'fullscreen') toggleFullscreen();
     if (act === 'finger') toggleFinger();
-    if (act === 'tutorial') Onboarding.open();
+    Onboarding.menuAct(act);   // «Tutorial»: todo, novedades o un capítulo
     if (act === 'install') window.libretaInstall?.();
   });
+  if (openPopover) bindSubmenus(openPopover.el);
   DataSafety.refreshBox();
 }
 function onLibraryClick(e) {
@@ -3976,6 +4149,7 @@ function duplicateFolder(f, parent, top = true) {
 function deleteNotebook(nb) {
   S.notebooks = S.notebooks.filter((n) => n.id !== nb.id); Store.remove(nb.id);
   (nb.recordings || []).forEach((r) => Voice.forgetIfUnused(r.id));
+  new Set([...(nb.pdfs || []).map((f) => f.id), ...nb.pages.map((p) => p.pdf?.id).filter(Boolean)]).forEach((id) => Store.forgetPdfIfUnused(id));   // su PDF original
   S.tabs = S.tabs.filter((id) => id !== nb.id); if (S.active === nb.id) S.active = S.tabs[0] || null; saveTabs();
 }
 /** Borrar libretas y carpetas (las carpetas, con todo lo que tienen dentro), tras preguntar. */
@@ -4092,12 +4266,15 @@ async function importPDF(file, { folder = S.folder || null, open = true } = {}) 
   if (!window.pdfjsLib) { toast('No se ha podido cargar el lector de PDF. Revisa la conexión y recarga.'); return; }
   try {
     toast('Importando el PDF…');
-    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-    const data = new Uint8Array(await file.arrayBuffer());
+    pdfjsLib.GlobalWorkerOptions.workerSrc = PDF_WORKER_URL;
+    const buf = await file.arrayBuffer();
+    const data = new Uint8Array(buf.slice(0));   // copia: pdf.js puede quedarse con el búfer
     const pdf = await pdfjsLib.getDocument({ data, isEvalSupported: false }).promise;
     const nb = newNotebook(file.name.replace(/\.pdf$/i, ''), COVERS[Math.floor(Math.random() * COVERS.length)], 'blank', 'white');
     nb.folder = folder;
     nb.pages = [];
+    // El PDF original se guarda una vez (aparte de la libreta) para pintarlo nítido con cualquier zoom; el JPEG queda de vista rápida.
+    const pdfId = buf.byteLength <= PDF_MAX_BYTES ? uid() : null;
     for (let i = 1; i <= pdf.numPages; i++) {
       const p = await pdf.getPage(i);
       const vp1 = p.getViewport({ scale: 1 });
@@ -4110,11 +4287,16 @@ async function importPDF(file, { folder = S.folder || null, open = true } = {}) 
       const ctx = canvas.getContext('2d');
       ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, canvas.width, canvas.height);
       await p.render({ canvasContext: ctx, viewport: vp }).promise;
-      const text = (await p.getTextContent()).items.map((t) => t.str + (t.hasEOL ? '\n' : ' ')).join('').replace(/[ \t]+/g, ' ').trim();
+      const text = await pdfPageText(p);
       const pdfRuns = await pdfTextRuns(p, p.getViewport({ scale: w / vp1.width }));
-      nb.pages.push({ id: uid(), w, h, template: 'blank', paper: 'white', bg: canvas.toDataURL('image/jpeg', 0.85), pdfText: text, pdfRuns, strokes: [], items: [] });
+      const page = { id: uid(), w, h, template: 'blank', paper: 'white', bg: canvas.toDataURL('image/jpeg', 0.85), pdfText: text, pdfRuns, strokes: [], items: [] };
+      if (pdfId) page.pdf = { id: pdfId, index: i - 1 };
+      nb.pages.push(page);
+      canvas.width = canvas.height = 0;
       if (i % 5 === 0) toast(`Importando el PDF… ${i} de ${pdf.numPages}`);
     }
+    if (pdfId) { await Store.putPdf(pdfId, new Blob([buf], { type: 'application/pdf' })); nb.pdfs = [{ id: pdfId, name: file.name, size: buf.byteLength, pages: pdf.numPages }]; }
+    pdf.destroy();
     S.notebooks.push(nb); Store.put(nb);
     toast(`PDF importado: ${nb.pages.length} ${nb.pages.length === 1 ? 'página' : 'páginas'}`);
     if (open) openNotebook(nb.id);
@@ -4123,6 +4305,58 @@ async function importPDF(file, { folder = S.folder || null, open = true } = {}) 
     console.error(e);
     toast('No se ha podido abrir ese PDF.');
     return null;
+  }
+}
+const PDF_MAX_BYTES = 150 * 1024 * 1024;   // un PDF más grande no se guarda entero (solo sus páginas en JPEG)
+/** Texto de una página de pdf.js (para buscar), como al importar. */
+async function pdfPageText(p) {
+  return (await p.getTextContent()).items.map((t) => t.str + (t.hasEOL ? '\n' : ' ')).join('').replace(/[ \t]+/g, ' ').trim();
+}
+/** PDF importado antes de guardar el original (o sin él): se vuelve a elegir el mismo archivo y cada página con
+ *  fondo de PDF se asocia a la suya por su texto o, si no lo tiene, por orden (con la misma proporción). La tinta, los
+ *  elementos y el JPEG no se tocan. Devuelve cuántas páginas quedaron asociadas. */
+async function reimportPDF(nb, file) {
+  if (!window.pdfjsLib) { toast('No se ha podido cargar el lector de PDF. Revisa la conexión y recarga.'); return 0; }
+  try {
+    toast('Leyendo el PDF…');
+    pdfjsLib.GlobalWorkerOptions.workerSrc = PDF_WORKER_URL;
+    const buf = await file.arrayBuffer();
+    if (buf.byteLength > PDF_MAX_BYTES) { toast('Ese PDF es demasiado grande para guardarlo entero.'); return 0; }
+    const pdf = await pdfjsLib.getDocument({ data: new Uint8Array(buf.slice(0)), isEvalSupported: false }).promise;
+    const info = [];
+    for (let i = 1; i <= pdf.numPages; i++) {
+      const p = await pdf.getPage(i), vp1 = p.getViewport({ scale: 1 });
+      info.push({ p, ratio: vp1.height / vp1.width, text: (await pdfPageText(p)).replace(/\s+/g, ' ') });
+    }
+    const pages = nb.pages.filter((p) => p.bg), id = uid(), used = new Set();
+    const fits = (page, k) => k >= 0 && k < info.length && !used.has(k) && Math.abs(page.h / page.w - info[k].ratio) < 0.02;
+    let n = 0;
+    for (let j = 0; j < pages.length; j++) {
+      const page = pages[j], t = (page.pdfText || '').replace(/\s+/g, ' ');
+      let k = t ? info.findIndex((x, kk) => !used.has(kk) && x.text === t) : -1;
+      if (k < 0) k = j;   // sin texto (o distinto): la del mismo orden
+      if (!fits(page, k)) continue;
+      used.add(k); n++;
+      page.pdf = { id, index: k };
+      if (!page.pdfRuns?.length) {   // importado antes de poder seleccionar el texto: de paso, se completa
+        const vp1 = info[k].p.getViewport({ scale: 1 });
+        page.pdfRuns = await pdfTextRuns(info[k].p, info[k].p.getViewport({ scale: page.w / vp1.width }));
+        if (!page.pdfText) page.pdfText = await pdfPageText(info[k].p);
+      }
+    }
+    pdf.destroy();
+    if (!n) { toast('Ese PDF no coincide con las páginas de esta libreta.'); return 0; }
+    await Store.putPdf(id, new Blob([buf], { type: 'application/pdf' }));
+    (nb.pdfs = nb.pdfs || []).push({ id, name: file.name, size: buf.byteLength, pages: info.length });
+    PdfDocs.missing.clear();
+    touch(nb);
+    if (nb === activeNb()) { for (const v of views.values()) Sharp.release(v); Sharp.schedule(0); }
+    toast(n === pages.length ? 'Listo: el PDF ya se ve nítido' : `Listo: ${n} de ${pages.length} páginas se ven nítidas`);
+    return n;
+  } catch (e) {
+    console.warn(e);
+    toast('No se ha podido abrir ese PDF.');
+    return 0;
   }
 }
 /** Crea una libreta con una página por imagen (la imagen, centrada y a todo el ancho que quepa) en `folder`. Devuelve la libreta. */
@@ -4456,8 +4690,10 @@ function celebrateFolder(folder, count0) {
 function backupMenu(anchor) {
   popover(anchor, `<div class="label">Todas tus libretas</div>
     <button data-act="save">Guardar copia (archivo .json)</button>
+    <button data-act="save-light">Guardar copia sin los PDF originales (más pequeña)</button>
     <button data-act="load">Recuperar copia…</button>`, (act) => {
     if (act === 'save') saveBackup();
+    if (act === 'save-light') saveBackup({ pdfs: false });
     if (act === 'load') loadBackup();
   });
 }
@@ -4480,13 +4716,15 @@ function loadBackup() {
           Store.put(nb); added++;
         }
         for (const [id, url] of Object.entries(data.audio || {})) { try { await Store.putAudio(id, await (await fetch(url)).blob()); } catch (e) { /* audio dañado */ } }
+        for (const [id, url] of Object.entries(data.pdfs || {})) { try { await Store.putPdf(id, await (await fetch(url)).blob()); PdfDocs.missing.delete(id); } catch (e) { /* PDF dañado: se ve el JPEG */ } }
         renderLibrary();
         toast(added ? `Recuperadas ${added} libretas` : 'El archivo no tenía libretas');
       } catch (e) { toast('Ese archivo no es una copia de Folia.'); }
     });
   }
 }
-async function saveBackup() {
+/** Copia de seguridad de todo. `pdfs: false` = sin los PDF originales (más pequeña; las páginas se ven con su JPEG). */
+async function saveBackup({ pdfs = true } = {}) {
   flushAll();
   // El audio de las grabaciones va dentro, en base64.
   const audio = {};
@@ -4495,8 +4733,19 @@ async function saveBackup() {
     const blob = await Store.getAudio(r.id);
     if (blob) audio[r.id] = await new Promise((res) => { const fr = new FileReader(); fr.onload = () => res(fr.result); fr.readAsDataURL(blob); });
   }
+  // Los PDF originales, también en base64 (≈ 1,33 × su tamaño); cada uno es un trozo aparte del archivo (sin juntar
+  // un texto enorme en memoria).
+  const parts = [];
+  if (pdfs) {
+    const ids = new Set(S.notebooks.flatMap((n) => [...(n.pdfs || []).map((f) => f.id), ...n.pages.map((p) => p.pdf?.id).filter(Boolean)]));
+    for (const id of ids) {
+      const blob = await Store.getPdf(id);
+      if (blob) parts.push((parts.length ? ',' : '') + JSON.stringify(id) + ':', JSON.stringify(await new Promise((res) => { const fr = new FileReader(); fr.onload = () => res(fr.result); fr.readAsDataURL(blob); })));
+    }
+  }
   const data = JSON.stringify({ app: 'Folia', version: 4, saved: new Date().toISOString(), folders: Folders.list, notebooks: S.notebooks, audio });
-  if (await saveFile(`libreta-copia-${new Date().toISOString().slice(0, 10)}.json`, new Blob([data], { type: 'application/json' }))) { DataSafety.markBackup(); toast('Copia guardada'); }
+  const blob = new Blob(parts.length ? [data.slice(0, -1), ',"pdfs":{', ...parts, '}}'] : [data], { type: 'application/json' });
+  if (await saveFile(`libreta-copia-${new Date().toISOString().slice(0, 10)}.json`, blob)) { DataSafety.markBackup(); toast('Copia guardada'); }
 }
 
 // ---------- Proteger los datos: almacenamiento persistente, espacio y recordatorio de copia ----------
@@ -6670,6 +6919,8 @@ function backToLibrary() {
   Voice.stopPlayback();
   leaveNotebook(activeNb());
   flushAll();
+  for (const v of views.values()) Sharp.release(v);
+  for (const id of [...PdfDocs.docs.keys()]) PdfDocs.drop(id);   // los PDF abiertos con pdf.js
   views.clear();
   renderLibrary();
 }
@@ -6980,6 +7231,7 @@ function openOtherMenu(anchor) {
 function renderEditor() {
   const nb = activeNb();
   if (!nb) return renderLibrary();
+  for (const v of views.values()) Sharp.release(v);
   views.clear();
   $('#app').innerHTML = `
     <nav class="tabs" id="tabs" role="tablist" aria-label="Libretas abiertas"></nav>
@@ -7157,6 +7409,7 @@ function updatePageIndicator() {
 function buildPages() {
   const nb = activeNb();
   const container = $('#pages');
+  for (const v of views.values()) Sharp.release(v);   // las capas nítidas de las páginas de antes
   container.innerHTML = '';
   views.clear();
   nb.pages.forEach((page, index) => {
@@ -7209,6 +7462,8 @@ function mountPage(page, v, scale = pageScale()) {
   for (const c of [v.paper, v.ink, v.live]) {
     c.width = Math.round(page.w * scale); c.height = Math.round(page.h * scale); c._scale = scale;
   }
+  // Página de PDF: el papel solo es el color de fondo (lo tapa el PDF): 2×2 px estirados, no un lienzo a pantalla completa.
+  if (page.bg) { const ps = 2 / page.w; v.paper.width = 2; v.paper.height = Math.max(2, Math.round(page.h * ps)); v.paper._scale = ps; }
   if (v.bg && page.bg && v.bg.getAttribute('src') !== page.bg) v.bg.src = page.bg;
   renderPaper(page); renderInk(page);
 }
@@ -7218,6 +7473,7 @@ function unmountPage(v) {
   if (!v.ink._scale && !v.ink.width) return;
   for (const c of [v.paper, v.ink, v.live, ...v.items.querySelectorAll('.note-ink canvas')]) { c.width = 0; c.height = 0; c._scale = 0; }
   if (v.bg) v.bg.removeAttribute('src');
+  Sharp.release(v);
 }
 /** Solo las páginas visibles y una pantalla por arriba y por abajo tienen lienzos de verdad (en iPad, pintar
  *  todas a zoom×pantalla agotaba la memoria con PDFs largos). Se llama al desplazarse y al cambiar el zoom.
@@ -7236,21 +7492,153 @@ function redrawPages(dpr = pageDpr()) {
     if (gap <= h) mountPage(page, v, scale);
     else if (gap > h * 2 || v.ink._scale !== scale) unmountPage(v);
   }
+  Sharp.schedule();   // la zona visible, nítida, cuando se pare (PDF en vector y tinta a zoom × pantalla)
 }
 function ctxFor(canvas) { const ctx = canvas.getContext('2d'); ctx.setTransform(canvas._scale, 0, 0, canvas._scale, 0, 0); return ctx; }
 // Una página desmontada no se pinta: se pintará entera al volver a montarse.
-function renderPaper(page) { const v = views.get(page.id); if (v && v.paper._scale) drawPaper(ctxFor(v.paper), page); }
+function renderPaper(page) {
+  const v = views.get(page.id);
+  if (v && v.paper._scale) drawPaper(ctxFor(v.paper), page);
+  if (v?.sharp?.bg && !page.bg) { Sharp.release(v, page); Sharp.schedule(0); }   // la capa nítida tenía el papel de antes
+}
 function renderInk(page) {
   const v = views.get(page.id);
   if (!v || !v.ink._scale) return;
   const ctx = ctxFor(v.ink);
   ctx.clearRect(0, 0, page.w, page.h);
-  const sel = S.lasso && S.lasso.pageId === page.id && !S.lasso.noteId ? new Set(S.lasso.ids) : null;
-  for (const s of page.strokes) drawStroke(ctx, s, page.paper);
-  if (sel) { ctx.save(); ctx.globalAlpha = 0.25; for (const s of page.strokes) if (sel.has(s.id)) { ctx.shadowColor = '#2F4FD8'; ctx.shadowBlur = 6; drawStroke(ctx, s, page.paper); } ctx.restore(); }
+  paintStrokes(ctx, page);
+  const sh = v.sharp;
+  if (sh?.ink) { ctx.clearRect(sh.r.x, sh.r.y, sh.r.w, sh.r.h); Sharp.paintInk(page, sh); }   // esa zona la pinta la capa nítida
   for (const it of page.items) if (it.type === 'sticky') paintNoteInk(page, it);   // la tinta de los post-its
   ZoomWin.dirty(page);   // la lupa repinta su panel si muestra esta página
 }
+/** Los trazos de la página (y el brillo de los elegidos con el lazo) en `ctx`, ya con su escala. */
+function paintStrokes(ctx, page) {
+  const sel = S.lasso && S.lasso.pageId === page.id && !S.lasso.noteId ? new Set(S.lasso.ids) : null;
+  for (const s of page.strokes) drawStroke(ctx, s, page.paper);
+  if (sel) { ctx.save(); ctx.globalAlpha = 0.25; for (const s of page.strokes) if (sel.has(s.id)) { ctx.shadowColor = '#2F4FD8'; ctx.shadowBlur = 6; drawStroke(ctx, s, page.paper); } ctx.restore(); }
+}
+/** Capa «nítida» de la zona visible de cada página montada (como las teselas de Goodnotes): los lienzos de la página
+ *  tienen como mucho 3 px por px de página (memoria de Safari) y el fondo de un PDF es un JPEG a 1,6; aquí se pinta solo lo
+ *  que se ve (y un margen) a zoom × pantalla: el PDF original en vector con pdf.js y, si el zoom pasa del tope, el papel y la
+ *  tinta. Se pinta 150 ms después de parar (desplazar, zoom), en un lienzo aparte que se pone encima cuando está listo
+ *  (mientras, se ve lo de siempre: sin parpadeo); lo que estaba a medias se cancela. Nada de esto ocurre en pointermove.
+ *  v.sharp = { r (px de página), k (px por px de página), bg (lienzo de papel/PDF o null), ink (lienzo de tinta o null) }. */
+const Sharp = {
+  timer: 0,
+  MAX_PX: 8e6,    // px por lienzo nítido (Safari en iPad: 16,7 Mpx por lienzo y poca memoria en total)
+  MARGIN: 0.25,   // margen alrededor de lo visible (fracción de la pantalla): desplazar un poco no lo deja borroso
+  warned: new Set(),
+  schedule(ms = 150) { clearTimeout(this.timer); this.timer = setTimeout(() => this.update(), ms); },
+  /** px de pantalla por px de página. */
+  k: () => S.zoom * pageDpr(),
+  update() {
+    this.timer = 0;
+    const nb = activeNb(), desk = $('#desk');
+    if (!nb || !desk || !desk.clientHeight || S.view !== 'editor') return;
+    if (pinchActive || PenInput.live) return this.schedule(250);   // pellizcando o escribiendo: después
+    const dr = desk.getBoundingClientRect(), k = this.k();
+    for (const page of nb.pages) {
+      const v = views.get(page.id);
+      if (!v || !v.ink._scale) { if (v?.sharp || v?.sharpJob) this.release(v); continue; }
+      const wr = v.wrap.getBoundingClientRect();
+      const vis = this.clip({ x: (dr.left - wr.left) / S.zoom, y: (dr.top - wr.top) / S.zoom, w: desk.clientWidth / S.zoom, h: desk.clientHeight / S.zoom }, page);
+      const bg = PdfDocs.usable(page) || (!page.bg && k > v.paper._scale + 0.01), ink = k > v.ink._scale + 0.01;
+      if (!vis || !(bg || ink)) { this.release(v, page); continue; }
+      if (page.bg && !page.pdf) this.hint(nb, page, k);
+      const cur = v.sharpJob?.want || v.sharp;
+      if (cur && cur.k === k && !!cur.bg === bg && !!cur.ink === ink && this.inside(vis, cur.r)) continue;   // ya lo cubre
+      this.start(page, v, this.region(vis, page, k), k, bg, ink);
+    }
+  },
+  clip(r, page) {
+    const x0 = Math.max(0, r.x), y0 = Math.max(0, r.y), x1 = Math.min(page.w, r.x + r.w), y1 = Math.min(page.h, r.y + r.h);
+    return x1 > x0 && y1 > y0 ? { x: x0, y: y0, w: x1 - x0, h: y1 - y0 } : null;
+  },
+  inside: (a, b) => a.x >= b.x - 0.5 && a.y >= b.y - 0.5 && a.x + a.w <= b.x + b.w + 0.5 && a.y + a.h <= b.y + b.h + 0.5,
+  /** Lo visible con su margen, en px de página enteros y sin pasar de MAX_PX a la escala k (si no cabe, menos margen). */
+  region(vis, page, k) {
+    const desk = $('#desk');
+    let m = this.MARGIN;
+    for (;;) {
+      const mx = m * desk.clientWidth / S.zoom, my = m * desk.clientHeight / S.zoom;
+      const r = this.clip({ x: vis.x - mx, y: vis.y - my, w: vis.w + 2 * mx, h: vis.h + 2 * my }, page);
+      const x = Math.floor(r.x), y = Math.floor(r.y), out = { x, y, w: Math.ceil(r.x + r.w) - x, h: Math.ceil(r.y + r.h) - y };
+      if (out.w * out.h * k * k <= this.MAX_PX || m <= 0) return out;
+      m = m > 0.05 ? m / 2 : 0;
+    }
+  },
+  canvas(r, k) {
+    const c = document.createElement('canvas');
+    const kk = Math.min(k, Math.sqrt(this.MAX_PX / (r.w * r.h)));   // pantalla enorme sin margen: algo menos de resolución
+    c.width = Math.max(1, Math.round(r.w * kk)); c.height = Math.max(1, Math.round(r.h * kk));
+    c.className = 'sharp';
+    c.style.cssText = `left:${r.x}px;top:${r.y}px;right:auto;bottom:auto;width:${r.w}px;height:${r.h}px;pointer-events:none`;
+    return c;
+  },
+  /** Pinta la zona en lienzos nuevos y, cuando están listos, los cambia por los de antes. */
+  async start(page, v, r, k, bg, ink) {
+    this.cancel(v);
+    const job = v.sharpJob = { want: { r, k, bg, ink }, task: null };
+    let bgc = null;
+    if (bg) {
+      bgc = this.canvas(r, k);
+      const sx = bgc.width / r.w, sy = bgc.height / r.h, ctx = bgc.getContext('2d');
+      ctx.setTransform(sx, 0, 0, sy, -r.x * sx, -r.y * sy); drawPaper(ctx, page);
+      if (PdfDocs.usable(page)) {
+        const pp = await PdfDocs.page(page);
+        if (v.sharpJob !== job) { bgc.width = bgc.height = 0; return; }
+        if (!pp) bgc = (bgc.width = bgc.height = 0, null);   // sin original: se queda el JPEG
+        else {
+          job.task = PdfDocs.render(pp, page, bgc, r);
+          try { await job.task.promise; } catch (e) { bgc.width = bgc.height = 0; if (v.sharpJob === job) v.sharpJob = null; return; }   // cancelado
+          finally { try { pp.cleanup(); } catch (e) { /* ya libre */ } }   // pdf.js guarda cada página pintada: se libera
+        }
+      }
+    }
+    if (v.sharpJob !== job || !v.ink._scale) { if (bgc) bgc.width = bgc.height = 0; return; }
+    v.sharpJob = null;
+    this.drop(v);
+    const inkc = ink ? this.canvas(r, k) : null;
+    if (bgc) (v.bg || v.paper).after(bgc);
+    if (inkc) v.ink.after(inkc);
+    v.sharp = bgc || inkc ? { r, k, bg: bgc, ink: inkc } : null;
+    renderInk(page);   // con capa de tinta: la tinta de la zona pasa a ella (y se quita de la de siempre)
+  },
+  paintInk(page, sh) {
+    const c = sh.ink, sx = c.width / sh.r.w, sy = c.height / sh.r.h, ctx = c.getContext('2d');
+    ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, c.width, c.height);
+    ctx.setTransform(sx, 0, 0, sy, -sh.r.x * sx, -sh.r.y * sy);
+    paintStrokes(ctx, page);
+  },
+  /** Empieza un trazo: lo que se estaba pintando con pdf.js se deja para después (no compite con el lápiz). */
+  pause() {
+    let any = false;
+    for (const v of views.values()) if (v.sharpJob) { this.cancel(v); any = true; }
+    if (any) this.schedule(300);
+  },
+  cancel(v) { const j = v.sharpJob; v.sharpJob = null; try { j?.task?.cancel(); } catch (e) { /* ya acabó */ } },
+  /** Quita los lienzos nítidos (sin repintar). */
+  drop(v) {
+    const sh = v.sharp;
+    v.sharp = null;
+    for (const c of [sh?.bg, sh?.ink]) if (c) { c.remove(); c.width = c.height = 0; }
+    return sh;
+  },
+  /** Libera todo lo nítido de una página (desmontar, salir, ya no hace falta). Con `page`, vuelve a pintar su tinta entera. */
+  release(v, page) {
+    if (!v) return;
+    this.cancel(v);
+    const sh = this.drop(v);
+    if (page && sh?.ink) renderInk(page);
+  },
+  /** PDF importado antes de guardar el original: se avisa una vez por libreta (con zoom) de que se puede volver a importar. */
+  hint(nb, page, k) {
+    if (k < 2 || this.warned.has(nb.id)) return;
+    this.warned.add(nb.id);
+    toast('Este PDF se importó con menos calidad · Para verlo nítido: menú «Página» › «Volver a importar…»');
+  },
+};
 function setZoom(z) {
   const desk = $('#desk');
   if (!desk) return;
@@ -7799,7 +8187,9 @@ function pageFormatMenu(anchor) {
   popover(anchor, `
     <button data-act="add">${icon('addPage')} Añadir página… <span class="kbd-hint">${onbKey('newPage')}</span></button>
     <button data-act="dup">${icon('copy')} Duplicar esta página</button>
-    <hr>${page.bg ? '<div class="label">Plantilla: página de PDF</div>' : `
+    <hr>${page.bg ? `<div class="label">Plantilla: página de PDF</div>${PdfDocs.usable(page) ? '' : `
+    <div class="label pdf-lowq">Este PDF se importó con menos calidad</div>
+    <button data-act="reimport">${icon('pdf')} Volver a importar para verlo nítido…</button>`}` : `
     <button class="pf-row" data-sub="tpl" aria-expanded="false">${icon('pageFormat')} <span class="pf-name">Plantilla</span> <span class="pf-val">${TEMPLATES[page.template] || TEMPLATES.blank}</span>${icon('chevronDown')}</button>
     <div class="pf-sub" data-for="tpl" hidden>${templateGroups().map(([g, list]) => `<div class="label tpl-group">${g}</div>${list.map(([k, n]) => `<button data-act="tpl:${k}">${mark(page.template === k)} ${n}</button>`).join('')}`).join('')}</div>
     <button class="pf-row" data-sub="paper" aria-expanded="false"><span class="pf-sw" style="background:${(PAPERS[page.paper] || PAPERS.white).fill}"></span> <span class="pf-name">Color del papel</span> <span class="pf-val">${(PAPERS[page.paper] || PAPERS.white).name}</span>${icon('chevronDown')}</button>
@@ -7812,6 +8202,7 @@ function pageFormatMenu(anchor) {
     if (act === 'add') return newPageDialog();
     if (act === 'dup') return duplicatePage(nb, currentPageIndex);
     if (act === 'legend') return Meaning.legendDialog(nb);
+    if (act === 'reimport') return pickFile('.pdf,application/pdf', (f) => reimportPDF(nb, f));
     if (kind === 'tpl' || kind === 'paper') {
       const before = snapshotPage(page);
       page[kind === 'tpl' ? 'template' : 'paper'] = value;
@@ -7856,10 +8247,12 @@ function pageMenu(anchor) {
     <hr><button data-act="fullscreen">${icon(isFullscreen() ? 'shrink' : 'expand')} ${isFullscreen() ? 'Salir de pantalla completa' : 'Pantalla completa'} <span class="kbd-hint">${onbKey('fullscreen')}</span></button>
     ${fingerSwitch()}
     <button data-act="shortcuts">${icon('keyboard')} Atajos de teclado…</button>
+    ${Onboarding.menuHtml()}
     ${PageMode.menuHtml()}
     <hr><div class="label">Apariencia</div>
     ${appearanceButtons()}`, (act) => {
     if (act === 'shortcuts') return shortcutsDialog();
+    if (Onboarding.menuAct(act)) return;   // «Tutorial»: todo, novedades o un capítulo
     if (PageMode.menuAct(act)) return;   // «Páginas»: continuo, por páginas u horizontal
     if (act === 'fullscreen') return toggleFullscreen();
     if (act === 'finger') return toggleFinger();
@@ -8800,6 +9193,7 @@ function attachInk(page, v) {
     PenInput.live = { type: pointerType, cancel };
     try { v.ink.setPointerCapture(e.pointerId); } catch (err) { /* puntero sintético */ }
     mountPage(page, v);   // por si aún no estaba montada (no debería: está a la vista)
+    Sharp.pause();   // el PDF nítido a medias espera: el trazo no compite con pdf.js
     currentPageIndex = activeNb().pages.indexOf(page);
     stopEditing();
     before = snapshotPage(page);
@@ -14183,69 +14577,132 @@ function shortcutsDialog() {
 }
 
 // =============================================================================
-// Tutorial de la primera vez (como en la app nativa): bienvenida animada, nombre, si se quiere
-// ver, qué temas, una lección por tema con su animación y un final con confeti. Siempre se puede
-// omitir y volver a ver desde + › Ver el tutorial.
+// Tutorial (como en la app nativa): bienvenida animada, nombre, si se quiere ver, qué temas
+// (agrupados en capítulos: Escribir · Organizar · Estudiar), una lección por tema con su animación
+// y un final con confeti. Se puede omitir y volver a ver desde ⚙︎ Ajustes o ⋯ › Tutorial: todo,
+// solo las «Novedades» (temas más nuevos que la versión vista) o un capítulo concreto.
 // =============================================================================
 const ONB_KEY = 'libreta-onboarding', ONB_NAME = 'libreta-user-name';
+/** Versión del contenido del tutorial (se guarda en ONB_KEY al terminarlo u omitirlo; «done» = 1).
+ *  Al añadir temas nuevos: súbela y pon esa versión en su campo `v`, y saldrán en «Novedades». */
+const ONB_VERSION = 2;
 const onbKey = (id) => { const b = Shortcuts.bindings(id)[0]; return b ? Shortcuts.display(b) : ''; };
+ICONS.shield = ICONS.shield || '<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/>';
 
+const ONB_CHAPTERS = [
+  ['write', 'Escribir', 'pen', ['#5C73FF', '#8C54FF']],
+  ['arrange', 'Organizar', 'folder', ['#9973FF', '#F266BF']],
+  ['learn', 'Estudiar', 'study', ['#FF9F0A', '#FF375F']],
+].map(([id, title, sym, colors]) => ({ id, title, sym, colors }));
+
+// [id, título, subtítulo, icono, colores, capítulo, versión en que entró, dónde está en la app]
+// `ui`: 'editor:#sel' o 'library:#sel'; 'editor@pen:#sel' = solo con esa herramienta (barra de opciones,
+// que puede tenerlo dentro de «Más»). Lo usa «Muéstramelo» y las pruebas comprueban que existe.
 const ONB_TOPICS = [
-  ['language', 'Idioma', 'Español o italiano, cuando quieras.', 'globe', ['#34C759', '#FF3B30']],
-  ['handwriting', 'Escribir a mano', 'Bolígrafo, pluma y lápiz. Formas perfectas.', 'pen', ['#5C73FF', '#8C54FF']],
-  ['highlighter', 'Subrayar', 'Libre, recto o perfectamente horizontal.', 'highlighter', ['#FFC71A', '#FF8C26']],
-  ['text', 'Textos con estilo', 'Letras, colores, negritas y fondos.', 'text', ['#33BFF2', '#4073FF']],
-  ['images', 'Imágenes', 'Inserta, recorta y ajusta el tamaño.', 'photo', ['#33D999', '#1A99BF']],
-  ['notes', 'Post-its y comentarios', 'Notas de colores y comentarios con nombre.', 'sticky', ['#FFD94D', '#FF8080']],
-  ['links', 'Enlaces entre libretas', 'Une ideas entre libretas y páginas.', 'link', ['#738CFF', '#33CCF2']],
-  ['pdf', 'Trabajar con PDF', 'Importa, selecciona texto y subráyalo.', 'pdf', ['#FF6666', '#E6408C']],
-  ['organize', 'Carpetas y pestañas', 'Carpetas dentro de carpetas y pestañas.', 'folder', ['#9973FF', '#F266BF']],
-  ['dynamic', 'Modo dinámico', 'Tus libretas como una constelación.', 'sparkles', ['#BF59FF', '#4D66FF']],
-  ['voice', 'Grabaciones y notas de voz', 'Graba clases y pon el audio en la página.', 'waveform', ['#FF8C33', '#FF4D73']],
-  ['timer', 'Temporizador de estudio', 'Pomodoro con descansos y alarma.', 'timer', ['#FF5959', '#40CC80']],
-  ['search', 'Buscar', 'Encuentra cualquier palabra al instante.', 'search', ['#4DBFFF', '#66F2BF']],
-  ['shortcuts', 'Atajos de teclado', 'Todo con el teclado, a tu manera.', 'keyboard', ['#99A6BF', '#667399']],
-  ['share', 'Compartir y exportar', 'PDF o imagen, listos para enviar.', 'share', ['#40D98C', '#338CFF']],
-].map(([id, title, subtitle, sym, colors]) => ({ id, title, subtitle, sym, colors }));
+  ['language', 'Idioma', 'Español o italiano, cuando quieras.', 'globe', ['#34C759', '#FF3B30'], 'write', 1, ['library:#settings-btn']],
+  ['handwriting', 'Escribir a mano', 'Pluma, bolígrafo y lápiz. Formas perfectas en directo.', 'pen', ['#5C73FF', '#8C54FF'], 'write', 2, ['editor:[data-tool="pen"]']],
+  ['palette', 'Paleta flotante', 'Tus colores siempre a mano.', 'palette', ['#FF9F0A', '#FF2D55'], 'write', 2, ['editor:#pal-btn']],
+  ['highlighter', 'Subrayar', 'Libre, recto o perfectamente horizontal.', 'highlighter', ['#FFC71A', '#FF8C26'], 'write', 1, ['editor:[data-tool="highlighter"]']],
+  ['ruler', 'Regla', 'Líneas rectas, medidas y ángulos.', 'ruler', ['#64D2FF', '#5E5CE6'], 'write', 2, ['editor@pen:[data-ruler="toggle"]']],
+  ['zoomwin', 'Lupa', 'Escribe ampliado y con precisión.', 'zoomIn', ['#30D158', '#0A84FF'], 'write', 2, ['editor@pen:[data-zw-toggle]']],
+  ['lasso', 'Lazo con filtros', 'Coge solo lo que quieras, o solo un color.', 'lasso', ['#BF5AF2', '#FF375F'], 'write', 2, ['editor:[data-tool="lasso"]', 'editor@lasso:#lf-menu-btn']],
+  ['text', 'Textos con estilo', 'Letras, colores, negritas y fondos.', 'text', ['#33BFF2', '#4073FF'], 'write', 1, ['editor:[data-tool="text"]']],
+  ['notes', 'Post-its y comentarios', 'Notas de colores; dibuja dentro con «Ampliar».', 'sticky', ['#FFD94D', '#FF8080'], 'write', 2, ['editor:[data-tool="sticky"]']],
+  ['images', 'Imágenes', 'Inserta, recorta y ajusta el tamaño.', 'photo', ['#33D999', '#1A99BF'], 'write', 1, ['editor:#add-image']],
+  ['pagemodes', 'Pasar página', 'Continuo, por páginas u horizontal.', 'pages', ['#5AC8FA', '#007AFF'], 'write', 2, ['editor:#page-count']],
+  ['organize', 'Carpetas', 'Arrastra libretas y archivos a una carpeta.', 'folder', ['#9973FF', '#F266BF'], 'arrange', 2, ['library:#new-btn']],
+  ['tabs', 'Pestañas', 'Varias libretas abiertas: ⌄ y «+».', 'layers', ['#FF6482', '#BF5AF2'], 'arrange', 2, ['editor:#tab-all', 'editor:#tab-plus']],
+  ['links', 'Enlaces entre libretas', 'Une ideas entre libretas y páginas.', 'link', ['#738CFF', '#33CCF2'], 'arrange', 1, ['editor:[data-tool="link"]']],
+  ['pdf', 'Trabajar con PDF', 'Importa, selecciona texto y subráyalo.', 'pdf', ['#FF6666', '#E6408C'], 'arrange', 1, ['library:#new-btn']],
+  ['search', 'Buscar', 'Encuentra cualquier palabra al instante.', 'search', ['#4DBFFF', '#66F2BF'], 'arrange', 1, ['editor:#find-btn']],
+  ['dynamic', 'Modo dinámico', 'Tus libretas como una constelación.', 'sparkles', ['#BF59FF', '#4D66FF'], 'arrange', 1, []],
+  ['backup', 'Copia de seguridad', 'El escudo te avisa si toca hacer copia.', 'shield', ['#34C759', '#30B0C7'], 'arrange', 2, ['library:#safety-btn']],
+  ['share', 'Compartir y exportar', 'PDF o imagen, listos para enviar.', 'share', ['#40D98C', '#338CFF'], 'arrange', 1, ['editor:#share-btn']],
+  ['shortcuts', 'Atajos de teclado', 'Todo con el teclado, a tu manera.', 'keyboard', ['#99A6BF', '#667399'], 'arrange', 1, ['library:#settings-btn']],
+  ['study', 'Menú Estudio', 'Tarjetas de repaso y de huecos.', 'study', ['#FF9F0A', '#FF375F'], 'learn', 2, ['editor:#study-btn']],
+  ['meaning', 'Colores con significado', 'Cada color, una idea; y su resumen.', 'palette', ['#FFD60A', '#FF6B9A'], 'learn', 2, ['editor:#page-format', 'editor:#study-btn']],
+  ['tape', 'Cinta de repaso', 'Tapa la respuesta y ponte a prueba.', 'tape', ['#34C759', '#A2845E'], 'learn', 2, ['editor@highlighter:[data-tape-act="draw"]']],
+  ['ai', 'IA con tu clave', 'Tarjetas, resúmenes y transcribir tu letra.', 'sparkles', ['#AF52DE', '#007AFF'], 'learn', 2, ['editor:#study-btn']],
+  ['recall', 'Curva del olvido', '«Para repasar hoy»: lo que vas olvidando.', 'graph', ['#FF453A', '#32D74B'], 'learn', 2, ['library:[data-recall]']],
+  ['voice', 'Grabaciones y notas de voz', 'Graba clases y pon el audio en la página.', 'waveform', ['#FF8C33', '#FF4D73'], 'learn', 1, ['editor:#mic-slot']],
+  ['timer', 'Temporizador de estudio', 'Pomodoro con descansos y alarma.', 'timer', ['#FF5959', '#40CC80'], 'learn', 1, ['editor:#study-btn']],
+].map(([id, title, subtitle, sym, colors, chapter, v, ui]) => ({ id, title, subtitle, sym, colors, chapter, v, ui }));
+const onbChapter = (id) => ONB_CHAPTERS.find((c) => c.id === id);
 
 /** Frase personal, pasos y truco de cada tema (con los atajos que tenga puestos quien lo ve). */
 function onbLesson(id, name) {
   const you = name ? `${name}, ` : '';
   const mod = IS_MAC ? '⌘' : 'Ctrl+';
+  const k = onbKey;
   switch (id) {
     case 'language': return [`${you}Folia habla tu idioma.`,
       [['globe', 'Al empezar elegiste el idioma con las banderas. Pruébalas aquí abajo.'],
         ['settings', 'Cámbialo cuando quieras en la biblioteca: ⚙︎ Ajustes › Idioma.'],
         ['check', 'Cambia todo al momento: menús, avisos, fechas y este tutorial.']],
       'Tus apuntes no se traducen: se quedan tal y como los escribes.'];
-    case 'handwriting': return [`${you}escribe y dibuja como en papel. Elige pluma, bolígrafo o lápiz, el color y el grosor.`,
-      [['pen', `Pulsa el bolígrafo arriba (o la tecla ${onbKey('toolPen')}) y escribe sobre la página.`],
-        ['shapes', 'Dibuja un círculo o una flecha y mantén quieto 1 segundo al final: se vuelve perfecto.'],
-        ['sparkles', 'Con «Formas» activado, cada trazo se convierte en forma.']],
-      `La goma (${onbKey('toolEraser')}) borra trazos enteros o solo un trozo; el lazo (${onbKey('toolLasso')}) los mueve.`];
+    case 'handwriting': return [`${you}escribe y dibuja como en papel.`,
+      [['pen', `Pulsa el bolígrafo arriba (${k('toolPen')}): pluma, bolígrafo o lápiz.`],
+        ['shapes', 'Dibuja un círculo y quédate quieto sin soltar: ves la forma perfecta en directo.'],
+        ['check', 'Suelta y se queda perfecta. Con «Formas», cada trazo es una forma.']],
+      `La goma (${k('toolEraser')}) borra trazos enteros o solo un trozo.`];
+    case 'palette': return [`${you}ten tus colores siempre a mano.`,
+      [['palette', 'Pulsa el botón de la paleta, junto a las herramientas.'],
+        ['palFixed', '«Fija»: una cápsula de colores que mueves y pliegas.'],
+        ['palStroke', '«Al terminar el trazo»: salen tus colores y se van solos.']],
+      'Con lápiz, Folia te la ofrece la primera vez.'];
     case 'highlighter': return [`${you}subraya sin miedo a que quede torcido.`,
-      [['highlighter', `Elige el subrayador (${onbKey('toolHighlighter')}) y su color.`],
+      [['highlighter', `Elige el subrayador (${k('toolHighlighter')}) y su color.`],
         ['minus', '«Recto» lo endereza en la dirección en que lo dibujas.'],
         ['chevronUpDown', '«H / V» lo deja perfectamente horizontal o vertical.']],
       'En «Libre», si mantienes quieto al final, también se endereza.'];
+    case 'ruler': return [`${you}líneas rectas sin esfuerzo.`,
+      [['ruler', `«Regla», en la barra del bolígrafo (${k('toggleRuler')}).`],
+        ['rotate', 'Muévela con un dedo y gírala con dos: se pega a 0°, 45° y 90°.'],
+        ['pen', 'Escribe junto al borde: sale recto y ves cuánto mide.']],
+      'Doble toque en la regla: transportador para medir ángulos.'];
+    case 'zoomwin': return [`${you}escribe en grande y queda en pequeño.`,
+      [['zoomIn', `«Lupa», en la barra del bolígrafo (${k('toggleZoomWin')}).`],
+        ['select', 'Pon el recuadro sobre la página y escribe abajo, ampliado.'],
+        ['chevronRight', 'Al llegar al borde avanza sola; «↵» baja al renglón siguiente.']],
+      'Arrastra la esquina del recuadro para cambiar el aumento.'];
+    case 'lasso': return [`${you}coge justo lo que quieres.`,
+      [['lasso', `Lazo (${k('toolLasso')}): rodea y mueve, copia o borra.`],
+        ['layers', '«Filtro»: elige si coge tinta, textos, imágenes…'],
+        ['eyedropper', '«Solo este color»: toca un trazo y solo coge los de su color.']],
+      'Solo coge lo que rodeas de verdad, y te dice cuántas cosas son.'];
     case 'text': return [`${you}añade cuadros de texto con el estilo que quieras.`,
-      [['text', `Elige Texto (${onbKey('toolText')}) y haz clic en la página para escribir.`],
-        ['bold', `${onbKey('bold')} negrita, ${onbKey('italic')} cursiva, ${onbKey('underline')} subrayado. Cambia letra, tamaño y color arriba.`],
+      [['text', `Elige Texto (${k('toolText')}) y haz clic en la página para escribir.`],
+        ['bold', `${k('bold')} negrita, ${k('italic')} cursiva, ${k('underline')} subrayado. Cambia letra, tamaño y color arriba.`],
         ['check', '«Predeterminar» guarda ese estilo para los textos nuevos.']],
       'Arrastra el borde del cuadro para moverlo mientras escribes.'];
+    case 'notes': return [`${you}notas que destacan, también a mano.`,
+      [['sticky', `Post-it (${k('toolSticky')}): una nota de color donde quieras.`],
+        ['zoomIn', '«Ampliar» lo acerca para escribir o dibujar dentro; «Hecho» vuelve.'],
+        ['comment', `Comentario (${k('toolComment')}): un círculo con nombre que se abre.`]],
+      'Lo que dibujas en el post-it se mueve con él.'];
     case 'images': return [`${you}trae fotos, capturas o archivos a tus apuntes.`,
       [['image', `Usa el botón de imagen, pégala (${mod}V) o arrástrala a la página.`],
         ['crop', 'Antes de colocarla, recórtala: libre, 1:1, 4:3, 16:9… y gírala.'],
         ['photo', 'Elige su ancho en la página, o cámbialo luego con el tirador.']],
       'Selecciona una imagen ya puesta y pulsa «Recortar…» para volver a ajustarla.'];
-    case 'notes': return [`${you}deja notas que destaquen.`,
-      [['sticky', `Post-it (${onbKey('toolSticky')}): pega notas de colores en cualquier sitio.`],
-        ['comment', `Comentario (${onbKey('toolComment')}): un círculo con nombre que se abre con su texto.`],
-        ['palette', 'Cambia el color de cada uno desde la barra de opciones.']],
-      'Los comentarios se ven encima de la tinta y salen en el PDF como un círculo.'];
+    case 'pagemodes': return [`${you}pasa las páginas a tu manera.`,
+      [['pages', 'Toca el número de página, abajo.'],
+        ['arrowDown', '«Continuo» o «Por páginas»: de arriba abajo.'],
+        ['chevronRight', '«Horizontal»: de lado, como diapositivas.']],
+      'También en ⋯ › Páginas.'];
+    case 'organize': return [`${you}cada asignatura en su carpeta.`,
+      [['folder', '+ › Nueva carpeta (también dentro de otra, con su color).'],
+        ['select', 'Arrastra una libreta, o un PDF de tu ordenador, hasta la carpeta.'],
+        ['layers', 'O «Seleccionar» varias y «Mover».']],
+      'La carpeta se ilumina cuando puedes soltar.'];
+    case 'tabs': return [`${you}varias libretas abiertas a la vez.`,
+      [['chevronDown', '⌄, a la izquierda: todas las pestañas. Ve a una, ciérralas u ordénalas.'],
+        ['plus', '«+», tras la última pestaña: abre otra libreta.'],
+        ['pages', `Arrastra una pestaña para moverla. ${k('tab1')}…${k('lastTab')} para saltar.`]],
+      `${k('closeTab')} cierra la pestaña actual; ${k('nextTab')} pasa a la siguiente.`];
     case 'links': return [`${you}conecta tus apuntes como en una wiki.`,
       [['link', 'Selecciona una palabra escrita con teclado y pulsa «Enlace».'],
-        ['linkArea', `O usa la herramienta Enlace (${onbKey('toolLink')}) para crear una zona sobre lo escrito a mano.`],
+        ['linkArea', `O usa la herramienta Enlace (${k('toolLink')}) para crear una zona sobre lo escrito a mano.`],
         ['eye', 'Al pulsarlo verás una vista previa y el botón «Ir».']],
       'Puedes enlazar a una libreta entera o a una página concreta.'];
     case 'pdf': return [`${you}estudia sobre tus PDF.`,
@@ -14253,41 +14710,66 @@ function onbLesson(id, name) {
         ['select', 'Con Seleccionar, arrastra sobre el texto del PDF (doble clic: una palabra).'],
         ['highlighter', 'Elige un color en el panel: queda subrayado. También línea, tachado o copiar.']],
       'Además puedes escribir a mano encima, como en cualquier página.'];
-    case 'organize': return [`${you}ordena tus libretas por asignaturas o proyectos.`,
-      [['folder', 'Crea carpetas (también dentro de otras) con + y mueve tus libretas con «Mover» o «Seleccionar».'],
-        ['layers', 'Abre varias a la vez: aparecen en pestañas, agrupadas por carpeta.'],
-        ['pages', `Arrastra una pestaña para ordenarla. ${onbKey('tab1')}…${onbKey('lastTab')} para saltar entre ellas.`]],
-      `${onbKey('closeTab')} cierra la pestaña actual; ${onbKey('nextTab')} pasa a la siguiente.`];
+    case 'search': return [`${you}encuentra cualquier cosa en segundos.`,
+      [['search', 'En la biblioteca busca en todas tus libretas: títulos, textos y PDF.'],
+        ['outline', `Dentro de una libreta, ${k('find')} busca solo en ella.`],
+        ['scanText', 'Lo escrito a mano también, si lo transcribes (Estudio › IA).']],
+      'El resultado se abre en su página con la palabra resaltada.'];
     case 'dynamic': return [`${you}mira tus libretas desde otro ángulo.`,
       [['sparkles', 'En la biblioteca, pulsa «Modo dinámico».'],
         ['graph', 'Las carpetas son nebulosas: haz clic para entrar viajando a la velocidad de la luz.'],
         ['select', 'Pasa el ratón para ver una vista previa; clic en una libreta para sus vínculos.']],
       'Arrastra libretas y carpetas para colocarlas a tu gusto.'];
-    case 'voice': return [`${you}no pierdas nada de lo que se dice en clase.`,
-      [['mic', `Pulsa el micrófono para grabar mientras escribes (${onbKey('record')}).`],
-        ['waveformPlus', 'En Grabaciones, «Añadir a la página» la pone como nota de voz.'],
-        ['play', 'Haz clic en la nota para escucharla. Cópiala a otra libreta si quieres.']],
-      `Muestra u oculta las notas de voz desde el menú del micrófono (${onbKey('toggleVoiceNotes')}).`];
-    case 'timer': return [`${you}estudia con método.`,
-      [['timer', `Pulsa el reloj de la barra (${onbKey('timer')}).`],
-        ['chevronUpDown', 'Ajusta los minutos de estudio y de descanso.'],
-        ['bell', 'Al llegar el descanso suena una alarma. Si lo empezaste sin querer, «Quitar temporizador».']],
-      'Sigue contando aunque cambies de libreta o cierres la página.'];
-    case 'search': return [`${you}encuentra cualquier cosa en segundos.`,
-      [['search', 'En la biblioteca busca en todas tus libretas: títulos, textos y PDF.'],
-        ['outline', `Dentro de una libreta, ${onbKey('find')} busca solo en ella.`],
-        ['highlighter', 'El resultado se abre en su página con la palabra resaltada.']],
-      'También encuentra palabras dentro de los PDF.'];
-    case 'shortcuts': return [`${you}ve más rápido con el teclado.`,
-      [['keyboard', `${onbKey('toolPen')} bolígrafo, ${onbKey('toolHighlighter')} subrayador, ${onbKey('toolEraser')} goma, ${onbKey('toolText')} texto… mientras no estés escribiendo.`],
-        ['pages', `${onbKey('closeTab')} cierra la pestaña, ${onbKey('tab1')} va a la primera, ${onbKey('find')} busca.`],
-        ['chevronUpDown', `Cámbialos todos en + › Atajos de teclado (${onbKey('shortcutsSettings')}).`]],
-      'Las teclas solas no molestan al escribir: una «h» en un texto es una «h».'];
+    case 'backup': return [`${you}tus apuntes, a salvo.`,
+      [['shield', 'El escudo de la biblioteca: verde, copia al día; naranja, toca hacerla.'],
+        ['download', 'Púlsalo y «Hacer copia ahora»: un archivo con todo.'],
+        ['upload', '«Recuperar copia…» lo trae de vuelta, también en otro equipo.']],
+      'Folia te lo recuerda si pasan días sin copia.'];
     case 'share': return [`${you}comparte tus apuntes con quien quieras.`,
       [['share', 'Compartir: descarga la libreta entera o solo la página actual.'],
         ['fileDown', 'En PDF o como imagen, lista para enviar.'],
         ['mail', 'Mándala por WhatsApp, correo, Drive… desde tu ordenador.']],
       'Las grabaciones y las zonas de enlace no salen en el PDF.'];
+    case 'shortcuts': return [`${you}ve más rápido con el teclado.`,
+      [['keyboard', `${k('toolPen')} bolígrafo, ${k('toolHighlighter')} subrayador, ${k('toolEraser')} goma, ${k('toolText')} texto… mientras no estés escribiendo.`],
+        ['pages', `${k('closeTab')} cierra la pestaña, ${k('tab1')} va a la primera, ${k('find')} busca.`],
+        ['chevronUpDown', `Cámbialos todos en ⚙︎ › Atajos de teclado (${k('shortcutsSettings')}).`]],
+      'Las teclas solas no molestan al escribir: una «h» en un texto es una «h».'];
+    case 'study': return [`${you}todo para estudiar, en un botón.`,
+      [['study', 'Menú «Estudio», en la barra del editor.'],
+        ['lightbulb', 'Tarjetas: rodea con el lazo y «Crear tarjeta», o escríbelas.'],
+        ['textMark', '«Tarjetas de huecos de lo subrayado»: lo subrayado pasa a ser […].']],
+      'El número del botón: las tarjetas que tocan hoy.'];
+    case 'meaning': return [`${you}cada color quiere decir algo.`,
+      [['palette', 'Página › Leyenda de colores: amarillo = definición, rosa = examen…'],
+        ['layers', 'Estudio › Resumen por color: todo lo de un color, junto.'],
+        ['lightbulb', 'Del resumen salen tarjetas en un toque.']],
+      'El nombre del color sale al elegirlo en la barra.'];
+    case 'tape': return [`${you}tapa la respuesta y ponte a prueba.`,
+      [['tape', 'Subrayador › «Cinta»: arrastra para tapar una zona.'],
+        ['eye', 'Toca la cinta para destapar; otra vez para taparla.'],
+        ['palette', 'Estudio › repaso por color: tapa todo lo de un color.']],
+      'También desde el lazo: «Tapar con cinta».'];
+    case 'ai': return [`${you}deja que la IA te ayude.`,
+      [['key', 'Pon tu clave gratuita de Google Gemini: Estudio › Clave de IA.'],
+        ['sparkles', 'Tarjetas, resumen o explicación de una página o de lo que rodees.'],
+        ['scanText', '«Transcribir»: tu letra pasa a texto y se puede buscar.']],
+      'La clave se queda en este dispositivo y siempre revisas antes de guardar.'];
+    case 'recall': return [`${you}repasa antes de olvidar.`,
+      [['graph', 'La barra de color de cada libreta baja según la vas olvidando.'],
+        ['bell', '«Para repasar hoy», arriba en la biblioteca: lo que toca.'],
+        ['chevronUpDown', 'Ordenar › «Por repasar»: lo más olvidado, primero.']],
+      'Estudiar en una libreta cuenta como repaso.'];
+    case 'voice': return [`${you}no pierdas nada de lo que se dice en clase.`,
+      [['mic', `Pulsa el micrófono para grabar mientras escribes (${k('record')}).`],
+        ['waveformPlus', 'En Grabaciones, «Añadir a la página» la pone como nota de voz.'],
+        ['play', 'Haz clic en la nota para escucharla. Cópiala a otra libreta si quieres.']],
+      `Muestra u oculta las notas de voz desde el menú del micrófono (${k('toggleVoiceNotes')}).`];
+    case 'timer': return [`${you}estudia con método.`,
+      [['timer', `Estudio › Temporizador de estudio, o el reloj de la barra (${k('timer')}).`],
+        ['chevronUpDown', 'Ajusta los minutos de estudio y de descanso.'],
+        ['bell', 'Al llegar el descanso suena una alarma. Si lo empezaste sin querer, «Quitar temporizador».']],
+      'Sigue contando aunque cambies de libreta o cierres la página.'];
   }
   return ['', [], ''];
 }
@@ -14303,31 +14785,66 @@ function onbLessonIt(id, name) {
         ['settings', 'Cambiala quando vuoi nella libreria: ⚙︎ Impostazioni › Lingua.'],
         ['check', 'Cambia tutto all’istante: menu, avvisi, date e questo tutorial.']],
       'I tuoi appunti non vengono tradotti: restano esattamente come li scrivi.'];
-    case 'handwriting': return [`${you}scrivi e disegna come sulla carta. Scegli stilografica, penna o matita, il colore e lo spessore.`,
-      [['pen', `Tocca la penna in alto (o il tasto ${k('toolPen')}) e scrivi sulla pagina.`],
-        ['shapes', 'Disegna un cerchio o una freccia e tieni fermo 1 secondo alla fine: diventa perfetto.'],
-        ['sparkles', 'Con «Forme» attivo, ogni tratto diventa una forma.']],
-      `La gomma (${k('toolEraser')}) cancella tratti interi o solo un pezzo; il lazo (${k('toolLasso')}) li sposta.`];
+    case 'handwriting': return [`${you}scrivi e disegna come sulla carta.`,
+      [['pen', `Tocca la penna in alto (${k('toolPen')}): stilografica, penna o matita.`],
+        ['shapes', 'Disegna un cerchio e resta fermo senza staccare: vedi la forma perfetta dal vivo.'],
+        ['check', 'Stacca e resta perfetta. Con «Forme», ogni tratto è una forma.']],
+      `La gomma (${k('toolEraser')}) cancella tratti interi o solo un pezzo.`];
+    case 'palette': return [`${you}tieni i tuoi colori sempre a portata di mano.`,
+      [['palette', 'Premi il pulsante della tavolozza, accanto agli strumenti.'],
+        ['palFixed', '«Fissa»: una capsula di colori che sposti e ripieghi.'],
+        ['palStroke', '«Alla fine del tratto»: compaiono i tuoi colori e se ne vanno da soli.']],
+      'Con la penna, Folia te la propone la prima volta.'];
     case 'highlighter': return [`${you}evidenzia senza paura che venga storto.`,
       [['highlighter', `Scegli l’evidenziatore (${k('toolHighlighter')}) e il suo colore.`],
         ['minus', '«Dritto» lo raddrizza nella direzione in cui lo disegni.'],
         ['chevronUpDown', '«O / V» lo rende perfettamente orizzontale o verticale.']],
       'In «Libero», se tieni fermo alla fine, si raddrizza lo stesso.'];
+    case 'ruler': return [`${you}linee dritte senza fatica.`,
+      [['ruler', `«Righello», nella barra della penna (${k('toggleRuler')}).`],
+        ['rotate', 'Spostalo con un dito e ruotalo con due: si aggancia a 0°, 45° e 90°.'],
+        ['pen', 'Scrivi lungo il bordo: viene dritto e vedi quanto misura.']],
+      'Doppio tocco sul righello: goniometro per misurare gli angoli.'];
+    case 'zoomwin': return [`${you}scrivi in grande e resta in piccolo.`,
+      [['zoomIn', `«Lente», nella barra della penna (${k('toggleZoomWin')}).`],
+        ['select', 'Metti il riquadro sulla pagina e scrivi sotto, ingrandito.'],
+        ['chevronRight', 'Arrivata al bordo avanza da sola; «↵» passa alla riga successiva.']],
+      'Trascina l’angolo del riquadro per cambiare l’ingrandimento.'];
+    case 'lasso': return [`${you}prendi proprio quello che vuoi.`,
+      [['lasso', `Lazo (${k('toolLasso')}): circonda e sposta, copia o cancella.`],
+        ['layers', '«Filtro»: scegli se prende inchiostro, testi, immagini…'],
+        ['eyedropper', '«Solo questo colore»: tocca un tratto e prende solo quelli del suo colore.']],
+      'Prende solo ciò che circondi davvero, e ti dice quante cose sono.'];
     case 'text': return [`${you}aggiungi caselle di testo con lo stile che vuoi.`,
       [['text', `Scegli Testo (${k('toolText')}) e fai clic sulla pagina per scrivere.`],
         ['bold', `${k('bold')} grassetto, ${k('italic')} corsivo, ${k('underline')} sottolineato. Cambia carattere, dimensione e colore in alto.`],
         ['check', '«Predefinito» salva quello stile per i testi nuovi.']],
       'Trascina il bordo della casella per spostarla mentre scrivi.'];
+    case 'notes': return [`${you}note che si notano, anche a mano.`,
+      [['sticky', `Post-it (${k('toolSticky')}): una nota colorata dove vuoi.`],
+        ['zoomIn', '«Ingrandisci» lo avvicina per scriverci o disegnarci dentro; «Fatto» torna indietro.'],
+        ['comment', `Commento (${k('toolComment')}): un cerchio con un nome che si apre.`]],
+      'Quello che disegni nel post-it si sposta con lui.'];
     case 'images': return [`${you}porta foto, screenshot o file nei tuoi appunti.`,
       [['image', `Usa il pulsante immagine, incollala (${mod}V) o trascinala sulla pagina.`],
         ['crop', 'Prima di posizionarla, ritagliala: libero, 1:1, 4:3, 16:9… e ruotala.'],
         ['photo', 'Scegli la sua larghezza nella pagina, o cambiala dopo con la maniglia.']],
       'Seleziona un’immagine già inserita e premi «Ritaglia…» per regolarla di nuovo.'];
-    case 'notes': return [`${you}lascia note che si notano.`,
-      [['sticky', `Post-it (${k('toolSticky')}): attacca note colorate ovunque.`],
-        ['comment', `Commento (${k('toolComment')}): un cerchio con un nome che si apre con il suo testo.`],
-        ['palette', 'Cambia il colore di ognuno dalla barra delle opzioni.']],
-      'I commenti si vedono sopra l’inchiostro e nel PDF escono come un cerchio.'];
+    case 'pagemodes': return [`${you}sfoglia le pagine a modo tuo.`,
+      [['pages', 'Tocca il numero di pagina, in basso.'],
+        ['arrowDown', '«Continuo» o «A pagine»: dall’alto in basso.'],
+        ['chevronRight', '«Orizzontale»: di lato, come diapositive.']],
+      'Anche in ⋯ › Pagine.'];
+    case 'organize': return [`${you}ogni materia nella sua cartella.`,
+      [['folder', '+ › Nuova cartella (anche dentro un’altra, con il suo colore).'],
+        ['select', 'Trascina un quaderno, o un PDF dal computer, fino alla cartella.'],
+        ['layers', 'Oppure «Seleziona» più quaderni e «Sposta».']],
+      'La cartella si illumina quando puoi rilasciare.'];
+    case 'tabs': return [`${you}più quaderni aperti alla volta.`,
+      [['chevronDown', '⌄, a sinistra: tutte le schede. Vai a una, chiudile o ordinale.'],
+        ['plus', '«+», dopo l’ultima scheda: apri un altro quaderno.'],
+        ['pages', `Trascina una scheda per spostarla. ${k('tab1')}…${k('lastTab')} per saltare.`]],
+      `${k('closeTab')} chiude la scheda attuale; ${k('nextTab')} passa alla successiva.`];
     case 'links': return [`${you}collega i tuoi appunti come in una wiki.`,
       [['link', 'Seleziona una parola scritta con la tastiera e premi «Collegamento».'],
         ['linkArea', `Oppure usa lo strumento Collegamento (${k('toolLink')}) per creare una zona sopra lo scritto a mano.`],
@@ -14338,41 +14855,66 @@ function onbLessonIt(id, name) {
         ['select', 'Con Seleziona, trascina sul testo del PDF (doppio clic: una parola).'],
         ['highlighter', 'Scegli un colore nel pannello: resta evidenziato. Anche linea, barrato o copia.']],
       'Inoltre puoi scriverci sopra a mano, come su qualsiasi pagina.'];
-    case 'organize': return [`${you}ordina i tuoi quaderni per materie o progetti.`,
-      [['folder', 'Crea cartelle (anche dentro altre) con + e sposta i quaderni con «Sposta» o «Seleziona».'],
-        ['layers', 'Aprine diversi alla volta: compaiono in schede, raggruppate per cartella.'],
-        ['pages', `Trascina una scheda per ordinarla. ${k('tab1')}…${k('lastTab')} per saltare tra di esse.`]],
-      `${k('closeTab')} chiude la scheda attuale; ${k('nextTab')} passa alla successiva.`];
+    case 'search': return [`${you}trova qualsiasi cosa in pochi secondi.`,
+      [['search', 'Nella libreria cerca in tutti i quaderni: titoli, testi e PDF.'],
+        ['outline', `Dentro un quaderno, ${k('find')} cerca solo lì.`],
+        ['scanText', 'Anche lo scritto a mano, se lo trascrivi (Studio › IA).']],
+      'Il risultato si apre nella sua pagina con la parola evidenziata.'];
     case 'dynamic': return [`${you}guarda i tuoi quaderni da un’altra prospettiva.`,
       [['sparkles', 'Nella libreria, premi «Modalità dinamica».'],
         ['graph', 'Le cartelle sono nebulose: fai clic per entrarci viaggiando alla velocità della luce.'],
         ['select', 'Passa il mouse per un’anteprima; clic su un quaderno per i suoi collegamenti.']],
       'Trascina quaderni e cartelle per sistemarli a tuo piacere.'];
+    case 'backup': return [`${you}i tuoi appunti, al sicuro.`,
+      [['shield', 'Lo scudo della libreria: verde, backup aggiornato; arancione, è ora di farlo.'],
+        ['download', 'Premilo e «Fai un backup ora»: un file con tutto.'],
+        ['upload', '«Ripristina backup…» lo riporta, anche su un altro dispositivo.']],
+      'Folia te lo ricorda se passano giorni senza backup.'];
+    case 'share': return [`${you}condividi i tuoi appunti con chi vuoi.`,
+      [['share', 'Condividi: scarica il quaderno intero o solo la pagina attuale.'],
+        ['fileDown', 'In PDF o come immagine, pronto da inviare.'],
+        ['mail', 'Mandalo via WhatsApp, e-mail, Drive… dal tuo computer.']],
+      'Le registrazioni e le zone di collegamento non escono nel PDF.'];
+    case 'shortcuts': return [`${you}vai più veloce con la tastiera.`,
+      [['keyboard', `${k('toolPen')} penna, ${k('toolHighlighter')} evidenziatore, ${k('toolEraser')} gomma, ${k('toolText')} testo… quando non stai scrivendo.`],
+        ['pages', `${k('closeTab')} chiude la scheda, ${k('tab1')} va alla prima, ${k('find')} cerca.`],
+        ['chevronUpDown', `Cambiali tutti in ⚙︎ › Scorciatoie da tastiera (${k('shortcutsSettings')}).`]],
+      'I tasti da soli non disturbano mentre scrivi: una «h» in un testo è una «h».'];
+    case 'study': return [`${you}tutto per studiare, in un pulsante.`,
+      [['study', 'Menu «Studio», nella barra dell’editor.'],
+        ['lightbulb', 'Flashcard: circonda con il lazo e «Crea flashcard», oppure scrivile.'],
+        ['textMark', '«Flashcard a completamento dal sottolineato»: il sottolineato diventa […].']],
+      'Il numero sul pulsante: le flashcard da ripassare oggi.'];
+    case 'meaning': return [`${you}ogni colore vuol dire qualcosa.`,
+      [['palette', 'Pagina › Legenda dei colori: giallo = definizione, rosa = esame…'],
+        ['layers', 'Studio › Riepilogo per colore: tutto quello di un colore, insieme.'],
+        ['lightbulb', 'Dal riepilogo nascono flashcard con un tocco.']],
+      'Il nome del colore compare quando lo scegli nella barra.'];
+    case 'tape': return [`${you}copri la risposta e mettiti alla prova.`,
+      [['tape', 'Evidenziatore › «Nastro»: trascina per coprire una zona.'],
+        ['eye', 'Tocca il nastro per scoprire; di nuovo per coprire.'],
+        ['palette', 'Studio › ripasso per colore: copre tutto quello di un colore.']],
+      'Anche dal lazo: «Copri con nastro».'];
+    case 'ai': return [`${you}lascia che l’IA ti aiuti.`,
+      [['key', 'Metti la tua chiave gratuita di Google Gemini: Studio › Chiave IA.'],
+        ['sparkles', 'Flashcard, riassunto o spiegazione di una pagina o di ciò che circondi.'],
+        ['scanText', '«Trascrivi»: la tua scrittura diventa testo e si può cercare.']],
+      'La chiave resta su questo dispositivo e controlli sempre prima di salvare.'];
+    case 'recall': return [`${you}ripassa prima di dimenticare.`,
+      [['graph', 'La barra colorata di ogni quaderno scende man mano che lo dimentichi.'],
+        ['bell', '«Da ripassare oggi», in alto nella libreria: quello che tocca.'],
+        ['chevronUpDown', 'Ordina › «Da ripassare»: il più dimenticato, per primo.']],
+      'Studiare in un quaderno conta come ripasso.'];
     case 'voice': return [`${you}non perdere nulla di quello che si dice in classe.`,
       [['mic', `Premi il microfono per registrare mentre scrivi (${k('record')}).`],
         ['waveformPlus', 'In Registrazioni, «Aggiungi alla pagina» la inserisce come nota vocale.'],
         ['play', 'Fai clic sulla nota per ascoltarla. Copiala in un altro quaderno se vuoi.']],
       `Mostra o nascondi le note vocali dal menu del microfono (${k('toggleVoiceNotes')}).`];
     case 'timer': return [`${you}studia con metodo.`,
-      [['timer', `Premi l’orologio nella barra (${k('timer')}).`],
+      [['timer', `Studio › Timer di studio, o l’orologio nella barra (${k('timer')}).`],
         ['chevronUpDown', 'Regola i minuti di studio e di pausa.'],
         ['bell', 'Quando arriva la pausa suona una sveglia. Se l’hai avviato per sbaglio, «Rimuovi timer».']],
       'Continua a contare anche se cambi quaderno o chiudi la pagina.'];
-    case 'search': return [`${you}trova qualsiasi cosa in pochi secondi.`,
-      [['search', 'Nella libreria cerca in tutti i quaderni: titoli, testi e PDF.'],
-        ['outline', `Dentro un quaderno, ${k('find')} cerca solo lì.`],
-        ['highlighter', 'Il risultato si apre nella sua pagina con la parola evidenziata.']],
-      'Trova anche le parole dentro i PDF.'];
-    case 'shortcuts': return [`${you}vai più veloce con la tastiera.`,
-      [['keyboard', `${k('toolPen')} penna, ${k('toolHighlighter')} evidenziatore, ${k('toolEraser')} gomma, ${k('toolText')} testo… quando non stai scrivendo.`],
-        ['pages', `${k('closeTab')} chiude la scheda, ${k('tab1')} va alla prima, ${k('find')} cerca.`],
-        ['chevronUpDown', `Cambiali tutti in ⚙︎ › Scorciatoie da tastiera (${k('shortcutsSettings')}).`]],
-      'I tasti da soli non disturbano mentre scrivi: una «h» in un testo è una «h».'];
-    case 'share': return [`${you}condividi i tuoi appunti con chi vuoi.`,
-      [['share', 'Condividi: scarica il quaderno intero o solo la pagina attuale.'],
-        ['fileDown', 'In PDF o come immagine, pronto da inviare.'],
-        ['mail', 'Mandalo via WhatsApp, e-mail, Drive… dal tuo computer.']],
-      'Le registrazioni e le zone di collegamento non escono nel PDF.'];
   }
   return ['', [], ''];
 }
@@ -14404,7 +14946,9 @@ const OnbDemos = {
   language(ctx, W, H, t) {
     this.paper(ctx, W, H);
     const p = onbCycle(t, 4), it = p > 0.5;
-    const flip = Math.min(onbRamp(p, 0.42, 0.5), 1 - onbRamp(p, 0.92, 1)) ;
+    // El menú gira (se encoge en vertical y vuelve) solo un momento al cambiar de idioma: a mitad y al final
+    // del ciclo. Antes `flip` se quedaba en 1 toda la mitad italiana y el menú salía aplastado en 2 px.
+    const flip = Math.max(0, 1 - Math.abs(p - 0.5) / 0.06, 1 - Math.min(p, 1 - p) / 0.06);
     // Dos banderas; la elegida, más grande y con anillo
     const flags = [['es', W / 2 - 60], ['it', W / 2 + 60]];
     for (const [k, x] of flags) {
@@ -14418,13 +14962,11 @@ const OnbDemos = {
     }
     // Un menú que cambia de idioma, con un pequeño giro
     const rows = it ? ['Nuovo quaderno', 'Nuova cartella', 'Importa PDF…'] : ['Nueva libreta', 'Nueva carpeta', 'Importar PDF…'];
-    const sx = Math.cos(flip * Math.PI / 2) || 0.001;
     ctx.save(); ctx.translate(W / 2, 175); ctx.scale(1, Math.max(0.05, 1 - flip));
     ctx.shadowColor = 'rgba(0,0,0,.18)'; ctx.shadowBlur = 12; ctx.shadowOffsetY = 4;
     ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.roundRect(-110, -62, 220, 124, 14); ctx.fill(); ctx.shadowColor = 'transparent';
     rows.forEach((r, i) => this.label(ctx, r, -88, -34 + i * 34, `500 16px ${ROUNDED}`, onbGray(0.15), 'left'));
     ctx.restore();
-    void sx;
     // Cursor que va a la bandera
     const target = it ? W / 2 + 60 : W / 2 - 60, from = it ? W / 2 - 60 : W / 2 + 60;
     const mv = onbSmooth(onbRamp((p % 0.5) * 2, 0.55, 0.85));
@@ -14541,39 +15083,6 @@ const OnbDemos = {
     for (const [x, y] of [[c.x, c.y], [c.x + c.w, c.y], [c.x, c.y + c.h], [c.x + c.w, c.y + c.h]]) { ctx.beginPath(); ctx.roundRect(x - 7, y - 7, 14, 14, 2); ctx.fill(); }
     ctx.restore();
   },
-  notes(ctx, W, H, t) {
-    const p = onbCycle(t, 4), drop = onbSmooth(onbRamp(p, 0.05, 0.3)), pin = onbRamp(p, 0.4, 0.5), open = onbSmooth(onbRamp(p, 0.55, 0.7));
-    this.paper(ctx, W, H);
-    this.lines(ctx, 22, 22, W - 44);
-    if (drop > 0) {
-      ctx.save(); ctx.globalAlpha = drop;
-      ctx.translate(W * 0.3, H * 0.55 - 160 * (1 - drop)); ctx.rotate((-6 + 18 * (1 - drop)) * Math.PI / 180);
-      ctx.shadowColor = 'rgba(0,0,0,.2)'; ctx.shadowBlur = 6; ctx.shadowOffsetY = 4;
-      ctx.fillStyle = 'rgb(255,237,128)'; ctx.beginPath(); ctx.roundRect(-60, -60, 120, 120, 4); ctx.fill();
-      ctx.shadowColor = 'transparent';
-      this.label(ctx, tr('¡Examen'), 0, -11, `600 18px ${ROUNDED}`, onbGray(0.25)); this.label(ctx, tr('el lunes!'), 0, 11, `600 18px ${ROUNDED}`, onbGray(0.25));
-      ctx.restore();
-    }
-    const px = W * 0.72, py = H * 0.3;
-    if (open > 0) {
-      const x = px - 17 - 10, y = py - 17 + 40, w = 140 * open, h = 70 * open;
-      ctx.save(); ctx.shadowColor = 'rgba(0,0,0,.25)'; ctx.shadowBlur = 6;
-      ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.roundRect(x, y, w, h, 10); ctx.fill(); ctx.restore();
-      ctx.save(); ctx.beginPath(); ctx.roundRect(x, y, w, h, 10); ctx.clip();
-      ctx.fillStyle = '#AF52DE'; ctx.fillRect(x, y, w, 22);
-      ctx.scale(open, open);
-      this.label(ctx, '  Stella', x / open + 2, (y + 11) / open, `700 12px ${ROUNDED}`, '#fff', 'left');
-      this.label(ctx, tr('Revisar esta parte'), (x + 70 * open) / open, (y + 46 * open) / open, `12px ${ROUNDED}`, onbGray(0.3));
-      ctx.restore();
-    }
-    if (pin > 0) {
-      ctx.save(); ctx.translate(px, py); ctx.scale(pin, pin);
-      ctx.fillStyle = '#AF52DE'; ctx.beginPath(); ctx.arc(0, 0, 17, 0, 7); ctx.fill();
-      ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.stroke();
-      this.label(ctx, 'S', 0, 1, `600 17px ${ROUNDED}`, '#fff');
-      ctx.restore();
-    }
-  },
   links(ctx, W, H, t, colors) {
     const p = onbCycle(t, 3);
     const a = [W * 0.22, H * 0.45 + 4 * Math.sin(t * 1.5)], b = [W * 0.78, H * 0.55 + 4 * Math.sin(t * 1.5 + 2)];
@@ -14619,29 +15128,6 @@ const OnbDemos = {
       const u = onbIcon('underline', '#4D4D4D', 20, 2); if (u.complete) ctx.drawImage(u, pw / 2 - 34, -10, 20, 20);
       ctx.restore();
     }
-  },
-  organize(ctx, W, H, t) {
-    const p = onbCycle(t, 3.4), move = onbSmooth(onbRamp(p, 0.2, 0.6));
-    const titles = [['Cardiología', '#FF3B30'], ['Digestivo', '#007AFF'], ['Cirugía vascular', '#34C759']].map(([n, c]) => [tr(n), c]);
-    ctx.save(); ctx.beginPath(); ctx.roundRect(0, 0, W, H, 14); ctx.clip();
-    ctx.fillStyle = onbGray(0.08); ctx.fillRect(0, 0, W, H);
-    ctx.fillStyle = onbGray(0.17); ctx.fillRect(0, 56, W, H - 56);
-    const tw = (W - 20) / 3;
-    [1, 2, 0].forEach((i) => {
-      const slot = i === 0 ? 2 * move : i - move;
-      const x = 10 + tw * slot, y = 16 - (i === 0 ? 6 * Math.sin(Math.PI * move) : 0);
-      if (i === 0) {
-        if (move > 0 && move < 1) { ctx.shadowColor = 'rgba(0,0,0,.5)'; ctx.shadowBlur = 8; }
-        ctx.fillStyle = onbGray(0.17); ctx.beginPath(); ctx.roundRect(x, y, tw - 4, 40, [9, 9, 0, 0]); ctx.fill(); ctx.shadowColor = 'transparent';
-      }
-      const book = onbIcon('book', titles[i][1], 14, 2.2); if (book.complete) ctx.drawImage(book, x + 10, y + 13, 14, 14);
-      ctx.font = `500 12.5px ${ROUNDED}`;
-      let title = titles[i][0];
-      while (title.length > 3 && ctx.measureText(title).width > tw - 42) title = title.slice(0, -2) + '…';
-      this.label(ctx, title, x + 30, y + 20, `500 12.5px ${ROUNDED}`, '#fff', 'left');
-    });
-    this.label(ctx, tr('Arrastra para ordenar'), W / 2, H * 0.6 + 10, `600 17px ${ROUNDED}`, 'rgba(255,255,255,.7)');
-    ctx.restore();
   },
   dynamic(ctx, W, H, t) {
     ctx.fillStyle = 'rgb(13,13,33)'; ctx.beginPath(); ctx.roundRect(0, 0, W, H, 14); ctx.fill();
@@ -14747,39 +15233,923 @@ const OnbDemos = {
     const doc = onbIcon('pdf', '#fff', 56, 1.6); if (doc.complete) ctx.drawImage(doc, -28, -28, 56, 56);
     ctx.restore();
   },
+
+  // ---------- Temas nuevos (versión 2) ----------
+  /** Puntero de toque: un anillo que se abre donde se pulsa (k de 0 a 1). */
+  tap(ctx, x, y, k, color = '#007AFF') {
+    if (k <= 0 || k >= 1) return;
+    ctx.save(); ctx.globalAlpha = 1 - k; ctx.strokeStyle = color; ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.arc(x, y, 8 + 16 * k, 0, 7); ctx.stroke(); ctx.restore();
+  },
+  /** Botón con texto (píldora) dibujado en el lienzo; `on` lo pinta pulsado. Devuelve su ancho. */
+  pill(ctx, text, cx, cy, on, color = '#007AFF') {
+    ctx.font = `600 12.5px ${ROUNDED}`;
+    const w = ctx.measureText(text).width + 22;
+    ctx.fillStyle = on ? color : onbGray(0.88);
+    ctx.beginPath(); ctx.roundRect(cx - w / 2, cy - 12, w, 24, 12); ctx.fill();
+    this.label(ctx, text, cx, cy + 0.5, `600 12.5px ${ROUNDED}`, on ? '#fff' : onbGray(0.25));
+    return w;
+  },
+  /** Trazo de una lista de puntos hasta la fracción `k`. */
+  path(ctx, pts, k) {
+    const n = Math.max(0, Math.min(1, k)) * (pts.length - 1);
+    if (n <= 0) return;
+    ctx.beginPath(); ctx.moveTo(pts[0][0], pts[0][1]);
+    for (let i = 1; i <= Math.floor(n); i++) ctx.lineTo(pts[i][0], pts[i][1]);
+    const f = n - Math.floor(n), a = pts[Math.floor(n)], b = pts[Math.floor(n) + 1];
+    if (f > 0 && b) ctx.lineTo(a[0] + (b[0] - a[0]) * f, a[1] + (b[1] - a[1]) * f);
+    ctx.stroke();
+  },
+  /** Letra a mano de mentira: bucles como «eeee» entre x0 y x1. */
+  cursive(x0, x1, y, h, n = 90) {
+    return Array.from({ length: n + 1 }, (_, i) => { const u = i / n, a = u * (x1 - x0) / 7; return [x0 + u * (x1 - x0) - 4 * Math.sin(a), y - h * 0.5 * (1 - Math.cos(a)) * (0.7 + 0.3 * Math.sin(u * 9))]; });
+  },
+  palette(ctx, W, H, t) {
+    const p = onbCycle(t, 4.4);
+    this.paper(ctx, W, H);
+    const colors = ['#1C1C1E', '#007AFF', '#FF3B30', '#34C759', '#AF52DE'], pick = p < 0.5 ? 1 : 2;
+    // La cápsula fija, que flota un poco
+    const cx = 40, cy = H / 2 - 6 + 4 * Math.sin(t * 1.4);
+    ctx.save(); ctx.shadowColor = 'rgba(0,0,0,.2)'; ctx.shadowBlur = 10; ctx.shadowOffsetY = 3;
+    ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.roundRect(cx - 22, cy - 100, 44, 200, 22); ctx.fill(); ctx.restore();
+    colors.forEach((c, i) => {
+      const y = cy - 76 + i * 38;
+      if (i === pick) { ctx.strokeStyle = c; ctx.lineWidth = 2.5; ctx.beginPath(); ctx.arc(cx, y, 15, 0, 7); ctx.stroke(); }
+      ctx.fillStyle = c; ctx.beginPath(); ctx.arc(cx, y, 11, 0, 7); ctx.fill();
+    });
+    this.tap(ctx, cx, cy - 76 + 38, onbRamp(p, 0.02, 0.14)); this.tap(ctx, cx, cy - 76 + 76, onbRamp(p, 0.52, 0.64));
+    ctx.lineWidth = 4; ctx.lineCap = ctx.lineJoin = 'round';
+    ctx.strokeStyle = colors[1]; this.path(ctx, this.cursive(96, W - 30, 92, 26), onbSmooth(onbRamp(p, 0.12, 0.45)));
+    if (p >= 0.5) { ctx.strokeStyle = colors[2]; this.path(ctx, this.cursive(96, W - 60, 160, 26), onbSmooth(onbRamp(p, 0.62, 0.92))); }
+    // Los tres modos: desactivada, fija, al terminar el trazo
+    ['palOff', 'palFixed', 'palStroke'].forEach((ic, i) => {
+      const x = W - 112 + i * 36, y = H - 30, on = i === 1;
+      ctx.fillStyle = on ? '#FF9F0A' : onbGray(0.88); ctx.beginPath(); ctx.roundRect(x - 15, y - 15, 30, 30, 9); ctx.fill();
+      const img = onbIcon(ic, on ? '#fff' : '#555', 18, 2); if (img.complete) ctx.drawImage(img, x - 9, y - 9, 18, 18);
+    });
+  },
+  ruler(ctx, W, H, t) {
+    const p = onbCycle(t, 4.6), turn = onbSmooth(onbRamp(p, 0.05, 0.28)) * (1 - onbSmooth(onbRamp(p, 0.9, 1)));
+    const draw = onbSmooth(onbRamp(p, 0.36, 0.72)), ang = -18 * turn;
+    this.paper(ctx, W, H);
+    ctx.save(); ctx.translate(W / 2, H / 2 + 24); ctx.rotate(ang * Math.PI / 180);
+    // La regla: translúcida, con marcas cada milímetro (aquí, cada 6 px) y números cada centímetro
+    ctx.fillStyle = 'rgba(120,130,150,.28)'; ctx.strokeStyle = 'rgba(80,90,110,.55)'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.roundRect(-160, -28, 320, 56, 8); ctx.fill(); ctx.stroke();
+    ctx.strokeStyle = 'rgba(40,40,60,.7)';
+    for (let i = 0; i <= 50; i++) { const x = -150 + i * 6, l = i % 10 === 0 ? 14 : i % 5 === 0 ? 10 : 6; ctx.beginPath(); ctx.moveTo(x, -28); ctx.lineTo(x, -28 + l); ctx.stroke(); }
+    for (let c = 0; c <= 5; c++) this.label(ctx, String(c), -150 + c * 60, -2, `600 11px ${ROUNDED}`, onbGray(0.25));
+    // El trazo pegado al borde de arriba
+    const len = 300 * draw;
+    if (len > 0) { ctx.strokeStyle = 'rgb(51,77,217)'; ctx.lineWidth = 4; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(-150, -32); ctx.lineTo(-150 + len, -32); ctx.stroke(); }
+    ctx.restore();
+    if (draw > 0) {
+      const cm = (len / 60).toFixed(1).replace('.', ',') + ' cm';
+      ctx.fillStyle = 'rgba(0,0,0,.75)'; ctx.beginPath(); ctx.roundRect(W / 2 - 38, 26, 76, 26, 13); ctx.fill();
+      this.label(ctx, cm, W / 2, 39.5, `700 13px ${ROUNDED}`, '#fff');
+    } else if (turn > 0) {
+      this.label(ctx, `${Math.round(-ang)}°`, W / 2, 39, `700 15px ${ROUNDED}`, onbGray(0.3));
+    }
+  },
+  zoomwin(ctx, W, H, t) {
+    const p = onbCycle(t, 5), q = onbRamp(p, 0.08, 0.82);
+    this.paper(ctx, W, H);
+    this.lines(ctx, 24, 18, W - 48, [0.9, 0.7], onbGray(0.82));
+    const pts = this.cursive(24, W - 30, 92, 14, 140);
+    const ink = (lw) => { ctx.strokeStyle = 'rgb(51,77,217)'; ctx.lineWidth = lw; ctx.lineCap = ctx.lineJoin = 'round'; this.path(ctx, pts, q); };
+    ink(2);
+    // El recuadro que sigue a la escritura
+    const gw = 96, gh = 36, gx = Math.min(W - 24 - gw, 24 + Math.max(0, (W - 54) * q - gw * 0.6)), gy = 68;
+    ctx.strokeStyle = '#007AFF'; ctx.lineWidth = 1.5; ctx.setLineDash([5, 4]); ctx.strokeRect(gx, gy, gw, gh); ctx.setLineDash([]);
+    ctx.fillStyle = 'rgba(0,122,255,.07)'; ctx.fillRect(gx, gy, gw, gh);
+    // Abajo, el panel ampliado: lo mismo, más grande
+    const px = 14, py = 128, pw = W - 28, ph = H - 142, sc = pw / gw;
+    ctx.save(); ctx.shadowColor = 'rgba(0,0,0,.18)'; ctx.shadowBlur = 8; ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.roundRect(px, py, pw, ph, 12); ctx.fill(); ctx.restore();
+    ctx.save(); ctx.beginPath(); ctx.roundRect(px, py, pw, ph, 12); ctx.clip();
+    ctx.translate(px - gx * sc, py + 4 - gy * sc * (ph / pw / (gh / gw))); ctx.scale(sc, sc * (ph / pw) / (gh / gw)); ink(2);
+    ctx.restore();
+    ctx.strokeStyle = '#007AFF'; ctx.lineWidth = 2; ctx.beginPath(); ctx.roundRect(px, py, pw, ph, 12); ctx.stroke();
+    this.label(ctx, '↵', px + pw - 18, py + ph - 16, `700 16px ${ROUNDED}`, '#007AFF');
+  },
+  lasso(ctx, W, H, t) {
+    const p = onbCycle(t, 5), loop = onbSmooth(onbRamp(p, 0.06, 0.34)), only = p > 0.55;
+    this.paper(ctx, W, H);
+    const blue = 'rgb(51,77,217)', red = '#FF3B30';
+    const strokes = [[70, 70, blue], [200, 64, red], [120, 130, red], [250, 135, blue], [90, 200, blue], [215, 205, red], [330, 70, red]];
+    const inside = (i) => i < 6;
+    strokes.forEach(([x, y, c], i) => {
+      const sel = loop >= 1 && inside(i) && (!only || c === red);
+      ctx.save();
+      if (sel) { ctx.shadowColor = c; ctx.shadowBlur = 10; }
+      ctx.strokeStyle = c; ctx.lineWidth = 3.5; ctx.lineCap = ctx.lineJoin = 'round';
+      this.path(ctx, this.cursive(x, x + 70, y + 10, 18, 40), 1);
+      ctx.restore();
+      if (sel) { ctx.strokeStyle = 'rgba(0,122,255,.6)'; ctx.setLineDash([3, 3]); ctx.lineWidth = 1; ctx.strokeRect(x - 8, y - 14, 86, 32); ctx.setLineDash([]); }
+    });
+    // El lazo: una línea discontinua que rodea casi toda la página
+    ctx.strokeStyle = '#AF52DE'; ctx.lineWidth = 2; ctx.setLineDash([7, 5]); ctx.lineDashOffset = -t * 30;
+    const ring = Array.from({ length: 61 }, (_, i) => { const a = i / 60 * Math.PI * 2 - 2.6; return [175 + 150 * Math.cos(a) + 6 * Math.sin(a * 5), 140 + 100 * Math.sin(a)]; });
+    this.path(ctx, ring, loop); ctx.setLineDash([]);
+    if (loop >= 1) {
+      const n = only ? 3 : 6;
+      ctx.fillStyle = '#AF52DE'; ctx.beginPath(); ctx.arc(W - 30, H - 30, 16, 0, 7); ctx.fill();
+      this.label(ctx, String(n), W - 30, H - 29, `700 15px ${ROUNDED}`, '#fff');
+    }
+    if (only) {
+      const k = onbSmooth(onbRamp(p, 0.55, 0.65));
+      ctx.save(); ctx.globalAlpha = k; ctx.translate(0, 8 * (1 - k));
+      const w = this.pill(ctx, `   ${tr('Solo este color')}`, W / 2, 22, true, '#1C1C1E');
+      ctx.fillStyle = red; ctx.beginPath(); ctx.arc(W / 2 - w / 2 + 14, 22, 6, 0, 7); ctx.fill();
+      ctx.restore();
+    }
+  },
+  notes(ctx, W, H, t) {
+    const p = onbCycle(t, 6), drop = onbSmooth(onbRamp(p, 0.02, 0.16));
+    const zoom = onbSmooth(onbRamp(p, 0.26, 0.38)) * (1 - onbSmooth(onbRamp(p, 0.78, 0.9))), draw = onbSmooth(onbRamp(p, 0.4, 0.7));
+    this.paper(ctx, W, H);
+    this.lines(ctx, 22, 22, W - 44);
+    // Comentario: un círculo con nombre en la esquina
+    ctx.fillStyle = '#AF52DE'; ctx.beginPath(); ctx.arc(W - 40, 40, 16, 0, 7); ctx.fill(); ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.stroke();
+    this.label(ctx, 'S', W - 40, 41, `600 16px ${ROUNDED}`, '#fff');
+    if (drop > 0) {
+      const s = 1 + 0.75 * zoom, x = 120 + (W / 2 - 120) * zoom, y = 150 - 160 * (1 - drop) + (H / 2 - 22 - 150) * zoom;
+      ctx.save(); ctx.globalAlpha = drop; ctx.translate(x, y); ctx.rotate((-5 * (1 - zoom) + 14 * (1 - drop)) * Math.PI / 180); ctx.scale(s, s);
+      ctx.shadowColor = 'rgba(0,0,0,.2)'; ctx.shadowBlur = 6; ctx.shadowOffsetY = 3;
+      ctx.fillStyle = 'rgb(255,237,128)'; ctx.beginPath(); ctx.roundRect(-55, -55, 110, 110, 4); ctx.fill(); ctx.shadowColor = 'transparent';
+      // La tinta del post-it: un corazón dibujado a mano
+      const heart = Array.from({ length: 50 }, (_, i) => { const a = i / 49 * Math.PI * 2; return [1.9 * 16 * Math.sin(a) ** 3, -1.9 * (13 * Math.cos(a) - 5 * Math.cos(2 * a) - 2 * Math.cos(3 * a) - Math.cos(4 * a)) - 4]; });
+      ctx.strokeStyle = '#FF3B30'; ctx.lineWidth = 3 / s * (1 + 0.4 * zoom); ctx.lineCap = ctx.lineJoin = 'round';
+      this.path(ctx, heart, p > 0.7 ? 1 : draw);
+      ctx.restore();
+    }
+    // Los botones de la barra: «Ampliar» y, al acercar, «Hecho»
+    const pz = onbRamp(p, 0.18, 0.26) > 0 && p < 0.3, pd = p > 0.72 && p < 0.8;
+    this.pill(ctx, tr('Ampliar'), W / 2 - 50, H - 22, pz, '#FF9F0A');
+    this.pill(ctx, tr('Hecho'), W / 2 + 50, H - 22, pd || (zoom > 0.5 && p < 0.78), '#34C759');
+  },
+  pagemodes(ctx, W, H, t) {
+    const p = onbCycle(t, 6), horiz = p >= 0.5, q = onbRamp(horiz ? p - 0.5 : p, 0.05, 0.45);
+    ctx.save(); ctx.beginPath(); ctx.roundRect(0, 0, W, H, 14); ctx.clip();
+    ctx.fillStyle = onbGray(0.2); ctx.fillRect(0, 0, W, H);
+    const pw = 120, ph = 160;
+    for (let i = 0; i < 4; i++) {
+      // Vertical: una debajo de otra y se desplazan; horizontal: de lado, encajando de una en una
+      const step = onbSmooth(Math.min(1, (q * 2) % 1.0001)) + Math.floor(q * 2);
+      const x = horiz ? W / 2 - pw / 2 + (i - Math.min(2, step)) * (pw + 30) : W / 2 - pw / 2;
+      const y = horiz ? 30 : 24 + i * (ph + 14) - q * (ph + 14) * 1.4;
+      ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.roundRect(x, y, pw, ph, 6); ctx.fill();
+      this.lines(ctx, x + 14, y + 18, pw - 28, [0.9, 0.7, 0.8, 0.6, 0.85], onbGray(0.82), 20);
+      this.label(ctx, String(i + 1), x + pw / 2, y + ph - 14, `600 12px ${ROUNDED}`, onbGray(0.5));
+    }
+    ctx.restore();
+    ctx.fillStyle = 'rgba(0,0,0,.65)'; ctx.beginPath(); ctx.roundRect(W / 2 - 70, H - 36, 140, 26, 13); ctx.fill();
+    this.label(ctx, tr(horiz ? 'Horizontal' : 'Continuo'), W / 2, H - 22.5, `700 13px ${ROUNDED}`, '#fff');
+  },
+  organize(ctx, W, H, t) {
+    const p = onbCycle(t, 4.6), pdf = Math.floor(t / 4.6) % 2 === 1;
+    const move = onbSmooth(onbRamp(p, 0.12, 0.5)), drop = onbSmooth(onbRamp(p, 0.52, 0.66)), bounce = Math.sin(Math.PI * onbRamp(p, 0.6, 0.75));
+    ctx.save(); ctx.beginPath(); ctx.roundRect(0, 0, W, H, 14); ctx.clip();
+    ctx.fillStyle = onbGray(0.12); ctx.fillRect(0, 0, W, H);
+    // La carpeta, abajo a la derecha (se ilumina cuando lo que llevas está encima)
+    const fx = W - 140, fy = H - 120, over = move > 0.85 && drop < 1;
+    ctx.save(); ctx.translate(fx + 60, fy + 50); ctx.scale(1 + 0.06 * bounce, 1 + 0.06 * bounce); ctx.translate(-60, -50);
+    if (over) { ctx.shadowColor = '#9973FF'; ctx.shadowBlur = 22; }
+    ctx.fillStyle = '#7C5CFF'; ctx.beginPath(); ctx.roundRect(0, 0, 50, 22, 6); ctx.fill();
+    ctx.fillStyle = '#9973FF'; ctx.beginPath(); ctx.roundRect(0, 12, 120, 84, 10); ctx.fill(); ctx.shadowColor = 'transparent';
+    this.label(ctx, tr('Cardiología'), 60, 58, `600 13px ${ROUNDED}`, '#fff');
+    ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(112, 18, 11, 0, 7); ctx.fill();
+    this.label(ctx, String(drop >= 1 ? 4 : 3), 112, 19, `700 12px ${ROUNDED}`, '#7C5CFF');
+    ctx.restore();
+    // Libretas en la estantería
+    const covers = [['#FF3B30', 28], ['#007AFF', 108], ['#34C759', 188]];
+    covers.forEach(([c, x], i) => {
+      if (i === 1 && !pdf) return;
+      ctx.fillStyle = c; ctx.beginPath(); ctx.roundRect(x, 30, 60, 80, 6); ctx.fill();
+      ctx.fillStyle = 'rgba(0,0,0,.2)'; ctx.fillRect(x, 32, 7, 76);
+    });
+    // Lo que se arrastra: la libreta azul o, una vez de cada dos, un PDF que llega desde fuera
+    const sx = pdf ? W + 10 : 108, sy = pdf ? -40 : 30, ex = fx + 30, ey = fy + 20;
+    const x = sx + (ex - sx) * move, y = sy + (ey - sy) * move - 30 * Math.sin(Math.PI * move), s = (1 - 0.15 * move) * (1 - drop);
+    if (s > 0.02) {
+      ctx.save(); ctx.translate(x + 30, y + 40); ctx.rotate((move > 0 && move < 1 ? 6 : 0) * Math.PI / 180); ctx.scale(s, s);
+      ctx.shadowColor = 'rgba(0,0,0,.45)'; ctx.shadowBlur = move > 0 ? 14 : 0; ctx.shadowOffsetY = 6;
+      if (pdf) {
+        ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.roundRect(-26, -34, 52, 68, 5); ctx.fill(); ctx.shadowColor = 'transparent';
+        ctx.fillStyle = '#FF3B30'; ctx.beginPath(); ctx.roundRect(-20, 8, 40, 18, 4); ctx.fill();
+        this.label(ctx, 'PDF', 0, 17.5, `800 11px ${ROUNDED}`, '#fff');
+      } else {
+        ctx.fillStyle = '#007AFF'; ctx.beginPath(); ctx.roundRect(-30, -40, 60, 80, 6); ctx.fill(); ctx.shadowColor = 'transparent';
+        ctx.fillStyle = 'rgba(0,0,0,.2)'; ctx.fillRect(-30, -38, 7, 76);
+      }
+      ctx.restore();
+    }
+    this.label(ctx, tr('Arrastra hasta la carpeta'), 24, H - 26, `600 15px ${ROUNDED}`, 'rgba(255,255,255,.7)', 'left');
+    ctx.restore();
+  },
+  tabs(ctx, W, H, t) {
+    const p = onbCycle(t, 5.4), grow = onbSmooth(onbRamp(p, 0.16, 0.34)), menu = onbSmooth(onbRamp(p, 0.56, 0.66)) * (1 - onbSmooth(onbRamp(p, 0.92, 1)));
+    ctx.save(); ctx.beginPath(); ctx.roundRect(0, 0, W, H, 14); ctx.clip();
+    ctx.fillStyle = onbGray(0.1); ctx.fillRect(0, 0, W, H);
+    ctx.fillStyle = onbGray(0.95); ctx.fillRect(0, 52, W, H - 52);
+    this.lines(ctx, 30, 90, W - 60, [0.8, 0.6, 0.9, 0.5], onbGray(0.82), 26);
+    // ⌄ a la izquierda
+    ctx.fillStyle = menu > 0 ? onbGray(0.3) : onbGray(0.2); ctx.beginPath(); ctx.roundRect(8, 12, 32, 32, 8); ctx.fill();
+    const chev = onbIcon('chevronDown', '#fff', 18, 2.4); if (chev.complete) ctx.drawImage(chev, 15, 19, 18, 18);
+    const names = [[tr('Biología'), '#FF3B30'], [tr('Química'), '#007AFF'], [tr('Historia'), '#34C759']];   // nombres cortos: caben enteros
+    const tw = 96;
+    let x = 48;
+    names.forEach(([n, c], i) => {
+      const w = i === 2 ? tw * grow : tw;
+      if (w < 2) return;
+      const active = i === 2 ? grow >= 1 : i === 0 && grow < 1;
+      ctx.fillStyle = active ? onbGray(0.95) : onbGray(0.18); ctx.beginPath(); ctx.roundRect(x, 12, w - 4, 40, [9, 9, 0, 0]); ctx.fill();
+      ctx.save(); ctx.beginPath(); ctx.rect(x, 12, w - 6, 40); ctx.clip();
+      ctx.fillStyle = c; ctx.beginPath(); ctx.roundRect(x + 10, 25, 9, 13, 2); ctx.fill();
+      this.label(ctx, n, x + 25, 32, `500 12px ${ROUNDED}`, active ? onbGray(0.15) : '#fff', 'left');
+      ctx.restore();
+      x += w;
+    });
+    // «+» justo tras la última pestaña
+    ctx.fillStyle = onbGray(0.2); ctx.beginPath(); ctx.arc(x + 16, 28, 14, 0, 7); ctx.fill();
+    const plus = onbIcon('plus', '#fff', 16, 2.4); if (plus.complete) ctx.drawImage(plus, x + 8, 20, 16, 16);
+    this.tap(ctx, x + 16, 28, onbRamp(p, 0.06, 0.2), '#fff');
+    this.tap(ctx, 24, 28, onbRamp(p, 0.48, 0.6), '#fff');
+    if (menu > 0) {
+      ctx.save(); ctx.globalAlpha = menu; ctx.translate(10, 52 + 8 * (1 - menu));
+      ctx.shadowColor = 'rgba(0,0,0,.3)'; ctx.shadowBlur = 14; ctx.fillStyle = onbGray(0.16); ctx.beginPath(); ctx.roundRect(0, 0, 190, 118, 12); ctx.fill(); ctx.shadowColor = 'transparent';
+      names.forEach(([n, c], i) => {
+        if (i === 2) { ctx.fillStyle = 'rgba(255,255,255,.1)'; ctx.beginPath(); ctx.roundRect(6, 6 + i * 36, 178, 32, 8); ctx.fill(); }
+        ctx.fillStyle = c; ctx.beginPath(); ctx.roundRect(16, 14 + i * 36, 11, 16, 2); ctx.fill();
+        this.label(ctx, n, 36, 22 + i * 36, `500 13px ${ROUNDED}`, '#fff', 'left');
+        this.label(ctx, '×', 172, 22 + i * 36, `500 16px ${ROUNDED}`, 'rgba(255,255,255,.5)');
+      });
+      ctx.restore();
+    }
+    ctx.restore();
+  },
+  backup(ctx, W, H, t) {
+    const p = onbCycle(t, 4.6), save = onbRamp(p, 0.3, 0.6), ok = p >= 0.6;
+    const color = ok ? '#34C759' : '#FF9F0A', cx = W / 2, cy = H / 2 - 16;
+    ctx.save(); ctx.translate(cx - 60, cy - 62); ctx.scale(5, 5);
+    const shield = new Path2D(ICONS.shield.match(/d="([^"]+)"/)[1]);
+    ctx.fillStyle = color + '33'; ctx.fill(shield); ctx.strokeStyle = color; ctx.lineWidth = 0.5; ctx.lineJoin = 'round'; ctx.stroke(shield);
+    ctx.restore();
+    if (save > 0 && save < 1) {
+      ctx.strokeStyle = '#007AFF'; ctx.lineWidth = 5; ctx.lineCap = 'round';
+      ctx.beginPath(); ctx.arc(cx, cy, 82, -Math.PI / 2, -Math.PI / 2 + save * Math.PI * 2); ctx.stroke();
+      const dl = onbIcon('download', '#007AFF', 34, 2.2); if (dl.complete) ctx.drawImage(dl, cx - 17, cy - 17, 34, 34);
+    } else if (ok) {
+      const k = onbSmooth(onbRamp(p, 0.6, 0.7));
+      ctx.save(); ctx.translate(cx, cy); ctx.scale(k, k);
+      ctx.strokeStyle = '#34C759'; ctx.lineWidth = 7; ctx.lineCap = ctx.lineJoin = 'round';
+      ctx.beginPath(); ctx.moveTo(-22, 0); ctx.lineTo(-6, 16); ctx.lineTo(24, -16); ctx.stroke(); ctx.restore();
+    } else {
+      ctx.fillStyle = '#FF9F0A'; ctx.beginPath(); ctx.arc(cx, cy, 20, 0, 7); ctx.fill();
+      this.label(ctx, '!', cx, cy + 1, `800 24px ${ROUNDED}`, '#fff');
+    }
+    this.label(ctx, tr(ok ? 'Copia de seguridad al día' : 'Copia de seguridad: toca hacer una'), cx, H - 22, `600 15px ${ROUNDED}`, '#fff');
+  },
+  study(ctx, W, H, t) {
+    const p = onbCycle(t, 5), flip = onbSmooth(onbRamp(p, 0.32, 0.46)), grades = onbSmooth(onbRamp(p, 0.5, 0.6));
+    const back = flip > 0.5, sx = Math.abs(Math.cos(flip * Math.PI)) || 0.02, cx = W / 2, cy = H / 2 - 22;
+    ctx.save(); ctx.translate(cx, cy); ctx.scale(Math.max(0.02, sx), 1);
+    ctx.shadowColor = 'rgba(0,0,0,.35)'; ctx.shadowBlur = 16; ctx.shadowOffsetY = 6;
+    ctx.fillStyle = back ? 'rgb(255,248,225)' : '#fff'; ctx.beginPath(); ctx.roundRect(-150, -78, 300, 156, 16); ctx.fill(); ctx.shadowColor = 'transparent';
+    ctx.fillStyle = '#FF9F0A'; ctx.fillRect(-150, -78 + 14, 4, 30);
+    if (!back) {
+      const a = tr('La') + ' ', b = ' ' + tr('es la unidad…'), blank = '[ … ]';
+      ctx.font = `600 19px ${ROUNDED}`; const wa = ctx.measureText(a).width, wb = ctx.measureText(blank).width, wc = ctx.measureText(b).width, x0 = -(wa + wb + wc) / 2;
+      this.label(ctx, a, x0, 0, `600 19px ${ROUNDED}`, onbGray(0.2), 'left');
+      ctx.fillStyle = 'rgba(255,159,10,.25)'; ctx.beginPath(); ctx.roundRect(x0 + wa - 2, -14, wb + 4, 28, 6); ctx.fill();
+      this.label(ctx, blank, x0 + wa, 0, `600 19px ${ROUNDED}`, '#C93400', 'left');
+      this.label(ctx, b, x0 + wa + wb, 0, `600 19px ${ROUNDED}`, onbGray(0.2), 'left');
+    } else this.label(ctx, tr('célula'), 0, 0, `700 30px ${ROUNDED}`, '#C93400');
+    ctx.restore();
+    if (grades > 0) {
+      ctx.save(); ctx.globalAlpha = grades;
+      const g = [['Otra vez', '#FF3B30'], ['Bien', '#34C759'], ['Fácil', '#007AFF']];
+      g.forEach(([n, c], i) => this.pill(ctx, tr(n), cx + (i - 1) * 96, H - 40, i === 1 && p > 0.78, c));
+      ctx.restore();
+      this.tap(ctx, cx, H - 40, onbRamp(p, 0.74, 0.86), '#34C759');
+    }
+    // El botón «Estudio» con su insignia
+    const st = onbIcon('study', '#fff', 22, 2); ctx.fillStyle = 'rgba(255,255,255,.12)'; ctx.beginPath(); ctx.roundRect(W - 46, 4, 40, 34, 10); ctx.fill();
+    if (st.complete) ctx.drawImage(st, W - 37, 10, 22, 22);
+    ctx.fillStyle = '#FF3B30'; ctx.beginPath(); ctx.arc(W - 10, 8, 9, 0, 7); ctx.fill();
+    this.label(ctx, p > 0.8 ? '2' : '3', W - 10, 9, `700 11px ${ROUNDED}`, '#fff');
+  },
+  meaning(ctx, W, H, t) {
+    const p = onbCycle(t, 5.2), sum = onbSmooth(onbRamp(p, 0.45, 0.6)) * (1 - onbSmooth(onbRamp(p, 0.92, 1)));
+    const yellow = 'rgba(255,204,0,.6)', pink = 'rgba(255,107,154,.5)';
+    this.paper(ctx, W, H);
+    const rows = [[0.8, yellow], [0.6, null], [0.7, pink], [0.85, null], [0.55, yellow], [0.75, pink]];
+    rows.forEach(([k, hl], i) => {
+      const y = 22 + i * 36, w = (W - 170) * k, on = onbRamp(p, 0.04 + i * 0.05, 0.12 + i * 0.05);
+      if (hl && on > 0) { ctx.fillStyle = hl; ctx.beginPath(); ctx.roundRect(18, y, w * on, 18, 4); ctx.fill(); }
+      ctx.fillStyle = onbGray(0.6); ctx.beginPath(); ctx.roundRect(18, y + 6, w, 6, 3); ctx.fill();
+    });
+    // Leyenda: qué quiere decir cada color
+    const legend = [['#FFCC00', 'Definición'], ['#FF6B9A', 'Examen']];
+    ctx.fillStyle = '#fff'; ctx.strokeStyle = onbGray(0.85); ctx.lineWidth = 1; ctx.beginPath(); ctx.roundRect(W - 140, 18, 124, 72, 10); ctx.fill(); ctx.stroke();
+    legend.forEach(([c, n], i) => {
+      ctx.fillStyle = c; ctx.beginPath(); ctx.arc(W - 122, 40 + i * 28, 8, 0, 7); ctx.fill();
+      this.label(ctx, tr(n), W - 106, 40 + i * 28, `600 13px ${ROUNDED}`, onbGray(0.2), 'left');
+    });
+    // Resumen por color: lo amarillo, junto
+    if (sum > 0) {
+      ctx.save(); ctx.globalAlpha = sum; ctx.translate(0, 20 * (1 - sum));
+      ctx.shadowColor = 'rgba(0,0,0,.25)'; ctx.shadowBlur = 12; ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.roundRect(W - 200, 108, 184, 150, 12); ctx.fill(); ctx.shadowColor = 'transparent';
+      ctx.fillStyle = '#FFCC00'; ctx.beginPath(); ctx.arc(W - 182, 128, 7, 0, 7); ctx.fill();
+      this.label(ctx, tr('Definición'), W - 168, 128, `700 13px ${ROUNDED}`, onbGray(0.2), 'left');
+      [0.9, 0.7].forEach((k, i) => {
+        ctx.fillStyle = yellow; ctx.beginPath(); ctx.roundRect(W - 186, 148 + i * 40, 156 * k, 28, 5); ctx.fill();
+        ctx.fillStyle = onbGray(0.55); ctx.beginPath(); ctx.roundRect(W - 180, 159 + i * 40, 140 * k, 6, 3); ctx.fill();
+      });
+      ctx.restore();
+    }
+  },
+  tape(ctx, W, H, t) {
+    const p = onbCycle(t, 4.6), open = onbSmooth(onbRamp(p, 0.32, 0.44)) * (1 - onbSmooth(onbRamp(p, 0.82, 0.94)));
+    this.paper(ctx, W, H);
+    this.label(ctx, tr('¿Capital de Italia?'), 26, 40, `600 20px ${ROUNDED}`, onbGray(0.2), 'left');
+    this.lines(ctx, 26, 140, W - 52, [0.9, 0.7, 0.8], onbGray(0.82), 24);
+    this.label(ctx, 'Roma', 40, 92, `700 30px ${ROUNDED}`, 'rgb(51,77,217)', 'left');
+    // La cinta: verde, con los bordes en zigzag; al tocarla se levanta
+    if (open < 1) {
+      ctx.save(); ctx.globalAlpha = 1 - open; ctx.translate(W / 2 - 40, 92 - 40 * open); ctx.rotate((-2 - 10 * open) * Math.PI / 180);
+      const w = 260, h = 46;
+      ctx.fillStyle = 'rgba(52,199,89,.92)'; ctx.beginPath(); ctx.moveTo(-w / 2, -h / 2);
+      ctx.lineTo(w / 2, -h / 2); for (let i = 0; i <= 6; i++) ctx.lineTo(w / 2 + (i % 2 ? -6 : 0), -h / 2 + i * h / 6);
+      ctx.lineTo(-w / 2, h / 2); for (let i = 6; i >= 0; i--) ctx.lineTo(-w / 2 + (i % 2 ? 6 : 0), -h / 2 + i * h / 6);
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(255,255,255,.35)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(-w / 2 + 14, -8); ctx.lineTo(w / 2 - 14, -8); ctx.stroke();
+      ctx.restore();
+    }
+    this.tap(ctx, W / 2 - 40, 92, onbRamp(p, 0.26, 0.4), '#34C759');
+    this.tap(ctx, W / 2 - 40, 92, onbRamp(p, 0.76, 0.9), '#34C759');
+  },
+  ai(ctx, W, H, t) {
+    const p = onbCycle(t, 5.2), fly = onbSmooth(onbRamp(p, 0.15, 0.42)), type = onbRamp(p, 0.42, 0.7), cards = onbSmooth(onbRamp(p, 0.72, 0.84));
+    this.paper(ctx, W, H);
+    ctx.strokeStyle = 'rgb(51,77,217)'; ctx.lineWidth = 2.5; ctx.lineCap = ctx.lineJoin = 'round';
+    [0, 1, 2].forEach((i) => this.path(ctx, this.cursive(20, 160 - i * 22, 52 + i * 40, 18, 60), 1));
+    // La IA lee lo escrito y lo pasa a texto
+    const sx = 40 + 170 * fly, sy = 90 - 30 * Math.sin(fly * Math.PI);
+    if (fly > 0 && fly < 1) { const sp = onbIcon('sparkles', '#AF52DE', 30, 2); if (sp.complete) ctx.drawImage(sp, sx - 15, sy - 15, 30, 30); }
+    [0.95, 0.75, 0.85].forEach((k, i) => {
+      const w = 150 * k * onbRamp(type, i / 3, (i + 1) / 3);
+      if (w > 0) { ctx.fillStyle = onbGray(0.35); ctx.beginPath(); ctx.roundRect(214, 42 + i * 40, w, 9, 4); ctx.fill(); }
+    });
+    ctx.strokeStyle = onbGray(0.85); ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(196, 24); ctx.lineTo(196, 160); ctx.stroke();
+    if (cards > 0) {
+      [0, 1].forEach((i) => {
+        ctx.save(); ctx.translate(120 + i * 150, 210); ctx.rotate((i ? 4 : -4) * Math.PI / 180); ctx.scale(cards, cards);
+        ctx.shadowColor = 'rgba(0,0,0,.2)'; ctx.shadowBlur = 8; ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.roundRect(-62, -34, 124, 68, 10); ctx.fill(); ctx.shadowColor = 'transparent';
+        ctx.fillStyle = '#AF52DE'; ctx.fillRect(-62, -20, 3, 26);
+        ctx.fillStyle = onbGray(0.6); ctx.beginPath(); ctx.roundRect(-48, -10, 90, 7, 3); ctx.fill(); ctx.beginPath(); ctx.roundRect(-48, 4, 64, 7, 3); ctx.fill();
+        ctx.restore();
+      });
+    }
+    this.label(ctx, tr('Transcribir'), 290, 18, `700 12px ${ROUNDED}`, '#AF52DE');
+  },
+  recall(ctx, W, H, t) {
+    const p = onbCycle(t, 5.6), studied = p > 0.7;
+    ctx.save(); ctx.beginPath(); ctx.roundRect(0, 0, W, H, 14); ctx.clip();
+    ctx.fillStyle = onbGray(0.12); ctx.fillRect(0, 0, W, H);
+    // Tira «Para repasar hoy»
+    ctx.fillStyle = 'rgba(255,69,58,.18)'; ctx.beginPath(); ctx.roundRect(12, 12, W - 24, 38, 12); ctx.fill();
+    const bell = onbIcon('bell', '#FF453A', 18, 2.2); if (bell.complete) ctx.drawImage(bell, 24, 22, 18, 18);
+    this.label(ctx, tr('Para repasar hoy'), 50, 31, `700 14px ${ROUNDED}`, '#fff', 'left');
+    if (!studied) { ctx.fillStyle = '#AF52DE'; ctx.beginPath(); ctx.roundRect(W - 50, 19, 18, 24, 3); ctx.fill(); }
+    const books = [['#007AFF', 0.15], ['#AF52DE', 1.2], ['#34C759', 0.5], ['#FF9F0A', 0.8]];
+    books.forEach(([c, age], i) => {
+      const x = 22 + i * 90, y = 74;
+      ctx.fillStyle = c; ctx.beginPath(); ctx.roundRect(x, y, 70, 96, 6); ctx.fill();
+      ctx.fillStyle = 'rgba(0,0,0,.2)'; ctx.fillRect(x, y + 2, 7, 92);
+      // Retención R = e^(−t/S): la barra baja con el tiempo y se llena al repasar
+      const time = i === 1 && studied ? (p - 0.72) * 0.6 : age + p * 1.1;
+      const r = Math.exp(-Math.max(0, time) / 1.6), bc = r > 0.7 ? '#32D74B' : r > 0.45 ? '#FFD60A' : '#FF453A';
+      ctx.fillStyle = 'rgba(255,255,255,.12)'; ctx.beginPath(); ctx.roundRect(x, y + 106, 70, 7, 3.5); ctx.fill();
+      ctx.fillStyle = bc; ctx.beginPath(); ctx.roundRect(x, y + 106, Math.max(7, 70 * r), 7, 3.5); ctx.fill();
+    });
+    this.tap(ctx, 22 + 90 + 35, 74 + 48, onbRamp(p, 0.66, 0.8), '#fff');
+    this.label(ctx, tr(studied ? '¡Repasada!' : 'Se va olvidando…'), W / 2, H - 28, `600 15px ${ROUNDED}`, 'rgba(255,255,255,.75)');
+    ctx.restore();
+  },
+};
+
+// ---------- Libreta de demostración «Así es Folia» (final del tutorial) ----------
+// Folia crea sola una libreta y la «escribe» a la vista (~1 minuto, con cámara que sigue la acción). La libreta se
+// construye ENTERA al empezar, con datos normales (trazos, elementos, tarjetas, leyenda, page.ocr), y se guarda en
+// la carpeta «Ejemplos»: si se cierra a mitad, queda completa. La película solo va enseñando sus piezas.
+// La IA es de mentira (respuestas preparadas, sin red ni clave) y se dice con «ejemplo».
+
+/** Letras de una sola línea para escribir el título a mano: trazos en una caja de 1 de alto (base en y = 1). */
+const ONB_GLYPHS = (() => {
+  const arc = (cx, cy, rx, ry, a0, a1, n = 18) => Array.from({ length: n + 1 }, (_, i) => { const a = (a0 + (a1 - a0) * i / n) * Math.PI / 180; return [cx + rx * Math.cos(a), cy + ry * Math.sin(a)]; });
+  return {
+    A: [0.8, [[[0, 1], [0.36, 0], [0.72, 1]], [[0.16, 0.62], [0.56, 0.62]]]],
+    E: [0.62, [[[0.55, 0.02], [0.06, 0], [0.04, 1], [0.56, 1]], [[0.05, 0.5], [0.46, 0.5]]]],
+    F: [0.58, [[[0.06, 0], [0.04, 1]], [[0.05, 0.01], [0.55, 0]], [[0.05, 0.48], [0.44, 0.48]]]],
+    a: [0.56, [[...arc(0.24, 0.76, 0.2, 0.24, -20, 340)], [[0.45, 0.52], [0.44, 1], [0.52, 0.96]]]],
+    c: [0.5, [arc(0.26, 0.76, 0.22, 0.25, -40, -320)]],
+    e: [0.54, [[[0.05, 0.76], [0.44, 0.74], ...arc(0.25, 0.76, 0.2, 0.25, -5, -300).slice(1)]]],
+    i: [0.26, [[[0.1, 0.52], [0.1, 1], [0.16, 0.97]], [[0.1, 0.34], [0.11, 0.35]]]],
+    'í': [0.28, [[[0.1, 0.52], [0.1, 1], [0.16, 0.97]], [[0.06, 0.4], [0.2, 0.26]]]],
+    l: [0.26, [[[0.1, 0], [0.09, 0.95], [0.18, 1]]]],
+    o: [0.54, [arc(0.25, 0.76, 0.21, 0.25, -90, 270)]],
+    s: [0.48, [[[0.4, 0.56], [0.3, 0.5], [0.14, 0.52], [0.08, 0.62], [0.16, 0.72], [0.32, 0.78], [0.4, 0.88], [0.34, 0.98], [0.18, 1], [0.04, 0.95]]]],
+    ' ': [0.34, []],
+  };
+})();
+/** Trazos de bolígrafo que escriben `text` a mano desde (x, y) (arriba a la izquierda) con altura `h`. */
+function onbHandwrite(text, x, y, h, color, width = 4) {
+  const out = [], rnd = onbRandom(11);
+  let cx = x;
+  for (const ch of text) {
+    const [adv, strokes] = ONB_GLYPHS[ch] || ONB_GLYPHS[' '];
+    for (const st of strokes) {
+      const pts = st.map(([u, v]) => [cx + u * h + (rnd() - 0.5) * h * 0.03, y + v * h + (rnd() - 0.5) * h * 0.03]);
+      out.push({ id: uid(), tool: 'pen', kind: 'pen', color, width, points: Shapes.densify(pts).map(([a, b], i, all) => [a, b, 0.35 + 0.3 * Math.sin(Math.PI * i / Math.max(1, all.length - 1))]) });
+    }
+    cx += adv * h + h * 0.08;
+  }
+  return out;
+}
+/** Un trazo de bolígrafo con estos puntos (se densifican como los de la app). */
+const onbInk = (pts, color = '#1C1C1E', width = 3, tool = 'pen') => ({ id: uid(), tool, kind: 'pen', color, width, points: Shapes.densify(pts).map(([a, b]) => [a, b, 0.5]) });
+/** «Letra» a mano sin significado (bucles) entre x0 y x1, para rellenar. */
+const onbScribble = (x0, x1, y, h, color = '#1E5BD8') => onbInk(OnbDemos.cursive(x0, x1, y, h, Math.max(20, Math.round((x1 - x0) / 4))), color, 2.6);
+
+/** Construye la libreta de demostración completa. Devuelve { nb, parts } (`parts`: las piezas para la película). */
+function onbFilmBuild() {
+  const L = (es, it) => (I18N.lang === 'it' ? it : es);
+  const style = (o) => Object.assign({}, DEFAULT_TEXT, o);
+  const text = (x, y, w, html, base) => ({ id: uid(), type: 'text', x, y, w, html, base: style(base) });
+  const nb = newNotebook(L('Así es Folia', 'Ecco Folia'), '#6B5CFF', 'ruled', 'white');
+  const p1 = nb.pages[0], p2 = newPage('clinical', 'white');
+  nb.pages.push(p2);
+  const P = {};
+  // Título escrito a mano
+  P.title = onbHandwrite(L('Así es Folia', 'Ecco Folia'), 70, 62, 72, '#3A2DB8', 4.5);
+  // Texto con la palabra clave resaltada y subrayada (de ahí sale la tarjeta de huecos)
+  const t1Plain = L('La mitocondria produce ATP para la célula.', 'Il mitocondrio produce ATP per la cellula.');
+  const [pre] = t1Plain.split('ATP');
+  P.t1 = text(70, 170, 660, `${esc(pre)}<span style="background-color:#FFE66B">ATP</span>${esc(t1Plain.slice(pre.length + 3))}`, { size: 26 });
+  const mctx = document.createElement('canvas').getContext('2d');
+  mctx.font = fontCSS(P.t1.base);
+  const tx = 70 + 9.5, ty = 170 + 7.5 + 26 * 0.67, wPre = mctx.measureText(pre).width, wAtp = mctx.measureText('ATP').width;
+  P.hl1 = onbInk([[tx + wPre + 10, ty], [tx + wPre + wAtp - 10, ty]], HL_COLORS[0], 26, 'highlighter');
+  // Forma perfecta: el círculo a mano (se ve temblón en la película) y una flecha con «ATP» a mano
+  const C = [200, 335], R = 72;
+  P.wobble = Array.from({ length: 73 }, (_, i) => { const a = i / 72 * Math.PI * 2 - Math.PI / 2, w = 1 + 0.08 * Math.sin(a * 3 + 1) + 0.05 * Math.sin(a * 7); return [C[0] + 4 + R * w * Math.cos(a) + (i > 66 ? (i - 66) * 2 : 0), C[1] + R * w * 0.9 * Math.sin(a)]; });
+  P.circle = onbInk(Array.from({ length: 73 }, (_, i) => { const a = i / 72 * Math.PI * 2 - Math.PI / 2; return [C[0] + 20 + R * Math.cos(a), C[1] + R * Math.sin(a)]; }), '#8E44AD', 3.5);
+  P.circleColor = '#E0362C'; P.circleDx = 20;   // antes de moverlo y cambiarle el color con el lazo
+  P.copy = onbInk(P.circle.points.map(([a, b]) => [a + 430, b]), '#8E44AD', 3.5);
+  P.arrow = [onbInk([[300, 335], [392, 335]], '#1E5BD8', 3), onbInk([[376, 322], [394, 335], [376, 348]], '#1E5BD8', 3)];
+  P.atp = onbScribble(410, 540, 352, 34, '#1E5BD8');
+  // Regla: una línea recta de lado a lado
+  P.rule = onbInk([[70, 452], [750, 452]], '#1C1C1E', 2.5);
+  // Colores con significado
+  P.t2 = text(70, 480, 680, L('Definición: orgánulo con doble membrana.', 'Definizione: organello con doppia membrana.'), { size: 22 });
+  P.t3 = text(70, 528, 680, L('Examen: ¡entra seguro!', 'Esame: esce sicuro!'), { size: 22 });
+  mctx.font = fontCSS(P.t2.base);
+  const w2 = mctx.measureText(P.t2.html).width, w3 = mctx.measureText(P.t3.html).width;
+  P.hl2 = onbInk([[90, 502], [70 + w2, 502]], HL_COLORS[0], 24, 'highlighter');
+  P.hl3 = onbInk([[90, 550], [70 + w3, 550]], HL_COLORS[2], 24, 'highlighter');
+  nb.legend = { [HL_COLORS[0].toLowerCase()]: L('Definición', 'Definizione'), [HL_COLORS[2].toLowerCase()]: L('Examen', 'Esame') };
+  // Cinta que tapa la respuesta
+  P.q = text(70, 610, 360, L('¿Qué produce la mitocondria?', 'Cosa produce il mitocondrio?'), { size: 22, bold: true });
+  P.ans = text(70, 660, 200, 'ATP', { size: 30, color: '#1E5BD8' });
+  P.tape = { id: uid(), type: 'tape', x: 62, y: 656, w: 210, h: 58, color: TAPE_COLORS[1] };
+  // Post-it con tinta dentro (coordenadas relativas a su esquina)
+  P.sticky = { id: uid(), type: 'sticky', x: 480, y: 600, w: 260, h: 210, color: STICKY_COLORS[0], html: '', base: style({ font: 'hand', size: 22 }),
+    strokes: [onbInk(OnbDemos.cursive(24, 200, 70, 30, 50), '#E0362C', 3),
+      onbInk(Array.from({ length: 50 }, (_, i) => { const a = i / 49 * Math.PI * 2; return [130 + 2.6 * 16 * Math.sin(a) ** 3, 140 - 2.6 * (13 * Math.cos(a) - 5 * Math.cos(2 * a) - 2 * Math.cos(3 * a) - Math.cos(4 * a))]; }), '#E0362C', 3)] };
+  // Comentario y enlace a la página del caso clínico
+  P.comment = { id: uid(), type: 'comment', x: 26, y: 172, title: 'Folia', color: COMMENT_COLORS[4], expanded: false, created: Date.now(), html: L('¡Pruébalo tú!', 'Provalo tu!'), base: style({ size: 16 }) };
+  P.link = text(70, 860, 420, `<a data-link='${JSON.stringify({ nb: nb.id, page: p2.id })}'>${L('Caso clínico →', 'Caso clinico →')}</a>`, { size: 24, color: '#1E5BD8', underline: true });
+  // Página 2: plantilla de Medicina (caso clínico) escrita a mano, con su transcripción (IA de ejemplo)
+  const lay = medLayout(p2);
+  P.med = [];
+  lay.fields.forEach((f) => P.med.push(onbScribble(f.x + 14, f.x + Math.min(f.w - 20, 260), f.y + f.h - 12, 22)));
+  lay.sections.slice(0, 3).forEach((s) => { for (let k = 0; k < 2; k++) P.med.push(onbScribble(s.x0 + 18, s.x0 + (s.x1 - s.x0) * (0.8 - k * 0.25), s.y + MED_ROW * (k + 2) - 8, 20, '#1C1C1E')); });
+  P.ocrText = L('Paciente: Ana, 54 años.\nMotivo: dolor torácico al subir escaleras.', 'Paziente: Anna, 54 anni.\nMotivo: dolore toracico salendo le scale.');
+  p2.ocr = [{ id: uid(), rect: { x: lay.fields[0].x, y: lay.fields[0].y, w: 740, h: 200 }, text: P.ocrText, at: Date.now() }];
+  p1.strokes.push(...P.title, P.hl1, P.circle, P.copy, ...P.arrow, P.atp, P.rule, P.hl2, P.hl3);
+  p1.items.push(P.t1, P.t2, P.t3, P.q, P.ans, P.tape, P.sticky, P.comment, P.link);
+  p2.strokes.push(...P.med);
+  // Tarjetas: desde el lazo, de huecos (lo subrayado, con la lógica de cloze.js) y de la IA (de ejemplo)
+  Cards.addMany(nb, [{ front: L('¿Qué orgánulo es?', 'Che organello è?'), back: L('La mitocondria', 'Il mitocondrio'), pageId: p1.id, rect: { x: 120, y: 255, w: 200, h: 165 } }]);
+  const seen = new Set();
+  Cloze.create(nb, Cloze.propose(nb).filter((c) => !seen.has(c.answer) && seen.add(c.answer)).slice(0, 2));
+  Cards.addMany(nb, [{ front: L('¿Qué produce la mitocondria?', 'Cosa produce il mitocondrio?'), back: L('ATP, la energía de la célula.', 'ATP, l’energia della cellula.'), pageId: p1.id }]).forEach((c) => { c.origin = 'ai'; });
+  nb.outline = [{ id: uid(), title: L('Así es Folia', 'Ecco Folia'), pageId: p1.id, level: 0 }, { id: uid(), title: L('Caso clínico', 'Caso clinico'), pageId: p2.id, level: 0 }];
+  return { nb, parts: P };
+}
+
+const OnbFilm = {
+  GAP: 40,
+  /** La libreta de esta sesión (o la ya creada con ese título): no se duplica al verla otra vez. */
+  ensure() {
+    let nb = nbById(this.nbId) || null;
+    const built = onbFilmBuild();
+    if (!nb) {
+      nb = built.nb;
+      nb.folder = Folders.topNamed(I18N.lang === 'it' ? 'Esempi' : 'Ejemplos').id;
+      S.notebooks.push(nb); Store.put(nb);
+      this.nbId = nb.id;
+      if (S.view === 'library') renderLibrary();
+    }
+    return built;   // la película se dibuja con su propia copia (misma forma que la guardada)
+  },
+  /** Pasos: [segundos, cámara [x, y, aumento] o función, rótulo, qué enseña]. */
+  steps(P) {
+    const p2y = PORTRAIT.h + this.GAP;
+    return [
+      { d: 5, cam: [390, 100, 2.1], cap: 'Escribe a mano, trazo a trazo', run: (k, v) => v.write(P.title, k) },
+      { d: 2.4, cam: [400, 192, 1.9], cap: 'Textos con estilo', run: (k, v) => v.type(P.t1, k) },
+      { d: 2.4, cam: [400, 192, 1.9], cap: 'Subraya lo importante', run: (k, v) => v.write([P.hl1], onbSmooth(k)), ui: (k, u) => u.tool(k) },
+      { d: 3.4, cam: [300, 335, 1.7], cap: 'Forma perfecta en directo: mantén quieto', run: (k, v) => v.shape(k), ui: (k, u) => u.hold(k) },
+      { d: 3, cam: [410, 452, 1.35], cap: 'La regla: líneas rectas y medidas', run: (k, v) => v.write([P.rule], onbSmooth(onbRamp(k, 0.25, 0.85))), ui: (k, u) => u.ruler(k) },
+      { d: 4, cam: [400, 515, 1.6], cap: 'Colores con significado', run: (k, v) => { v.type(P.t2, onbRamp(k, 0, 0.25)); v.type(P.t3, onbRamp(k, 0.2, 0.45)); v.write([P.hl2], onbRamp(k, 0.45, 0.6)); v.write([P.hl3], onbRamp(k, 0.6, 0.75)); }, ui: (k, u) => u.legend(onbRamp(k, 0.7, 0.85)) },
+      { d: 3, cam: [380, 340, 1.5], cap: 'Lazo: rodea y cuenta lo que coge', ui: (k, u) => u.lasso(onbSmooth(onbRamp(k, 0, 0.6)), k > 0.6 ? 'all' : '') },
+      { d: 2.6, cam: [380, 340, 1.5], cap: 'Filtro y «Solo este color»', ui: (k, u) => u.filter(k) },
+      { d: 3.5, cam: [480, 340, 1.25], cap: 'Mueve, cambia de color o copia', run: (k, v) => v.edit(k), ui: (k, u) => u.editBar(k) },
+      { d: 4.5, cam: (k) => [610, 705, 1.6 + 1.1 * onbSmooth(onbRamp(k, 0.15, 0.3)) * (1 - onbSmooth(onbRamp(k, 0.85, 1)))], cap: 'Post-it: «Ampliar» y dibuja dentro', run: (k, v) => v.sticky(k), ui: (k, u) => u.stickyBar(k) },
+      { d: 3.5, cam: [250, 655, 1.8], cap: 'Cinta: tapa la respuesta y destápala', run: (k, v) => v.tape(k), ui: (k, u) => u.tapTape(k) },
+      { d: 2.4, cam: [230, 200, 1.8], cap: 'Comentarios con nombre', run: (k, v) => v.show(P.comment, k > 0.1), ui: (k, u) => u.comment(onbRamp(k, 0.35, 0.5)) },
+      { d: 2.8, cam: [260, 875, 1.6], cap: 'Enlaces a otra página', run: (k, v) => v.type(P.link, onbRamp(k, 0, 0.4)), ui: (k, u) => u.tapAt(150, 878, onbRamp(k, 0.6, 0.85)) },
+      { d: 4, cam: [410, p2y + 330, 1.15], cap: 'Plantillas de Medicina', run: (k, v) => v.write(P.med, onbRamp(k, 0.15, 1)) },
+      { d: 2.8, cam: [410, p2y + 250, 1.15], cap: 'IA ▾ › Transcribir a texto', ui: (k, u) => u.ai('ocr', k) },
+      { d: 2.8, cam: [410, p2y + 250, 1.15], cap: 'IA › Resumen', ui: (k, u) => u.ai('summary', k) },
+      { d: 2.8, cam: [410, p2y + 250, 1.15], cap: 'IA › Tarjetas con su cita', ui: (k, u) => u.ai('cards', k) },
+      { d: 2.6, cam: [300, 335, 1.6], cap: 'Lazo › Crear tarjeta', ui: (k, u) => u.makeCard(k) },
+      { d: 3, cam: [400, 192, 1.9], cap: 'Tarjetas de huecos de lo subrayado', ui: (k, u) => u.cloze(k) },
+      { d: 3.6, cam: [410, 520, 0.95], cap: 'Repaso: Otra vez · Difícil · Bien · Fácil', ui: (k, u) => u.review(k) },
+      { d: 2.8, cam: [410, 580, 0.9], cap: 'Copia de seguridad: el escudo te avisa', ui: (k, u) => u.shield(k) },
+      { d: 1.6, cam: [410, 580, 0.9], cap: 'Así es Folia: ya está en tu biblioteca', ui: () => {} },
+    ];
+  },
+
+  /** Empieza la película en `canvas`. `opts.speed` (pruebas) la acelera; `opts.onStep(i, cap)` y `opts.onEnd()`. */
+  play(canvas, opts = {}) {
+    this.stop();
+    const { parts: P, nb } = this.ensure();
+    const steps = this.steps(P), speed = opts.speed || 1, total = steps.reduce((a, s) => a + s.d, 0);
+    this.total = total;
+    const ctx = canvas.getContext('2d'), start = performance.now();
+    let last = -1;
+    const frame = (now) => {
+      if (!document.contains(canvas)) return;
+      const T = opts.freeze ? Math.min(total, opts.at || 0) : Math.min(total, (opts.at || 0) + (now - start) / 1000 * speed);
+      let i = 0, acc = 0;
+      while (i < steps.length - 1 && acc + steps[i].d <= T) acc += steps[i++].d;
+      const k = Math.min(1, (T - acc) / steps[i].d);
+      if (i !== last) { last = i; opts.onStep?.(i, steps[i].cap); }
+      this.draw(ctx, canvas, nb, P, steps, i, k);
+      opts.onProgress?.(T / total);
+      if (T >= total) { this.raf = 0; return opts.onEnd?.(); }
+      this.raf = requestAnimationFrame(frame);
+    };
+    this.raf = requestAnimationFrame(frame);
+  },
+  stop() { cancelAnimationFrame(this.raf); this.raf = 0; },
+
+  /** Un fotograma: qué se ve de la libreta (vista), la cámara y la interfaz de mentira encima. */
+  draw(ctx, canvas, nb, P, steps, i, k) {
+    const dpr = Math.min(devicePixelRatio || 1, 2), W = canvas.clientWidth, H = canvas.clientHeight;
+    if (!W || !H) return;
+    if (canvas.width !== Math.round(W * dpr) || canvas.height !== Math.round(H * dpr)) { canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr); }
+    // Lo que se ve: todo lo de los pasos ya hechos, lo del paso actual a medias
+    const v = this.view(P);
+    for (let j = 0; j < i; j++) steps[j].run?.(1, v);
+    steps[i].run?.(k, v);
+    // Cámara: va suave del encuadre del paso anterior al de este
+    const camOf = (s, kk) => (typeof s.cam === 'function' ? s.cam(kk) : s.cam);
+    const from = i ? camOf(steps[i - 1], 1) : camOf(steps[0], 0), to = camOf(steps[i], k), e = onbSmooth(Math.min(1, k / 0.3));
+    const cam = from.map((a, n) => a + (to[n] - a) * e);
+    // En pantallas estrechas (móvil) se acerca menos: si no, la página se sale por los lados.
+    const fit = Math.min(W / (PORTRAIT.w + 60), H / (PORTRAIT.h + 60)), z = fit * Math.max(0.9, 1 + (cam[2] - 1) * Math.min(1, W / 1000));
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.fillStyle = 'rgb(28,28,34)'; ctx.fillRect(0, 0, W, H);
+    ctx.save();
+    ctx.translate(W / 2 - cam[0] * z, H / 2 - cam[1] * z); ctx.scale(z, z);
+    nb.pages.forEach((page, n) => {
+      ctx.save(); ctx.translate(0, n * (PORTRAIT.h + this.GAP));
+      ctx.shadowColor = 'rgba(0,0,0,.45)'; ctx.shadowBlur = 30; ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, page.w, page.h); ctx.shadowColor = 'transparent';
+      ctx.beginPath(); ctx.rect(0, 0, page.w, page.h); ctx.clip();
+      ctx.textAlign = 'start'; ctx.textBaseline = 'alphabetic';   // la interfaz de encima los cambia
+      drawPageQuick(ctx, v.page(page));   // sin imágenes ni PDF: se dibuja en el momento
+      v.extra(ctx, page);
+      ctx.restore();
+    });
+    ctx.restore();
+    const toScreen = (x, y) => [W / 2 + (x - cam[0]) * z, H / 2 + (y - cam[1]) * z];
+    ctx.save(); steps[i].ui?.(k, this.ui(ctx, W, H, z, toScreen, P)); ctx.restore();
+  },
+
+  /** Qué se ve de cada pieza: oculta, a medias o entera (sin tocar la libreta guardada). */
+  view(P) {
+    const shown = new Set(), part = new Map(), over = new Map(), extras = [];
+    const v = {
+      show(o, on = true) { if (on) shown.add(o.id); },
+      /** Trazos uno tras otro, hasta la fracción k del total de puntos. */
+      write(list, k) {
+        const n = list.reduce((a, s) => a + s.points.length, 0);
+        let left = Math.max(0, Math.min(1, k)) * n;
+        for (const s of list) {
+          if (left <= 0) break;
+          shown.add(s.id);
+          if (left < s.points.length) part.set(s.id, Object.assign({}, s, { points: s.points.slice(0, Math.max(2, Math.ceil(left))) }));
+          left -= s.points.length;
+        }
+      },
+      type(it, k) {
+        if (k <= 0) return;
+        shown.add(it.id);
+        if (k < 1) { const t = htmlText(it.html); over.set(it.id, Object.assign({}, it, { html: esc(t.slice(0, Math.ceil(t.length * k))) })); }
+      },
+      shape(k) {
+        const draw = onbRamp(k, 0, 0.45), morph = onbSmooth(onbRamp(k, 0.7, 0.82));
+        if (morph <= 0) {
+          const pts = P.wobble.slice(0, Math.max(2, Math.ceil(draw * P.wobble.length)));
+          extras.push((ctx) => { ctx.strokeStyle = P.circleColor; ctx.lineWidth = 3.5; ctx.lineCap = ctx.lineJoin = 'round'; ctx.beginPath(); pts.forEach(([x, y], n) => (n ? ctx.lineTo(x, y) : ctx.moveTo(x, y))); ctx.stroke(); });
+        } else v.circleAt(0, P.circleColor, 1 - morph);
+        v.write(P.arrow, onbRamp(k, 0.84, 0.92)); v.write([P.atp], onbRamp(k, 0.9, 1));
+      },
+      /** El círculo antes de editarlo con el lazo: más a la izquierda (−dx) y rojo. `blend`: lo que le queda de temblón. */
+      circleAt(dx, color, blend = 0) {
+        shown.add(P.circle.id);
+        const last = Math.max(1, P.circle.points.length - 1);
+        const pts = P.circle.points.map(([x, y, p], n) => { const w = P.wobble[Math.round(n / last * (P.wobble.length - 1))]; return [x - P.circleDx + dx + (w[0] - x + P.circleDx) * blend, y + (w[1] - y) * blend, p]; });
+        part.set(P.circle.id, Object.assign({}, P.circle, { points: pts, color }));
+      },
+      edit(k) {
+        const mv = onbSmooth(onbRamp(k, 0.05, 0.35)), recolor = k > 0.5, copy = onbSmooth(onbRamp(k, 0.68, 0.9));
+        if (k < 1) v.circleAt(P.circleDx * mv, recolor ? '#8E44AD' : P.circleColor); else { shown.add(P.circle.id); part.delete(P.circle.id); }
+        if (copy > 0) { shown.add(P.copy.id); if (copy < 1) part.set(P.copy.id, Object.assign({}, P.copy, { points: P.copy.points.map(([x, y, p]) => [x - 430 * (1 - copy), y, p]) })); }
+      },
+      sticky(k) {
+        const drop = onbSmooth(onbRamp(k, 0, 0.12));
+        if (drop <= 0) return;
+        shown.add(P.sticky.id);
+        const ink = onbRamp(k, 0.32, 0.8), n = P.sticky.strokes.reduce((a, s) => a + s.points.length, 0);
+        let left = ink * n;
+        const strokes = [];
+        for (const s of P.sticky.strokes) { if (left <= 0) break; strokes.push(left < s.points.length ? Object.assign({}, s, { points: s.points.slice(0, Math.max(2, Math.ceil(left))) }) : s); left -= s.points.length; }
+        over.set(P.sticky.id, Object.assign({}, P.sticky, { y: P.sticky.y - 120 * (1 - drop), strokes }));
+      },
+      tape(k) {
+        v.show(P.q); v.show(P.ans);
+        const lift = onbSmooth(onbRamp(k, 0.3, 0.42)) * (1 - onbSmooth(onbRamp(k, 0.75, 0.87)));
+        if (k < 0.12) return;
+        shown.add(P.tape.id);
+        if (lift > 0) over.set(P.tape.id, Object.assign({}, P.tape, { open: true }));
+        if (lift > 0 && lift <= 0.95) extras.push((ctx) => { ctx.globalAlpha = 1 - lift; Tape.draw(ctx, Object.assign({}, P.tape, { y: P.tape.y - 40 * lift })); ctx.globalAlpha = 1; });
+      },
+      page(page) {
+        const strokes = page.strokes.filter((s) => shown.has(s.id)).map((s) => part.get(s.id) || s);
+        const items = page.items.filter((it) => shown.has(it.id)).map((it) => over.get(it.id) || it);
+        return Object.assign({}, page, { strokes, items });
+      },
+      extra(ctx, page) { if (page.strokes.includes(P.title[0])) extras.forEach((f) => { ctx.save(); f(ctx); ctx.restore(); }); },
+    };
+    return v;
+  },
+
+  /** Interfaz de mentira dibujada encima (px de pantalla): botones, menús, contador del lazo, repaso… */
+  ui(ctx, W, H, z, at, P) {
+    const R = ROUNDED, s = Math.max(0.8, Math.min(1.25, W / 900));
+    const pill = (text, x, y, on, color = '#007AFF', dark = false) => {
+      ctx.font = `600 ${14 * s}px ${R}`; const w = ctx.measureText(text).width + 26 * s, h = 30 * s;
+      ctx.save(); ctx.shadowColor = 'rgba(0,0,0,.3)'; ctx.shadowBlur = 10;
+      ctx.fillStyle = on ? color : dark ? 'rgba(40,40,50,.92)' : '#fff'; ctx.beginPath(); ctx.roundRect(x - w / 2, y - h / 2, w, h, h / 2); ctx.fill(); ctx.restore();
+      OnbDemos.label(ctx, text, x, y + 0.5, `600 ${14 * s}px ${R}`, on || dark ? '#fff' : onbGray(0.2));
+      return w;
+    };
+    const panel = (x, y, w, h, alpha = 1) => { ctx.save(); ctx.globalAlpha = alpha; ctx.shadowColor = 'rgba(0,0,0,.35)'; ctx.shadowBlur = 18; ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.roundRect(x, y, w, h, 14 * s); ctx.fill(); ctx.restore(); };
+    const txt = (t, x, y, size = 14, color = onbGray(0.2), weight = 500, align = 'left') => OnbDemos.label(ctx, t, x, y, `${weight} ${size * s}px ${R}`, color, align);
+    const tap = (x, y, k, color = '#BF59FF') => { if (k <= 0 || k >= 1) return; ctx.save(); ctx.globalAlpha = 1 - k; ctx.strokeStyle = color; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(x, y, (10 + 22 * k) * s, 0, 7); ctx.stroke(); ctx.restore(); };
+    const example = (x, y) => { ctx.font = `700 ${11 * s}px ${R}`; const w = ctx.measureText(tr('ejemplo')).width + 14 * s; ctx.fillStyle = 'rgba(175,82,222,.15)'; ctx.beginPath(); ctx.roundRect(x, y - 9 * s, w, 18 * s, 9 * s); ctx.fill(); txt(tr('ejemplo'), x + 7 * s, y, 11, '#AF52DE', 700); };
+    const sel = (pts, k) => { ctx.save(); ctx.strokeStyle = '#AF52DE'; ctx.lineWidth = 2.2; ctx.setLineDash([8, 6]); ctx.lineDashOffset = -performance.now() / 30; const q = pts.map(([x, y]) => at(x, y)); OnbDemos.path(ctx, q, k); ctx.restore(); };
+    const loop = (cx, cy, rx, ry) => Array.from({ length: 61 }, (_, n) => { const a = n / 60 * Math.PI * 2 - 2.6; return [cx + rx * Math.cos(a) + 5 * Math.sin(a * 5), cy + ry * Math.sin(a)]; });
+    const glow = (x, y, w, h) => { const [a, b] = at(x, y); ctx.save(); ctx.strokeStyle = 'rgba(0,122,255,.75)'; ctx.setLineDash([4, 4]); ctx.lineWidth = 1.5; ctx.strokeRect(a, b, w * z, h * z); ctx.restore(); };
+    const bottom = H - 96 * s;
+    return {
+      tool(k) { const w = pill(`    ${tr('Subrayador')}`, W / 2, 34 * s, true, 'rgba(28,28,30,.92)'); ctx.fillStyle = HL_COLORS[0]; ctx.beginPath(); ctx.arc(W / 2 - w / 2 + 18 * s, 34 * s, 7 * s, 0, 7); ctx.fill(); void k; },
+      hold(k) {
+        const h = onbRamp(k, 0.45, 0.7);
+        if (h <= 0 || k > 0.82) return;
+        const end = P.wobble.at(-1), [x, y] = at(end[0], end[1]);
+        ctx.strokeStyle = '#AF52DE'; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(x, y, 16 * s, -Math.PI / 2, -Math.PI / 2 + h * Math.PI * 2); ctx.stroke();
+        pill(tr('Mantén quieto…'), x, y - 40 * s, false, '#007AFF', true);
+      },
+      ruler(k) {
+        const a = onbSmooth(onbRamp(k, 0, 0.2)) * (1 - onbSmooth(onbRamp(k, 0.9, 1)));
+        if (a <= 0) return;
+        const [x0, y0] = at(60, 458), [x1] = at(760, 458);
+        ctx.save(); ctx.globalAlpha = a;
+        ctx.fillStyle = 'rgba(120,130,150,.35)'; ctx.strokeStyle = 'rgba(80,90,110,.6)'; ctx.beginPath(); ctx.roundRect(x0, y0, x1 - x0, 60 * z, 8); ctx.fill(); ctx.stroke();
+        ctx.strokeStyle = 'rgba(40,40,60,.7)'; ctx.lineWidth = 1;
+        for (let mm = 0; mm <= 170; mm++) { const x = x0 + (10 + mm * 4) * z, l = (mm % 10 === 0 ? 16 : mm % 5 === 0 ? 11 : 6) * z; ctx.beginPath(); ctx.moveTo(x, y0); ctx.lineTo(x, y0 + l); ctx.stroke(); }
+        const len = Math.max(0, onbSmooth(onbRamp(k, 0.25, 0.85))) * 680;
+        if (len > 0) { const [bx, by] = at(70 + len, 452); pill(`${(len / 37.8).toFixed(1).replace('.', ',')} cm`, bx, by - 34 * s, true, 'rgba(0,0,0,.8)'); }
+        ctx.restore();
+      },
+      legend(k) {
+        if (k <= 0) return;
+        const w = 210 * s, h = 92 * s, [ax, ay] = at(560, 470), x = Math.min(W - w - 12, ax), y = Math.max(12, ay - h - 8);
+        panel(x, y, w, h, k);
+        ctx.save(); ctx.globalAlpha = k;
+        txt(tr('Leyenda de colores'), x + 14 * s, y + 18 * s, 12, onbGray(0.45), 700);
+        [[HL_COLORS[0], 'Definición'], [HL_COLORS[2], 'Examen']].forEach(([c, n], j) => { ctx.fillStyle = c; ctx.beginPath(); ctx.arc(x + 24 * s, y + (44 + j * 28) * s, 9 * s, 0, 7); ctx.fill(); txt(tr(n), x + 42 * s, y + (44 + j * 28) * s, 15, onbGray(0.15), 600); });
+        ctx.restore();
+      },
+      lasso(k, mode) {
+        sel(loop(330, 335, 230, 105), k);
+        if (mode !== 'all') return;
+        glow(118, 255, 200, 165); glow(296, 318, 102, 34); glow(404, 316, 142, 46);
+        const [x, y] = at(330, 230); pill(tr('4 trazos'), x, y - 6 * s, true, '#AF52DE');
+      },
+      filter(k) {
+        sel(loop(330, 335, 230, 105), 1);
+        const only = k > 0.55;
+        if (!only) { glow(118, 255, 200, 165); glow(296, 318, 102, 34); glow(404, 316, 142, 46); } else glow(118, 255, 200, 165);
+        const [x, y] = at(330, 230);
+        pill(tr(only ? '1 trazo' : '4 trazos'), x, y - 6 * s, true, '#AF52DE');
+        const op = onbSmooth(onbRamp(k, 0.05, 0.2)) * (1 - onbSmooth(onbRamp(k, 0.5, 0.6)));
+        if (op > 0) {
+          const pw = 230 * s, px = Math.min(W - pw - 12, x + 60 * s), py = y + 10 * s;
+          panel(px, py, pw, 170 * s, op);
+          ctx.save(); ctx.globalAlpha = op;
+          txt(tr('Herramienta Lazo'), px + 14 * s, py + 20 * s, 12, onbGray(0.45), 700);
+          ['Bolígrafo y pluma', 'Cuadros de texto', 'Post-its'].forEach((n, j) => {
+            const yy = py + (48 + j * 32) * s; txt(tr(n), px + 14 * s, yy, 14, onbGray(0.15));
+            ctx.fillStyle = '#34C759'; ctx.beginPath(); ctx.roundRect(px + pw - 54 * s, yy - 10 * s, 38 * s, 20 * s, 10 * s); ctx.fill(); ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(px + pw - 26 * s, yy, 8 * s, 0, 7); ctx.fill();
+          });
+          txt(`${tr('Solo este color…')}`, px + 14 * s, py + 148 * s, 14, '#007AFF', 600);
+          ctx.restore();
+          tap(px + 60 * s, py + 148 * s, onbRamp(k, 0.35, 0.5));
+        }
+        if (only) { const w = pill(`    ${tr('Solo este color')}`, W / 2, 34 * s, true, 'rgba(28,28,30,.92)'); ctx.fillStyle = '#E0362C'; ctx.beginPath(); ctx.arc(W / 2 - w / 2 + 18 * s, 34 * s, 7 * s, 0, 7); ctx.fill(); }
+      },
+      editBar(k) {
+        const acts = [['Mover', 0.05], ['Color', 0.45], ['Copiar', 0.65]];
+        let x = W / 2 - 150 * s;
+        acts.forEach(([n, at0]) => { const on = k > at0 && k < at0 + 0.2; const w = pill(tr(n), x + 50 * s, bottom, on, '#AF52DE'); x += w + 10 * s; });
+        if (k > 0.45 && k < 0.65) [ '#1C1C1E', '#E0362C', '#8E44AD', '#2E9E4F'].forEach((c, j) => { ctx.fillStyle = c; ctx.beginPath(); ctx.arc(W / 2 - 45 * s + j * 30 * s, bottom - 42 * s, 11 * s, 0, 7); ctx.fill(); if (c === '#8E44AD') { ctx.strokeStyle = c; ctx.lineWidth = 2.5; ctx.beginPath(); ctx.arc(W / 2 - 45 * s + j * 30 * s, bottom - 42 * s, 15 * s, 0, 7); ctx.stroke(); } });
+      },
+      stickyBar(k) {
+        pill(tr('Ampliar'), W / 2 - 60 * s, bottom, k > 0.12 && k < 0.3, '#FF9F0A');
+        pill(tr('Hecho'), W / 2 + 60 * s, bottom, k > 0.8 && k < 0.92, '#34C759');
+        tap(W / 2 - 60 * s, bottom, onbRamp(k, 0.12, 0.25)); tap(W / 2 + 60 * s, bottom, onbRamp(k, 0.8, 0.92));
+      },
+      tapTape(k) { const [x, y] = at(P.tape.x + P.tape.w / 2, P.tape.y + P.tape.h / 2); tap(x, y, onbRamp(k, 0.22, 0.38), '#34C759'); tap(x, y, onbRamp(k, 0.66, 0.8), '#34C759'); },
+      comment(k) {
+        if (k <= 0) return;
+        const [x, y] = at(P.comment.x + 30, P.comment.y + 10), w = 200 * s, h = 76 * s;
+        panel(x, y, w, h, k);
+        ctx.save(); ctx.globalAlpha = k; ctx.fillStyle = COMMENT_COLORS[4]; ctx.beginPath(); ctx.roundRect(x, y, w, 26 * s, [14 * s, 14 * s, 0, 0]); ctx.fill();
+        txt('Folia', x + 12 * s, y + 13 * s, 13, '#fff', 700); txt(htmlText(P.comment.html), x + 12 * s, y + 50 * s, 15, onbGray(0.2)); ctx.restore();
+      },
+      tapAt(px, py, k) { const [x, y] = at(px, py); tap(x, y, k); },
+      ai(kind, k) {
+        const pw = Math.min(W - 24, 440 * s), x = W / 2 - pw / 2, y = 70 * s, a = onbSmooth(onbRamp(k, 0.24, 0.34));
+        pill(`✨ ${tr('IA')} ▾`, W / 2, 34 * s, k < 0.26, '#AF52DE', true);
+        tap(W / 2, 34 * s, onbRamp(k, 0.0, 0.12));
+        // El menú «✨ IA ▾» del lazo, con la opción que se elige resaltada
+        const m = onbSmooth(onbRamp(k, 0.04, 0.12)) * (1 - onbSmooth(onbRamp(k, 0.24, 0.3)));
+        if (m > 0) {
+          const rows = [['cards', 'Tarjetas'], ['summary', 'Resumir'], ['ocr', 'Transcribir a texto'], ['explain', 'Explicar']], mw = 230 * s, mx = W / 2 - mw / 2, my = 54 * s;
+          panel(mx, my, mw, (24 + rows.length * 34) * s, m);
+          ctx.save(); ctx.globalAlpha = m;
+          txt(tr('Con lo seleccionado'), mx + 14 * s, my + 16 * s, 11, onbGray(0.45), 700);
+          rows.forEach(([id, n], j) => {
+            const ry = my + (40 + j * 34) * s;
+            if (id === kind && k > 0.14) { ctx.fillStyle = 'rgba(175,82,222,.16)'; ctx.beginPath(); ctx.roundRect(mx + 6 * s, ry - 14 * s, mw - 12 * s, 28 * s, 8 * s); ctx.fill(); }
+            txt(tr(n), mx + 16 * s, ry, 14, onbGray(0.15), id === kind ? 700 : 500);
+          });
+          ctx.restore();
+        }
+        const ph = { ocr: 130, summary: 160, cards: 150 }[kind] * s;
+        panel(x, y, pw, ph, a);
+        ctx.save(); ctx.globalAlpha = a;
+        const head = { ocr: 'Transcripción', summary: 'Resumen', cards: 'Tarjetas' }[kind];
+        txt(tr(head), x + 16 * s, y + 22 * s, 16, onbGray(0.1), 700); example(x + pw - 80 * s, y + 22 * s);
+        const typed = onbRamp(k, 0.34, 0.9);
+        if (kind === 'ocr') P.ocrText.split('\n').forEach((line, j) => txt(line.slice(0, Math.ceil(line.length * onbRamp(typed, j / 2, (j + 1) / 2))), x + 16 * s, y + (60 + j * 28) * s, 15, onbGray(0.2)));
+        if (kind === 'summary') ['Dolor torácico de esfuerzo.', 'Pensar en angina estable.', 'Pedir ECG y troponinas.'].forEach((t, j) => { if (typed > j / 3) txt(`•  ${tr(t)}`, x + 16 * s, y + (60 + j * 30) * s, 15, onbGray(0.2)); });
+        if (kind === 'cards') {
+          if (typed > 0.1) { txt(tr('¿Qué produce la mitocondria?'), x + 16 * s, y + 60 * s, 15, onbGray(0.1), 700); txt(tr('ATP, la energía de la célula.'), x + 16 * s, y + 86 * s, 15, onbGray(0.3)); }
+          if (typed > 0.5) { ctx.fillStyle = 'rgba(175,82,222,.5)'; ctx.fillRect(x + 16 * s, y + 108 * s, 3, 26 * s); txt(`«${tr('La mitocondria produce ATP para la célula.')}»`, x + 26 * s, y + 121 * s, 13, onbGray(0.45), 500); }
+        }
+        ctx.restore();
+      },
+      makeCard(k) {
+        sel(loop(220, 335, 95, 92), onbSmooth(onbRamp(k, 0, 0.4)));
+        if (k < 0.4) return;
+        const [x, y] = at(220, 450);
+        pill(`💡 ${tr('Crear tarjeta')}`, x, y, k > 0.5 && k < 0.65, '#FF9F0A');
+        tap(x, y, onbRamp(k, 0.5, 0.65));
+        const f = onbSmooth(onbRamp(k, 0.65, 0.95));
+        if (f > 0) { const cx = x + (W - 90 * s - x) * f, cy = y + (40 * s - y) * f; panel(cx - 50 * s, cy - 32 * s, 100 * s, 64 * s, 1 - f * 0.3); txt(tr('¿Qué orgánulo es?'), cx, cy, 10, onbGray(0.2), 600, 'center'); }
+      },
+      cloze(k) {
+        const [x, y] = at(P.hl1.points[0][0], 192), pulse = 0.5 + 0.5 * Math.sin(k * 18);
+        ctx.save(); ctx.globalAlpha = 0.4 * pulse * (1 - onbRamp(k, 0.4, 0.5)); ctx.fillStyle = '#FFD60A'; ctx.fillRect(x - 6, y - 22 * z, 90 * z, 44 * z); ctx.restore();
+        const a = onbSmooth(onbRamp(k, 0.35, 0.55)), pw = Math.min(W - 24, 420 * s), px = W / 2 - pw / 2, py = H / 2 + 40 * s;
+        panel(px, py, pw, 110 * s, a);
+        if (a <= 0) return;
+        ctx.save(); ctx.globalAlpha = a;
+        txt(tr('Tarjetas de huecos'), px + 16 * s, py + 22 * s, 12, onbGray(0.45), 700);
+        const front = tr('La mitocondria produce ATP para la célula.').replace('ATP', CLOZE_GAP);
+        txt(front, px + 16 * s, py + 62 * s, 16, onbGray(0.15), 600);
+        ctx.restore();
+      },
+      review(k) {
+        const flip = onbSmooth(onbRamp(k, 0.25, 0.4)), back = flip > 0.5, sx = Math.max(0.02, Math.abs(Math.cos(flip * Math.PI)));
+        ctx.save(); ctx.fillStyle = 'rgba(0,0,0,.55)'; ctx.fillRect(0, 0, W, H); ctx.restore();
+        const cw = Math.min(W - 32, 460 * s), ch = 220 * s;
+        ctx.save(); ctx.translate(W / 2, H / 2 - 30 * s); ctx.scale(sx, 1);
+        ctx.shadowColor = 'rgba(0,0,0,.4)'; ctx.shadowBlur = 24; ctx.fillStyle = back ? 'rgb(255,248,225)' : '#fff'; ctx.beginPath(); ctx.roundRect(-cw / 2, -ch / 2, cw, ch, 18 * s); ctx.fill(); ctx.restore();
+        ctx.save(); ctx.translate(W / 2, H / 2 - 30 * s); ctx.scale(sx, 1);
+        if (!back) txt(tr('La mitocondria produce ATP para la célula.').replace('ATP', CLOZE_GAP), 0, 0, 17, onbGray(0.15), 600, 'center');
+        else txt('ATP', 0, 0, 34, '#C93400', 800, 'center');
+        ctx.restore();
+        if (k > 0.45) {
+          const g = CARD_GRADES.map(([, n]) => tr(n)), colors = ['#FF3B30', '#FF9F0A', '#34C759', '#007AFF'];
+          const step = Math.min(110 * s, (W - 24) / 4);
+          g.forEach((n, j) => pill(n, W / 2 + (j - 1.5) * step, H / 2 + 110 * s, j === 2 && k > 0.7, colors[j]));
+          tap(W / 2 + 0.5 * step, H / 2 + 110 * s, onbRamp(k, 0.68, 0.84), '#34C759');
+        }
+      },
+      shield(k) {
+        const ok = k > 0.55, c = ok ? '#34C759' : '#FF9F0A', sz = 110 * s, x = W / 2 - sz / 2, y = H / 2 - sz / 2 - 20 * s;
+        ctx.save(); ctx.fillStyle = 'rgba(0,0,0,.45)'; ctx.fillRect(0, 0, W, H); ctx.restore();
+        ctx.save(); ctx.translate(x, y); ctx.scale(sz / 24, sz / 24);
+        const sh = new Path2D(ICONS.shield.match(/d="([^"]+)"/)[1]); ctx.fillStyle = c + '40'; ctx.fill(sh); ctx.strokeStyle = c; ctx.lineWidth = 1.2; ctx.stroke(sh); ctx.restore();
+        const sv = onbRamp(k, 0.2, 0.55);
+        if (sv > 0 && sv < 1) { ctx.strokeStyle = '#0A84FF'; ctx.lineWidth = 5; ctx.lineCap = 'round'; ctx.beginPath(); ctx.arc(W / 2, y + sz / 2, sz * 0.7, -Math.PI / 2, -Math.PI / 2 + sv * Math.PI * 2); ctx.stroke(); }
+        txt(tr(ok ? 'Copia de seguridad al día' : 'Copia de seguridad: toca hacer una'), W / 2, y + sz + 34 * s, 17, '#fff', 700, 'center');
+      },
+    };
+  },
 };
 
 // ---------- El recorrido ----------
 const Onboarding = {
-  el: null, stage: null, selected: null, raf: 0,
+  el: null, stage: null, selected: null, raf: 0, direct: false, unpoint: null,
 
-  maybeShow() {
-    let seen = null;
-    try { seen = localStorage.getItem(ONB_KEY); } catch (e) { /* sin almacenamiento */ }
-    if (!seen) this.open();
+  /** Versión del tutorial que ya se vio aquí: 0 = nunca; «done» (de antes de haber versiones) = 1. */
+  seenVersion() {
+    let v = null;
+    try { v = localStorage.getItem(ONB_KEY); } catch (e) { /* sin almacenamiento */ }
+    if (!v) return 0;
+    return v === 'done' ? 1 : (Number(v) || 1);
   },
+  markSeen() { try { localStorage.setItem(ONB_KEY, String(Math.max(ONB_VERSION, this.seenVersion()))); } catch (e) { /* nada */ } },
+  /** «Novedades»: los temas más nuevos que la versión vista (si ya se vio todo, los de la última versión). */
+  newsTopics() {
+    const seen = this.seenVersion(), list = ONB_TOPICS.filter((t) => t.v > seen);
+    return seen && list.length ? list : ONB_TOPICS.filter((t) => t.v === ONB_VERSION);
+  },
+  /** ¿Marcar el tema como «Nuevo»? Solo para quien ya vio una versión anterior. */
+  isNew(t) { const seen = this.seenVersion(); return seen > 0 && t.v > seen; },
+  chapterTopics(id) { return ONB_TOPICS.filter((t) => t.chapter === id); },
+
+  maybeShow() { if (!this.seenVersion()) this.open(); },
   get name() { try { return (localStorage.getItem(ONB_NAME) || '').trim(); } catch (e) { return ''; } },
   set name(v) { try { localStorage.setItem(ONB_NAME, v); } catch (e) { /* nada */ } },
   get firstName() { return this.name.split(/\s+/)[0] || ''; },
 
-  open() {
+  /** Abre el tutorial. Con `topics` (lista de ids) va directo a esas lecciones (Novedades o un capítulo). */
+  open(opts = {}) {
     this.close(true);
-    this.selected = new Set(ONB_TOPICS.map((t) => t.id));
+    this.direct = Array.isArray(opts.topics);
+    this.filmOnly = !!opts.film;
+    this.filmSpeed = opts.speed || 1; this.filmAt = opts.at || 0; this.filmFreeze = !!opts.freeze;   // las dos últimas: capturas de un momento
+    this.selected = new Set(this.direct ? opts.topics : ONB_TOPICS.map((t) => t.id));
     const el = document.createElement('div');
     el.className = 'onb';
     el.setAttribute('role', 'dialog');
     el.setAttribute('aria-modal', 'true');
     el.setAttribute('aria-label', 'Tutorial de Folia');
     el.innerHTML = `<canvas class="onb-aurora" aria-hidden="true"></canvas><div class="onb-stages"></div>
-      <button class="onb-glass onb-skip" data-onb="skip">Omitir tutorial</button>`;
+      <button class="onb-glass onb-skip" data-onb="skip">Omitir tutorial</button>
+      <button class="onb-glass prominent onb-return" data-onb="return">${icon('back')} Volver al tutorial</button>`;
     document.body.appendChild(el);
     this.el = el;
     el.addEventListener('click', (e) => this.onClick(e));
     el.addEventListener('keydown', (e) => this.onKey(e));
     this.startAurora();
-    this.go('welcome');
+    this.go(this.filmOnly ? 'film' : this.direct ? (this.selected.size ? 'lesson:0' : 'done') : 'welcome');
   },
+  openNews() { this.open({ topics: this.newsTopics().map((t) => t.id) }); },
+  openChapter(id) { this.open({ topics: this.chapterTopics(id).map((t) => t.id) }); },
   close(silent) {
+    this.unpoint?.();
+    OnbFilm.stop();
     cancelAnimationFrame(this.raf);
     cancelAnimationFrame(this.demoRaf);
     cancelAnimationFrame(this.confettiRaf);
@@ -14791,15 +16161,39 @@ const Onboarding = {
     setTimeout(() => el.remove(), 450);
   },
   finish(create) {
-    try { localStorage.setItem(ONB_KEY, 'done'); } catch (e) { /* nada */ }
+    this.markSeen();
     this.close();
     if (create) setTimeout(() => newNotebookDialog(), 300);
+  },
+
+  // ---------- Entrada «Tutorial» de los menús (⋯ del editor y ⚙︎ Ajustes de la biblioteca) ----------
+  /** Fila desplegable (como «Plantilla»): todo, Novedades o repetir un capítulo. Necesita bindSubmenus(). */
+  menuHtml() {
+    const seen = this.seenVersion(), fresh = seen > 0 && seen < ONB_VERSION;
+    return `<button class="pf-row onb-menu-row" data-sub="onb" aria-expanded="false">${icon('tutorial')} <span class="pf-name">Tutorial</span> <span class="pf-val">${fresh ? '<b class="onb-menu-new">Novedades</b>' : ''}</span>${icon('chevronDown')}</button>
+      <div class="pf-sub" data-for="onb" hidden>
+        <button data-act="onb:all">${icon('play')} Todo el tutorial</button>
+        <button data-act="onb:news">${icon('sparkles')} Novedades <span class="kbd-hint">${this.newsTopics().length}</span></button>
+        <button data-act="onb:film">${icon('book')} Libreta de demostración</button>
+        <div class="label">Repetir un capítulo</div>
+        ${ONB_CHAPTERS.map((c) => `<button data-act="onb:ch:${c.id}">${icon(c.sym)} ${c.title} <span class="kbd-hint">${this.chapterTopics(c.id).length}</span></button>`).join('')}
+      </div>`;
+  },
+  /** Acción del menú; true si era del tutorial. */
+  menuAct(act) {
+    if (!act?.startsWith('onb:')) return false;
+    if (act === 'onb:all') this.open();
+    else if (act === 'onb:news') this.openNews();
+    else if (act === 'onb:film') this.open({ film: true });
+    else if (act.startsWith('onb:ch:')) this.openChapter(act.slice(7));
+    return true;
   },
 
   // Transición entre etapas: entra desde un lado, sale por el otro.
   go(stage, forward = true) {
     const host = this.el?.querySelector('.onb-stages');
     if (!host) return;
+    this.unpoint?.();
     this.stage = stage;
     cancelAnimationFrame(this.demoRaf);
     cancelAnimationFrame(this.confettiRaf);
@@ -14811,7 +16205,7 @@ const Onboarding = {
     const st = document.createElement('div');
     st.className = `onb-stage in ${forward ? 'from-right' : 'from-left'}`;
     st.innerHTML = this.html(stage);
-    this.el.querySelector('.onb-skip').hidden = stage === 'done';
+    this.el.querySelector('.onb-skip').hidden = stage === 'done' || stage === 'film';
     const enter = () => {
       st.classList.remove('pending');
       host.appendChild(st);
@@ -14825,6 +16219,7 @@ const Onboarding = {
     const glass = (label, act, prominent, extra = '') => `<button class="onb-glass ${prominent ? 'prominent' : ''}" data-onb="${act}" ${extra}>${label}</button>`;
     const arrow = `<span class="onb-arrow">${icon('chevronRight')}</span>`;
     const title = (t, sub) => `<h1 class="onb-title">${esc(t)}</h1><p class="onb-sub">${esc(sub)}</p>`;
+    const colors = (c) => `--c1:${c[0]};--c2:${c[1]}`;
     if (stage === 'welcome') {
       return `<div class="onb-center">
         <div class="onb-logo" aria-hidden="true"><div class="onb-cover"></div>
@@ -14843,7 +16238,7 @@ const Onboarding = {
         <div class="onb-row">${glass('Prefiero no decirlo', 'noname', false)}${glass(`Continuar ${arrow}`, 'name', true, this.name ? '' : 'disabled')}</div></div>`;
     }
     if (stage === 'ask') {
-      const card = (act, sym, colors, t, sub, prominent) => `<button class="onb-choice ${prominent ? 'prominent' : ''}" data-onb="${act}" style="--c1:${colors[0]};--c2:${colors[1]}">
+      const card = (act, sym, c, t, sub, prominent) => `<button class="onb-choice ${prominent ? 'prominent' : ''}" data-onb="${act}" style="${colors(c)}">
         <span class="onb-tile">${icon(sym)}</span><b>${t}</b><span>${sub}</span></button>`;
       return `<div class="onb-center">
         ${title(name ? `Encantado, ${name}` : '¡Encantado!', '¿Te enseño cómo funciona Folia? Son un par de minutos y eliges qué ver.')}
@@ -14851,38 +16246,53 @@ const Onboarding = {
         ${card('no', 'compass', ['#8E8E93', 'rgba(142,142,147,.6)'], 'Ahora no', 'Prefiero explorarla yo. Podré verlo más tarde.', false)}</div></div>`;
     }
     if (stage === 'topics') {
+      const seen = this.seenVersion();
+      const topic = (t, i) => `<button class="onb-topic" data-topic="${t.id}" aria-pressed="${this.selected.has(t.id)}" style="${colors(t.colors)};--i:${i}">
+          <span class="onb-tile">${icon(t.sym)}</span><span class="onb-tt"><b>${t.title}</b><span>${t.subtitle}</span></span>
+          ${this.isNew(t) ? '<span class="onb-new">Nuevo</span>' : ''}<span class="onb-check">${icon('check')}</span></button>`;
+      let i = 0;
       return `<div class="onb-topics">
         <div class="onb-head">${title(name ? `¿Qué quieres aprender, ${name}?` : '¿Qué quieres aprender?', 'Está todo seleccionado. Quita lo que ya sepas.')}</div>
-        <div class="onb-grid">${ONB_TOPICS.map((t, i) => `<button class="onb-topic" data-topic="${t.id}" aria-pressed="${this.selected.has(t.id)}" style="--c1:${t.colors[0]};--c2:${t.colors[1]};--i:${i}">
-          <span class="onb-tile">${icon(t.sym)}</span><span class="onb-tt"><b>${t.title}</b><span>${t.subtitle}</span></span>
-          <span class="onb-check">${icon('check')}</span></button>`).join('')}</div>
-        <div class="onb-row onb-foot">${glass('', 'all', false)}${glass('', 'begin', true)}</div></div>`;
+        <div class="onb-grid">${ONB_CHAPTERS.map((c) => `<button class="onb-chap" data-chap="${c.id}" style="${colors(c.colors)}" aria-pressed="true">
+            <span class="onb-tile small">${icon(c.sym)}</span><b>${c.title}</b><span class="onb-chap-n">${this.chapterTopics(c.id).length} temas</span><span class="onb-check">${icon('check')}</span></button>
+          ${this.chapterTopics(c.id).map((t) => topic(t, i++)).join('')}`).join('')}</div>
+        <div class="onb-row onb-foot">${glass('', 'all', false)}${seen > 0 && seen < ONB_VERSION ? glass(`${icon('sparkles')} Solo novedades`, 'news', false) : ''}${glass('', 'begin', true)}</div></div>`;
     }
     if (stage.startsWith('lesson:')) {
-      const lessons = this.lessons(), index = Number(stage.slice(7)), topic = lessons[index];
+      const lessons = this.lessons(), index = Number(stage.slice(7)), topic = lessons[index], ch = onbChapter(topic.chapter);
       const [intro, steps, tip] = (I18N.lang === 'it' ? onbLessonIt : onbLesson)(topic.id, name);
-      return `<div class="onb-lesson" style="--c1:${topic.colors[0]};--c2:${topic.colors[1]}">
+      return `<div class="onb-lesson" style="${colors(topic.colors)}">
         <div class="onb-progress" role="progressbar" aria-valuemin="1" aria-valuemax="${lessons.length}" aria-valuenow="${index + 1}" aria-label="Tema ${index + 1} de ${lessons.length}">
           ${lessons.map((_, i) => `<i class="${i <= index ? 'on' : ''}"></i>`).join('')}</div>
         <div class="onb-lesson-body">
           <div class="onb-demo"><canvas width="388" height="278" aria-hidden="true"></canvas></div>
           <div class="onb-copy">
-            <div class="onb-kicker"><span class="onb-tile small">${icon(topic.sym)}</span>Tema ${index + 1} de ${lessons.length}</div>
+            <div class="onb-kicker"><span class="onb-tile small">${icon(topic.sym)}</span><span class="onb-chap-name">${ch.title}</span><span aria-hidden="true">·</span><span>Tema ${index + 1} de ${lessons.length}</span>${this.isNew(topic) ? '<span class="onb-new">Nuevo</span>' : ''}</div>
             <h1>${topic.title}</h1>
             <p class="onb-intro">${esc(intro)}</p>
             <ul class="onb-steps">${steps.map(([sym, text], i) => `<li style="--i:${i}"><span class="onb-step-icon">${icon(sym)}</span><span>${esc(text)}</span></li>`).join('')}</ul>
             ${topic.id === 'language' ? `<div class="onb-langs">${languageButtons('onb-glass')}</div>` : ''}
             <p class="onb-tip"><span>${icon('lightbulb')}</span>${esc(tip)}</p>
+            <button class="onb-glass onb-show" data-onb="show" hidden>${icon('eye')} Muéstramelo</button>
           </div></div>
         <div class="onb-nav">${glass(`<span class="onb-arrow back">${icon('back')}</span> Atrás`, 'back', false)}${glass(`${index + 1 === lessons.length ? 'Terminar' : 'Siguiente'} ${arrow}`, 'next', true)}</div></div>`;
+    }
+    if (stage === 'film') {
+      return `<div class="onb-film"><canvas class="onb-film-cv" aria-hidden="true"></canvas>
+        <div class="onb-film-bar" aria-hidden="true"><i></i></div>
+        <p class="onb-film-cap" aria-live="polite"></p>
+        <button class="onb-glass onb-film-skip" data-onb="film-skip">Saltar ${arrow}</button>
+        <div class="onb-film-end" hidden><div class="onb-center">
+          ${title('Así es Folia', 'Tu libreta de demostración ya está en la biblioteca, en «Ejemplos». Ábrela y tócalo todo.')}
+          <div class="onb-row">${glass(`${icon('rotate')} Ver otra vez`, 'film-again', false)}${glass(`${icon('book')} Abrir la libreta`, 'film-open', false)}${glass(`Continuar ${arrow}`, 'film-done', true)}</div></div></div></div>`;
     }
     // Final
     return `<canvas class="onb-confetti" aria-hidden="true"></canvas><div class="onb-center">
       <div class="onb-seal" aria-hidden="true"><svg viewBox="0 0 24 24"><defs><linearGradient id="onb-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#34C759"/><stop offset="1" stop-color="#32D2FF"/></linearGradient></defs>
         <path fill="url(#onb-g)" d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z"/>
         <path d="m9 12 2 2 4-4" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-      ${title(name ? `¡Todo listo, ${name}!` : '¡Todo listo!', 'Puedes volver a ver el tutorial cuando quieras desde + › Ver el tutorial.')}
-      <div class="onb-row">${glass('Ir a mis libretas', 'library', false)}${glass(`${icon('plus')} Crear mi primera libreta`, 'create', true)}</div></div>`;
+      ${title(name ? `¡Todo listo, ${name}!` : '¡Todo listo!', 'Vuelve a verlo cuando quieras: ⚙︎ Ajustes o ⋯ › Tutorial (todo, novedades o un capítulo).')}
+      <div class="onb-row">${glass('Ir a mis libretas', 'library', false)}${OnbFilm.nbId ? '' : glass(`${icon('book')} Ver la libreta de demostración`, 'film', false)}${glass(`${icon('plus')} Crear mi primera libreta`, 'create', true)}</div></div>`;
   },
   lessons() { return ONB_TOPICS.filter((t) => this.selected.has(t.id)); },
   /** Al cambiar de idioma: la lección (que lleva tu nombre y tus atajos) se vuelve a escribir. */
@@ -14892,7 +16302,7 @@ const Onboarding = {
     const fresh = document.createElement('div');
     fresh.innerHTML = this.html(this.stage);
     const copy = st.querySelector('.onb-copy'), next = fresh.querySelector('.onb-copy');
-    if (copy && next) { next.classList.add('instant'); copy.replaceWith(next); }
+    if (copy && next) { next.classList.add('instant'); next.querySelector('.onb-show').hidden = copy.querySelector('.onb-show')?.hidden ?? true; copy.replaceWith(next); }
     st.querySelectorAll('.onb-nav .onb-glass').forEach((b, i) => { const nb = fresh.querySelectorAll('.onb-nav .onb-glass')[i]; if (nb) b.innerHTML = nb.innerHTML; });
   },
   after(stage, st) {
@@ -14909,17 +16319,85 @@ const Onboarding = {
     }
     if (stage === 'ask') setTimeout(() => st.querySelector('[data-onb="yes"]')?.focus({ preventScroll: true }), 300);
     if (stage === 'topics') this.refreshTopics(st);
-    if (stage.startsWith('lesson:')) this.startDemo(st, this.lessons()[Number(stage.slice(7))]);
+    if (stage.startsWith('lesson:')) {
+      const topic = this.lessons()[Number(stage.slice(7))];
+      st.querySelector('.onb-show').hidden = !this.target(topic);
+      this.startDemo(st, topic);
+    }
     if (stage === 'done') this.startConfetti(st.querySelector('.onb-confetti'));
+    if (stage === 'film') this.playFilm(st);
+  },
+  /** La libreta de demostración: se crea entera y se enseña cómo se «escribe». Sin animaciones: se crea y se abre. */
+  playFilm(st = this.el?.querySelector('.onb-stage:not(.out)')) {
+    if (!st) return;
+    if (onbReduce()) { OnbFilm.ensure(); return this.act('film-open'); }
+    const end = st.querySelector('.onb-film-end'), cap = st.querySelector('.onb-film-cap'), bar = st.querySelector('.onb-film-bar i');
+    end.hidden = true; st.querySelector('.onb-film-skip').hidden = false;
+    OnbFilm.play(st.querySelector('.onb-film-cv'), {
+      speed: this.filmSpeed, at: this.filmAt, freeze: this.filmFreeze,
+      onStep: (i, text) => { cap.textContent = text; cap.classList.remove('in'); void cap.offsetWidth; cap.classList.add('in'); },
+      onProgress: (p) => { bar.style.width = `${(p * 100).toFixed(1)}%`; },
+      onEnd: () => this.filmEnd(st),
+    });
+  },
+  filmEnd(st = this.el?.querySelector('.onb-stage:not(.out)')) {
+    OnbFilm.stop();
+    if (!st?.querySelector('.onb-film-end')) return;
+    st.querySelector('.onb-film-end').hidden = false;
+    st.querySelector('.onb-film-skip').hidden = true;
+    setTimeout(() => st.querySelector('[data-onb="film-done"]')?.focus({ preventScroll: true }), 50);
   },
   refreshTopics(st = this.el?.querySelector('.onb-stage:not(.out)')) {
     if (!st) return;
     const n = this.selected.size, all = n === ONB_TOPICS.length;
     st.querySelectorAll('[data-topic]').forEach((b) => b.setAttribute('aria-pressed', this.selected.has(b.dataset.topic)));
+    st.querySelectorAll('[data-chap]').forEach((b) => b.setAttribute('aria-pressed', this.chapterTopics(b.dataset.chap).every((t) => this.selected.has(t.id))));
     st.querySelector('[data-onb="all"]').textContent = all ? 'Quitar todo' : 'Seleccionar todo';
     st.querySelector('[data-onb="begin"]').innerHTML = `${n ? `Empezar · ${n} ${n === 1 ? 'tema' : 'temas'}` : 'Terminar'} <span class="onb-arrow">${icon('chevronRight')}</span>`;
   },
+
+  // ---------- «Muéstramelo»: señala en la app el botón del que habla la lección ----------
+  /** El botón del tema en la pantalla de detrás (si está; dentro de «Más» también vale). */
+  target(topic) {
+    const view = S.view === 'editor' ? 'editor' : 'library';
+    for (const u of topic?.ui || []) {
+      const m = u.match(/^(editor|library)(?:@(\w+))?:(.+)$/);
+      if (!m || m[1] !== view || (m[2] && m[2] !== S.tool)) continue;
+      const el = document.querySelector(m[3]);
+      if (el && !el.closest('.onb') && (el.closest('.opt-more-pop') || el.getClientRects().length)) return el;
+    }
+    return null;
+  },
+  point(topic) {
+    const el = this.target(topic);
+    if (!el || !this.el) return;
+    this.unpoint?.();
+    // Si el botón se ha ido a «Más» (barra estrecha), se abre «Más» para que se vea.
+    const inMore = !!el.closest('.opt-more-pop');
+    if (inMore && typeof setOptMore === 'function') setOptMore(true);
+    this.el.classList.add('peek');
+    const r = el.getBoundingClientRect(), ring = document.createElement('div');
+    ring.className = 'onb-ring';
+    ring.style.cssText = `left:${r.left - 6}px;top:${r.top - 6}px;width:${r.width + 12}px;height:${r.height + 12}px`;
+    document.body.appendChild(ring);
+    const timer = setTimeout(() => this.unpoint?.(), 3600);
+    this.unpoint = () => {
+      this.unpoint = null;
+      clearTimeout(timer); ring.remove();
+      if (inMore && typeof setOptMore === 'function') setOptMore(false);
+      this.el?.classList.remove('peek');
+      this.el?.querySelector('[data-onb="show"]')?.focus({ preventScroll: true });
+    };
+  },
+
   onClick(e) {
+    if (this.el.classList.contains('peek')) return this.unpoint?.();   // un toque en cualquier sitio vuelve
+    const chap = e.target.closest('[data-chap]');
+    if (chap) {
+      const list = this.chapterTopics(chap.dataset.chap), on = list.every((t) => this.selected.has(t.id));
+      list.forEach((t) => (on ? this.selected.delete(t.id) : this.selected.add(t.id)));
+      return this.refreshTopics();
+    }
     const topic = e.target.closest('[data-topic]');
     if (topic) {
       const id = topic.dataset.topic;
@@ -14939,14 +16417,22 @@ const Onboarding = {
     if (a === 'yes') return this.go('topics');
     if (a === 'no') return this.finish(false);
     if (a === 'all') { this.selected = this.selected.size === ONB_TOPICS.length ? new Set() : new Set(ONB_TOPICS.map((t) => t.id)); return this.refreshTopics(); }
+    if (a === 'news') { this.selected = new Set(this.newsTopics().map((t) => t.id)); return this.go('lesson:0'); }
     if (a === 'begin') return this.go(this.selected.size ? 'lesson:0' : 'done');
     if (a === 'back') return this.go(lesson === 0 ? 'topics' : `lesson:${lesson - 1}`, false);
-    if (a === 'next') return this.go(lesson + 1 < this.lessons().length ? `lesson:${lesson + 1}` : 'done');
+    if (a === 'next') return this.go(lesson + 1 < this.lessons().length ? `lesson:${lesson + 1}` : this.direct ? 'done' : 'film');
+    if (a === 'film') return this.go('film');
+    if (a === 'film-skip') return this.filmEnd();
+    if (a === 'film-again') return this.playFilm();
+    if (a === 'film-open') { const id = OnbFilm.nbId; this.finish(false); if (id && nbById(id)) setTimeout(() => openNotebook(id), 50); return; }
+    if (a === 'film-done') return this.filmOnly ? this.finish(false) : this.go('done');
+    if (a === 'show') return this.point(this.lessons()[lesson]);
     if (a === 'library') return this.finish(false);
     if (a === 'create') return this.finish(true);
   },
   onKey(e) {
     if (e.target.closest?.('.onb-confirm')) return;
+    if (this.el.classList.contains('peek')) { if (e.key === 'Escape' || e.key === 'Enter' || e.key === ' ') { e.preventDefault(); e.stopPropagation(); this.unpoint?.(); } return; }
     if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); return this.stage === 'done' ? this.finish(false) : this.confirmSkip(); }
     if (this.stage?.startsWith('lesson:') && !e.target.matches('input')) {
       if (e.key === 'ArrowRight') { e.preventDefault(); this.act('next'); }
@@ -14962,7 +16448,7 @@ const Onboarding = {
     const box = document.createElement('div');
     box.className = 'onb-confirm';
     box.innerHTML = `<div class="onb-confirm-card" role="alertdialog" aria-modal="true" aria-labelledby="onb-skip-t">
-      <h2 id="onb-skip-t">¿Omitir el tutorial?</h2><p>Podrás verlo cuando quieras desde + › Ver el tutorial.</p>
+      <h2 id="onb-skip-t">¿Omitir el tutorial?</h2><p>Podrás verlo cuando quieras desde ⚙︎ Ajustes o ⋯ › Tutorial.</p>
       <div class="onb-row"><button class="onb-glass" data-c="stay">Seguir con el tutorial</button><button class="onb-glass prominent" data-c="skip">Omitir</button></div></div>`;
     this.el.appendChild(box);
     const done = () => box.remove();
@@ -14974,7 +16460,6 @@ const Onboarding = {
     box.addEventListener('keydown', (e) => { if (e.key === 'Escape') { e.stopPropagation(); done(); } });
     setTimeout(() => box.querySelector('[data-c="stay"]').focus(), 30);
   },
-
   // ---------- Fondo: aurora con estrellas (30 fotogramas por segundo) ----------
   startAurora() {
     const canvas = this.el.querySelector('.onb-aurora'), ctx = canvas.getContext('2d');
