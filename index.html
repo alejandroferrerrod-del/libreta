@@ -1449,6 +1449,9 @@ body.is-card-dragging .crumbs button { box-shadow: inset 0 0 0 1.5px color-mix(i
 /* Barra de pestañas como Chrome: ⌄ a la izquierda del todo, «+» pegado a la última pestaña */
 .tabs .tab-all { margin: 0 4px 0 6px; flex: none; }
 .tabs .plus { flex: none; margin-left: 4px; }
+
+/* Textos de la app nunca a medias: estos bajan de línea en vez de cortarse con «…» */
+.mean-cname, .cloze-inc small { white-space: normal; overflow: visible; text-overflow: clip; }
 /* =============================================================================
    Tutorial de la primera vez (siempre en oscuro, como en la app nativa)
    ============================================================================= */
@@ -1845,7 +1848,7 @@ I18N.dict.it = {
   'Como la carpeta madre': 'Come la cartella madre', 'Usar el color de la carpeta madre': 'Usa il colore della cartella madre',
   'Nueva carpeta…': 'Nuova cartella…', 'Nueva carpeta aquí…': 'Nuova cartella qui…', 'Nueva carpeta dentro…': 'Nuova cartella dentro…',
   'Importar PDF…': 'Importa PDF…', 'Ajustes': 'Impostazioni', 'Ajustes: apariencia, atajos, copias de seguridad…': 'Impostazioni: aspetto, scorciatoie, backup…',
-  'Idioma': 'Lingua', 'Apariencia': 'Aspetto', 'Automática': 'Automatico', 'Clara': 'Chiaro', 'Oscura': 'Scuro',
+  'Idioma': 'Lingua', 'Apariencia': 'Aspetto', 'Automática': 'Automatico', 'Auto': 'Auto', 'Automática (como el sistema)': 'Automatico (come il sistema)', 'Clara': 'Chiaro', 'Oscura': 'Scuro',
   'Pantalla completa': 'Schermo intero', 'Salir de pantalla completa': 'Esci da schermo intero', 'Atajos de teclado': 'Scorciatoie da tastiera',
   'Atajos de teclado…': 'Scorciatoie da tastiera…', 'Ver el tutorial': 'Guarda il tutorial', 'Copia de seguridad': 'Backup',
   'Guardar copia de seguridad': 'Salva backup', 'Recuperar copia…': 'Ripristina backup…', 'Instalar Folia en este ordenador': 'Installa Folia su questo computer',
@@ -1959,7 +1962,7 @@ I18N.dict.it = {
   'Cambiar el tamaño de la guía (aumento)': 'Cambia le dimensioni della guida (ingrandimento)',
   'Lupa: escribe en el panel de abajo. Al llegar a la derecha, la guía avanza sola': 'Lente: scrivi nel pannello in basso. Arrivando a destra, la guida avanza da sola',
   'Es la última línea de la libreta': "È l'ultima riga del quaderno", 'Elige el bolígrafo o el subrayador para escribir en la lupa': "Scegli la penna o l'evidenziatore per scrivere nella lente",
-  'Formas': 'Forme', 'Para una forma perfecta, al acabar el trazo mantén quieto 1 segundo antes de soltar': 'Per una forma perfetta, alla fine del tratto tieni fermo 1 secondo prima di rilasciare',
+  'Formas': 'Forme', 'Mantén quieto al acabar: forma perfecta': 'Tieni fermo alla fine: forma perfetta', 'Para una forma perfecta, al acabar el trazo mantén quieto 1 segundo antes de soltar': 'Per una forma perfetta, alla fine del tratto tieni fermo 1 secondo prima di rilasciare',
   'Cada trazo se convierte en línea, círculo, rectángulo…': 'Ogni tratto diventa linea, cerchio, rettangolo…', 'Grosor': 'Spessore', 'Otro color': 'Altro colore',
   'Libre': 'Libero', 'Recto': 'Dritto', 'H / V': 'O / V', 'Forma del subrayado': 'Forma dell’evidenziatura', 'Trazo entero': 'Tratto intero', 'Parcial': 'Parziale',
   'Tamaño': 'Dimensione', 'Haz clic en la página para pegar un post-it. Puedes escribir encima con el bolígrafo.': 'Fai clic sulla pagina per attaccare un post-it. Puoi scriverci sopra con la penna.',
@@ -2420,10 +2423,10 @@ function setAppearance(value) {
 }
 applyAppearance();
 /** Selector de Apariencia (menú «…» del editor y Ajustes): tres botones con su icono sobre una mini vista del tema. */
-const APPEARANCES = [['system', 'Automática', 'apSystem'], ['light', 'Clara', 'apLight'], ['dark', 'Oscura', 'apDark']];
+const APPEARANCES = [['system', 'Auto', 'apSystem'], ['light', 'Clara', 'apLight'], ['dark', 'Oscura', 'apDark']];
 function appearanceButtons() {
   const cur = currentAppearance();
-  return `<div class="ap-row" role="group" aria-label="Apariencia">${APPEARANCES.map(([k, n, ic]) => `<button class="ap-btn" data-ap="${k}" aria-pressed="${cur === k}">
+  return `<div class="ap-row" role="group" aria-label="Apariencia">${APPEARANCES.map(([k, n, ic]) => `<button class="ap-btn" data-ap="${k}" aria-pressed="${cur === k}" title="${k === 'system' ? 'Automática (como el sistema)' : n}">
     <span class="ap-tile ap-${k}" aria-hidden="true">${icon(ic)}</span><span class="ap-name">${n}</span></button>`).join('')}</div>`;
 }
 // Un toque cambia el tema al momento y el menú sigue abierto (como los botones de idioma).
@@ -8166,7 +8169,8 @@ function hideShortHints(el) {
   for (const h of el.querySelectorAll(':scope > .hint')) {
     if (!h.title) h.title = h.textContent.trim();
     h.hidden = false;
-    if (h.clientWidth < 110 && h.scrollWidth > h.clientWidth) h.hidden = true;
+    // Nunca a medias («…»): si no cabe entera, la ayuda se esconde (queda como ayuda emergente de la barra).
+    if (h.scrollWidth > h.clientWidth + 1) h.hidden = true;
   }
 }
 /** Coloca el menú «Más» bajo su botón (o lo esconde). */
@@ -8245,7 +8249,7 @@ function renderOptions() {
       <div class="sep"></div>${colorRow('pen', S.penColor)}<div class="sep"></div>
       ${widthControl('pen-width', 1, 14, 0.5, S.penWidth, S.penColor)}
       ${optGroup(2, `<div class="sep"></div><button class="pill-toggle" data-act="shapes" aria-pressed="${S.penShapes}">${icon('shapes')} Formas</button>${shapesMenuButton()}`)}${ZoomWin.barBtn()}
-      <span class="hint">${S.penShapes ? 'Cada trazo se convierte en línea, círculo, rectángulo…' : 'Para una forma perfecta, al acabar el trazo mantén quieto 1 segundo antes de soltar'}</span>`;
+      <span class="hint">${S.penShapes ? 'Cada trazo se convierte en línea, círculo, rectángulo…' : 'Mantén quieto al acabar: forma perfecta'}</span>`;
   } else if (S.tool === 'highlighter') {
     html = Tape.drawing ? Tape.hlBarHtml() : `${colorRow('highlighter', S.hlColor)}<div class="sep"></div>
       ${widthControl('hl-width', 8, 40, 1, S.hlWidth, S.hlColor)}
