@@ -1177,6 +1177,58 @@ body.is-card-dragging .crumbs button { box-shadow: inset 0 0 0 1.5px color-mix(i
 .safety-pop .storage-line b.ok { color: var(--safe-ok); }
 .safety-pop .storage-line b.warn { color: var(--safe-warn); }
 .safety-pop .sp-tip { margin: 2px 0 0; color: var(--muted); font-size: 12.5px; line-height: 1.35; }
+
+/* ---------- Barra de opciones compacta (2026-10-20): mismos tamaños, iconos y lo secundario en «Más» ---------- */
+.options { gap: 8px; }
+.options > *, .options .ogrp > *, .options .item-acts > * { flex: none; }
+.options .ogrp { display: inline-flex; align-items: center; gap: 8px; flex: none; }
+.options .item-acts { align-items: center; }
+.options .item-acts .ogrp { gap: 2px; }
+.options .icon-btn { width: 34px; height: 34px; border-radius: 9px; position: relative; }
+.options .icon-btn svg { width: 20px; height: 20px; }
+.options .btn { height: 34px; border-radius: 9px; padding: 0 12px; }
+.options .pill-toggle { height: 34px; padding: 0 12px; }
+.options .menu-btn { height: 34px; border-radius: 9px; }
+.options .seg { height: 34px; align-items: stretch; border-radius: 9px; }
+.options .seg button { padding: 0 10px; }
+.options select { height: 34px; border-radius: 9px; max-width: 150px; }
+.options select:hover { background: var(--fill); }
+.options .range input[type="range"] { width: 110px; }
+.options .hint { flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.options .opt-field { border: 1px solid var(--line); border-radius: 9px; padding: 0 10px; height: 34px; background: var(--surface-2); width: 170px; }
+.options .opt-label { display: inline-flex; align-items: center; gap: 6px; max-width: 260px; overflow: hidden; text-overflow: ellipsis; }
+.options .opt-label svg { width: 16px; height: 16px; flex: none; }
+/* Tamaño «− 20 pt +»: más estrecho y bajo; el número abre el menú «Tamaño». */
+.options .size-seg { height: 30px; }
+.options .size-seg button { padding: 0 8px; font-size: 15px; }
+.options .seg .size-btn { min-width: 40px; padding: 0 4px; gap: 1px; font-size: 13.5px; font-weight: 600; }
+.options .size-btn small { font-size: 10.5px; font-weight: 500; color: var(--muted); }
+.options .bius button { min-width: 32px; justify-content: center; padding: 0 6px; font-size: 15px; }
+.options .align-seg button { padding: 0 7px; }
+.options .align-seg svg { width: 17px; height: 17px; }
+/* «Resaltar»: el rotulador y debajo el color con el que marca (como las herramientas de arriba). */
+.options .mark-btn svg { transform: translateY(-2px); color: var(--ink); }
+.options .mark-btn .ink-bar { position: absolute; left: 8px; right: 8px; bottom: 4px; height: 4px; border-radius: 2px; background: var(--c); box-shadow: inset 0 0 0 .5px var(--sep); }
+/* «Predeterminar»: la estrella se rellena cuando este ya es el estilo de los textos nuevos. */
+.options .def-btn[aria-pressed="true"] { background: var(--accent-soft); }
+.options .def-btn[aria-pressed="true"] .star { fill: currentColor; }
+/* Botón «Más»: siempre a la derecha, visible aunque la barra se desplace (en el móvil). */
+.opt-more-btn { margin-left: auto; position: sticky; right: 0; z-index: 1; height: 34px; border: 0; border-radius: 9px; padding: 0 12px 0 9px;
+  display: inline-flex; align-items: center; gap: 5px; background: linear-gradient(var(--fill), var(--fill)) var(--bar); color: var(--accent); font-size: 14px; font-weight: 500; flex: none;
+  box-shadow: -12px 0 10px -2px var(--bar); }
+.opt-more-btn svg { width: 20px; height: 20px; }
+.opt-more-btn[aria-expanded="true"] { background: var(--accent); color: var(--accent-ink); }
+.opt-more-pop { position: fixed; z-index: 50; display: flex; flex-direction: column; align-items: stretch; gap: 6px; padding: 8px; min-width: 220px; max-width: calc(100vw - 16px);
+  overflow: auto; white-space: nowrap; background: var(--surface); border: 1px solid var(--hairline); border-radius: 14px; box-shadow: var(--shadow); animation: pop .12s ease-out; }
+.opt-more-pop .ogrp { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 2px 0; }
+.opt-more-pop .ogrp + .ogrp { border-top: 1px solid var(--hairline); padding-top: 8px; }
+.opt-more-pop .sep { display: none; }
+.opt-more-pop select { max-width: none; }
+/* En «Más», los botones de icono dicen también su nombre (el de aria-label, ya traducido). */
+.opt-more-pop .ogrp.list, .opt-more-pop .ogrp:has(> .icon-btn:only-child) { flex-direction: column; align-items: stretch; gap: 2px; }
+.opt-more-pop .icon-btn { width: auto; justify-content: start; display: flex; align-items: center; gap: 10px; padding: 0 12px 0 8px; color: var(--ink); }
+.opt-more-pop .icon-btn svg { color: var(--accent); }
+.opt-more-pop .icon-btn::after { content: attr(aria-label); font-size: 14px; }
 /* =============================================================================
    Tutorial de la primera vez (siempre en oscuro, como en la app nativa)
    ============================================================================= */
@@ -1417,7 +1469,12 @@ const ICONS = {
  "palStroke": "<g transform=\"translate(.2 .2) scale(.78)\" stroke-width=\"2.25\"><path d=\"M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z\"/><circle cx=\"8.5\" cy=\"7.5\" r=\"2.1\" fill=\"#E0362C\" stroke=\"none\"/><circle cx=\"13.5\" cy=\"6.5\" r=\"2.1\" fill=\"#F5A524\" stroke=\"none\"/><circle cx=\"17.5\" cy=\"10.5\" r=\"2.1\" fill=\"#2E9E4F\" stroke=\"none\"/><circle cx=\"6.5\" cy=\"12.5\" r=\"2.1\" fill=\"#1E5BD8\" stroke=\"none\"/></g><path d=\"M12.6 20.6c1.4-2.6 2.8-3 3.7-1.2s2.3 1.8 3.7-1\" stroke-width=\"1.8\"/><path d=\"M20.6 10.2l.55 1.55 1.55.55-1.55.55-.55 1.55-.55-1.55-1.55-.55 1.55-.55z\" fill=\"currentColor\" stroke-width=\"1\"/><circle cx=\"22.4\" cy=\"16.2\" r=\".8\" fill=\"currentColor\" stroke=\"none\"/>",
  "apSystem": "<path d=\"M12 6.5a5.5 5.5 0 0 0 0 11z\" class=\"ap-day\"/><path d=\"M12 6.5a5.5 5.5 0 0 1 0 11z\" class=\"ap-night\" fill=\"currentColor\"/><g class=\"ap-day\"><path d=\"M12 2v2\"/><path d=\"M12 20v2\"/><path d=\"M2 12h2\"/><path d=\"m4.93 4.93 1.41 1.41\"/><path d=\"m4.93 19.07 1.41-1.41\"/></g><g class=\"ap-night\" fill=\"currentColor\" stroke=\"none\"><path d=\"M19.2 4.3l.45 1.25 1.25.45-1.25.45-.45 1.25-.45-1.25-1.25-.45 1.25-.45z\"/><circle cx=\"20.6\" cy=\"16.8\" r=\".9\"/></g>",
  "apLight": "<circle cx=\"12\" cy=\"12\" r=\"4.2\" class=\"ap-day\" fill=\"currentColor\" fill-opacity=\".18\"/><g class=\"ap-day\"><path d=\"M12 2v2\"/><path d=\"M12 20v2\"/><path d=\"m4.93 4.93 1.41 1.41\"/><path d=\"m17.66 17.66 1.41 1.41\"/><path d=\"M2 12h2\"/><path d=\"M20 12h2\"/><path d=\"m6.34 17.66-1.41 1.41\"/><path d=\"m19.07 4.93-1.41 1.41\"/></g>",
- "apDark": "<path d=\"M11.5 3.2a6.6 6.6 0 0 0 9.3 9.3A8.9 8.9 0 1 1 11.5 3.2z\" class=\"ap-night\" fill=\"currentColor\" fill-opacity=\".18\"/><g class=\"ap-night\" fill=\"currentColor\" stroke=\"none\"><path d=\"M17.6 3.4l.6 1.7 1.7.6-1.7.6-.6 1.7-.6-1.7-1.7-.6 1.7-.6z\"/><path d=\"M21.3 8.6l.35.95.95.35-.95.35-.35.95-.35-.95-.95-.35.95-.35z\"/><circle cx=\"14.6\" cy=\"8.7\" r=\".75\"/></g>"
+ "apDark": "<path d=\"M11.5 3.2a6.6 6.6 0 0 0 9.3 9.3A8.9 8.9 0 1 1 11.5 3.2z\" class=\"ap-night\" fill=\"currentColor\" fill-opacity=\".18\"/><g class=\"ap-night\" fill=\"currentColor\" stroke=\"none\"><path d=\"M17.6 3.4l.6 1.7 1.7.6-1.7.6-.6 1.7-.6-1.7-1.7-.6 1.7-.6z\"/><path d=\"M21.3 8.6l.35.95.95.35-.95.35-.35.95-.35-.95-.95-.35.95-.35z\"/><circle cx=\"14.6\" cy=\"8.7\" r=\".75\"/></g>",
+ // Dibujados a mano (2026-10-20): barra de opciones compacta.
+ "zoomIn": "<circle cx=\"10.5\" cy=\"10.5\" r=\"6.5\"/><path d=\"m15.5 15.5 5 5\"/><path d=\"M10.5 7.8v5.4\"/><path d=\"M7.8 10.5h5.4\"/>",
+ "textDefault": "<path d=\"M3 20 8.5 6 14 20\"/><path d=\"M5.2 14.6h6.6\"/><path class=\"star\" d=\"M18 2.5l1.18 2.88 3.1.23-2.38 2.01.75 3.02L18 9l-2.65 1.64.75-3.02-2.38-2.01 3.1-.23z\" stroke-width=\"1.5\"/>",
+ "boxBg": "<rect x=\"4\" y=\"4\" width=\"16\" height=\"16\" rx=\"3.5\"/><rect x=\"7.5\" y=\"7.5\" width=\"9\" height=\"9\" rx=\"1.5\" fill=\"currentColor\" fill-opacity=\".28\" stroke=\"none\"/>",
+ "dots": "<circle cx=\"5.5\" cy=\"12\" r=\"1.6\" fill=\"currentColor\" stroke=\"none\"/><circle cx=\"12\" cy=\"12\" r=\"1.6\" fill=\"currentColor\" stroke=\"none\"/><circle cx=\"18.5\" cy=\"12\" r=\"1.6\" fill=\"currentColor\" stroke=\"none\"/>",
 };
 const icon = (name, extra = '') => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" ${extra}>${ICONS[name] || ''}</svg>`;
 
@@ -1668,9 +1725,15 @@ I18N.dict.it = {
   'Haz clic en la página para escribir.': 'Fai clic sulla pagina per scrivere.', 'Rodea trazos para seleccionarlos': 'Circonda i tratti per selezionarli',
   'Dibuja un recuadro sobre lo escrito a mano para enlazarlo': 'Disegna un riquadro sopra lo scritto a mano per collegarlo',
   'Tipo de letra': 'Carattere', 'Sistema': 'Sistema', 'Serif': 'Serif', 'Manuscrita': 'Manoscritta', 'Mono': 'Mono',
-  'Letra más grande': 'Testo più grande', 'Letra más pequeña': 'Testo più piccolo', 'Tamaño de letra': 'Dimensione del testo', 'Tamaños rápidos': 'Dimensioni rapide', 'Menos': 'Meno', 'Más': 'Più',
+  'Letra más grande': 'Testo più grande', 'Letra más pequeña': 'Testo più piccolo', 'Tamaño de letra': 'Dimensione del testo', 'Tamaños rápidos': 'Dimensioni rapide', 'Menos': 'Meno', 'Más': 'Altro', 'Disminuir': 'Diminuisci', 'Aumentar': 'Aumenta',
   'Negrita': 'Grassetto', 'Cursiva': 'Corsivo', 'Subrayado': 'Sottolineato', 'Tachado': 'Barrato', 'Resaltar ▾': 'Evidenzia ▾', 'Fondo ▾': 'Sfondo ▾',
   'Sin resaltar': 'Senza evidenziatura', 'Amarillo': 'Giallo', 'Verde': 'Verde', 'Azul': 'Blu', 'Rosa': 'Rosa', 'Naranja': 'Arancione', 'Sin fondo': 'Senza sfondo', 'Borde': 'Bordo',
+  // Barra de opciones compacta (iconos y menú «Más»)
+  'Ampliar: acercar el post-it para escribir en él': 'Ingrandisci: avvicina il post-it per scriverci sopra', 'Resaltar': 'Evidenzia',
+  'Resaltar: color de fondo de las letras': 'Evidenzia: colore di sfondo del testo', 'Estilo predeterminado': 'Stile predefinito',
+  'Los textos nuevos ya tienen este estilo': 'I testi nuovi hanno già questo stile', 'Predeterminar: usar este estilo en todos los textos nuevos': 'Predefinito: usa questo stile in tutti i testi nuovi',
+  'Fondo y borde': 'Sfondo e bordo', 'Fondo y borde del cuadro': 'Sfondo e bordo del riquadro', 'Imagen': 'Immagine', 'Más opciones de esta barra': 'Altre opzioni di questa barra',
+  'Alineación': 'Allineamento', 'pt': 'pt',
   'Predeterminar': 'Predefinito', 'Los textos nuevos tendrán este estilo': 'I testi nuovi avranno questo stile', 'Color de fondo de las letras': 'Colore di sfondo del testo',
   'Alinear a la izquierda': 'Allinea a sinistra', 'Centrar': 'Centra', 'Alinear a la derecha': 'Allinea a destra',
   'Insertar una imagen donde está el cursor': 'Inserisci un’immagine dove si trova il cursore', 'Enlazar el texto seleccionado con otra libreta o página': 'Collega il testo selezionato a un altro quaderno o pagina',
@@ -4945,7 +5008,7 @@ const Pomo = {
     const ring = 2 * Math.PI * 64, progress = Math.min(1, Math.max(0, this.progress()));
     const status = this.paused ? 'En pausa' : this.running ? 'quedan' : `${Math.round(this.duration(st.phase) / 60)} min`;
     const stepper = (key, label, min, max, step) => `<div class="pomo-row"><span>${label}: <b>${s[key]}${key === 'sessionsBeforeLongBreak' ? '' : ' min'}</b></span>
-      <span class="stepper"><button data-step="${key}" data-d="${-step}" data-min="${min}" data-max="${max}" aria-label="Menos">${icon('minus')}</button><button data-step="${key}" data-d="${step}" data-min="${min}" data-max="${max}" aria-label="Más">${icon('plus')}</button></span></div>`;
+      <span class="stepper"><button data-step="${key}" data-d="${-step}" data-min="${min}" data-max="${max}" aria-label="Disminuir">${icon('minus')}</button><button data-step="${key}" data-d="${step}" data-min="${min}" data-max="${max}" aria-label="Aumentar">${icon('plus')}</button></span></div>`;
     panel.innerHTML = `
       <div class="pomo-title" style="color:${p.color}">${this.fresh ? `${p.title} · listo para empezar` : p.title}</div>
       <div class="pomo-ring">
@@ -5377,7 +5440,7 @@ function liveReorder(container, selector, { onDrop, onOutside, onTarget, onMove,
     const from = items.indexOf(el);
     const scrollEl = (typeof scroller === 'function' ? scroller() : scroller) || container;
     const start = { x: e.clientX, y: e.clientY, scroll: scrollEl.scrollTop, scrollX: scrollEl.scrollLeft };
-    let dragging = false, to = from, last = e, autoscroll = 0, ghost = null, g0 = null, lay0 = null, applied = [0, 0];
+    let dragging = false, to = from, last = e, autoscroll = 0, ghost = null, g0 = null, lay0 = null, applied = [0, 0], yRange = null;
     // Desplazamiento de la copia flotante, sin salirse del scroller.
     const ghostX = () => {
       const b = scrollEl.getBoundingClientRect(), tx = last.clientX - start.x;
@@ -5398,6 +5461,7 @@ function liveReorder(container, selector, { onDrop, onOutside, onTarget, onMove,
         if (axis !== 'y') dx = last.clientX - start.x + lay0.left - lx;
         if (axis !== 'x') dy = last.clientY - start.y + lay0.top - ly;
       }
+      if (yRange && axis !== 'x') dy = Math.max(yRange[0], Math.min(yRange[1], dy));
       applied = [dx, dy];
       if (ghost) ghost.style.transform = `translate(${axis === 'y' ? 0 : ghostX()}px, ${axis === 'x' ? 0 : last.clientY - start.y}px)`;
       else el.style.transform = `translate(${dx}px, ${dy}px)`;
@@ -5425,6 +5489,10 @@ function liveReorder(container, selector, { onDrop, onOutside, onTarget, onMove,
       // Casillas en coordenadas de la ventana al empezar (la diferencia de scroll se suma al puntero).
       slots = items.map((x) => { const r = x.getBoundingClientRect(); return { left: r.left, top: r.top, width: r.width, height: r.height, bottom: r.bottom }; });
       lay0 = { left: slots[from].left, top: slots[from].top };
+      // Tope vertical: lo arrastrado no baja de lo último ni sube de lo primero del contenido. Sin él, al bajar alargaba la
+      // zona desplazable, el autodesplazamiento la seguía y la lista bajaba sin fin (vacía).
+      const sr = scrollEl.getBoundingClientRect(), top0 = slots[from].top - sr.top + scrollEl.scrollTop;
+      yRange = [-top0, Math.max(0, scrollEl.scrollHeight - slots[from].height - top0)];
       items.forEach((x) => { if (x !== el) x.classList.add('reorder-shift'); });
       el.classList.add('reordering');
       el.style.pointerEvents = 'none';   // para saber qué hay debajo del puntero
@@ -6464,12 +6532,12 @@ function renderEditor() {
         ${TOOLS.map(([t, n]) => toolButton(t, n)).join('')}
         <button class="icon-btn" id="add-image" aria-label="Insertar imagen" title="Insertar imagen (también puedes pegarla o arrastrarla)">${icon('image')}</button>
       </div>
+      ${paletteButton()}
       <button class="reading-pill" id="reading-pill" title="Salir del modo lectura">${icon('penOff')}<span>Modo lectura</span><b>Salir</b></button>
       <div class="spacer"></div>
       <div class="cluster" aria-label="Estudio"><span id="pomo-slot" class="pomo-slot"></span><span id="mic-slot" class="mic-slot"></span></div>
       <span class="bar-sep" aria-hidden="true"></span>
       <div class="cluster" aria-label="Deshacer">
-        ${paletteButton()}
         <button class="icon-btn" id="undo" aria-label="Deshacer" title="Deshacer (${onbKey('undo')})">${icon('undo')}</button>
         <button class="icon-btn" id="redo" aria-label="Rehacer" title="Rehacer (${onbKey('redo')})">${icon('redo')}</button></div>
       <span class="bar-sep" aria-hidden="true"></span>
@@ -7052,7 +7120,7 @@ function pageMenu(anchor) {
   });
   if (openPopover) bindSubmenus(openPopover.el);
 }
-// ---------- Botón «Paleta flotante» de la barra (junto a Deshacer: la paleta también lleva deshacer y rehacer) ----------
+// ---------- Botón «Paleta flotante» de la barra (justo después de las herramientas: la paleta las lleva consigo) ----------
 /** Icono, nombre (para la etiqueta) y explicación de cada modo de la paleta (PALETTE_MODES en palette.js). */
 const PALETTE_UI = {
   off: { icon: 'palOff', label: 'Paleta flotante: desactivada', hint: 'Las herramientas, solo en la barra de arriba.' },
@@ -7234,15 +7302,96 @@ function widthControl(id, min, max, step, value, color) {
   return `<div class="width-dots" style="--c:${color}">${presets.map((w) => `<button data-act="width" data-for="${id}" data-v="${w}" aria-label="Grosor ${w}" aria-pressed="${Math.abs(value - w) < step / 2}"><span style="width:${dot(w)}px;height:${dot(w)}px"></span></button>`).join('')}</div>
     <label class="range" for="${id}"><input id="${id}" type="range" min="${min}" max="${max}" step="${step}" value="${value}" aria-label="Grosor"> <span>${Number(value).toFixed(1).replace('.', ',')}</span></label>`;
 }
+// ---------- Barra de opciones compacta: iconos con su nombre al pasar el ratón y lo secundario en «Más» ----------
+/** Grupo que, si la barra no cabe, pasa al menú «Más». Cuanto menor `p`, antes se va (y el de más a la derecha antes). */
+const optGroup = (p, html, cls = '') => `<span class="ogrp${cls ? ' ' + cls : ''}" data-more="${p}">${html}</span>`;
+/** Botón de icono de la barra. En «Más» enseña también su nombre (sale de aria-label, ya traducido). */
+const optBtn = (act, ic, name, key = '', title = name, attrs = '') =>
+  `<button class="icon-btn" data-act="${act}" aria-label="${name}" title="${title}${key ? ` (${key})` : ''}"${attrs ? ' ' + attrs : ''}>${icon(ic)}</button>`;
 /** Acciones del elemento seleccionado, con iconos (el nombre y el atajo salen al pasar el ratón). */
 const itemActions = (layer = true) => {
   const mod = IS_MAC ? '⌘' : 'Ctrl+';
-  const b = (act, ic, name, key = '') => `<button class="icon-btn" data-act="${act}" aria-label="${name}" title="${name}${key ? ` (${key})` : ''}">${icon(ic)}</button>`;
   return `<div class="sep"></div><span class="item-acts">
-    ${b('copy', 'copy', 'Copiar', mod + 'C')}${b('cut', 'cut', 'Cortar', mod + 'X')}${b('duplicate', 'duplicate', 'Duplicar')}
-    ${layer ? b('front', 'toFront', 'Traer al frente') + b('back', 'toBack', 'Enviar atrás') : ''}
-    ${b('delete', 'trash', 'Eliminar', 'Supr')}</span>`;
+    ${optGroup(2, optBtn('copy', 'copy', 'Copiar', mod + 'C') + optBtn('cut', 'cut', 'Cortar', mod + 'X') + optBtn('duplicate', 'duplicate', 'Duplicar'), 'list')}
+    ${layer ? optGroup(0, optBtn('front', 'toFront', 'Traer al frente') + optBtn('back', 'toBack', 'Enviar atrás'), 'list') : ''}
+    ${optBtn('delete', 'trash', 'Eliminar', 'Supr')}</span>`;
 };
+/** Estado del menú «Más» de la barra: abierto o no, y para qué barra (al cambiar de herramienta o de elemento se cierra). */
+const OptMore = { open: false, key: '' };
+const optMoreKey = (item) => [S.tool, item?.id || '', S.editing ? 'e' : '', S.lasso ? 'l' : '', S.reading ? 'r' : ''].join('|');
+/** Si la barra no cabe, pasa a «Más» los grupos secundarios (data-more) hasta que quepa; las ayudas se acortan antes. */
+function fitOptions(el, item) {
+  const key = optMoreKey(item);
+  if (key !== OptMore.key) { OptMore.key = key; OptMore.open = false; }
+  if (!el.clientWidth) return;   // barra oculta (modo lectura): se ajusta al volver a enseñarse
+  const fits = () => { tidyOptions(el); return el.scrollWidth <= el.clientWidth + 1; };
+  const groups = [...el.querySelectorAll('[data-more]')];
+  if (fits() || !groups.length) return hideShortHints(el);
+  groups.forEach((g, i) => { g.dataset.i = i; });
+  el.insertAdjacentHTML('beforeend', `<button class="opt-more-btn" data-more-btn aria-haspopup="true" aria-expanded="false" aria-label="Más opciones de esta barra" title="Más opciones de esta barra">${icon('dots')}<span>Más</span></button>
+    <div class="opt-more-pop" role="group" aria-label="Más opciones de esta barra" hidden></div>`);
+  const pop = el.querySelector('.opt-more-pop');
+  const order = groups.slice().sort((a, b) => a.dataset.more - b.dataset.more || b.dataset.i - a.dataset.i);
+  for (const g of order) {
+    if (fits()) break;
+    pop.append(g);
+  }
+  [...pop.children].sort((a, b) => a.dataset.i - b.dataset.i).forEach((g) => pop.append(g));   // en «Más», en el orden de la barra
+  tidyOptions(el);
+  hideShortHints(el);
+  placeOptMore(el);
+}
+/** Separadores: ni dos seguidos, ni al principio, ni al final (cuando un grupo se ha ido a «Más»). */
+function tidyOptions(el) {
+  const kids = [...el.children].filter((k) => !k.matches('.opt-more-pop, .opt-more-btn'));
+  const shown = (k) => !k.hidden && (k.childElementCount || k.textContent.trim() || k.matches('button, input, select, label'));
+  let prevSep = true;
+  for (const k of kids) {
+    if (k.classList.contains('sep')) { k.hidden = prevSep; prevSep = true; } else if (shown(k)) prevSep = false;
+  }
+  for (let i = kids.length - 1; i >= 0 && !(shown(kids[i]) && !kids[i].classList.contains('sep')); i--) kids[i].classList.contains('sep') && (kids[i].hidden = true);
+}
+/** Una ayuda que se ha quedado en casi nada no se enseña (sigue en su title). */
+function hideShortHints(el) {
+  for (const h of el.querySelectorAll(':scope > .hint')) {
+    if (!h.title) h.title = h.textContent.trim();
+    h.hidden = false;
+    if (h.clientWidth < 110 && h.scrollWidth > h.clientWidth) h.hidden = true;
+  }
+}
+/** Coloca el menú «Más» bajo su botón (o lo esconde). */
+function placeOptMore(el) {
+  const btn = el.querySelector('.opt-more-btn'), pop = el.querySelector('.opt-more-pop');
+  if (!btn || !pop) return;
+  pop.hidden = !OptMore.open;
+  btn.setAttribute('aria-expanded', OptMore.open);
+  if (!OptMore.open) return;
+  const r = btn.getBoundingClientRect();
+  pop.style.top = r.bottom + 6 + 'px';
+  pop.style.maxHeight = Math.max(160, innerHeight - r.bottom - 18) + 'px';
+  pop.style.left = Math.max(8, Math.min(innerWidth - pop.offsetWidth - 8, r.right - pop.offsetWidth)) + 'px';
+}
+function setOptMore(open) {
+  OptMore.open = open;
+  const el = $('#options');
+  if (el) placeOptMore(el);
+}
+/** Un toque fuera del menú «Más» (y fuera de los menús que abre) lo cierra; también Escape. */
+addEventListener('pointerdown', (e) => {
+  if (OptMore.open && !e.target.closest?.('.opt-more-pop, .opt-more-btn, .popover, .scrim')) setOptMore(false);
+}, true);
+addEventListener('keydown', (e) => { if (e.key === 'Escape' && OptMore.open) setOptMore(false); });
+/** Al cambiar el ancho de la ventana (girar el iPad), la barra se vuelve a repartir. */
+let optResizeTimer = 0;
+addEventListener('resize', () => { clearTimeout(optResizeTimer); optResizeTimer = setTimeout(() => { if (S.view === 'editor') renderOptions(); }, 150); });
+/** Clic en la barra (o en su «Más»). Tras una acción que no es de marcar o elegir, «Más» se cierra. */
+function onOptionsBarClick(e) {
+  if (e.target.closest('[data-more-btn]')) return setOptMore(!OptMore.open);
+  const inMore = e.target.closest('.opt-more-pop'), b = e.target.closest('button');
+  if (!onCommentSizeClick(e) && !InkColors.onClick(e)) onOptionsClick(e);
+  const keep = !b || b.hasAttribute('aria-pressed') || b.closest('.seg, .color-row') || b.classList.contains('swatch');
+  if (inMore && !keep && OptMore.open) setOptMore(false);
+}
 
 function renderOptions() {
   const el = $('#options');
@@ -7252,48 +7401,49 @@ function renderOptions() {
   let html = '';
   if (S.lasso) {
     const n = S.lasso.ids.length + (S.lasso.itemIds?.length || 0);
+    const mod = IS_MAC ? '⌘' : 'Ctrl+';
     html = `<b class="lasso-count">${LassoFilter.summary()}</b><span class="hint">Arrastra el recuadro para ${n === 1 ? 'moverlo' : 'moverlos'}.</span>
       ${S.lasso.ids.length ? swatches(S.penColors, '', 'lasso-color') : ''}
-      <div class="sep"></div><button class="btn" data-act="copy">Copiar</button><button class="btn" data-act="cut">Cortar</button><button class="btn" data-act="duplicate">Duplicar</button>
-      <button class="icon-btn" data-act="delete" aria-label="Eliminar" title="Eliminar (Supr)">${icon('trash')}</button>
-      <div class="sep"></div><button class="btn tinted" data-act="make-card" title="Tarjeta de repaso con la zona seleccionada">${icon('lightbulb')} Crear tarjeta</button>
-      <button class="btn tinted" data-act="make-ai-cards" title="La IA resume la selección y propone varias tarjetas">${icon('sparkles')} Tarjetas con IA</button>${Tape.lassoBtn()}`;
+      <div class="sep"></div><span class="item-acts">${optGroup(2, optBtn('copy', 'copy', 'Copiar', mod + 'C') + optBtn('cut', 'cut', 'Cortar', mod + 'X') + optBtn('duplicate', 'duplicate', 'Duplicar'), 'list')}
+      ${optBtn('delete', 'trash', 'Eliminar', 'Supr')}</span>
+      <div class="sep"></div>${optGroup(4, `<button class="btn tinted" data-act="make-card" title="Tarjeta de repaso con la zona seleccionada">${icon('lightbulb')} Crear tarjeta</button>`)}
+      ${optGroup(3, `<button class="btn tinted" data-act="make-ai-cards" title="La IA resume la selección y propone varias tarjetas">${icon('sparkles')} Tarjetas con IA</button>`)}${optGroup(1, Tape.lassoBtn())}`;
   } else if (item && item.type === 'tape') {
     html = Tape.optionsHtml(item) + itemActions(false);
   } else if (item && item.type === 'comment') {
-    html = `<input type="text" id="comment-title" value="${esc(item.title)}" aria-label="Nombre del comentario" style="border:1px solid var(--line);border-radius:8px;padding:6px 8px;background:var(--surface-2);width:170px">
+    html = `<input type="text" id="comment-title" value="${esc(item.title)}" aria-label="Nombre del comentario" class="opt-field">
       ${swatches(COMMENT_COLORS, item.color, 'comment-color')}
-      <button class="btn" data-act="toggle-comment">${item.expanded ? 'Cerrar' : 'Abrir'}</button><div class="sep"></div>${commentSizeControl(item.color)}
+      <button class="btn" data-act="toggle-comment">${item.expanded ? 'Cerrar' : 'Abrir'}</button>${optGroup(1, `<div class="sep"></div>${commentSizeControl(item.color)}`)}
       ${S.editing ? '<div class="sep"></div>' + textBar(item) : ''}${itemActions(false)}`;
   } else if (item && item.type === 'sticky') {
-    html = `${swatches(STICKY_COLORS, item.color, 'sticky-color')}<button class="btn" data-act="note-zoom" title="Acercar el post-it para escribir en él">${icon('plus')} Ampliar</button><div class="sep"></div>${textBar(item)}${itemActions()}`;
+    html = `${swatches(STICKY_COLORS, item.color, 'sticky-color')}${optBtn('note-zoom', 'zoomIn', 'Ampliar', '', 'Ampliar: acercar el post-it para escribir en él')}<div class="sep"></div>${textBar(item)}${itemActions()}`;
   } else if (item && item.type === 'text') {
     html = textBar(item) + itemActions();
   } else if (item && item.type === 'link') {
-    html = `<b style="color:${LINK_COLOR}">${icon('link').replace('<svg', '<svg width="16" height="16"')} ${esc(item.target ? linkTitle(item.target) : 'Sin destino')}</b>
+    html = `<b class="opt-label" style="color:${LINK_COLOR}">${icon('link')} ${esc(item.target ? linkTitle(item.target) : 'Sin destino')}</b>
       <button class="btn" data-act="link-pick">${item.target ? 'Cambiar destino' : 'Elegir destino'}</button>
-      ${item.target ? '<button class="btn" data-act="link-preview">Vista previa</button>' : ''}${itemActions()}`;
+      ${item.target ? optGroup(3, optBtn('link-preview', 'eye', 'Vista previa')) : ''}${itemActions()}`;
   } else if (item && item.type === 'voice') {
     const r = Voice.find(activeNb(), item.rec);
-    html = `<b class="voice-label">${icon('waveform')} ${esc(r ? Voice.title(r) : 'Grabación borrada')}</b>
-      ${r ? `<button class="btn" data-act="voice-play">${icon('play')} Reproducir</button><button class="btn" data-act="voice-rename">${icon('rename')} Renombrar…</button>` : ''}
-      <button class="btn" data-act="voice-list">Grabaciones</button>${itemActions()}`;
+    html = `<b class="voice-label opt-label">${icon('waveform')} ${esc(r ? Voice.title(r) : 'Grabación borrada')}</b>
+      ${r ? `<button class="btn" data-act="voice-play">${icon('play')} Reproducir</button>${optGroup(3, optBtn('voice-rename', 'rename', 'Renombrar…'))}` : ''}
+      ${optGroup(1, `<button class="btn" data-act="voice-list">Grabaciones</button>`)}${itemActions()}`;
   } else if (item && item.type === 'image') {
     html = `<button class="btn tinted" data-act="image-crop">${icon('crop')} Recortar…</button><span class="hint">Arrástrala o usa el círculo de la esquina para cambiar su tamaño.</span>${itemActions()}`;
   } else if (S.tool === 'pen') {
     html = `<button class="menu-btn" data-act="pen-kind-menu" aria-haspopup="menu">${icon('pen')}${PEN_KINDS[S.penKind]}${icon('chevronUpDown')}</button>
       <div class="sep"></div>${colorRow('pen', S.penColor)}<div class="sep"></div>
       ${widthControl('pen-width', 1, 14, 0.5, S.penWidth, S.penColor)}
-      <div class="sep"></div><button class="pill-toggle" data-act="shapes" aria-pressed="${S.penShapes}">${icon('shapes')} Formas</button>
+      ${optGroup(2, `<div class="sep"></div><button class="pill-toggle" data-act="shapes" aria-pressed="${S.penShapes}">${icon('shapes')} Formas</button>`)}
       <span class="hint">${S.penShapes ? 'Cada trazo se convierte en línea, círculo, rectángulo…' : 'Para una forma perfecta, al acabar el trazo mantén quieto 1 segundo antes de soltar'}</span>`;
   } else if (S.tool === 'highlighter') {
     html = Tape.drawing ? Tape.hlBarHtml() : `${colorRow('highlighter', S.hlColor)}<div class="sep"></div>
       ${widthControl('hl-width', 8, 40, 1, S.hlWidth, S.hlColor)}
-      <div class="sep"></div><div class="seg" role="group" aria-label="Forma del subrayado">
+      ${optGroup(2, `<div class="sep"></div><div class="seg" role="group" aria-label="Forma del subrayado">
         <button data-act="hl-mode" data-v="free" aria-pressed="${S.hlMode === 'free'}">Libre</button>
         <button data-act="hl-mode" data-v="straight" aria-pressed="${S.hlMode === 'straight'}">Recto</button>
-        <button data-act="hl-mode" data-v="cardinal" aria-pressed="${S.hlMode === 'cardinal'}">H / V</button></div>
-      <div class="sep"></div>${Tape.hlBarHtml()}`;
+        <button data-act="hl-mode" data-v="cardinal" aria-pressed="${S.hlMode === 'cardinal'}">H / V</button></div>`)}
+      ${optGroup(1, `<div class="sep"></div>${Tape.hlBarHtml()}`)}`;
   } else if (S.tool === 'eraser') {
     html = `<div class="seg"><button data-act="eraser-mode" data-v="stroke" aria-pressed="${S.eraserMode === 'stroke'}">Trazo entero</button><button data-act="eraser-mode" data-v="partial" aria-pressed="${S.eraserMode === 'partial'}">Parcial</button></div>
       ${S.eraserMode === 'partial' ? `<div class="sep"></div><label class="range" for="er-size">Tamaño <input id="er-size" type="range" min="6" max="60" step="1" value="${S.eraserSize}"> <span>${S.eraserSize}</span></label>` : ''}`;
@@ -7313,9 +7463,10 @@ function renderOptions() {
     html = '<span class="hint">Haz clic en un elemento para seleccionarlo y arrástralo para moverlo. Doble clic en un texto para escribir. Ctrl+C, Ctrl+X y Ctrl+V para copiar, cortar y pegar.</span>';
   }
   el.innerHTML = html;
+  fitOptions(el, item);
   // Los botones no se quedan el foco: el texto sigue en edición y con su selección (ratón, dedo y lápiz).
   el.onmousedown = el.onpointerdown = (e) => { if (e.target.closest('button')) e.preventDefault(); };
-  el.onclick = (e) => { if (!onCommentSizeClick(e) && !InkColors.onClick(e)) onOptionsClick(e); };
+  el.onclick = onOptionsBarClick;
   InkColors.hook(el);
   el.oninput = onOptionsInput;
   el.onchange = onOptionsInput;
@@ -7342,25 +7493,30 @@ function setCommentSize(size) {
   $$('.comment-panel').forEach(placeCommentPanel);   // el globo se coloca junto al círculo nuevo
   renderOptions();
 }
-/** Barra de estilo de texto. Con texto seleccionado se aplica a la selección; si no, a todo el cuadro. */
+/** Color con el que «Resaltar» marca las letras (el último elegido; solo en memoria). */
+const TextMark = { last: MARK_COLORS[1][1] };
+/** Barra de estilo de texto. Con texto seleccionado se aplica a la selección; si no, a todo el cuadro.
+ *  Lo esencial (tamaño, color, B I U S, resaltar) siempre está; lo demás pasa a «Más» si no cabe. */
 function textBar(item) {
   const base = item ? item.base : S.textDefault;
   const isDefault = item && JSON.stringify(Object.assign({}, base)) === JSON.stringify(Object.assign({}, S.textDefault));
   const state = (cmd, fallback) => (hasTextSelection() ? document.queryCommandState(cmd) : fallback);
-  return `<select id="font" aria-label="Tipo de letra">${Object.entries(FONTS).map(([k, f]) => `<option value="${k}" ${base.font === k ? 'selected' : ''}>${f.name}</option>`).join('')}</select>
-    <div class="seg"><button data-act="size" data-v="-2" aria-label="Letra más pequeña">−</button><button class="size-btn" data-act="size-menu" aria-haspopup="dialog" aria-expanded="${openPopover?.el.classList.contains('size-pop') ? 'true' : 'false'}" aria-label="Tamaño de letra: ${base.size} pt" title="Tamaño de letra">${base.size} pt</button><button data-act="size" data-v="2" aria-label="Letra más grande">+</button></div>
+  const sizeOpen = openPopover?.el.classList.contains('size-pop') ? 'true' : 'false';
+  const defName = isDefault ? 'Estilo predeterminado' : 'Predeterminar';
+  return `${optGroup(5, `<select id="font" aria-label="Tipo de letra" title="Tipo de letra">${Object.entries(FONTS).map(([k, f]) => `<option value="${k}" ${base.font === k ? 'selected' : ''}>${f.name}</option>`).join('')}</select>`)}
+    <div class="seg size-seg"><button data-act="size" data-v="-2" aria-label="Letra más pequeña" title="Letra más pequeña">−</button><button class="size-btn" data-act="size-menu" aria-haspopup="dialog" aria-expanded="${sizeOpen}" aria-label="Tamaño de letra: ${base.size} pt" title="Tamaño de letra">${base.size}<small>pt</small></button><button data-act="size" data-v="2" aria-label="Letra más grande" title="Letra más grande">+</button></div>
     ${colorRow('text', base.color)}
-    <div class="seg">
-      <button data-act="bold" aria-pressed="${state('bold', base.bold)}" style="font-weight:700" title="Negrita">B</button>
-      <button data-act="italic" aria-pressed="${state('italic', base.italic)}" style="font-style:italic" title="Cursiva">I</button>
-      <button data-act="underline" aria-pressed="${state('underline', base.underline)}" style="text-decoration:underline" title="Subrayado">U</button>
-      <button data-act="strike" aria-pressed="${state('strikeThrough', base.strike)}" style="text-decoration:line-through" title="Tachado">S</button></div>
-    <button class="btn" data-act="mark-menu" title="Color de fondo de las letras">Resaltar ▾</button>
-    ${item?.type === 'text' || !item ? `<div class="seg">${[['left', '⟸'], ['center', '≡'], ['right', '⟹']].map(([k, s]) => `<button data-act="align" data-v="${k}" aria-pressed="${base.align === k}" aria-label="Alinear ${k}">${s}</button>`).join('')}</div>
-      <button class="btn" data-act="box-menu" title="Fondo y borde del cuadro">Fondo ▾</button>` : ''}
-    ${item && S.editing ? '<button class="btn" data-act="inline-image" title="Insertar una imagen donde está el cursor">Imagen</button>' : ''}
-    ${hasTextSelection() ? '<button class="btn" data-act="text-link" title="Enlazar el texto seleccionado con otra libreta o página">Enlace</button>' : ''}
-    ${item ? `<button class="btn ${isDefault ? 'on' : ''}" data-act="default" ${isDefault ? 'disabled' : ''} title="Usar este estilo en todos los textos nuevos">${isDefault ? '✓ Predeterminado' : 'Predeterminar'}</button>` : ''}`;
+    <div class="seg bius">
+      <button data-act="bold" aria-pressed="${state('bold', base.bold)}" style="font-weight:700" aria-label="Negrita" title="Negrita">B</button>
+      <button data-act="italic" aria-pressed="${state('italic', base.italic)}" style="font-style:italic" aria-label="Cursiva" title="Cursiva">I</button>
+      <button data-act="underline" aria-pressed="${state('underline', base.underline)}" style="text-decoration:underline" aria-label="Subrayado" title="Subrayado">U</button>
+      <button data-act="strike" aria-pressed="${state('strikeThrough', base.strike)}" style="text-decoration:line-through" aria-label="Tachado" title="Tachado">S</button></div>
+    <button class="icon-btn mark-btn" data-act="mark-menu" aria-haspopup="menu" aria-label="Resaltar" title="Resaltar: color de fondo de las letras" style="--c:${TextMark.last}">${icon('highlighter')}<span class="ink-bar"></span></button>
+    ${item?.type === 'text' || !item ? optGroup(4, `<div class="seg align-seg" role="group" aria-label="Alineación">${[['left', 'alignLeft', 'Alinear a la izquierda'], ['center', 'alignCenter', 'Centrar'], ['right', 'alignRight', 'Alinear a la derecha']].map(([k, ic, n]) => `<button data-act="align" data-v="${k}" aria-pressed="${base.align === k}" aria-label="${n}" title="${n}">${icon(ic)}</button>`).join('')}</div>
+      ${optBtn('box-menu', 'boxBg', 'Fondo y borde', '', 'Fondo y borde del cuadro', 'aria-haspopup="menu"')}`) : ''}
+    ${item && S.editing ? optGroup(3, optBtn('inline-image', 'image', 'Imagen', '', 'Insertar una imagen donde está el cursor')) : ''}
+    ${hasTextSelection() ? optGroup(6, optBtn('text-link', 'link', 'Enlace', '', 'Enlazar el texto seleccionado con otra libreta o página')) : ''}
+    ${item ? optGroup(1, `<button class="icon-btn def-btn" data-act="default" aria-pressed="${!!isDefault}" aria-label="${defName}" title="${isDefault ? 'Los textos nuevos ya tienen este estilo' : 'Predeterminar: usar este estilo en todos los textos nuevos'}">${icon('textDefault')}</button>`) : ''}`;
 }
 
 // =============================================================================
@@ -7489,7 +7645,7 @@ function onOptionsClick(e) {
     case 'text-color': textStyle({ color: v }); break;
     case 'bold': case 'italic': case 'underline': case 'strike': textStyle({ [act]: true }); break;
     case 'align': textStyle({ align: v }); break;
-    case 'mark-menu': return popover(b, MARK_COLORS.map(([n, c]) => `<button data-act="${c || 'none'}"><span class="swatch" style="background:${c || 'transparent'};width:16px;height:16px"></span>${n}</button>`).join(''), (c) => textStyle({ mark: c === 'none' ? '' : c }));
+    case 'mark-menu': return popover(b, MARK_COLORS.map(([n, c]) => `<button data-act="${c || 'none'}"><span class="swatch" style="background:${c || 'transparent'};width:16px;height:16px"></span>${n}</button>`).join(''), (c) => { if (c !== 'none') TextMark.last = c; textStyle({ mark: c === 'none' ? '' : c }); });
     case 'box-menu': return popover(b, BOX_BGS.map(([n, c]) => `<button data-act="bg:${c}"><span class="swatch" style="background:${c || 'transparent'};width:16px;height:16px"></span>${n}</button>`).join('') + `<hr><button data-act="border">${found?.item.base.border ? '✓ ' : ''}Borde</button>`,
       (a) => (a === 'border' ? textStyle({ border: true }) : textStyle({ bg: a.slice(3) })));
     case 'inline-image': saveRange(); return pickFile('image/*', (f) => insertImageFile(f));
@@ -9724,7 +9880,7 @@ const AI = {
       <p>Para leer tu selección, Folia usa Gemini, la IA de Google, con <b>tu propia clave gratuita</b>. Solo hay que hacerlo una vez:</p>
       <ol class="aiz-steps"><li>Abre <a href="${AI_KEY_PAGE}" target="_blank" rel="noopener">Google AI Studio</a> y entra con tu cuenta de Google.</li>
         <li>Pulsa «Create API key» y copia la clave.</li><li>Pégala aquí.</li></ol>
-      <label class="field" for="ai-key">Tu clave de Gemini<input type="password" id="ai-key" autocomplete="off" spellcheck="false" placeholder="AIza…"></label>
+      <label class="field" for="ai-key">Tu clave de Gemini<input type="password" id="ai-key" autocomplete="off" spellcheck="false" placeholder="AQ.… o AIza…"></label>
       <p class="aiz-warn"><b>Aviso:</b> <span>En el nivel gratuito Google puede usar lo que envías para mejorar sus productos; no envíes datos de pacientes.</span></p>
       <p class="aiz-small">La clave se guarda solo en este dispositivo: no va en la copia de seguridad. Puedes borrarla cuando quieras.</p>
       <div class="actions">${had ? '<button class="btn" data-act="forget">Borrar la clave</button>' : ''}<button class="btn" data-act="cancel">Cancelar</button><button class="btn primary" data-act="save">Guardar y seguir</button></div>`,
@@ -9733,7 +9889,7 @@ const AI = {
       if (act === 'forget') { AI.clearKey(); close(); return toast('Clave de IA borrada de este dispositivo'); }
       if (act !== 'save') return;
       const k = $('#ai-key', sc).value.trim();
-      if (!/^[\w-]{20,}$/.test(k)) { toast('Esa clave no parece válida: cópiala entera'); return $('#ai-key', sc).focus(); }
+      if (!/^[\w.-]{20,}$/.test(k))   /* claves antiguas «AIza…» y nuevas «AQ.…» (Google, 2026) */ { toast('Esa clave no parece válida: cópiala entera'); return $('#ai-key', sc).focus(); }
       if (!AI.setKey(k)) return toast('Este navegador no deja guardar la clave');
       close();
       if (then) then();
