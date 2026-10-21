@@ -1975,14 +1975,22 @@ body.is-card-dragging .crumbs button { box-shadow: inset 0 0 0 1.5px color-mix(i
 /* Entrada «Tutorial» de los menús (⋯ y ⚙︎) */
 .popover .onb-menu-new { font: 700 11px var(--font); padding: 2px 7px; border-radius: 999px; color: #1C1C1E; background: linear-gradient(90deg, #FFD60A, #FF9F0A); }
 /* Libreta de demostración «Así es Folia» (película del final) */
-.onb-film { position: absolute; inset: 0; z-index: 3; }
-.onb-film-cv { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
-.onb-film-bar { position: absolute; left: 0; right: 0; top: 0; height: 4px; background: rgba(255,255,255,.12); }
-.onb-film-bar i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, #32D2FF, #AF52DE, #FF2D55); }
-.onb-film-cap { position: absolute; left: 50%; bottom: 26px; transform: translateX(-50%); margin: 0; max-width: calc(100% - 32px); padding: 10px 20px; border-radius: 999px; font: 600 18px var(--rounded); text-align: center; color: #fff; background: rgba(20,20,32,.78); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,.15); box-shadow: 0 6px 24px rgba(0,0,0,.35); }
-.onb-film-cap:empty { display: none; }
-.onb-film-cap.in { animation: onb-cap .35s cubic-bezier(.3,1.4,.5,1); }
-@keyframes onb-cap { from { opacity: 0; transform: translate(-50%, 10px); } }
+.onb-film { position: absolute; inset: 0; z-index: 3; overflow: hidden; --film-bg: #08080B; --film-fg: #F5F5F7; --film-fade: 1; }
+.onb-film.light { --film-bg: #F4F3F0; --film-fg: #1D1D1F; }
+.onb-film-bg { position: absolute; inset: 0; background: radial-gradient(120% 90% at 50% 38%, #1E1D29 0%, #0C0C11 55%, #050507 100%); }
+.onb-film.light .onb-film-bg { background: radial-gradient(120% 90% at 50% 38%, #FFFFFF 0%, #EFEEEA 60%, #E2E0DB 100%); }
+.onb-film-cv, .onb-film-fx { position: absolute; inset: 0; width: 100%; height: 100%; display: block; opacity: var(--film-fade); will-change: transform, filter; }
+.onb-film-fx { will-change: auto; pointer-events: none; }
+.onb-film-scrim { position: absolute; left: 0; right: 0; bottom: 0; height: 34%; pointer-events: none; background: linear-gradient(to bottom, transparent, color-mix(in srgb, var(--film-bg) 82%, transparent) 55%, var(--film-bg)); }
+.onb-film-bar { position: absolute; left: 0; right: 0; top: 0; height: 3px; background: color-mix(in srgb, var(--film-fg) 10%, transparent); z-index: 2; }
+.onb-film-bar i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, #6B5CFF, #B84DF2, #FF375F); }
+/* Rótulos con tipografía cinética: cada palabra entra desde el desenfoque (lo mueve onboarding.js, fotograma a fotograma) */
+.onb-film-cap { position: absolute; left: 50%; bottom: 7%; transform: translateX(-50%); margin: 0; width: min(92%, 1100px); text-align: center; z-index: 2;
+  font: 700 clamp(30px, 5.4vw, 68px)/1.08 -apple-system, "SF Pro Display", "Segoe UI Variable Display", system-ui, sans-serif; letter-spacing: -0.025em; color: var(--film-fg); text-wrap: balance; pointer-events: none; }
+.onb-film-cap span { display: inline-block; opacity: 0; will-change: transform, filter, opacity; }
+.onb-film-cap .acc { background: linear-gradient(90deg, #7B6CFF, #C04DF2 55%, #FF4D7A); -webkit-background-clip: text; background-clip: text; color: transparent; padding-bottom: .06em; }
+.onb-film.light .onb-film-cap .acc { background-image: linear-gradient(90deg, #5B4BFF, #A63AE0 55%, #F0306A); }
+.onb-film.light .onb-film-skip { color: #1D1D1F; background: rgba(255,255,255,.7); border-color: rgba(0,0,0,.08); box-shadow: 0 2px 10px rgba(0,0,0,.08); }
 .onb-film-skip { position: absolute; top: 18px; right: 18px; z-index: 4; padding: 10px 18px; font-size: 15px; }
 .onb-film-skip[hidden], .onb-film-end[hidden] { display: none; }
 .onb-film-end { position: absolute; inset: 0; z-index: 5; display: flex; background: rgba(10,10,26,.72); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); animation: fade .4s ease-out; }
@@ -2006,7 +2014,7 @@ body.is-card-dragging .crumbs button { box-shadow: inset 0 0 0 1.5px color-mix(i
   .onb-steps { gap: 10px; } .onb-steps li { font-size: 15px; }
   .onb-tip { font-size: 14px; }
   .onb-nav { padding: 10px 16px 18px; }
-  .onb-film-cap { font-size: 15px; bottom: 16px; padding: 8px 14px; border-radius: 16px; }
+  .onb-film-cap { bottom: 6%; font-size: clamp(26px, 8vw, 34px); }
   .onb-film-skip { top: 12px; right: 12px; padding: 8px 14px; font-size: 14px; }
 }
 @media (max-width: 360px) { .onb-demo { zoom: .66; } }
@@ -19387,116 +19395,590 @@ const OnbDemos = {
   },
 };
 
-// ---------- Libreta de demostración «Así es Folia» (final del tutorial) ----------
-// Folia crea sola una libreta y la «escribe» a la vista (~1 minuto, con cámara que sigue la acción). La libreta se
-// construye ENTERA al empezar, con datos normales (trazos, elementos, tarjetas, leyenda, page.ocr), y se guarda en
-// la carpeta «Ejemplos»: si se cierra a mitad, queda completa. La película solo va enseñando sus piezas.
-// La IA es de mentira (respuestas preparadas, sin red ni clave) y se dice con «ejemplo».
-
-/** Letras de una sola línea para escribir el título a mano: trazos en una caja de 1 de alto (base en y = 1). */
-const ONB_GLYPHS = (() => {
-  const arc = (cx, cy, rx, ry, a0, a1, n = 18) => Array.from({ length: n + 1 }, (_, i) => { const a = (a0 + (a1 - a0) * i / n) * Math.PI / 180; return [cx + rx * Math.cos(a), cy + ry * Math.sin(a)]; });
-  return {
-    A: [0.8, [[[0, 1], [0.36, 0], [0.72, 1]], [[0.16, 0.62], [0.56, 0.62]]]],
-    E: [0.62, [[[0.55, 0.02], [0.06, 0], [0.04, 1], [0.56, 1]], [[0.05, 0.5], [0.46, 0.5]]]],
-    F: [0.58, [[[0.06, 0], [0.04, 1]], [[0.05, 0.01], [0.55, 0]], [[0.05, 0.48], [0.44, 0.48]]]],
-    a: [0.56, [[...arc(0.24, 0.76, 0.2, 0.24, -20, 340)], [[0.45, 0.52], [0.44, 1], [0.52, 0.96]]]],
-    c: [0.5, [arc(0.26, 0.76, 0.22, 0.25, -40, -320)]],
-    e: [0.54, [[[0.05, 0.76], [0.44, 0.74], ...arc(0.25, 0.76, 0.2, 0.25, -5, -300).slice(1)]]],
-    i: [0.26, [[[0.1, 0.52], [0.1, 1], [0.16, 0.97]], [[0.1, 0.34], [0.11, 0.35]]]],
-    'í': [0.28, [[[0.1, 0.52], [0.1, 1], [0.16, 0.97]], [[0.06, 0.4], [0.2, 0.26]]]],
-    l: [0.26, [[[0.1, 0], [0.09, 0.95], [0.18, 1]]]],
-    o: [0.54, [arc(0.25, 0.76, 0.21, 0.25, -90, 270)]],
-    s: [0.48, [[[0.4, 0.56], [0.3, 0.5], [0.14, 0.52], [0.08, 0.62], [0.16, 0.72], [0.32, 0.78], [0.4, 0.88], [0.34, 0.98], [0.18, 1], [0.04, 0.95]]]],
-    ' ': [0.34, []],
+// ---------- Letra manuscrita de un solo trazo (película y libreta de demostración) ----------
+// Alfabeto hecho a mano para Folia (sin fuentes externas). Cada letra es «avance|trazo|trazo…» en una caja con la
+// altura de la x = 10, la base en y = 0 y la y hacia arriba. Un trazo es la lista de puntos «x,y» por los que pasa
+// el lápiz (curva suave entre ellos); «!» tras un punto = esquina viva; un trazo que empieza por «*» se escribe al
+// acabar la palabra, como hace la mano (puntos de la i, tildes, palito de la t).
+const ONB_HAND = {
+  a: '9.5|7,8 5.5,9.8 3,9.6 1,7.5 0.4,4 1.6,0.8 3.6,0.2 5.6,1.8 7,5 7.4,10! 7.2,3 7.6,0.8 8.6,0.2 9.5,1.5',
+  b: '8|0.3,3 1.8,10 2.6,15.5 2.1,17.8 1.2,16.8 0.9,12 0.8,0.4! 1.3,5 3.2,8.8 5.4,10 7,8.4 7.1,4 5.4,0.8 3,0.2 1.4,1',
+  c: '8|7.2,8.2 5.6,9.9 3.2,9.7 1.2,7.8 0.4,4.5 1.3,1.4 3.6,0 6,0.4 8,2.2',
+  d: '9.5|7,8 5.5,9.8 3,9.6 1,7.5 0.4,4 1.6,0.8 3.6,0.2 5.6,1.8 7,5 7.6,17.8! 7.2,3 7.6,0.8 8.6,0.2 9.5,1.5',
+  e: '8|0.6,3.6 3.5,4.2 6,5.6 6.6,8 5.2,9.8 2.8,9.6 0.9,7.4 0.4,4 1.6,1 4,0 6.2,0.5 8,2.2',
+  f: '6|5.8,16.2 4.8,17.8 3.2,17.4 2.5,14.5 2.4,0.2|*0,9.8 5.2,10',
+  g: '9.5|7,8 5.5,9.8 3,9.6 1,7.5 0.4,4 1.6,0.8 3.6,0.2 5.6,1.8 7,5 7.4,10! 7.3,-3.5 6.4,-7 4,-8.4 1.6,-7.6 0.8,-5.6 2.6,-3 6.2,-0.8 9.5,1.5',
+  h: '9|0.3,3 1.8,10 2.6,15.5 2.1,17.8 1.2,16.8 0.9,12 0.8,0.2! 1.3,5 2.8,8.6 4.6,10 6.2,9 6.6,6 6.4,2 7.2,0.2 8.2,0.3 9,1.5',
+  i: '4.4|0.2,3.5 1.4,8 1.7,10! 1.5,2.4 2.3,0.3 3.4,0.4 4.4,1.8|*1.8,13.4 2.3,14.3',
+  j: '4.5|0.2,3.5 1.4,8 1.8,10! 1.8,-4.5 1.2,-7.6 -0.4,-8.2 -1.6,-6.8|*1.9,13.4 2.4,14.3',
+  k: '8.5|0.3,3 1.8,10 2.6,15.5 2.1,17.8 1.2,16.8 0.9,12 0.8,0.2! 1.1,4 3.6,8.6 5.6,9.8 6.2,8.2 4.6,6 1.4,4.8! 4.4,4.2 6,0.8 7.2,0.2 8.5,1.5',
+  l: '5.2|0.3,3 1.8,10 2.8,15.5 2.4,17.8 1.4,17 1,12 1,2.6 1.8,0.3 3.2,0.2 5.2,1.8',
+  m: '12.6|0.2,6 0.9,9.6! 0.9,0.2! 1.4,5.2 2.6,8.8 3.8,10 5,9 5.4,6 5.4,0.2! 5.8,5.2 7.2,8.8 8.6,10 9.9,8.8 10.2,5.5 10.1,2 10.8,0.3 11.8,0.4 12.6,1.6',
+  n: '8.8|0.2,6 0.9,9.6! 0.9,0.2! 1.4,5.2 2.8,8.8 4.4,10 5.8,8.9 6.1,5.5 6,2 6.7,0.3 7.8,0.4 8.8,1.6',
+  o: '8|4.8,9.9 2.4,9.4 0.8,7.2 0.5,3.8 1.8,1 4.2,0.1 6.2,1 7.2,4 6.8,7.6 5.2,9.8 4.6,9.9 6,9.7 7.4,9.9',
+  p: '8.4|0.2,6 1.2,9.8! 0.9,-8! 1.1,4.5 2.8,8.6 4.8,10 6.8,8.8 7.4,5 6.4,1.4 4,0.1 1.6,1',
+  q: '9|7,8 5.5,9.8 3,9.6 1,7.5 0.4,4 1.6,0.8 3.6,0.2 5.6,1.8 7,5 7.4,10! 7.2,-8',
+  r: '7|0.2,6 0.9,9.6! 0.9,0.2! 1.2,4.8 2.6,8.4 4.4,9.9 6,9.6 7,8.8',
+  s: '7|0.3,1.2 2.4,5.6 4.2,9.9! 5.8,6.4 6.6,3 5.6,0.6 3.2,0 1.2,0.8 0.6,1.8',
+  t: '5.6|0.4,3.5 1.8,8 2.6,14.5! 2.2,3 2.6,0.6 3.8,0.1 5.6,1.6|*0.2,9.8 5.2,10.2',
+  u: '8.8|0.2,6 0.9,9.8! 0.7,3.2 1.6,0.6 3.2,0.1 5,1.4 6.2,4.6 6.6,10! 6.3,2.4 7,0.3 7.9,0.3 8.8,1.6',
+  v: '8|0.2,7.5 1,9.8! 2.4,5 3.6,0.2! 5.4,5 6.6,9.8 7,10 8,10.2',
+  w: '11.2|0.2,7.5 0.9,9.8! 2.2,4.5 3.2,0.2! 4.8,5.5 5.6,9.2! 6.8,4.5 7.8,0.2! 9.4,5 10.2,9.8 11.2,10.2',
+  x: '7.6|0.2,8 1.4,9.8 3,8 4.4,2.4 5.8,0.2 7.6,1.4|6.8,9.8 0.6,0.2',
+  y: '9|0.2,6 0.9,9.8! 0.7,3.2 1.6,0.6 3.2,0.1 5,1.4 6.2,4.6 6.6,10! 6.5,-3.5 5.6,-7 3.6,-8.4 1.4,-7.6 0.8,-5.6 2.6,-3 6.2,-0.8 9,1.5',
+  z: '7.4|0.6,9.8 6.6,9.8! 0.6,0.2! 7.2,0.3',
+  A: '11|0.2,0.2 5.6,16! 11,0.2|2.6,6.2 8.6,6.2',
+  B: '9.6|1,16! 1,0.2|1,16 5.2,16.2 7.8,14.8 8.4,12.4 7.2,9.6 4.6,8.6 1.4,8.4! 5.8,8.4 8.6,6.8 9.4,4 8.2,1.2 5,0.1 1,0.2',
+  C: '10.6|10,13.4 8.4,15.6 5.6,16.2 2.8,15 0.8,12 0.3,7.6 1.2,3.4 3.8,0.6 7,0 10.6,1.8',
+  D: '11|1,16! 1,0.2|1,16 5,16 8.6,14 10.6,10.4 10.6,5.8 8.8,2.2 5.4,0.2 1,0.2',
+  E: '9|8.4,16 1,16! 1,0.2! 8.8,0.2|1,8.4 6.8,8.4',
+  F: '8.6|8.4,16 1,16! 1,0.2|1,8.6 6.6,8.6',
+  G: '11|10,13.4 8.4,15.6 5.6,16.2 2.8,15 0.8,12 0.3,7.6 1.2,3.4 3.8,0.6 7,0 9.6,1.2 10.6,4 10.6,7.4! 6.6,7.4',
+  H: '10.4|1,16 1,0.2|9.4,16 9.4,0.2|1,8.4 9.4,8.4',
+  I: '4.2|2.1,16 2.1,0.2',
+  J: '8.6|8,16! 8,4.2 6.8,1 4.2,0 1.8,0.8 0.4,3',
+  K: '9.6|1,16 1,0.2|9,16 1.4,7.2! 9.6,0.2',
+  L: '8.4|1,16! 1,0.2! 8.4,0.2',
+  M: '13|0.6,0.2! 1.4,16! 6.6,4! 11.6,16! 12.4,0.2',
+  N: '11|1,0.2! 1,16! 10,0.2! 10,16',
+  O: '11.4|6,16.1 3,15 1,12.2 0.3,8 1.2,3.6 3.8,0.6 7,0.1 9.8,1.8 11.2,5.6 11,10.4 9.4,14.2 6.6,16.2 4.8,15.6',
+  P: '9.4|1,16! 1,0.2|1,16 5.4,16.2 8.2,14.8 9,12 8,9.4 5.2,8 1,8.2',
+  Q: '11.4|6,16.1 3,15 1,12.2 0.3,8 1.2,3.6 3.8,0.6 7,0.1 9.8,1.8 11.2,5.6 11,10.4 9.4,14.2 6.6,16.2 4.8,15.6|6.4,3.4 10.8,-1.2',
+  R: '10|1,16! 1,0.2|1,16 5.4,16.2 8.2,14.8 9,12 8,9.4 5.2,8 1.2,8.2! 4.4,8 9.8,0.2',
+  S: '9.6|9,13.6 7.6,15.6 5,16.2 2.4,15.4 1.2,13 2.2,10.4 5.2,8.8 8.2,7 9.4,4.2 8.4,1.4 5.6,0 2.6,0.2 0.3,2.2',
+  T: '10|0.2,16 9.8,16|5,16 5,0.2',
+  U: '10.6|1,16! 1,5.2 2.4,1.4 5,0 7.8,0.6 9.4,3.4 9.8,8 9.8,16',
+  V: '10.4|0.2,16! 5.2,0.2! 10.4,16',
+  W: '14.6|0.2,16! 3.6,0.2! 7.3,12! 11,0.2! 14.6,16',
+  X: '10|0.4,16 9.6,0.2|9.6,16 0.4,0.2',
+  Y: '10|0.2,16! 5,8! 9.8,16|5,8 5,0.2',
+  Z: '10.4|0.8,16 9.8,16! 0.4,0.2! 10.2,0.2',
+  0: '9|4.6,14 2,12.8 0.6,9.6 0.4,5 1.4,1.6 4,0 6.6,0.8 8.4,4 8.6,8.8 7.6,12.6 5.2,14.1 3.8,13.6',
+  1: '6|0.6,10.6 4,14.2! 4,0.2',
+  2: '9|0.8,10.8 2,13.2 4.4,14.2 6.8,13.4 8,11 7.4,8.2 4.6,5 0.4,0.2! 8.8,0.2',
+  3: '8.8|0.8,12.2 2.8,14 5.4,14.2 7.4,12.8 7.6,10.2 5.8,8.2 3.4,7.6! 6.2,7.2 8.4,5.2 8.4,2.4 6.4,0.3 3.4,0 1.2,0.8 0.2,2.2',
+  4: '9.4|6.4,14.2 0.3,4.4! 9.4,4.4|6.6,9.6 6.6,0.2',
+  5: '8.8|8,14 1.8,14! 1,7.8! 3.6,8.8 6.4,8.6 8.2,6.6 8.4,3.4 6.8,0.8 4,0 1.6,0.6 0.3,2',
+  6: '8.8|7.4,13.2 5.4,14.2 2.8,13.2 0.9,10 0.4,5.4 1.4,1.6 4,0 6.8,0.6 8.4,3 8,6 5.8,7.8 3,7.6 1,5.6',
+  7: '8.6|0.4,14 8.4,14! 3.4,0.2|2.4,7.2 7,7.2',
+  8: '8.6|4.4,7.6 6.8,9.6 7.4,12 6,13.9 3.4,14.1 1.6,12.6 1.8,10.4 4.4,7.6 7.4,5.2 8,2.6 6.6,0.4 3.4,0 1,1.4 0.8,4 4.4,7.6',
+  9: '8.8|8,10.8 6.4,8.2 3.6,7.6 1.2,9 0.6,11.8 2.2,13.8 5,14.2 7.4,12.8 8.4,9.8 8,0.2',
+  '.': '2.8|0.9,0.3 1.5,1.1',
+  ',': '2.8|1.6,1.2 1.4,-0.6 0.2,-2.8',
+  ':': '3|1.1,8.4 1.7,9.2|0.9,0.3 1.5,1.1',
+  ';': '3|1.1,8.4 1.7,9.2|1.6,1.2 1.4,-0.6 0.2,-2.8',
+  '·': '4|1.6,5.2 2.3,6.2',
+  '-': '6|0.4,5.4 5.6,5.8',
+  '–': '8|0.4,5.4 7.6,5.8',
+  '+': '9|0.4,6 8.4,6.3|4.4,10.6 4.3,1.6',
+  '=': '8.6|0.4,7.4 8,7.6|0.4,3.6 8.2,3.8',
+  '<': '8|7.6,10.6 0.4,5.6! 7.6,0.8',
+  '>': '8|0.4,10.6 7.6,5.6! 0.4,0.8',
+  '(': '4.6|4,16.6 1.4,11.6 0.8,5 1.8,-1 3.8,-3.6',
+  ')': '4.6|0.6,16.6 3.2,11.6 3.8,5 2.8,-1 0.8,-3.6',
+  '/': '7|0.2,-1.4 6.8,15.6',
+  '?': '8|0.6,12 2,14.4 4.6,15 7,13.6 7.4,10.8 5.6,8.4 3.8,6.6 3.6,3.6|3.4,0.3 4,1.1',
+  '¿': '8|4.4,10.2 4.6,10.7|4.4,7 4.2,4 2.4,2.2 0.6,0 0.6,-2.6 2.4,-4.4 5,-4.8 7.4,-3.4',
+  '!': '3.4|1.8,16 1.6,4|1.4,0.3 2,1.1',
+  '¡': '3.4|1.6,10.2 1.8,10.7|1.8,6.6 1.6,-5.4',
+  '→': '13|0.2,6 12.4,6.2|8.8,9.8 12.8,6.2! 8.8,2.6',
+  '←': '13|12.8,6.2 0.6,6|4.2,9.8 0.2,6! 4.2,2.6',
+  '↓': '8.6|4.3,14.6 4.3,0.4|0.8,4.2 4.3,0! 7.8,4.2',
+  '↑': '8.6|4.3,0 4.3,14.4|0.8,10.6 4.3,14.8! 7.8,10.6',
+  'β': '8.8|1.4,-7.4! 1.4,11 2.4,14.4 4.6,15.6 6.8,14.6 7.4,12 6,9.6 3.6,8.8! 6.6,8 8.4,5.6 8,2.2 5.8,0.2 3.2,0.2 1.4,1.6',
+  '%': '10|0.4,0.2 9.6,14.6|2.4,14.6 0.8,13 1,10.8 2.8,10 4,11.6 3.8,13.6 2.4,14.6|7.6,4.6 6,3 6.2,0.8 8,0 9.2,1.6 9,3.6 7.6,4.6',
+  '«': '8|3.6,9 0.6,5.4! 3.6,1.8|7.4,9 4.4,5.4! 7.4,1.8',
+  '»': '8|0.6,9 3.6,5.4! 0.6,1.8|4.4,9 7.4,5.4! 4.4,1.8',
+  '"': '4.6|1.4,16 1,12.6|3.8,16 3.4,12.6',
+  "'": '2.4|1.4,16 1,12.6',
+  '’': '2.4|1.4,16 1,12.6',
+  '°': '5|2.4,16 0.8,14.6 1,13 2.6,12.4 4,13.4 3.8,15.2 2.4,16',
+  '×': '7.6|0.6,9.4 7,2.6|7,9.4 0.6,2.6',
+  ' ': '5',
+};
+// Letras con tilde, diéresis o virgulilla: la base y el signo encima (se escribe al acabar la palabra).
+(() => {
+  const marks = {
+    acute: (c, y) => `*${c - 0.9},${y} ${c + 1.4},${y + 2.6}`,
+    grave: (c, y) => `*${c - 1.2},${y + 2.6} ${c + 1},${y}`,
+    tilde: (c, y) => `*${c - 2.8},${y} ${c - 1.6},${y + 1.2} ${c - 0.2},${y + 0.6} ${c + 1.4},${y} ${c + 2.6},${y + 1.2}`,
+    diaer: (c, y) => `*${c - 1.6},${y + 0.6} ${c - 1.4},${y + 1.1}|*${c + 1.4},${y + 0.6} ${c + 1.6},${y + 1.1}`,
   };
+  const add = (ch, base, mark, c, y, drop = false) => {
+    const src = ONB_HAND[base].split('|');
+    ONB_HAND[ch] = [...(drop ? src.filter((s) => !s.startsWith('*')) : src), marks[mark](c, y)].join('|');
+  };
+  [['á', 'a', 4.2], ['é', 'e', 3.6], ['ó', 'o', 4], ['ú', 'u', 3.8]].forEach(([ch, b, c]) => add(ch, b, 'acute', c, 12.4));
+  [['à', 'a', 4.2], ['è', 'e', 3.6], ['ò', 'o', 4], ['ù', 'u', 3.8]].forEach(([ch, b, c]) => add(ch, b, 'grave', c, 12.4));
+  add('í', 'i', 'acute', 2, 12.2, true); add('ì', 'i', 'grave', 2, 12.2, true);
+  add('ñ', 'n', 'tilde', 4.4, 12.8); add('ü', 'u', 'diaer', 3.8, 12.8);
+  [['Á', 'A', 5.6], ['É', 'E', 4.8], ['Í', 'I', 2.1], ['Ó', 'O', 5.8], ['Ú', 'U', 5.4]].forEach(([ch, b, c]) => add(ch, b, 'acute', c, 17.6));
+  [['À', 'A', 5.6], ['È', 'E', 4.8]].forEach(([ch, b, c]) => add(ch, b, 'grave', c, 17.6));
+  add('Ñ', 'N', 'tilde', 5.5, 17.8);
 })();
-/** Trazos de bolígrafo que escriben `text` a mano desde (x, y) (arriba a la izquierda) con altura `h`. */
-function onbHandwrite(text, x, y, h, color, width = 4) {
-  const out = [], rnd = onbRandom(11);
-  let cx = x;
-  for (const ch of text) {
-    const [adv, strokes] = ONB_GLYPHS[ch] || ONB_GLYPHS[' '];
-    for (const st of strokes) {
-      const pts = st.map(([u, v]) => [cx + u * h + (rnd() - 0.5) * h * 0.03, y + v * h + (rnd() - 0.5) * h * 0.03]);
-      out.push({ id: uid(), tool: 'pen', kind: 'pen', color, width, points: Shapes.densify(pts).map(([a, b], i, all) => [a, b, 0.35 + 0.3 * Math.sin(Math.PI * i / Math.max(1, all.length - 1))]) });
-    }
-    cx += adv * h + h * 0.08;
-  }
-  return out;
-}
-/** Un trazo de bolígrafo con estos puntos (se densifican como los de la app). */
-const onbInk = (pts, color = '#1C1C1E', width = 3, tool = 'pen') => ({ id: uid(), tool, kind: 'pen', color, width, points: Shapes.densify(pts).map(([a, b]) => [a, b, 0.5]) });
-/** «Letra» a mano sin significado (bucles) entre x0 y x1, para rellenar. */
-const onbScribble = (x0, x1, y, h, color = '#1E5BD8') => onbInk(OnbDemos.cursive(x0, x1, y, h, Math.max(20, Math.round((x1 - x0) / 4))), color, 2.6);
+/** Letras que se enlazan con la siguiente (salen por abajo o por arriba hacia la derecha) y las que no se dejan enlazar. */
+const ONB_HAND_OUT = new Set('acdeghiklmntuyzáéíúàèìùñü');
+const ONB_HAND_NOIN = new Set('fc');
 
-/** Construye la libreta de demostración completa. Devuelve { nb, parts } (`parts`: las piezas para la película). */
+const OnbHand = {
+  parsed: new Map(),
+  /** Una letra lista para usar: { w, strokes: [{ pts: [[x, y, esquina]], late }] }. Lo desconocido, como un espacio. */
+  glyph(ch) {
+    if (!this.parsed.has(ch)) {
+      const src = ONB_HAND[ch] ?? ONB_HAND[ch.normalize('NFC')] ?? ONB_HAND[' '];
+      const [w, ...strokes] = src.split('|');
+      this.parsed.set(ch, { w: Number(w), strokes: strokes.map((s) => {
+        const late = s.startsWith('*');
+        const pts = (late ? s.slice(1) : s).trim().split(/\s+/).map((p) => { const corner = p.endsWith('!'); const [x, y] = p.replace('!', '').split(',').map(Number); return [x, y, corner]; });
+        return { pts, late };
+      }) });
+    }
+    return this.parsed.get(ch);
+  },
+  /** Curva suave (Catmull-Rom centrípeta) por los puntos de control, cortada en las esquinas. Puntos cada `step` px. */
+  spline(ctrl, step = 1.6) {
+    const out = [];
+    let run = [ctrl[0]];
+    const flush = () => {
+      if (run.length < 2) { if (!out.length) out.push([run[0][0], run[0][1]]); return; }
+      const P = run, n = P.length;
+      const at = (i) => (i < 0 ? [2 * P[0][0] - P[1][0], 2 * P[0][1] - P[1][1]] : i >= n ? [2 * P[n - 1][0] - P[n - 2][0], 2 * P[n - 1][1] - P[n - 2][1]] : P[i]);
+      for (let i = 0; i < n - 1; i++) {
+        const p0 = at(i - 1), p1 = P[i], p2 = P[i + 1], p3 = at(i + 2);
+        const d = (a, b) => Math.max(1e-4, Math.sqrt(Math.hypot(b[0] - a[0], b[1] - a[1])));
+        const t1 = d(p0, p1), t2 = t1 + d(p1, p2), t3 = t2 + d(p2, p3);
+        const len = Math.hypot(p2[0] - p1[0], p2[1] - p1[1]), m = Math.max(1, Math.ceil(len / step));
+        for (let k = out.length ? 1 : 0; k <= m; k++) {
+          const t = t1 + (t2 - t1) * k / m, L = (a, b, ta, tb) => [(a[0] * (tb - t) + b[0] * (t - ta)) / (tb - ta), (a[1] * (tb - t) + b[1] * (t - ta)) / (tb - ta)];
+          const A1 = L(p0, p1, 0, t1), A2 = L(p1, p2, t1, t2), A3 = L(p2, p3, t2, t3), B1 = L(A1, A2, 0, t2), B2 = L(A2, A3, t1, t3);
+          out.push(L(B1, B2, t1, t2));
+        }
+      }
+    };
+    for (let i = 1; i < ctrl.length; i++) {
+      run.push(ctrl[i]);
+      if (ctrl[i][2] && i < ctrl.length - 1) { flush(); run = [ctrl[i]]; }
+    }
+    flush();
+    return out;
+  },
+  /** De unos puntos (px) a un trazo con presión y su tiempo: rápido en lo recto, despacio en las curvas cerradas.
+   *  o: { v (px/s), h (px de referencia para las curvas) }. Devuelve { points: [[x, y, presión]], times, dur }. */
+  ink(pts, o) {
+    const n = pts.length, v = o.v, h = o.h || 14;
+    const times = new Float32Array(n), points = [];
+    let t = 0, len = 0;
+    const total = pts.reduce((a, p, i) => a + (i ? Math.hypot(p[0] - pts[i - 1][0], p[1] - pts[i - 1][1]) : 0), 0);
+    for (let i = 0; i < n; i++) {
+      const a = pts[Math.max(0, i - 2)], b = pts[i], c = pts[Math.min(n - 1, i + 2)];
+      const ds = i ? Math.hypot(b[0] - pts[i - 1][0], b[1] - pts[i - 1][1]) : 0;
+      const v1 = [b[0] - a[0], b[1] - a[1]], v2 = [c[0] - b[0], c[1] - b[1]];
+      const l1 = Math.hypot(...v1) || 1, l2 = Math.hypot(...v2) || 1;
+      const turn = Math.acos(Math.max(-1, Math.min(1, (v1[0] * v2[0] + v1[1] * v2[1]) / (l1 * l2))));
+      const kappa = turn / Math.max(1, (l1 + l2) / 2);
+      len += ds;
+      const ramp = Math.min(1, 0.35 + len / (h * 0.5)) * Math.min(1, 0.45 + (total - len) / (h * 0.5));
+      const speed = v * ramp / (1 + 0.9 * h * kappa);
+      t += ds / Math.max(8, speed);
+      times[i] = t;
+      const dy = (c[1] - a[1]) / Math.max(1e-3, Math.hypot(c[0] - a[0], c[1] - a[1]));
+      const taper = Math.min(1, 0.25 + len / 5) * Math.min(1, 0.2 + (total - len) / 9);
+      points.push([b[0], b[1], Math.max(0.12, Math.min(0.9, (0.5 + 0.2 * dy - 0.12 * (speed / v - 0.6)) * taper))]);
+    }
+    return { points, times, dur: t };
+  },
+  /** `text` escrito a mano desde (x, y = renglón) con la altura de la x `h` px. Devuelve
+   *  { strokes: [{ points, times, dur, late, word }], words: [{ x0, x1 }], width }. Los tiempos van luego en cola. */
+  layout(text, o) {
+    const h = o.h, u = h / 10, slant = o.slant ?? 0.2, rnd = onbRandom(o.seed ?? 7), jit = o.jitter ?? 1;
+    const out = [], words = [];
+    let cx = o.x, word = -1, prev = null;
+    const put = (gx, gy, sc) => ([x, y, c]) => {
+      const X = gx + x * u * sc, Y = gy - y * u * sc;
+      return [X + (gy - Y) * slant + (rnd() - 0.5) * u * 0.16 * jit, Y + (rnd() - 0.5) * u * 0.16 * jit, c];
+    };
+    for (const ch of text) {
+      if (ch === ' ') { cx += ONB_HAND[' '].split('|')[0] * u; prev = null; continue; }
+      if (!prev) { word++; words.push({ x0: cx, x1: cx }); }
+      const g = this.glyph(ch), sc = 1 + (rnd() - 0.5) * 0.07 * jit, gy = o.y + Math.sin(cx / (h * 7) + (o.seed || 0)) * u * 0.5 * jit + (rnd() - 0.5) * u * 0.3 * jit;
+      const f = put(cx, gy, sc);
+      g.strokes.forEach((s, k) => {
+        const ctrl = s.pts.map(f);
+        const join = !k && !s.late && prev && ONB_HAND_OUT.has(prev.ch) && !ONB_HAND_NOIN.has(ch) && /\p{Ll}/u.test(ch) && prev.main;
+        if (join) { prev.main.ctrl.push(...ctrl); return; }
+        const st = { ctrl, late: s.late, word };
+        out.push(st);
+        if (!s.late) prev = { ch, main: st };
+      });
+      if (!g.strokes.some((s) => !s.late)) prev = { ch, main: null };
+      cx += (g.w + 1.9) * u * sc;
+      words[word].x1 = cx - 1.9 * u;
+    }
+    return { strokes: out, words, width: cx - o.x };
+  },
+  /** Trazos de bolígrafo de `text` con su tiempo (s desde 0). o: { x, y, h, color, width, seed, slant, v (alturas de x por s) }. */
+  write(text, o) {
+    const L = this.layout(text, o), h = o.h, v = (o.v || 15) * h;
+    // Orden natural: cada palabra, sus trazos principales y después los «tardíos» (puntos, tildes, palitos)
+    const order = [];
+    const nWords = L.words.length;
+    for (let w = 0; w < nWords; w++) {
+      const of = L.strokes.filter((s) => s.word === w);
+      order.push(...of.filter((s) => !s.late), ...of.filter((s) => s.late));
+    }
+    const strokes = [], words = L.words.map((w) => Object.assign({ t0: 0, t1: 0 }, w));
+    let t = 0, last = null;
+    for (const s of order) {
+      const pts = this.spline(s.ctrl, Math.max(1.1, h / 9));
+      const ink = this.ink(pts, { v, h });
+      if (last) {
+        const d = Math.hypot(pts[0][0] - last[0], pts[0][1] - last[1]);
+        t += 0.05 + d / (v * 1.9) + (s.word !== strokes.at(-1).word ? 0.1 : 0);
+      }
+      if (!strokes.length || s.word !== strokes.at(-1).word) words[s.word].t0 = t;
+      strokes.push({ id: uid(), tool: 'pen', kind: 'pen', color: o.color, width: o.width || 2.4, points: ink.points, word: s.word, t0: t, times: ink.times.map((x) => x + t) });
+      t += ink.dur;
+      words[s.word].t1 = t;
+      last = pts.at(-1);
+    }
+    return { strokes, words, dur: t, width: L.width };
+  },
+  /** Un dibujo a mano: cada trazo, una lista de puntos de control [x, y, esquina?] en px de página. */
+  draw(list, o) {
+    const rnd = onbRandom(o.seed ?? 3), jit = o.jitter ?? 1, v = o.v || 420, h = o.h || 30;
+    const strokes = [];
+    let t = 0, last = null;
+    for (const ctrl of list) {
+      const pts = this.spline(ctrl.map(([x, y, c]) => [x + (rnd() - 0.5) * 1.6 * jit, y + (rnd() - 0.5) * 1.6 * jit, c]), 2);
+      const ink = this.ink(pts, { v, h });
+      if (last) t += 0.08 + Math.hypot(pts[0][0] - last[0], pts[0][1] - last[1]) / (v * 2.2);
+      strokes.push({ id: uid(), tool: 'pen', kind: 'pen', color: o.color, width: o.width || 2.6, points: ink.points, t0: t, times: ink.times.map((x) => x + t) });
+      t += ink.dur;
+      last = pts.at(-1);
+    }
+    return { strokes, dur: t };
+  },
+};
+
+// ---------- Libreta de demostración «Así es Folia» y su película (final del tutorial) ----------
+// Folia crea sola una libreta de Medicina (insuficiencia cardiaca) y una película de ~70 s enseña cómo se hizo, como
+// un anuncio: letra manuscrita de verdad (OnbHand), un corazón dibujado trazo a trazo, cámara con curvas suaves e
+// inclinación 3D, un Apple Pencil con su sombra que sigue la punta y rótulos con tipografía cinética.
+// La libreta se construye ENTERA al empezar (datos normales: trazos, elementos, tarjetas, leyenda, page.ocr) y se
+// guarda en «Ejemplos»: si se cierra a mitad, queda completa. La película usa su propia copia con los tiempos de
+// cada punto: cada fotograma solo busca hasta dónde se ve cada trazo y dónde está la cámara (nada se recalcula).
+
+const ONB_FILM_INK = '#1B2A4A', ONB_FILM_RED = '#C8372D', ONB_FILM_BLUE = '#2F66D0', ONB_FILM_VIOLET = '#6B5CFF';
+/** Curva de aceleración suave (entra y sale despacio). */
+const onbEase = (x) => (x <= 0 ? 0 : x >= 1 ? 1 : x < 0.5 ? 4 * x * x * x : 1 - (-2 * x + 2) ** 3 / 2);
+/** Muelle amortiguado: de 0 a 1 con un pequeño rebote (aparecer de los paneles). */
+const onbSpring = (x) => (x <= 0 ? 0 : x >= 1 ? 1 : 1 - Math.exp(-6 * x) * Math.cos(9 * x));
+
+/** Construye la libreta de demostración y la película. Devuelve { nb, parts } (`parts`: tinta con tiempos, cámara…). */
 function onbFilmBuild() {
   const L = (es, it) => (I18N.lang === 'it' ? it : es);
   const style = (o) => Object.assign({}, DEFAULT_TEXT, o);
   const text = (x, y, w, html, base) => ({ id: uid(), type: 'text', x, y, w, html, base: style(base) });
-  const nb = newNotebook(L('Así es Folia', 'Ecco Folia'), '#6B5CFF', 'ruled', 'white');
+  const nb = newNotebook(L('Así es Folia', 'Ecco Folia'), '#6B5CFF', 'dots', 'white');
   const p1 = nb.pages[0], p2 = newPage('clinical', 'white');
   nb.pages.push(p2);
-  const P = {};
-  // Título escrito a mano
-  P.title = onbHandwrite(L('Así es Folia', 'Ecco Folia'), 70, 62, 72, '#3A2DB8', 4.5);
-  // Texto con la palabra clave resaltada y subrayada (de ahí sale la tarjeta de huecos)
-  const t1Plain = L('La mitocondria produce ATP para la célula.', 'Il mitocondrio produce ATP per la cellula.');
-  const [pre] = t1Plain.split('ATP');
-  P.t1 = text(70, 170, 660, `${esc(pre)}<span style="background-color:#FFE66B">ATP</span>${esc(t1Plain.slice(pre.length + 3))}`, { size: 26 });
-  const mctx = document.createElement('canvas').getContext('2d');
-  mctx.font = fontCSS(P.t1.base);
-  const tx = 70 + 9.5, ty = 170 + 7.5 + 26 * 0.67, wPre = mctx.measureText(pre).width, wAtp = mctx.measureText('ATP').width;
-  P.hl1 = onbInk([[tx + wPre + 10, ty], [tx + wPre + wAtp - 10, ty]], HL_COLORS[0], 26, 'highlighter');
-  // Forma perfecta: el círculo a mano (se ve temblón en la película) y una flecha con «ATP» a mano
-  const C = [200, 335], R = 72;
-  P.wobble = Array.from({ length: 73 }, (_, i) => { const a = i / 72 * Math.PI * 2 - Math.PI / 2, w = 1 + 0.08 * Math.sin(a * 3 + 1) + 0.05 * Math.sin(a * 7); return [C[0] + 4 + R * w * Math.cos(a) + (i > 66 ? (i - 66) * 2 : 0), C[1] + R * w * 0.9 * Math.sin(a)]; });
-  P.circle = onbInk(Array.from({ length: 73 }, (_, i) => { const a = i / 72 * Math.PI * 2 - Math.PI / 2; return [C[0] + 20 + R * Math.cos(a), C[1] + R * Math.sin(a)]; }), '#8E44AD', 3.5);
-  P.circleColor = '#E0362C'; P.circleDx = 20;   // antes de moverlo y cambiarle el color con el lazo
-  P.copy = onbInk(P.circle.points.map(([a, b]) => [a + 430, b]), '#8E44AD', 3.5);
-  P.arrow = [onbInk([[300, 335], [392, 335]], '#1E5BD8', 3), onbInk([[376, 322], [394, 335], [376, 348]], '#1E5BD8', 3)];
-  P.atp = onbScribble(410, 540, 352, 34, '#1E5BD8');
-  // Regla: una línea recta de lado a lado
-  P.rule = onbInk([[70, 452], [750, 452]], '#1C1C1E', 2.5);
-  // Colores con significado
-  P.t2 = text(70, 480, 680, L('Definición: orgánulo con doble membrana.', 'Definizione: organello con doppia membrana.'), { size: 22 });
-  P.t3 = text(70, 528, 680, L('Examen: ¡entra seguro!', 'Esame: esce sicuro!'), { size: 22 });
-  mctx.font = fontCSS(P.t2.base);
-  const w2 = mctx.measureText(P.t2.html).width, w3 = mctx.measureText(P.t3.html).width;
-  P.hl2 = onbInk([[90, 502], [70 + w2, 502]], HL_COLORS[0], 24, 'highlighter');
-  P.hl3 = onbInk([[90, 550], [70 + w3, 550]], HL_COLORS[2], 24, 'highlighter');
-  nb.legend = { [HL_COLORS[0].toLowerCase()]: L('Definición', 'Definizione'), [HL_COLORS[2].toLowerCase()]: L('Examen', 'Esame') };
-  // Cinta que tapa la respuesta
-  P.q = text(70, 610, 360, L('¿Qué produce la mitocondria?', 'Cosa produce il mitocondrio?'), { size: 22, bold: true });
-  P.ans = text(70, 660, 200, 'ATP', { size: 30, color: '#1E5BD8' });
-  P.tape = { id: uid(), type: 'tape', x: 62, y: 656, w: 210, h: 58, color: TAPE_COLORS[1] };
-  // Post-it con tinta dentro (coordenadas relativas a su esquina)
-  P.sticky = { id: uid(), type: 'sticky', x: 480, y: 600, w: 260, h: 210, color: STICKY_COLORS[0], html: '', base: style({ font: 'hand', size: 22 }),
-    strokes: [onbInk(OnbDemos.cursive(24, 200, 70, 30, 50), '#E0362C', 3),
-      onbInk(Array.from({ length: 50 }, (_, i) => { const a = i / 49 * Math.PI * 2; return [130 + 2.6 * 16 * Math.sin(a) ** 3, 140 - 2.6 * (13 * Math.cos(a) - 5 * Math.cos(2 * a) - 2 * Math.cos(3 * a) - Math.cos(4 * a))]; }), '#E0362C', 3)] };
-  // Comentario y enlace a la página del caso clínico
-  P.comment = { id: uid(), type: 'comment', x: 26, y: 172, title: 'Folia', color: COMMENT_COLORS[4], expanded: false, created: Date.now(), html: L('¡Pruébalo tú!', 'Provalo tu!'), base: style({ size: 16 }) };
-  P.link = text(70, 860, 420, `<a data-link='${JSON.stringify({ nb: nb.id, page: p2.id })}'>${L('Caso clínico →', 'Caso clinico →')}</a>`, { size: 24, color: '#1E5BD8', underline: true });
-  // Página 2: plantilla de Medicina (caso clínico) escrita a mano, con su transcripción (IA de ejemplo)
-  const lay = medLayout(p2);
-  P.med = [];
-  lay.fields.forEach((f) => P.med.push(onbScribble(f.x + 14, f.x + Math.min(f.w - 20, 260), f.y + f.h - 12, 22)));
-  lay.sections.slice(0, 3).forEach((s) => { for (let k = 0; k < 2; k++) P.med.push(onbScribble(s.x0 + 18, s.x0 + (s.x1 - s.x0) * (0.8 - k * 0.25), s.y + MED_ROW * (k + 2) - 8, 20, '#1C1C1E')); });
-  P.ocrText = L('Paciente: Ana, 54 años.\nMotivo: dolor torácico al subir escaleras.', 'Paziente: Anna, 54 anni.\nMotivo: dolore toracico salendo le scale.');
-  p2.ocr = [{ id: uid(), rect: { x: lay.fields[0].x, y: lay.fields[0].y, w: 740, h: 200 }, text: P.ocrText, at: Date.now() }];
-  p1.strokes.push(...P.title, P.hl1, P.circle, P.copy, ...P.arrow, P.atp, P.rule, P.hl2, P.hl3);
-  p1.items.push(P.t1, P.t2, P.t3, P.q, P.ans, P.tape, P.sticky, P.comment, P.link);
-  p2.strokes.push(...P.med);
-  // Tarjetas: desde el lazo, de huecos (lo subrayado, con la lógica de cloze.js) y de la IA (de ejemplo)
-  Cards.addMany(nb, [{ front: L('¿Qué orgánulo es?', 'Che organello è?'), back: L('La mitocondria', 'Il mitocondrio'), pageId: p1.id, rect: { x: 120, y: 255, w: 200, h: 165 } }]);
-  const seen = new Set();
-  Cloze.create(nb, Cloze.propose(nb).filter((c) => !seen.has(c.answer) && seen.add(c.answer)).slice(0, 2));
-  Cards.addMany(nb, [{ front: L('¿Qué produce la mitocondria?', 'Cosa produce il mitocondrio?'), back: L('ATP, la energía de la célula.', 'ATP, l’energia della cellula.'), pageId: p1.id }]).forEach((c) => { c.origin = 'ai'; });
-  nb.outline = [{ id: uid(), title: L('Así es Folia', 'Ecco Folia'), pageId: p1.id, level: 0 }, { id: uid(), title: L('Caso clínico', 'Caso clinico'), pageId: p2.id, level: 0 }];
+  const P = { ink: [], marks: [], cams: [], caps: [], taps: [], L, p1, p2 };
+  let seed = 3;
+  // Trazos con tiempo. Los de OnbHand traen t0 y times desde 0; aquí se ponen desde `t0` y duran `dur` (si se da).
+  const timed = (res, t0, o = {}) => {
+    const k = o.dur ? o.dur / res.dur : 1;
+    const list = res.strokes.map((st) => {
+      const s = { id: st.id, tool: o.tool || 'pen', kind: 'pen', color: st.color, width: st.width, points: st.points };
+      const f = { s, t0: t0 + st.t0 * k, times: Float32Array.from(st.times, (x) => t0 + x * k), pen: o.pen !== false, page: o.page || p1, layer: o.layer || 0 };
+      f.t1 = f.times[f.times.length - 1];
+      if (!o.hidden) P.ink.push(f);
+      return f;
+    });
+    return { list, t0, t1: t0 + res.dur * k, words: (res.words || []).map((w) => Object.assign({}, w, { t0: t0 + w.t0 * k, t1: t0 + w.t1 * k })) };
+  };
+  const write = (txt, x, y, h, t0, o = {}) => timed(OnbHand.write(txt, { x, y, h, color: o.color || ONB_FILM_INK, width: o.width || Math.max(2.2, h * 0.12), seed: seed++, v: o.v || 14 }), t0, o);
+  const draw = (list, t0, o = {}) => timed(OnbHand.draw(list, { color: o.color || ONB_FILM_INK, width: o.width || 2.6, seed: seed++, v: o.v || 520, h: o.h || 26, jitter: o.jitter ?? 0.6 }), t0, o);
+  // Subrayador: una pasada algo torcida (como a mano) sobre [x0, x1] a la altura y.
+  const hl = (x0, x1, y, color, t0, dur, o = {}) => {
+    const n = Math.max(6, Math.round((x1 - x0) / 6)), pts = [];
+    for (let i = 0; i <= n; i++) { const u = i / n; pts.push([x0 + (x1 - x0) * u, y + Math.sin(u * 2.4 + x0) * 1.2 - u * 1.5, 0.5]); }
+    const s = { id: uid(), tool: 'highlighter', kind: 'pen', color, width: o.width || 20, points: pts };
+    const f = { s, t0, t1: t0 + dur, times: Float32Array.from(pts, (_, i) => t0 + dur * onbEase(i / n) * 0.3 + dur * 0.7 * (i / n)), pen: o.pen !== false, page: p1, layer: 0 };
+    P.ink.push(f);
+    return f;
+  };
+  // Zigzag de color dentro de una zona (sombreado con subrayador, como en un buen apunte).
+  const tint = (pts, color, t0, dur, ox, oy) => {
+    const ctrl = pts.map(([x, y]) => [ox + x, oy + y, true]);
+    const dense = OnbHand.spline(ctrl, 4).map(([x, y]) => [x, y, 0.5]);
+    const s = { id: uid(), tool: 'highlighter', kind: 'pen', color, width: 17, points: dense };
+    const f = { s, t0, t1: t0 + dur, times: Float32Array.from(dense, (_, i) => t0 + dur * i / Math.max(1, dense.length - 1)), pen: true, page: p1, layer: 0 };
+    P.ink.push(f);
+    return f;
+  };
+  const cap = (t0, t1, a, b = '') => P.caps.push({ t0, t1, a, b });
+  const cam = (t, x, y, w, h, rx = 0, ry = 0) => P.cams.push({ t, x, y, w, h, rx, ry });
+
+  // ===== 1. Escribe a mano =====
+  P.header = text(590, 34, 200, L('Cardiología · Tema 4', 'Cardiologia · Tema 4'), { size: 14, color: '#8E8E93' });
+  cam(0, 360, 150, 760, 300, 16, -7);
+  P.title = write(L('Insuficiencia cardiaca', 'Insufficienza cardiaca'), 72, 128, 30, 1.5, { dur: 4.3 });
+  const tw = Math.min(700, P.title.words.at(-1).x1);
+  P.under = draw([[[70, 148], [70 + tw * 0.35, 145.5], [70 + tw * 0.7, 145], [tw + 8, 141.5]]], P.title.t1 + 0.2, { color: ONB_FILM_VIOLET, width: 3.4, dur: 0.42 });
+  cam(1.3, 300, 118, 520, 190, 0, 0);
+  cam(P.title.t1 - 0.6, 380, 128, 680, 210);
+  P.sym = write(L('Disnea · Edemas · Ortopnea', 'Dispnea · Edemi · Ortopnea'), 74, 214, 17, P.title.t1 + 1.05, { dur: 3.4 });
+  cam(P.title.t1 + 0.9, 330, 190, 600, 230);
+  cam(P.sym.t1, 360, 205, 640, 240);
+  cap(0.3, P.title.t1 + 0.4, L('Escribe a mano.', 'Scrivi a mano.'));
+  cap(P.title.t1 + 0.7, P.sym.t1 + 0.4, L('Como en papel.', 'Come sulla carta.'), L('Pero vivo.', 'Ma vivo.'));
+
+  // ===== 2. Forma perfecta (con tiradores) =====
+  let t = P.sym.t1 + 0.8;
+  cam(t, 230, 300, 420, 150);
+  P.icfer = write('IC-FEr', 74, 305, 18, t, { dur: 1.0 });
+  t = P.icfer.t1 + 0.3;
+  const ax0 = 172, ax1 = 254, ay = 299;
+  const wob = (u) => Math.sin(u * 9.5) * 2.2 + Math.sin(u * 23) * 0.9;
+  const shaftW = Array.from({ length: 24 }, (_, i) => { const u = i / 23; return [ax0 + (ax1 - ax0) * u, ay + wob(u) - u * 3, false]; });
+  const headW = [[ax1 - 15, ay - 13, false], [ax1 + 1, ay - 2.5, true], [ax1 - 14, ay + 10, false]];
+  const aw = draw([shaftW, headW], t, { dur: 0.75, jitter: 0.3 });
+  const arrowFix = (x1) => [[[ax0, ay], [x1, ay]], [[x1 - 13, ay - 11], [x1 + 1, ay], [x1 - 13, ay + 11]]];
+  P.arrow = { wob: aw.list, t0: t, snap: aw.t1 + 0.5, x1: ax1, x1b: ax1 + 14, drag: [aw.t1 + 1.25, aw.t1 + 1.75], fix: arrowFix };
+  P.taps.push({ t0: P.arrow.drag[0] - 0.05, t1: P.arrow.drag[1], at: (T) => [ax1 + 14 * onbEase(onbRamp(T, P.arrow.drag[0], P.arrow.drag[1])), ay] });
+  cap(P.icfer.t0 - 0.1, aw.t1 + 2.3, L('Mantén el trazo.', 'Tieni premuto.'), L('Queda perfecto.', 'Diventa perfetto.'));
+  t = P.arrow.drag[1] + 0.35;
+  P.fevi = write(L('↓ FEVI', '↓ FEVS'), 296, 305, 18, t, { dur: 1.0 });
+  const fx0 = P.fevi.words[0].x0, fx1 = P.fevi.words.at(-1).x1, ecx = (fx0 + fx1) / 2, erx = (fx1 - fx0) / 2 + 22, ery = 27, ecy = 298;
+  const ellW = Array.from({ length: 40 }, (_, i) => { const u = i / 39, a = -Math.PI * 0.62 + u * Math.PI * 2.12, r = 1 + 0.06 * Math.sin(a * 3 + 1) + (u > 0.9 ? (u - 0.9) * 0.9 : 0); return [ecx + erx * r * Math.cos(a) + 3, ecy + ery * r * Math.sin(a) + 2, false]; });
+  const ew = draw([ellW], P.fevi.t1 + 0.25, { dur: 0.7, color: ONB_FILM_RED, width: 3, jitter: 0.3 });
+  P.ell = { wob: ew.list, snap: ew.t1 + 0.5, cx: ecx, cy: ecy, rx: erx, ry: ery };
+  cam(P.icfer.t1, 250, 300, 440, 150);
+  cam(P.fevi.t0, 290, 300, 470, 160);
+  cam(P.ell.snap + 0.9, 300, 290, 520, 190);
+
+  // ===== 3. Dibuja lo que importa: corazón (cuatro cavidades) =====
+  const HX = 440, HY = 250, H = (pts, c) => pts.map(([x, y], i) => [HX + x, HY + y, !!(c && c.includes(i))]);
+  t = P.ell.snap + 1.5;
+  cam(t - 0.4, 600, 420, 380, 400, 14, 10);
+  const ell = (cx, cy, rx, ry, n = 16) => Array.from({ length: n + 1 }, (_, i) => { const a = i / n * Math.PI * 2 - Math.PI / 2; return [cx + rx * Math.cos(a), cy + ry * Math.sin(a)]; });
+  const tube = (x, y, h) => [[x - 6, y + 4], [x - 7, y - h * 0.6], [x - 4, y - h], [x + 1, y - h - 1.5], [x + 5, y - h + 0.5], [x + 6, y - h * 0.5], [x + 6, y + 2]];
+  const heart = [
+    [H([[86, 126], [64, 146], [53, 182], [54, 222], [66, 258], [92, 290], [130, 314], [180, 331], [226, 341], [244, 338]]), ONB_FILM_INK],
+    [H([[244, 338], [266, 322], [282, 290], [290, 248], [290, 206], [282, 168], [266, 140], [244, 127], [212, 122], [178, 121]]), ONB_FILM_INK],
+    [H([[108, 125], [124, 126.5], [140, 124]]), ONB_FILM_INK],
+    [H([[140, 124], [137, 96], [138, 66], [150, 38], [172, 18], [204, 9], [234, 14], [254, 32], [262, 60], [262, 90], [260, 116]]), ONB_FILM_RED],
+    [H([[176, 122], [174, 94], [178, 68], [192, 50], [208, 44], [222, 48], [230, 62], [232, 88], [232, 116]]), ONB_FILM_RED],
+    [H(ell(246, 116, 14, 4)), ONB_FILM_RED],
+    [H(tube(170, 22, 18)), ONB_FILM_RED], [H(tube(197, 13, 18)), ONB_FILM_RED], [H(tube(224, 14, 16)), ONB_FILM_RED],
+    [H([[84, 126], [83, 80], [84, 30]]), ONB_FILM_BLUE], [H([[108, 125], [108, 80], [109, 30]]), ONB_FILM_BLUE], [H(ell(96, 30, 12.5, 4)), ONB_FILM_BLUE],
+    [H([[287, 146], [300, 143], [313, 141]]), ONB_FILM_RED], [H([[289, 162], [301, 160], [314, 158]]), ONB_FILM_RED], [H(ell(314, 149.5, 3.2, 8.5, 12)), ONB_FILM_RED],
+    [H([[55, 204], [88, 199], [118, 196]]), ONB_FILM_INK], [H([[143, 194], [176, 192], [212, 190]]), ONB_FILM_INK], [H([[238, 189], [264, 187], [289, 186]]), ONB_FILM_INK],
+    [H([[120, 197], [124, 208], [129, 215]]), ONB_FILM_INK], [H([[141, 195], [137, 207], [131, 215]]), ONB_FILM_INK],
+    [H([[214, 191], [218, 203], [224, 210]]), ONB_FILM_INK], [H([[236, 190], [232, 202], [226, 210]]), ONB_FILM_INK],
+    [H([[170, 123], [168, 158], [170, 192]]), ONB_FILM_INK],
+    [H([[172, 196], [178, 236], [192, 276], [212, 310], [234, 334]]), ONB_FILM_INK],
+    [H([[238, 199], [258, 214], [268, 248], [264, 284], [248, 310], [228, 318], [212, 302], [200, 266], [194, 230], [198, 206], [211, 199]]), ONB_FILM_INK],
+  ];
+  P.heart = [];
+  heart.forEach(([pts, color], i) => {
+    const d = draw([pts], t, { color, width: i < 2 ? 3 : 2.5, v: 560, h: 30, jitter: 0.5 });
+    P.heart.push(...d.list);
+    t = d.t1 + (i < 3 ? 0.14 : 0.09);
+  });
+  // Escala de tiempo: el dibujo entero en ~7 s (mano rápida de quien repasa un esquema que se sabe)
+  const hs = P.heart[0].t0, he = P.heart.at(-1).t1, want = 6.4;
+  P.heart.forEach((f) => { const map = (x) => hs + (x - hs) * want / (he - hs); f.t0 = map(f.t0); f.times = f.times.map(map); f.t1 = map(f.t1); });
+  t = hs + want + 0.2;
+  P.heartDone = t;
+  cam(hs + 2.6, 600, 400, 380, 380, 6, 4);
+  // Sombreado: derecha en azul, izquierda en rosa (sangre venosa / arterial)
+  const B = HL_COLORS[3], R = HL_COLORS[2];
+  P.tint = [
+    tint([[96, 40], [96, 120]], B, t, 0.18, HX, HY),
+    tint([[70, 148], [150, 140], [66, 166], [156, 160], [70, 186], [156, 182]], B, t + 0.24, 0.3, HX, HY),
+    tint([[74, 222], [160, 216], [72, 244], [166, 240], [86, 266], [176, 262], [114, 288], [186, 290]], B, t + 0.6, 0.38, HX, HY),
+    tint([[186, 142], [272, 140], [182, 162], [280, 160], [186, 180], [280, 178]], R, t + 1.05, 0.3, HX, HY),
+    tint([[212, 220], [254, 218], [206, 246], [262, 246], [210, 272], [258, 274], [224, 298], [246, 300]], R, t + 1.42, 0.34, HX, HY),
+    tint([[158, 118], [156, 70], [170, 40], [205, 27], [238, 34], [248, 64], [247, 110]], R, t + 1.82, 0.3, HX, HY),
+  ];
+  t += 2.25;
+  // Rótulos
+  const lab = (s, x, y, h, tt, d) => write(s, HX + x, HY + y, h, tt, { dur: d, color: ONB_FILM_INK });
+  P.labels = [lab('AD', 92, 176, 13, t, 0.36), lab(L('AI', 'AS'), 210, 172, 13, t + 0.46, 0.36), lab('VD', 92, 262, 13, t + 0.92, 0.36), lab(L('VI', 'VS'), 216, 270, 13, t + 1.38, 0.36)];
+  t += 1.85;
+  P.lead = [draw([H([[264, 46], [286, 36]])], t, { width: 1.6, dur: 0.2 }), draw([H([[66, 62], [82, 70]])], t + 0.85, { width: 1.6, dur: 0.18 })];
+  P.labels.push(lab('Aorta', 290, 40, 12, t + 0.24, 0.52), lab('VCS', 16, 66, 12, t + 1.06, 0.42));
+  t += 1.6;
+  P.heartGlow = t;
+  cam(t - 2.2, 600, 400, 400, 390, -6, -4);
+  cam(t + 0.3, 600, 410, 420, 420, 0, 0);
+  cap(P.heart[0].t0 - 0.6, t + 0.6, L('Dibuja lo que importa.', 'Disegna ciò che conta.'));
+
+  // ===== 4. Colores con significado =====
+  t += 0.9;
+  cam(t - 0.2, 250, 330, 470, 330);
+  P.treat = write(L('Tratamiento:', 'Terapia:'), 74, 402, 15, t, { dur: 1.25 });
+  P.drug = write(L('IECA + β-bloq', 'ACE-i + β-bloc'), 96, 448, 18, P.treat.t1 + 0.3, { dur: 1.6 });
+  t = P.drug.t1 + 0.45;
+  cam(t - 0.4, 250, 320, 520, 340);
+  const sw = P.sym.words, Y = HL_COLORS[0], G = HL_COLORS[1];
+  P.hlSym = [0, 2, 4].map((i, k) => hl(sw[i].x0 - 4, sw[i].x1 + 2, 208, Y, t + k * 0.5, 0.36));
+  t += 1.65;
+  const dw = P.drug.words;
+  P.hlDrug = hl(dw[0].x0 - 6, dw.at(-1).x1 + 4, 441, G, t, 0.6, { width: 24 });
+  t += 0.8;
+  P.legend = { t0: t, t1: t + 2.6 };
+  nb.legend = { [Y.toLowerCase()]: L('Síntomas', 'Sintomi'), [G.toLowerCase()]: L('Tratamiento', 'Terapia') };
+  cap(P.treat.t0 + 0.2, t + 2.4, L('Cada color,', 'Ogni colore,'), L('un significado.', 'un significato.'));
+  t += 2.7;
+
+  // ===== 5. Lazo → tarjeta =====
+  cam(t - 0.5, 600, 420, 430, 420, 0, 0);
+  const lasso = Array.from({ length: 49 }, (_, i) => { const a = -2.2 + i / 48 * Math.PI * 2.08; return [HX + 172 + 205 * Math.cos(a) + 6 * Math.sin(a * 5), HY + 172 + 200 * Math.sin(a)]; });
+  const ld = draw([lasso.map(([x, y]) => [x, y, false])], t, { dur: 1.15, hidden: true, jitter: 0 });
+  P.lasso = { f: ld.list[0], t0: t, t1: ld.t1, sel: ld.t1 + 0.1 };
+  P.taps.push({ t0: t, t1: ld.t1, at: (T) => onbFilmPointAt(ld.list[0], T) });
+  t = ld.t1 + 0.9;
+  P.mkCard = { tap: t, t0: t + 0.35, flip: t + 2.0, out: t + 4.3, t1: t + 5.0 };
+  P.taps.push({ t0: t, t1: t + 0.1, ui: 'make' });
+  P.card = { front: L('¿Qué cavidad falla en la IC-FEr?', 'Quale cavità cede nell’IC-FEr?'), back: L('Ventrículo izquierdo', 'Ventricolo sinistro'), backSub: L('FEVI < 40 %', 'FEVS < 40 %') };
+  cap(P.lasso.t0 + 0.2, P.mkCard.t1 - 0.2, L('Rodéalo.', 'Cerchialo.'), L('Ya es una tarjeta.', 'È già una flashcard.'));
+  t = P.mkCard.t1 + 0.3;
+
+  // ===== 6. Cinta que tapa y se destapa =====
+  const tb = { x: dw[0].x0 - 12, y: 422, w: dw.at(-1).x1 - dw[0].x0 + 26, h: 40 };
+  P.tape = { id: uid(), type: 'tape', x: Math.round(tb.x), y: tb.y, w: Math.round(tb.w), h: tb.h, color: TAPE_COLORS[0] };
+  cam(t - 0.3, 210, 430, 340, 170, 12, 0);
+  P.tapeAnim = { lay: t + 0.3, open: t + 1.6, close: t + 3.2 };
+  P.taps.push({ t0: P.tapeAnim.open - 0.08, t1: P.tapeAnim.open + 0.06, ripple: [tb.x + tb.w * 0.55, tb.y + tb.h / 2] });
+  P.taps.push({ t0: P.tapeAnim.close - 0.08, t1: P.tapeAnim.close + 0.06, ripple: [tb.x + tb.w * 0.55, tb.y + tb.h / 2] });
+  cam(t + 1.2, 220, 435, 330, 160, 0, 0);
+  cap(t + 0.2, t + 4.1, L('Tápalo.', 'Coprilo.'), L('Ponte a prueba.', 'Mettiti alla prova.'));
+  t += 4.4;
+
+  // ===== 7. Audio sincronizado =====
+  cam(t - 0.4, 240, 520, 420, 200, 0, 0);
+  P.audio = { t0: t, play: t + 0.7, t1: t + 5.6 };
+  P.bnp = write(L('↑ BNP → confirma IC', '↑ BNP → conferma IC'), 74, 545, 16, P.audio.play + 0.3, { dur: 3.3, pen: false });
+  cap(t + 0.1, P.audio.t1 - 0.2, L('Graba la clase.', 'Registra la lezione.'), L('Revive cada trazo.', 'Rivivi ogni tratto.'));
+  t = P.audio.t1 + 0.2;
+
+  // ===== 8. Repaso de hoy, con racha =====
+  P.review = { t0: t, flip: t + 1.2, grade: t + 2.2, streak: t + 2.7, t1: t + 6.0 };
+  P.reviewCard = { front: L('Tratamiento de base de la IC-FEr', 'Terapia di base dell’IC-FEr'), back: L('IECA + β-bloqueantes', 'ACE-i + β-bloccanti') };
+  cam(t, 400, 380, 700, 600, 0, 0);
+  cap(t + 0.3, P.review.t1 - 0.2, L('Cinco minutos', 'Cinque minuti'), L('al día.', 'al giorno.'));
+  t = P.review.t1;
+
+  // ===== 9. iPad ↔ Mac =====
+  P.sync = { t0: t, ipad: t + 0.5, mac: t + 1.5, fly: t + 2.2, land: t + 3.4, t1: t + 5.0 };
+  cam(t + 0.2, 410, 580, 900, 1240, 0, 0);
+  cam(P.sync.ipad + 0.6, 410, 600, 1000, 1360, 8, -14);
+  cam(P.sync.mac + 0.4, 1220, 620, 2500, 1300, 10, -8);
+  cam(P.sync.t1, 1220, 620, 2600, 1350, 5, 0);
+  cap(P.sync.ipad, P.sync.t1 - 0.1, L('En tu iPad.', 'Sul tuo iPad.'), L('En tu Mac.', 'Sul tuo Mac.'));
+  t = P.sync.t1;
+
+  // ===== 10. Final: logotipo =====
+  P.end = { t0: t, word: t + 0.9, tag: t + 2.7, t1: t + 5.2 };
+  cam(t + 1.6, 1260, 640, 3600, 1900, 0, 0);
+  P.total = P.end.t1;
+  P.word = OnbHand.write('Folia', { x: 0, y: 0, h: 30, color: '#fff', width: 4.4, seed: 21, v: 9 });
+
+  // ===== La libreta guardada (lo mismo que se ve, más unas piezas para tocar) =====
+  p1.strokes.push(...P.ink.filter((f) => f.page === p1).map((f) => f.s));
+  // Las formas que se arreglan: en la libreta, ya perfectas
+  const fixed = (pts, color, width) => ({ id: uid(), tool: 'pen', kind: 'pen', color, width, points: Shapes.densify(pts).map(([a, b]) => [a, b, 0.5]) });
+  const wobIds = new Set([...P.arrow.wob, ...P.ell.wob].map((f) => f.s.id));
+  p1.strokes = p1.strokes.filter((s) => !wobIds.has(s.id));
+  P.arrowFixed = P.arrow.fix(P.arrow.x1b).map((pts) => fixed(pts, ONB_FILM_INK, 2.6));
+  P.ellFixed = fixed(ell(P.ell.cx, P.ell.cy, P.ell.rx, P.ell.ry, 72).map(([x, y]) => [x, y]), ONB_FILM_RED, 3);
+  p1.strokes.push(...P.arrowFixed, P.ellFixed);
+  P.sticky = { id: uid(), type: 'sticky', x: 520, y: 690, w: 230, h: 150, color: STICKY_COLORS[0], html: '', base: style({ font: 'hand', size: 22 }), strokes: [] };
+  P.sticky.strokes.push(...OnbHand.write(L('Examen', 'Esame'), { x: 26, y: 62, h: 20, color: ONB_FILM_RED, width: 2.6, seed: 31 }).strokes.map(onbFilmClean),
+    ...OnbHand.write(L('12 de noviembre', '12 novembre'), { x: 26, y: 112, h: 14, color: ONB_FILM_INK, width: 2.1, seed: 32 }).strokes.map(onbFilmClean));
+  P.comment = { id: uid(), type: 'comment', x: 30, y: 96, title: 'Folia', color: COMMENT_COLORS[4], expanded: false, created: Date.now(), html: L('¡Pruébalo tú! Toca la cinta para destaparla.', 'Provalo tu! Tocca il nastro per scoprirlo.'), base: style({ size: 16 }) };
+  P.link = text(70, 700, 360, `<a data-link='${JSON.stringify({ nb: nb.id, page: p2.id })}'>${L('Caso clínico →', 'Caso clinico →')}</a>`, { size: 22, color: '#1E5BD8', underline: true });
+  p1.items.push(P.header, P.tape, P.sticky, P.comment, P.link);
+  // Página 2: caso clínico escrito a mano (plantilla de Medicina) con su transcripción (IA de ejemplo)
+  const lay = medLayout(p2), sec = (i, k) => lay.sections[i].y + MED_ROW * (k + 2) - 9;
+  const case2 = [
+    [L('Ana, 67 años', 'Anna, 67 anni'), lay.fields[0].x + 14, lay.fields[0].y + 42, 15],
+    ['67', lay.fields[1].x + 14, lay.fields[1].y + 42, 15],
+    [L('Disnea de esfuerzo y edemas en tobillos', 'Dispnea da sforzo ed edemi alle caviglie'), lay.fields[2].x + 14, lay.fields[2].y + 42, 14],
+    [L('HTA y DM2. Infarto hace 3 años.', 'Ipertensione e DM2. Infarto 3 anni fa.'), lay.sections[0].x0 + 16, sec(0, 0), 13],
+    [L('Ortopnea de dos almohadas.', 'Ortopnea a due cuscini.'), lay.sections[0].x0 + 16, sec(0, 1), 13],
+    [L('Crepitantes en ambas bases. Edemas +', 'Crepitii a entrambe le basi. Edemi +'), lay.sections[1].x0 + 16, sec(1, 0), 13],
+    [L('Eco: FEVI 32 %. NT-proBNP 2400', 'Eco: FEVS 32 %. NT-proBNP 2400'), lay.sections[2].x0 + 16, sec(2, 0), 13],
+  ];
+  if (lay.sections[4]) case2.push([L('IC-FEr, NYHA III', 'IC-FEr, NYHA III'), lay.sections[4].x0 + 16, sec(4, 0) - MED_ROW, 13]);
+  if (lay.sections[5]) case2.push([L('IECA + β-bloq + iSGLT2', 'ACE-i + β-bloc + iSGLT2'), lay.sections[5].x0 + 16, sec(5, 0), 13]);
+  case2.forEach(([s, x, y, h], i) => p2.strokes.push(...OnbHand.write(s, { x, y, h, color: ONB_FILM_INK, width: Math.max(2, h * 0.13), seed: 40 + i }).strokes.map(onbFilmClean)));
+  P.ocrText = L('Paciente: Ana, 67 años.\nMotivo: disnea de esfuerzo y edemas en tobillos.', 'Paziente: Anna, 67 anni.\nMotivo: dispnea da sforzo ed edemi alle caviglie.');
+  p2.ocr = [{ id: uid(), rect: { x: lay.fields[0].x, y: lay.fields[0].y, w: 740, h: 160 }, text: P.ocrText, at: Date.now() }];
+  // Tarjetas: la del lazo (con el dibujo), de huecos (lo subrayado) y una de la IA (de ejemplo)
+  const heartRect = { x: HX - 10, y: HY - 20, w: 360, h: 380 };
+  let img = null;
+  try { img = onbFilmHeartImage(P, heartRect); } catch (e) { img = null; }
+  Cards.addMany(nb, [Object.assign({ front: P.card.front, back: `${P.card.back}\n${P.card.backSub}`, pageId: p1.id, rect: heartRect }, img ? { img, imgSide: 'front' } : {})]);
+  Cloze.create(nb, [
+    { front: L(`Tratamiento de base de la IC-FEr: ${CLOZE_GAP} + β-bloqueantes`, `Terapia di base dell’IC-FEr: ${CLOZE_GAP} + β-bloccanti`), answer: L('IECA', 'ACE-i'), pageId: p1.id, rect: { x: tb.x, y: tb.y, w: tb.w, h: tb.h }, src: { pageId: p1.id } },
+    { front: L(`Síntomas de IC: disnea, edemas y ${CLOZE_GAP}`, `Sintomi di IC: dispnea, edemi e ${CLOZE_GAP}`), answer: L('ortopnea', 'ortopnea'), pageId: p1.id, rect: { x: 60, y: 190, w: 460, h: 40 }, src: { pageId: p1.id } },
+  ]);
+  Cards.addMany(nb, [{ front: L('¿Qué péptido confirma la IC?', 'Quale peptide conferma l’IC?'), back: L('BNP / NT-proBNP elevado.', 'BNP / NT-proBNP elevato.'), pageId: p1.id }]).forEach((c) => { c.origin = 'ai'; });
+  nb.outline = [{ id: uid(), title: L('Insuficiencia cardiaca', 'Insufficienza cardiaca'), pageId: p1.id, level: 0 }, { id: uid(), title: L('Caso clínico', 'Caso clinico'), pageId: p2.id, level: 0 }];
   onbDemoRest(nb);
   return { nb, parts: P };
 }
+/** Un trazo de OnbHand sin sus tiempos (lo que se guarda). */
+const onbFilmClean = (st) => ({ id: st.id, tool: 'pen', kind: 'pen', color: st.color, width: st.width, points: st.points });
+/** Dónde va la punta de un trazo con tiempos en el instante T (entre dos puntos, interpolado). */
+function onbFilmPointAt(f, T) {
+  const tm = f.times, n = tm.length;
+  if (T <= tm[0]) return f.s.points[0];
+  if (T >= tm[n - 1]) return f.s.points[n - 1];
+  let lo = 0, hi = n - 1;
+  while (hi - lo > 1) { const m = (lo + hi) >> 1; if (tm[m] <= T) lo = m; else hi = m; }
+  const a = f.s.points[lo], b = f.s.points[hi], u = (T - tm[lo]) / Math.max(1e-6, tm[hi] - tm[lo]);
+  return [a[0] + (b[0] - a[0]) * u, a[1] + (b[1] - a[1]) * u, a[2]];
+}
+/** Cuántos puntos de un trazo se ven en T (búsqueda binaria en sus tiempos). */
+function onbFilmCount(f, T) {
+  const tm = f.times;
+  if (T < tm[0]) return 0;
+  let lo = 0, hi = tm.length;
+  while (lo < hi) { const m = (lo + hi) >> 1; if (tm[m] <= T) lo = m + 1; else hi = m; }
+  return lo;
+}
+/** Contorno de un trazo como Path2D (mismo dibujo que drawStroke, de render.js), para pintarlo muchas veces sin rehacerlo. */
+function onbFilmPath(s, pts = s.points) {
+  const path = new Path2D();
+  if (s.tool === 'highlighter') {
+    path.moveTo(pts[0][0], pts[0][1]);
+    for (let i = 1; i < pts.length - 1; i++) path.quadraticCurveTo(pts[i][0], pts[i][1], (pts[i][0] + pts[i + 1][0]) / 2, (pts[i][1] + pts[i + 1][1]) / 2);
+    path.lineTo(pts[pts.length - 1][0], pts[pts.length - 1][1]);
+  } else if (pts.length === 1) path.arc(pts[0][0], pts[0][1], s.width * 0.6, 0, Math.PI * 2);
+  else outlinePieces(path, outlinePoints(pts, strokeWidths(s, pts)));
+  return path;
+}
+/** Pinta un trazo (entero o sus primeros puntos) en ctx ya en px de página. */
+function onbFilmStroke(ctx, s, path) {
+  if (s.tool === 'highlighter') { ctx.globalAlpha = 0.38; ctx.strokeStyle = s.color; ctx.lineWidth = s.width; ctx.lineCap = ctx.lineJoin = 'round'; ctx.stroke(path); ctx.globalAlpha = 1; }
+  else { ctx.fillStyle = s.color; ctx.fill(path); }
+}
+/** Imagen del corazón (para la tarjeta del lazo y la de la película): el recorte de la página con su dibujo. */
+function onbFilmHeartImage(P, r, scale = 1.4, asCanvas = false) {
+  const c = document.createElement('canvas');
+  c.width = Math.round(r.w * scale); c.height = Math.round(r.h * scale);
+  const x = c.getContext('2d');
+  x.fillStyle = '#fff'; x.fillRect(0, 0, c.width, c.height);
+  x.scale(scale, scale); x.translate(-r.x, -r.y);
+  const ids = new Set([...P.heart, ...P.tint, ...P.labels.flatMap((l) => l.list), ...P.lead.flatMap((l) => l.list)].map((f) => f.s.id));
+  for (const f of P.ink) if (ids.has(f.s.id)) onbFilmStroke(x, f.s, onbFilmPath(f.s));
+  return asCanvas ? c : c.toDataURL('image/png');
+}
+
 /** ¿Es la libreta de demostración? (su título en una carpeta principal «Ejemplos»/«Esempi»; no lleva campo propio). */
 function onbIsDemo(nb) {
   const f = nb && typeof Folders !== 'undefined' ? Folders.byId(nb.folder) : null;
@@ -19510,8 +19992,23 @@ function onbDemoRest(nb, now = Date.now()) {
   return changed;
 }
 
+/** Puntos [x, y, 0.5] repartidos cada ~3 px por una línea quebrada (formas perfectas de la película). */
+function onbFilmLine(pts, n = 0) {
+  const d = Shapes.densify(pts.map(([x, y]) => [x, y]));
+  if (!n || d.length < 2) return d.map(([x, y]) => [x, y, 0.5]);
+  const len = [0];
+  for (let i = 1; i < d.length; i++) len.push(len[i - 1] + Math.hypot(d[i][0] - d[i - 1][0], d[i][1] - d[i - 1][1]));
+  const out = [], tot = len.at(-1) || 1;
+  for (let k = 0, j = 0; k < n; k++) {
+    const L = tot * k / (n - 1);
+    while (j < d.length - 2 && len[j + 1] < L) j++;
+    const u = (L - len[j]) / Math.max(1e-6, len[j + 1] - len[j]);
+    out.push([d[j][0] + (d[j + 1][0] - d[j][0]) * u, d[j][1] + (d[j + 1][1] - d[j][1]) * u, 0.5]);
+  }
+  return out;
+}
+
 const OnbFilm = {
-  GAP: 40,
   /** La libreta de esta sesión (o la ya creada con ese título): no se duplica al verla otra vez. */
   ensure() {
     let nb = nbById(this.nbId) || S.notebooks.find(onbIsDemo) || null;
@@ -19528,337 +20025,796 @@ const OnbFilm = {
   },
   /** Al arrancar: la demo creada con versiones anteriores tenía tarjetas pendientes; se ponen al día. */
   restOld() { for (const nb of S.notebooks) if (onbIsDemo(nb) && onbDemoRest(nb)) Store.put(nb); },
-  /** Pasos: [segundos, cámara [x, y, aumento] o función, rótulo, qué enseña]. */
-  steps(P) {
-    const p2y = PORTRAIT.h + this.GAP;
-    return [
-      { d: 5, cam: [390, 100, 2.1], cap: 'Escribe a mano, trazo a trazo', run: (k, v) => v.write(P.title, k) },
-      { d: 2.4, cam: [400, 192, 1.9], cap: 'Textos con estilo', run: (k, v) => v.type(P.t1, k) },
-      { d: 2.4, cam: [400, 192, 1.9], cap: 'Subraya lo importante', run: (k, v) => v.write([P.hl1], onbSmooth(k)), ui: (k, u) => u.tool(k) },
-      { d: 3.4, cam: [300, 335, 1.7], cap: 'Forma perfecta en directo: mantén quieto', run: (k, v) => v.shape(k), ui: (k, u) => u.hold(k) },
-      { d: 3, cam: [410, 452, 1.35], cap: 'La regla: líneas rectas y medidas', run: (k, v) => v.write([P.rule], onbSmooth(onbRamp(k, 0.25, 0.85))), ui: (k, u) => u.ruler(k) },
-      { d: 4, cam: [400, 515, 1.6], cap: 'Colores con significado', run: (k, v) => { v.type(P.t2, onbRamp(k, 0, 0.25)); v.type(P.t3, onbRamp(k, 0.2, 0.45)); v.write([P.hl2], onbRamp(k, 0.45, 0.6)); v.write([P.hl3], onbRamp(k, 0.6, 0.75)); }, ui: (k, u) => u.legend(onbRamp(k, 0.7, 0.85)) },
-      { d: 3, cam: [380, 340, 1.5], cap: 'Lazo: rodea y cuenta lo que coge', ui: (k, u) => u.lasso(onbSmooth(onbRamp(k, 0, 0.6)), k > 0.6 ? 'all' : '') },
-      { d: 2.6, cam: [380, 340, 1.5], cap: 'Filtro y «Solo este color»', ui: (k, u) => u.filter(k) },
-      { d: 3.5, cam: [480, 340, 1.25], cap: 'Mueve, cambia de color o copia', run: (k, v) => v.edit(k), ui: (k, u) => u.editBar(k) },
-      { d: 4.5, cam: (k) => [610, 705, 1.6 + 1.1 * onbSmooth(onbRamp(k, 0.15, 0.3)) * (1 - onbSmooth(onbRamp(k, 0.85, 1)))], cap: 'Post-it: «Ampliar» y dibuja dentro', run: (k, v) => v.sticky(k), ui: (k, u) => u.stickyBar(k) },
-      { d: 3.5, cam: [250, 655, 1.8], cap: 'Cinta: tapa la respuesta y destápala', run: (k, v) => v.tape(k), ui: (k, u) => u.tapTape(k) },
-      { d: 2.4, cam: [230, 200, 1.8], cap: 'Comentarios con nombre', run: (k, v) => v.show(P.comment, k > 0.1), ui: (k, u) => u.comment(onbRamp(k, 0.35, 0.5)) },
-      { d: 2.8, cam: [260, 875, 1.6], cap: 'Enlaces a otra página', run: (k, v) => v.type(P.link, onbRamp(k, 0, 0.4)), ui: (k, u) => u.tapAt(150, 878, onbRamp(k, 0.6, 0.85)) },
-      { d: 4, cam: [410, p2y + 330, 1.15], cap: 'Plantillas de Medicina', run: (k, v) => v.write(P.med, onbRamp(k, 0.15, 1)) },
-      { d: 2.8, cam: [410, p2y + 250, 1.15], cap: 'IA ▾ › Transcribir a texto', ui: (k, u) => u.ai('ocr', k) },
-      { d: 2.8, cam: [410, p2y + 250, 1.15], cap: 'IA › Resumen', ui: (k, u) => u.ai('summary', k) },
-      { d: 2.8, cam: [410, p2y + 250, 1.15], cap: 'IA › Tarjetas con su cita', ui: (k, u) => u.ai('cards', k) },
-      { d: 2.6, cam: [300, 335, 1.6], cap: 'Lazo › Crear tarjeta', ui: (k, u) => u.makeCard(k) },
-      { d: 3, cam: [400, 192, 1.9], cap: 'Tarjetas de huecos de lo subrayado', ui: (k, u) => u.cloze(k) },
-      { d: 3.6, cam: [410, 520, 0.95], cap: 'Repaso: Otra vez · Difícil · Bien · Fácil', ui: (k, u) => u.review(k) },
-      { d: 2.8, cam: [410, 580, 0.9], cap: 'Copia de seguridad: el escudo te avisa', ui: (k, u) => u.shield(k) },
-      { d: 1.6, cam: [410, 580, 0.9], cap: 'Así es Folia: ya está en tu biblioteca', ui: () => {} },
-    ];
-  },
 
-  /** Empieza la película en `canvas`. `opts.speed` (pruebas) la acelera; `opts.onStep(i, cap)` y `opts.onEnd()`. */
+  /** Empieza la película en `canvas` (.onb-film-cv; a su lado .onb-film-fx y .onb-film-cap).
+   *  opts: speed (pruebas), at (segundo de inicio), freeze (quieta en `at`: capturas), calm (sin movimiento:
+   *  prefers-reduced-motion), onStep(i, rótulo), onProgress(0–1), onEnd(). */
   play(canvas, opts = {}) {
     this.stop();
     const { parts: P, nb } = this.ensure();
-    const steps = this.steps(P), speed = opts.speed || 1, total = steps.reduce((a, s) => a + s.d, 0);
-    this.total = total;
-    const ctx = canvas.getContext('2d'), start = performance.now();
-    let last = -1;
+    P.cams.sort((a, b) => a.t - b.t);
+    this.P = P; this.nb = nb; this.total = P.total; this.tex = {}; this.special = null; this.stillKey = '';
+    this.track = this.pencilTrack(P);
+    this.tex.heart = onbFilmHeartImage(P, { x: 430, y: 225, w: 380, h: 375 }, 1.6, true);   // la tarjeta, lista antes de hacer falta
+    const root = canvas.parentElement;
+    this.el = { cv: canvas, fx: root.querySelector('.onb-film-fx'), cap: root.querySelector('.onb-film-cap') };
+    this.capIdx = -1; this.capStyle = []; this.blurNow = -1; this.tiltNow = '';
+    const speed = opts.speed || 1, start = performance.now();
+    // Versión tranquila: el final de cada golpe, quieto unos segundos, con un fundido entre uno y otro.
+    const stills = P.caps.map((c) => Math.min(P.total, c.t1 - 0.25)).concat(P.total);
+    const HOLD = 3.4;
     const frame = (now) => {
       if (!document.contains(canvas)) return;
-      const T = opts.freeze ? Math.min(total, opts.at || 0) : Math.min(total, (opts.at || 0) + (now - start) / 1000 * speed);
-      let i = 0, acc = 0;
-      while (i < steps.length - 1 && acc + steps[i].d <= T) acc += steps[i++].d;
-      const k = Math.min(1, (T - acc) / steps[i].d);
-      if (i !== last) { last = i; opts.onStep?.(i, steps[i].cap); }
-      this.draw(ctx, canvas, nb, P, steps, i, k);
-      opts.onProgress?.(T / total);
-      if (T >= total) { this.raf = 0; return opts.onEnd?.(); }
+      const real = Math.max(0, now - start) / 1000 * speed;   // el primer fotograma puede llevar una hora algo anterior
+      let T, fade = 1;
+      if (opts.calm) {
+        const i = Math.min(stills.length - 1, Math.floor(real / HOLD)), u = real / HOLD - i;
+        T = stills[i]; fade = Math.min(1, u / 0.12, (1 - u) / 0.12 + (i === stills.length - 1 ? 1 : 0));
+        canvas.parentElement.style.setProperty('--film-fade', fade.toFixed(3));
+        if (real >= HOLD * stills.length) T = P.total + 1;
+      } else T = opts.freeze ? Math.min(P.total, opts.at || 0) : Math.min(P.total, (opts.at || 0) + real);
+      this.render(Math.min(P.total, T), !!opts.calm);
+      const ci = P.caps.findIndex((c) => T < c.t1);
+      if (ci !== this.stepNow) { this.stepNow = ci; if (ci >= 0) opts.onStep?.(ci, P.caps[ci].a); }
+      opts.onProgress?.(Math.min(1, T / P.total));
+      if (T >= P.total && !opts.freeze) { this.raf = 0; return opts.onEnd?.(); }
       this.raf = requestAnimationFrame(frame);
     };
     this.raf = requestAnimationFrame(frame);
   },
   stop() { cancelAnimationFrame(this.raf); this.raf = 0; },
 
-  /** Un fotograma: qué se ve de la libreta (vista), la cámara y la interfaz de mentira encima. */
-  draw(ctx, canvas, nb, P, steps, i, k) {
-    const dpr = Math.min(devicePixelRatio || 1, 2), W = canvas.clientWidth, H = canvas.clientHeight;
+  /** Encuadre en T: caja de la página (centro, ancho, alto) e inclinación, de un fotograma clave al siguiente. */
+  camAt(T) {
+    const c = this.P.cams;
+    if (T <= c[0].t) return c[0];
+    for (let i = 0; i < c.length - 1; i++) {
+      if (T >= c[i + 1].t) continue;
+      const a = c[i], b = c[i + 1], u = onbEase((T - a.t) / Math.max(1e-6, b.t - a.t));
+      const lg = (p, q) => Math.exp(Math.log(p) + (Math.log(q) - Math.log(p)) * u);
+      return { x: a.x + (b.x - a.x) * u, y: a.y + (b.y - a.y) * u, w: lg(a.w, b.w), h: lg(a.h, b.h), rx: a.rx + (b.rx - a.rx) * u, ry: a.ry + (b.ry - a.ry) * u };
+    }
+    return c[c.length - 1];
+  },
+
+  /** Por dónde va la punta del lápiz: tramos en contacto (trazos, lazo, toques) ordenados en el tiempo. */
+  pencilTrack(P) {
+    const list = P.ink.filter((f) => f.pen).map((f) => ({ t0: f.t0, t1: f.t1, at: (T) => onbFilmPointAt(f, T) }));
+    for (const tp of P.taps) {
+      const pos = tp.at || (tp.ripple ? () => tp.ripple : null);
+      if (pos) list.push({ t0: tp.t0, t1: tp.t1, at: pos });
+    }
+    return list.sort((a, b) => a.t0 - b.t0);
+  },
+  /** { x, y (px de página), lift (0 apoyado – 1 levantado), away (0 en escena – 1 fuera) } o null. */
+  pencilAt(T) {
+    const L = this.track;
+    let i = -1;
+    for (let k = 0; k < L.length; k++) { if (L[k].t0 <= T) i = k; else break; }
+    const c = L[i], n = L[i + 1];
+    if (c && T <= c.t1) { const p = c.at(T); return { x: p[0], y: p[1], lift: 0, away: 0 }; }
+    const OUT = 0.65;
+    if (c && n && n.t0 - c.t1 < 2.2) {
+      const gap = Math.max(1e-3, n.t0 - c.t1), u = Math.min(1, (T - c.t1) / gap), a = c.at(c.t1), b = n.at(n.t0), e = onbEase(u);
+      return { x: a[0] + (b[0] - a[0]) * e, y: a[1] + (b[1] - a[1]) * e, lift: Math.sin(Math.PI * u) * Math.min(1, gap / 0.5), away: 0 };
+    }
+    if (c && T - c.t1 < OUT) { const a = c.at(c.t1), u = (T - c.t1) / OUT; return { x: a[0], y: a[1], lift: Math.min(1, u * 2), away: onbEase(u) }; }
+    if (n && n.t0 - T < OUT) { const b = n.at(n.t0), u = 1 - (n.t0 - T) / OUT; return { x: b[0], y: b[1], lift: Math.min(1, (1 - u) * 2), away: 1 - onbEase(u) }; }
+    return null;
+  },
+
+  // ---------- Un fotograma ----------
+  render(T, calm) {
+    const { cv, fx } = this.el, P = this.P;
+    const dpr = Math.min(devicePixelRatio || 1, 2), W = cv.clientWidth, H = cv.clientHeight;
     if (!W || !H) return;
-    if (canvas.width !== Math.round(W * dpr) || canvas.height !== Math.round(H * dpr)) { canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr); }
-    // Lo que se ve: todo lo de los pasos ya hechos, lo del paso actual a medias
-    const v = this.view(P);
-    for (let j = 0; j < i; j++) steps[j].run?.(1, v);
-    steps[i].run?.(k, v);
-    // Cámara: va suave del encuadre del paso anterior al de este
-    const camOf = (s, kk) => (typeof s.cam === 'function' ? s.cam(kk) : s.cam);
-    const from = i ? camOf(steps[i - 1], 1) : camOf(steps[0], 0), to = camOf(steps[i], k), e = onbSmooth(Math.min(1, k / 0.3));
-    const cam = from.map((a, n) => a + (to[n] - a) * e);
-    // En pantallas estrechas (móvil) se acerca menos: si no, la página se sale por los lados.
-    const fit = Math.min(W / (PORTRAIT.w + 60), H / (PORTRAIT.h + 60)), z = fit * Math.max(0.9, 1 + (cam[2] - 1) * Math.min(1, W / 1000));
+    for (const c of [cv, fx]) if (c && (c.width !== Math.round(W * dpr) || c.height !== Math.round(H * dpr))) { c.width = Math.round(W * dpr); c.height = Math.round(H * dpr); }
+    const dark = isDarkTheme();
+    const cam = Object.assign({}, this.camAt(T)), narrow = W < 600 && cam.w < 1200;
+    // Móvil: encuadre más cerrado y la cámara sigue a la mano (media de la punta en el último medio segundo)
+    if (narrow) {
+      let sum = 0, n = 0;
+      for (let k = 0; k < 8; k++) { const p = this.pencilAt(T - k * 0.08); if (p && !p.away) { sum += p.x; n++; } }
+      const want = n ? sum / n : null;
+      if (want !== null) cam.x += (Math.max(cam.x - cam.w * 0.3, Math.min(cam.x + cam.w * 0.3, want)) - cam.x) * 0.7;
+      cam.w = Math.max(cam.w * 0.62, Math.min(cam.w, 400));
+    }
+    const z = Math.min(W * 0.86 / cam.w, H * (W < 600 ? 0.56 : 0.6) / cam.h), sx = W / 2, sy = H * (W < 600 ? 0.4 : 0.43);
+    const S = { T, W, H, dpr, z, sx, sy, cam, dark, calm, s: Math.max(0.8, Math.min(1.6, W / 900, H / 680)), toScreen: (x, y) => [sx + (x - cam.x) * z, sy + (y - cam.y) * z] };
+    // Inclinación 3D de la escena (CSS: la compone la GPU) y desenfoque de lo que no está en foco
+    const tilt = calm ? '' : `perspective(${Math.round(Math.max(W, H) * 1.5)}px) rotateX(${cam.rx.toFixed(2)}deg) rotateY(${cam.ry.toFixed(2)}deg)`;
+    if (tilt !== this.tiltNow) { cv.style.transform = tilt; cv.style.transformOrigin = `${sx}px ${sy}px`; this.tiltNow = tilt; }
+    const blur = Math.round(this.blurAt(T) * 2) / 2;
+    if (blur !== this.blurNow) { cv.style.filter = blur ? `blur(${blur}px)` : ''; this.blurNow = blur; }
+    const ctx = cv.getContext('2d');
+    // Escena quieta y desenfocada (repaso, final): no se repinta (el desenfoque CSS no se recalcula)
+    const P2 = this.P, still = (T > P2.review.t0 + 0.7 && T < P2.review.t1 - 0.6) ? 'r' : T > P2.end.t0 + 1.7 ? 'e' : '';
+    const key = still && `${still}${W}x${H}${dark}`;
+    if (key && key === this.stillKey) { this.overlayOnly(fx, S); return; }
+    this.stillKey = key;
+    ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, cv.width, cv.height);
+    ctx.setTransform(dpr * z, 0, 0, dpr * z, dpr * (sx - cam.x * z), dpr * (sy - cam.y * z));
+    this.devices(ctx, S);
+    this.page(ctx, S);
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    ctx.fillStyle = 'rgb(28,28,34)'; ctx.fillRect(0, 0, W, H);
+    this.sceneUI(ctx, S);
+    if (!calm) this.pencil(ctx, S);
+    this.overlayOnly(fx, S);
+  },
+  overlayOnly(fx, S) {
+    const g = fx.getContext('2d');
+    g.setTransform(1, 0, 0, 1, 0, 0); g.clearRect(0, 0, fx.width, fx.height);
+    g.setTransform(S.dpr, 0, 0, S.dpr, 0, 0);
+    this.overlay(g, S);
+    this.caption(S.T, S.calm);
+  },
+  /** Desenfoque de la escena (px): cuando manda algo de encima (tarjeta, repaso, final). */
+  blurAt(T) {
+    const P = this.P, m = P.mkCard, r = P.review, e = P.end;
+    const card = onbRamp(T, m.t0, m.t0 + 0.7) * (1 - onbRamp(T, m.out, m.out + 0.6));
+    const rev = onbRamp(T, r.t0, r.t0 + 0.6) * (1 - onbRamp(T, r.t1 - 0.5, r.t1));
+    return Math.max(card * 9, rev * 12, onbRamp(T, e.t0, e.t0 + 1.2) * 14, (1 - onbEase(onbRamp(T, 0, 1.1))) * 16);
+  },
+
+  /** La página 1: papel, elementos, tinta hasta T y lo que pasa encima (formas que se arreglan, lazo, cinta). */
+  page(ctx, S) {
+    const P = this.P, T = S.T, page = P.p1, z = S.z * S.dpr;
+    // Sombra (hecha una vez, pequeña y difuminada) y papel con sus elementos (otra capa, a 2,5×): nada de esto se
+    // vuelve a dibujar en cada fotograma, solo se copia (60 fps en iPad).
+    const L = this.layers(S);
+    ctx.drawImage(L.shadow, -L.pad, -L.pad + 22, page.w + L.pad * 2, page.h + L.pad * 2);
     ctx.save();
-    ctx.translate(W / 2 - cam[0] * z, H / 2 - cam[1] * z); ctx.scale(z, z);
-    nb.pages.forEach((page, n) => {
-      ctx.save(); ctx.translate(0, n * (PORTRAIT.h + this.GAP));
-      ctx.shadowColor = 'rgba(0,0,0,.45)'; ctx.shadowBlur = 30; ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, page.w, page.h); ctx.shadowColor = 'transparent';
-      ctx.beginPath(); ctx.rect(0, 0, page.w, page.h); ctx.clip();
-      ctx.textAlign = 'start'; ctx.textBaseline = 'alphabetic';   // la interfaz de encima los cambia
-      drawPageQuick(ctx, v.page(page));   // sin imágenes ni PDF: se dibuja en el momento
-      v.extra(ctx, page);
+    ctx.beginPath(); ctx.rect(0, 0, page.w, page.h); ctx.clip();
+    ctx.drawImage(L.paper, 0, 0, page.w, page.h);
+    // La tinta ya terminada va a su capa poco a poco; de cerca (más detalle del que tiene la capa) se dibuja en vectores.
+    const special = this.special || (this.special = new Set([...P.arrow.wob, ...P.ell.wob].map((f) => f.s.id)));
+    const vector = z > L.K * 1.12;
+    if (T < L.T) { L.ink.getContext('2d').clearRect(0, 0, L.ink.width, L.ink.height); L.done.clear(); }
+    L.T = T;
+    const ic = L.ink.getContext('2d');
+    for (const f of P.ink) if (f.page === page && T >= f.t1 && !special.has(f.s.id) && !L.done.has(f)) { L.done.add(f); ic.setTransform(L.K, 0, 0, L.K, 0, 0); onbFilmStroke(ic, f.s, f.path || (f.path = onbFilmPath(f.s))); }
+    if (!vector) ctx.drawImage(L.ink, 0, 0, page.w, page.h);
+    // Lo visible de la página (para no pintar lo que cae fuera)
+    const vx0 = S.cam.x - (S.sx + 80) / S.z, vx1 = S.cam.x + (S.W - S.sx + 80) / S.z, vy0 = S.cam.y - (S.sy + 120) / S.z, vy1 = S.cam.y + (S.H - S.sy + 120) / S.z;
+    const sel = T >= P.lasso.sel && T < P.mkCard.t0 + 0.8 ? new Set([...P.heart, ...P.tint, ...P.labels.flatMap((l) => l.list), ...P.lead.flatMap((l) => l.list)].map((f) => f.s.id)) : null;
+    for (const f of P.ink) {
+      if (f.page !== page || T < f.t0 || special.has(f.s.id)) continue;
+      if (!vector && T >= f.t1 && !sel?.has(f.s.id)) continue;
+      const bb = f.bb || (f.bb = Shapes.bounds(f.s.points.map((q) => [q[0], q[1]])));
+      if (bb.x > vx1 || bb.x + bb.w < vx0 || bb.y > vy1 || bb.y + bb.h < vy0) continue;
+      let path;
+      if (T >= f.t1) path = f.path || (f.path = onbFilmPath(f.s));
+      else {
+        const n = onbFilmCount(f, T);
+        if (n < 1) continue;
+        const pts = f.s.points.slice(0, n);
+        pts.push(onbFilmPointAt(f, T));
+        path = onbFilmPath(f.s, pts);
+        if (!f.pen && f.s.tool !== 'highlighter') this.ghostTip(ctx, pts[pts.length - 1]);
+      }
+      if (sel?.has(f.s.id) && f.s.tool !== 'highlighter') { ctx.save(); ctx.strokeStyle = 'rgba(10,132,255,.28)'; ctx.lineWidth = 5; ctx.lineJoin = 'round'; ctx.stroke(path); ctx.restore(); }
+      if (vector || T < f.t1) onbFilmStroke(ctx, f.s, path);
+    }
+    // Brillo suave al acabar el dibujo
+    const hg = onbRamp(T, P.heartGlow - 0.1, P.heartGlow + 1.1);
+    if (hg > 0 && hg < 1) {
+      ctx.save(); ctx.globalAlpha = Math.sin(Math.PI * hg) * 0.7; ctx.shadowColor = ONB_FILM_VIOLET; ctx.shadowBlur = 22 * z;
+      for (const f of P.heart) onbFilmStroke(ctx, f.s, f.path || (f.path = onbFilmPath(f.s)));
       ctx.restore();
-    });
+    }
+    this.shapes(ctx, S);
+    this.tape(ctx, S);
+    this.lassoLine(ctx, S);
     ctx.restore();
-    const toScreen = (x, y) => [W / 2 + (x - cam[0]) * z, H / 2 + (y - cam[1]) * z];
-    ctx.save(); steps[i].ui?.(k, this.ui(ctx, W, H, z, toScreen, P)); ctx.restore();
+  },
+  /** Capas fijas de la página 1: sombra, papel con sus elementos y tinta terminada (px de página × K). */
+  layers(S) {
+    const P = this.P, page = P.p1, key = S.dark ? 'd' : 'l';
+    if (this.tex.layers?.key === key) return this.tex.layers;
+    const K = 2.5, pad = 120, mk = (w, h) => { const c = document.createElement('canvas'); c.width = Math.round(w); c.height = Math.round(h); return c; };
+    const sh = mk((page.w + pad * 2) / 4, (page.h + pad * 2) / 4), sx = sh.getContext('2d');
+    sx.scale(0.25, 0.25);
+    sx.shadowColor = S.dark ? 'rgba(0,0,0,.75)' : 'rgba(30,30,60,.22)'; sx.shadowBlur = 14; sx.shadowOffsetX = 10000; sx.fillStyle = '#000';
+    sx.fillRect(pad - 40000, pad, page.w, page.h);   // solo su sombra (la forma queda fuera del lienzo)
+    const paper = mk(page.w * K, page.h * K), px = paper.getContext('2d');
+    px.scale(K, K); px.textAlign = 'start'; px.textBaseline = 'alphabetic';
+    drawPageQuick(px, Object.assign({}, page, { strokes: [], items: [P.header, P.sticky, P.link] }));
+    const ink = this.tex.layers?.ink || mk(page.w * K, page.h * K);
+    ink.getContext('2d').clearRect(0, 0, ink.width, ink.height);
+    return (this.tex.layers = { key, K, pad, shadow: sh, paper, ink, done: new Set(), T: 0 });
+  },
+  /** Punta luminosa de la tinta que se escribe sola (audio): la voz va dejando el trazo. */
+  ghostTip(ctx, p) {
+    const r = 9;
+    const g = ctx.createRadialGradient(p[0], p[1], 0, p[0], p[1], r);
+    g.addColorStop(0, 'rgba(255,149,0,.95)'); g.addColorStop(1, 'rgba(255,149,0,0)');
+    ctx.save(); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(p[0], p[1], r, 0, 7); ctx.fill(); ctx.restore();
+  },
+  /** Flecha y óvalo: temblones al dibujarlos, se quedan perfectos al mantener (con brillo y tiradores). */
+  shapes(ctx, S) {
+    const P = this.P, T = S.T, z = S.z * S.dpr;
+    const one = (wob, snap, fixedOf, color, width) => {
+      if (T < wob[0].t0) return;
+      const m = onbEase(onbRamp(T, snap, snap + 0.24));
+      if (m <= 0) {
+        for (const f of wob) {
+          if (T < f.t0) continue;
+          const n = onbFilmCount(f, T), pts = f.s.points.slice(0, n);
+          if (T < f.t1) pts.push(onbFilmPointAt(f, T));
+          if (pts.length) onbFilmStroke(ctx, f.s, T >= f.t1 ? f.path || (f.path = onbFilmPath(f.s)) : onbFilmPath(f.s, pts));
+        }
+        return;
+      }
+      const fixed = fixedOf(T);
+      const paths = wob.map((f, k) => {
+        const tgt = onbFilmLine(fixed[k], f.s.points.length);
+        const pts = f.s.points.map((p, i) => [p[0] + (tgt[i][0] - p[0]) * m, p[1] + (tgt[i][1] - p[1]) * m, p[2] + (0.5 - p[2]) * m]);
+        return [Object.assign({}, f.s, { color, width: f.s.width + (width - f.s.width) * m }), pts];
+      });
+      const glow = 1 - onbRamp(T, snap, snap + 1.0);
+      for (const [s, pts] of paths) {
+        const path = onbFilmPath(s, pts);
+        if (glow > 0) { ctx.save(); ctx.globalAlpha = glow; ctx.shadowColor = ONB_FILM_VIOLET; ctx.shadowBlur = 16 * z; onbFilmStroke(ctx, s, path); ctx.restore(); }
+        onbFilmStroke(ctx, s, path);
+      }
+    };
+    const A = P.arrow;
+    one(A.wob, A.snap, (TT) => A.fix(A.x1 + (A.x1b - A.x1) * onbEase(onbRamp(TT, A.drag[0], A.drag[1]))), ONB_FILM_INK, 2.6);
+    const E = P.ell;
+    const ellPts = Array.from({ length: 73 }, (_, i) => { const a = -Math.PI * 0.62 + i / 72 * Math.PI * 2; return [E.cx + E.rx * Math.cos(a), E.cy + E.ry * Math.sin(a)]; });
+    one(E.wob, E.snap, () => [ellPts], ONB_FILM_RED, 3);
+  },
+  /** Cinta: se pega deslizándose, se levanta al tocarla (con sombra) y vuelve a taparlo. */
+  tape(ctx, S) {
+    const P = this.P, T = S.T, A = P.tapeAnim, t = P.tape;
+    if (T < A.lay) return;
+    const lay = onbEase(onbRamp(T, A.lay, A.lay + 0.45));
+    const lift = onbEase(onbRamp(T, A.open, A.open + 0.45)) * (1 - onbEase(onbRamp(T, A.close, A.close + 0.4)));
+    if (lift > 0.02) {   // marca fina donde estaba (como en la app)
+      ctx.save(); ctx.globalAlpha = 0.6 * lift; ctx.strokeStyle = '#C9B48A'; ctx.setLineDash([5, 4]); ctx.lineWidth = 1.2;
+      ctx.strokeRect(t.x + 0.5, t.y + 0.5, t.w - 1, t.h - 1); ctx.restore();
+    }
+    if (lift >= 0.98) return;
+    ctx.save();
+    ctx.translate(t.x, t.y + t.h / 2);
+    ctx.rotate(-0.12 * lift);
+    ctx.translate(-t.x, -(t.y + t.h / 2) - t.h * 1.6 * lift);
+    ctx.beginPath(); ctx.rect(t.x - 10, t.y - 200, (t.w + 20) * lay, t.h + 400); ctx.clip();
+    if (lift > 0) { ctx.shadowColor = 'rgba(0,0,0,.25)'; ctx.shadowBlur = 18 * lift * S.z * S.dpr; ctx.shadowOffsetY = 10 * lift * S.z * S.dpr; }
+    Tape.draw(ctx, t, 1 - lift * 0.85);
+    ctx.restore();
+  },
+  /** Lazo: línea discontinua violeta que la punta va dejando. */
+  lassoLine(ctx, S) {
+    const P = this.P, T = S.T, L = P.lasso;
+    if (T < L.t0 || T > P.mkCard.t0 + 1.2) return;
+    const f = L.f, n = onbFilmCount(f, T), pts = f.s.points.slice(0, n);
+    if (T < f.t1) pts.push(onbFilmPointAt(f, T));
+    if (pts.length < 2) return;
+    ctx.save();
+    ctx.globalAlpha = 1 - onbRamp(T, P.mkCard.t0 + 0.4, P.mkCard.t0 + 1.2);
+    ctx.strokeStyle = '#AF52DE'; ctx.lineWidth = 2.2; ctx.setLineDash([9, 7]); ctx.lineDashOffset = -T * 40; ctx.lineCap = 'round';
+    ctx.beginPath(); pts.forEach((p, i) => (i ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1])));
+    if (T >= f.t1) ctx.closePath();
+    ctx.stroke();
+    if (T >= f.t1) { ctx.globalAlpha *= 0.06 * onbRamp(T, f.t1, f.t1 + 0.3); ctx.fillStyle = '#AF52DE'; ctx.fill(); }
+    ctx.restore();
   },
 
-  /** Qué se ve de cada pieza: oculta, a medias o entera (sin tocar la libreta guardada). */
-  view(P) {
-    const shown = new Set(), part = new Map(), over = new Map(), extras = [];
-    const v = {
-      show(o, on = true) { if (on) shown.add(o.id); },
-      /** Trazos uno tras otro, hasta la fracción k del total de puntos. */
-      write(list, k) {
-        const n = list.reduce((a, s) => a + s.points.length, 0);
-        let left = Math.max(0, Math.min(1, k)) * n;
-        for (const s of list) {
-          if (left <= 0) break;
-          shown.add(s.id);
-          if (left < s.points.length) part.set(s.id, Object.assign({}, s, { points: s.points.slice(0, Math.max(2, Math.ceil(left))) }));
-          left -= s.points.length;
-        }
-      },
-      type(it, k) {
-        if (k <= 0) return;
-        shown.add(it.id);
-        if (k < 1) { const t = htmlText(it.html); over.set(it.id, Object.assign({}, it, { html: esc(t.slice(0, Math.ceil(t.length * k))) })); }
-      },
-      shape(k) {
-        const draw = onbRamp(k, 0, 0.45), morph = onbSmooth(onbRamp(k, 0.7, 0.82));
-        if (morph <= 0) {
-          const pts = P.wobble.slice(0, Math.max(2, Math.ceil(draw * P.wobble.length)));
-          extras.push((ctx) => { ctx.strokeStyle = P.circleColor; ctx.lineWidth = 3.5; ctx.lineCap = ctx.lineJoin = 'round'; ctx.beginPath(); pts.forEach(([x, y], n) => (n ? ctx.lineTo(x, y) : ctx.moveTo(x, y))); ctx.stroke(); });
-        } else v.circleAt(0, P.circleColor, 1 - morph);
-        v.write(P.arrow, onbRamp(k, 0.84, 0.92)); v.write([P.atp], onbRamp(k, 0.9, 1));
-      },
-      /** El círculo antes de editarlo con el lazo: más a la izquierda (−dx) y rojo. `blend`: lo que le queda de temblón. */
-      circleAt(dx, color, blend = 0) {
-        shown.add(P.circle.id);
-        const last = Math.max(1, P.circle.points.length - 1);
-        const pts = P.circle.points.map(([x, y, p], n) => { const w = P.wobble[Math.round(n / last * (P.wobble.length - 1))]; return [x - P.circleDx + dx + (w[0] - x + P.circleDx) * blend, y + (w[1] - y) * blend, p]; });
-        part.set(P.circle.id, Object.assign({}, P.circle, { points: pts, color }));
-      },
-      edit(k) {
-        const mv = onbSmooth(onbRamp(k, 0.05, 0.35)), recolor = k > 0.5, copy = onbSmooth(onbRamp(k, 0.68, 0.9));
-        if (k < 1) v.circleAt(P.circleDx * mv, recolor ? '#8E44AD' : P.circleColor); else { shown.add(P.circle.id); part.delete(P.circle.id); }
-        if (copy > 0) { shown.add(P.copy.id); if (copy < 1) part.set(P.copy.id, Object.assign({}, P.copy, { points: P.copy.points.map(([x, y, p]) => [x - 430 * (1 - copy), y, p]) })); }
-      },
-      sticky(k) {
-        const drop = onbSmooth(onbRamp(k, 0, 0.12));
-        if (drop <= 0) return;
-        shown.add(P.sticky.id);
-        const ink = onbRamp(k, 0.32, 0.8), n = P.sticky.strokes.reduce((a, s) => a + s.points.length, 0);
-        let left = ink * n;
-        const strokes = [];
-        for (const s of P.sticky.strokes) { if (left <= 0) break; strokes.push(left < s.points.length ? Object.assign({}, s, { points: s.points.slice(0, Math.max(2, Math.ceil(left))) }) : s); left -= s.points.length; }
-        over.set(P.sticky.id, Object.assign({}, P.sticky, { y: P.sticky.y - 120 * (1 - drop), strokes }));
-      },
-      tape(k) {
-        v.show(P.q); v.show(P.ans);
-        const lift = onbSmooth(onbRamp(k, 0.3, 0.42)) * (1 - onbSmooth(onbRamp(k, 0.75, 0.87)));
-        if (k < 0.12) return;
-        shown.add(P.tape.id);
-        if (lift > 0) over.set(P.tape.id, Object.assign({}, P.tape, { open: true }));
-        if (lift > 0 && lift <= 0.95) extras.push((ctx) => { ctx.globalAlpha = 1 - lift; Tape.draw(ctx, Object.assign({}, P.tape, { y: P.tape.y - 40 * lift })); ctx.globalAlpha = 1; });
-      },
-      page(page) {
-        const strokes = page.strokes.filter((s) => shown.has(s.id)).map((s) => part.get(s.id) || s);
-        const items = page.items.filter((it) => shown.has(it.id)).map((it) => over.get(it.id) || it);
-        return Object.assign({}, page, { strokes, items });
-      },
-      extra(ctx, page) { if (page.strokes.includes(P.title[0])) extras.forEach((f) => { ctx.save(); f(ctx); ctx.restore(); }); },
-    };
-    return v;
+  /** iPad (marco alrededor de la página) y Mac (a la derecha), con la libreta que viaja de uno a otro. */
+  devices(ctx, S) {
+    const P = this.P, T = S.T, Y = P.sync, z = S.z * S.dpr;
+    const ip = onbEase(onbRamp(T, Y.ipad - 0.4, Y.ipad + 0.5)), mac = onbEase(onbRamp(T, Y.mac - 0.3, Y.mac + 0.6));
+    if (ip <= 0) return;
+    const pw = P.p1.w, ph = P.p1.h;
+    // iPad: borde de aluminio, marco negro y pantalla con la barra de la app
+    ctx.save();
+    ctx.globalAlpha = ip;
+    ctx.shadowColor = S.dark ? 'rgba(0,0,0,.6)' : 'rgba(20,20,40,.25)'; ctx.shadowBlur = 80 * z; ctx.shadowOffsetY = 40 * z;
+    ctx.fillStyle = S.dark ? '#3A3A3E' : '#D7D9DE';
+    ctx.beginPath(); ctx.roundRect(-62, -112, pw + 124, ph + 174, 78); ctx.fill();
+    ctx.shadowColor = 'transparent';
+    ctx.fillStyle = '#0B0B0D'; ctx.beginPath(); ctx.roundRect(-55, -105, pw + 110, ph + 160, 72); ctx.fill();
+    ctx.fillStyle = S.dark ? '#1C1C1E' : '#EEEEF1'; ctx.beginPath(); ctx.roundRect(-30, -80, pw + 60, ph + 110, 46); ctx.fill();
+    // Barra de herramientas: lápices de colores y la punta (sin texto)
+    ctx.fillStyle = S.dark ? '#2C2C2E' : '#fff'; ctx.beginPath(); ctx.roundRect(pw / 2 - 210, -64, 420, 40, 20); ctx.fill();
+    [ONB_FILM_INK, ONB_FILM_RED, ONB_FILM_BLUE, HL_COLORS[0], HL_COLORS[1]].forEach((c, i) => { ctx.fillStyle = c; ctx.beginPath(); ctx.arc(pw / 2 - 150 + i * 46, -44, 11, 0, 7); ctx.fill(); });
+    ctx.fillStyle = '#AF52DE'; ctx.beginPath(); ctx.roundRect(pw / 2 + 96, -54, 70, 20, 10); ctx.fill();
+    ctx.restore();
+    if (mac <= 0) return;
+    // Mac: pantalla con la libreta (cuando llega) y la base
+    const mx = 1120, my = 70, mw = 1500, mh = 960;
+    ctx.save();
+    ctx.globalAlpha = mac;
+    ctx.translate(0, (1 - mac) * 60);
+    ctx.shadowColor = S.dark ? 'rgba(0,0,0,.6)' : 'rgba(20,20,40,.22)'; ctx.shadowBlur = 90 * z; ctx.shadowOffsetY = 40 * z;
+    ctx.fillStyle = '#0B0B0D'; ctx.beginPath(); ctx.roundRect(mx, my, mw, mh, [44, 44, 10, 10]); ctx.fill();
+    ctx.shadowColor = 'transparent';
+    ctx.strokeStyle = S.dark ? '#4A4A4F' : '#B9BBC1'; ctx.lineWidth = 6; ctx.stroke();
+    const scr = { x: mx + 30, y: my + 30, w: mw - 60, h: mh - 56 };
+    ctx.fillStyle = S.dark ? '#1C1C1E' : '#F2F2F5'; ctx.fillRect(scr.x, scr.y, scr.w, scr.h);
+    // Barra lateral de la app con dos miniaturas
+    ctx.fillStyle = S.dark ? '#242427' : '#E6E6EA'; ctx.fillRect(scr.x, scr.y, 230, scr.h);
+    const land = onbEase(onbRamp(T, Y.land, Y.land + 0.6));
+    const img = this.pageImage();
+    ctx.save(); ctx.beginPath(); ctx.rect(scr.x, scr.y, scr.w, scr.h); ctx.clip();
+    if (land > 0) {
+      ctx.globalAlpha = mac * land;
+      ctx.drawImage(img, scr.x + 60, scr.y + 40, 110, 156);
+      ctx.drawImage(this.page2Image(), scr.x + 60, scr.y + 230, 110, 156);
+      const ph2 = scr.h - 70, pw2 = ph2 * pw / ph, px = scr.x + 230 + (scr.w - 230 - pw2) / 2, py = scr.y + 35 + (1 - land) * 30;
+      ctx.shadowColor = 'rgba(0,0,0,.18)'; ctx.shadowBlur = 30 * z; ctx.fillStyle = '#fff'; ctx.fillRect(px, py, pw2, ph2); ctx.shadowColor = 'transparent';
+      ctx.drawImage(img, px, py, pw2, ph2);
+    }
+    ctx.restore();
+    // Base del portátil
+    ctx.fillStyle = S.dark ? '#5A5B60' : '#CDD0D6';
+    ctx.beginPath(); ctx.moveTo(mx - 120, my + mh); ctx.lineTo(mx + mw + 120, my + mh); ctx.lineTo(mx + mw + 90, my + mh + 40); ctx.lineTo(mx - 90, my + mh + 40); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = S.dark ? '#3E3F43' : '#B3B6BD'; ctx.beginPath(); ctx.roundRect(mx + mw / 2 - 130, my + mh, 260, 14, [0, 0, 10, 10]); ctx.fill();
+    ctx.restore();
+    // La libreta que viaja: arco del iPad al Mac, con estela
+    const fl = onbRamp(T, Y.fly, Y.land);
+    if (fl > 0 && fl < 1) {
+      const p0 = [pw / 2, ph * 0.3], p2 = [scr.x + scr.w * 0.58, scr.y + scr.h * 0.45], c1 = [(p0[0] + p2[0]) / 2, -520];
+      const at = (u) => [(1 - u) ** 2 * p0[0] + 2 * (1 - u) * u * c1[0] + u * u * p2[0], (1 - u) ** 2 * p0[1] + 2 * (1 - u) * u * c1[1] + u * u * p2[1]];
+      const e = onbEase(fl);
+      ctx.save();
+      ctx.strokeStyle = 'rgba(175,82,222,.5)'; ctx.lineWidth = 6; ctx.lineCap = 'round'; ctx.setLineDash([2, 22]);
+      ctx.beginPath(); for (let k = 0; k <= 30; k++) { const q = at(Math.max(0, e - 0.35) + (e - Math.max(0, e - 0.35)) * k / 30); k ? ctx.lineTo(q[0], q[1]) : ctx.moveTo(q[0], q[1]); } ctx.stroke();
+      const [x, y] = at(e), sc = 1.5 + Math.sin(Math.PI * e) * 0.7;
+      ctx.translate(x, y); ctx.scale(sc, sc); ctx.rotate(Math.sin(Math.PI * e) * -0.2);
+      ctx.shadowColor = 'rgba(107,92,255,.8)'; ctx.shadowBlur = 50 * z;
+      const g = ctx.createLinearGradient(-90, -120, 90, 120); g.addColorStop(0, '#6B5CFF'); g.addColorStop(1, '#B84DF2');
+      ctx.fillStyle = g; ctx.beginPath(); ctx.roundRect(-90, -120, 180, 240, 22); ctx.fill();
+      ctx.shadowColor = 'transparent'; ctx.fillStyle = 'rgba(0,0,0,.18)'; ctx.fillRect(-90, -120, 26, 240);
+      ctx.drawImage(img, -50, -86, 128, 172);
+      ctx.restore();
+    }
+  },
+  /** La página 1 terminada, en un lienzo (para el Mac y la libreta que vuela): se dibuja una sola vez. */
+  pageImage() {
+    if (this.tex.page) return this.tex.page;
+    const c = document.createElement('canvas'), k = 0.9, p = this.nb.pages[0];
+    c.width = Math.round(p.w * k); c.height = Math.round(p.h * k);
+    const x = c.getContext('2d'); x.scale(k, k);
+    const P = this.P;
+    drawPageQuick(x, Object.assign({}, P.p1, { strokes: [], items: [P.header, P.sticky, P.link] }));
+    const skip = new Set([...P.arrow.wob, ...P.ell.wob].map((f) => f.s.id));
+    for (const f of P.ink) if (f.page === P.p1 && !skip.has(f.s.id)) onbFilmStroke(x, f.s, f.path || (f.path = onbFilmPath(f.s)));
+    for (const s of [...P.arrowFixed, P.ellFixed]) onbFilmStroke(x, s, onbFilmPath(s));
+    Tape.draw(x, P.tape);
+    return (this.tex.page = c);
   },
 
-  /** Interfaz de mentira dibujada encima (px de pantalla): botones, menús, contador del lazo, repaso… */
-  ui(ctx, W, H, z, at, P) {
-    const R = ROUNDED, s = Math.max(0.8, Math.min(1.25, W / 900));
-    const pill = (text, x, y, on, color = '#007AFF', dark = false) => {
-      ctx.font = `600 ${14 * s}px ${R}`; const w = ctx.measureText(text).width + 26 * s, h = 30 * s;
-      ctx.save(); ctx.shadowColor = 'rgba(0,0,0,.3)'; ctx.shadowBlur = 10;
-      ctx.fillStyle = on ? color : dark ? 'rgba(40,40,50,.92)' : '#fff'; ctx.beginPath(); ctx.roundRect(x - w / 2, y - h / 2, w, h, h / 2); ctx.fill(); ctx.restore();
-      OnbDemos.label(ctx, text, x, y + 0.5, `600 ${14 * s}px ${R}`, on || dark ? '#fff' : onbGray(0.2));
-      return w;
+  /** Miniatura de la página 2 (caso clínico) para la barra lateral del Mac. */
+  page2Image() {
+    if (this.tex.p2) return this.tex.p2;
+    const c = document.createElement('canvas'), k = 0.25, p = this.nb.pages[1] || this.P.p2;
+    c.width = Math.round(p.w * k); c.height = Math.round(p.h * k);
+    const x = c.getContext('2d'); x.scale(k, k);
+    drawPageQuick(x, Object.assign({}, p, { items: [] }));
+    return (this.tex.p2 = c);
+  },
+
+  // ---------- Encima de la escena (px de pantalla, inclinados con ella) ----------
+  sceneUI(ctx, S) {
+    const P = this.P, T = S.T;
+    // Mantén quieto: un anillo que se llena junto a la punta
+    for (const [wob, snap] of [[P.arrow.wob, P.arrow.snap], [P.ell.wob, P.ell.snap]]) {
+      const end = wob.at(-1), k = onbRamp(T, end.t1 + 0.05, snap);
+      if (k > 0 && T < snap + 0.25) {
+        const [x, y] = S.toScreen(...end.s.points.at(-1).slice(0, 2));
+        ctx.save(); ctx.globalAlpha = 1 - onbRamp(T, snap, snap + 0.25);
+        ctx.strokeStyle = 'rgba(175,82,222,.25)'; ctx.lineWidth = 4; ctx.beginPath(); ctx.arc(x, y, 22, 0, 7); ctx.stroke();
+        ctx.strokeStyle = '#AF52DE'; ctx.lineCap = 'round'; ctx.beginPath(); ctx.arc(x, y, 22, -Math.PI / 2, -Math.PI / 2 + k * Math.PI * 2); ctx.stroke();
+        ctx.restore();
+      }
+    }
+    // Tiradores de las formas perfectas
+    const handles = (pts, a) => {
+      if (a <= 0) return;
+      ctx.save(); ctx.globalAlpha = a;
+      for (const [px, py] of pts) {
+        const [x, y] = S.toScreen(px, py);
+        ctx.shadowColor = 'rgba(0,0,0,.25)'; ctx.shadowBlur = 6; ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(x, y, 8, 0, 7); ctx.fill();
+        ctx.shadowColor = 'transparent'; ctx.strokeStyle = '#0A84FF'; ctx.lineWidth = 2.5; ctx.stroke();
+      }
+      ctx.restore();
     };
-    const panel = (x, y, w, h, alpha = 1) => { ctx.save(); ctx.globalAlpha = alpha; ctx.shadowColor = 'rgba(0,0,0,.35)'; ctx.shadowBlur = 18; ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.roundRect(x, y, w, h, 14 * s); ctx.fill(); ctx.restore(); };
-    const txt = (t, x, y, size = 14, color = onbGray(0.2), weight = 500, align = 'left') => OnbDemos.label(ctx, t, x, y, `${weight} ${size * s}px ${R}`, color, align);
-    const tap = (x, y, k, color = '#BF59FF') => { if (k <= 0 || k >= 1) return; ctx.save(); ctx.globalAlpha = 1 - k; ctx.strokeStyle = color; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(x, y, (10 + 22 * k) * s, 0, 7); ctx.stroke(); ctx.restore(); };
-    const example = (x, y) => { ctx.font = `700 ${11 * s}px ${R}`; const w = ctx.measureText(tr('ejemplo')).width + 14 * s; ctx.fillStyle = 'rgba(175,82,222,.15)'; ctx.beginPath(); ctx.roundRect(x, y - 9 * s, w, 18 * s, 9 * s); ctx.fill(); txt(tr('ejemplo'), x + 7 * s, y, 11, '#AF52DE', 700); };
-    const sel = (pts, k) => { ctx.save(); ctx.strokeStyle = '#AF52DE'; ctx.lineWidth = 2.2; ctx.setLineDash([8, 6]); ctx.lineDashOffset = -performance.now() / 30; const q = pts.map(([x, y]) => at(x, y)); OnbDemos.path(ctx, q, k); ctx.restore(); };
-    const loop = (cx, cy, rx, ry) => Array.from({ length: 61 }, (_, n) => { const a = n / 60 * Math.PI * 2 - 2.6; return [cx + rx * Math.cos(a) + 5 * Math.sin(a * 5), cy + ry * Math.sin(a)]; });
-    const glow = (x, y, w, h) => { const [a, b] = at(x, y); ctx.save(); ctx.strokeStyle = 'rgba(0,122,255,.75)'; ctx.setLineDash([4, 4]); ctx.lineWidth = 1.5; ctx.strokeRect(a, b, w * z, h * z); ctx.restore(); };
-    const bottom = H - 96 * s;
-    return {
-      tool(k) { const w = pill(`    ${tr('Subrayador')}`, W / 2, 34 * s, true, 'rgba(28,28,30,.92)'); ctx.fillStyle = HL_COLORS[0]; ctx.beginPath(); ctx.arc(W / 2 - w / 2 + 18 * s, 34 * s, 7 * s, 0, 7); ctx.fill(); void k; },
-      hold(k) {
-        const h = onbRamp(k, 0.45, 0.7);
-        if (h <= 0 || k > 0.82) return;
-        const end = P.wobble.at(-1), [x, y] = at(end[0], end[1]);
-        ctx.strokeStyle = '#AF52DE'; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(x, y, 16 * s, -Math.PI / 2, -Math.PI / 2 + h * Math.PI * 2); ctx.stroke();
-        pill(tr('Mantén quieto…'), x, y - 40 * s, false, '#007AFF', true);
-      },
-      ruler(k) {
-        const a = onbSmooth(onbRamp(k, 0, 0.2)) * (1 - onbSmooth(onbRamp(k, 0.9, 1)));
-        if (a <= 0) return;
-        const [x0, y0] = at(60, 458), [x1] = at(760, 458);
-        ctx.save(); ctx.globalAlpha = a;
-        ctx.fillStyle = 'rgba(120,130,150,.35)'; ctx.strokeStyle = 'rgba(80,90,110,.6)'; ctx.beginPath(); ctx.roundRect(x0, y0, x1 - x0, 60 * z, 8); ctx.fill(); ctx.stroke();
-        ctx.strokeStyle = 'rgba(40,40,60,.7)'; ctx.lineWidth = 1;
-        for (let mm = 0; mm <= 170; mm++) { const x = x0 + (10 + mm * 4) * z, l = (mm % 10 === 0 ? 16 : mm % 5 === 0 ? 11 : 6) * z; ctx.beginPath(); ctx.moveTo(x, y0); ctx.lineTo(x, y0 + l); ctx.stroke(); }
-        const len = Math.max(0, onbSmooth(onbRamp(k, 0.25, 0.85))) * 680;
-        if (len > 0) { const [bx, by] = at(70 + len, 452); pill(`${(len / 37.8).toFixed(1).replace('.', ',')} cm`, bx, by - 34 * s, true, 'rgba(0,0,0,.8)'); }
-        ctx.restore();
-      },
-      legend(k) {
-        if (k <= 0) return;
-        const w = 210 * s, h = 92 * s, [ax, ay] = at(560, 470), x = Math.min(W - w - 12, ax), y = Math.max(12, ay - h - 8);
-        panel(x, y, w, h, k);
-        ctx.save(); ctx.globalAlpha = k;
-        txt(tr('Leyenda de colores'), x + 14 * s, y + 18 * s, 12, onbGray(0.45), 700);
-        [[HL_COLORS[0], 'Definición'], [HL_COLORS[2], 'Examen']].forEach(([c, n], j) => { ctx.fillStyle = c; ctx.beginPath(); ctx.arc(x + 24 * s, y + (44 + j * 28) * s, 9 * s, 0, 7); ctx.fill(); txt(tr(n), x + 42 * s, y + (44 + j * 28) * s, 15, onbGray(0.15), 600); });
-        ctx.restore();
-      },
-      lasso(k, mode) {
-        sel(loop(330, 335, 230, 105), k);
-        if (mode !== 'all') return;
-        glow(118, 255, 200, 165); glow(296, 318, 102, 34); glow(404, 316, 142, 46);
-        const [x, y] = at(330, 230); pill(tr('4 trazos'), x, y - 6 * s, true, '#AF52DE');
-      },
-      filter(k) {
-        sel(loop(330, 335, 230, 105), 1);
-        const only = k > 0.55;
-        if (!only) { glow(118, 255, 200, 165); glow(296, 318, 102, 34); glow(404, 316, 142, 46); } else glow(118, 255, 200, 165);
-        const [x, y] = at(330, 230);
-        pill(tr(only ? '1 trazo' : '4 trazos'), x, y - 6 * s, true, '#AF52DE');
-        const op = onbSmooth(onbRamp(k, 0.05, 0.2)) * (1 - onbSmooth(onbRamp(k, 0.5, 0.6)));
-        if (op > 0) {
-          const pw = 230 * s, px = Math.min(W - pw - 12, x + 60 * s), py = y + 10 * s;
-          panel(px, py, pw, 170 * s, op);
-          ctx.save(); ctx.globalAlpha = op;
-          txt(tr('Herramienta Lazo'), px + 14 * s, py + 20 * s, 12, onbGray(0.45), 700);
-          ['Bolígrafo y pluma', 'Cuadros de texto', 'Post-its'].forEach((n, j) => {
-            const yy = py + (48 + j * 32) * s; txt(tr(n), px + 14 * s, yy, 14, onbGray(0.15));
-            ctx.fillStyle = '#34C759'; ctx.beginPath(); ctx.roundRect(px + pw - 54 * s, yy - 10 * s, 38 * s, 20 * s, 10 * s); ctx.fill(); ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(px + pw - 26 * s, yy, 8 * s, 0, 7); ctx.fill();
-          });
-          txt(`${tr('Solo este color…')}`, px + 14 * s, py + 148 * s, 14, '#007AFF', 600);
-          ctx.restore();
-          tap(px + 60 * s, py + 148 * s, onbRamp(k, 0.35, 0.5));
-        }
-        if (only) { const w = pill(`    ${tr('Solo este color')}`, W / 2, 34 * s, true, 'rgba(28,28,30,.92)'); ctx.fillStyle = '#E0362C'; ctx.beginPath(); ctx.arc(W / 2 - w / 2 + 18 * s, 34 * s, 7 * s, 0, 7); ctx.fill(); }
-      },
-      editBar(k) {
-        const acts = [['Mover', 0.05], ['Color', 0.45], ['Copiar', 0.65]];
-        let x = W / 2 - 150 * s;
-        acts.forEach(([n, at0]) => { const on = k > at0 && k < at0 + 0.2; const w = pill(tr(n), x + 50 * s, bottom, on, '#AF52DE'); x += w + 10 * s; });
-        if (k > 0.45 && k < 0.65) [ '#1C1C1E', '#E0362C', '#8E44AD', '#2E9E4F'].forEach((c, j) => { ctx.fillStyle = c; ctx.beginPath(); ctx.arc(W / 2 - 45 * s + j * 30 * s, bottom - 42 * s, 11 * s, 0, 7); ctx.fill(); if (c === '#8E44AD') { ctx.strokeStyle = c; ctx.lineWidth = 2.5; ctx.beginPath(); ctx.arc(W / 2 - 45 * s + j * 30 * s, bottom - 42 * s, 15 * s, 0, 7); ctx.stroke(); } });
-      },
-      stickyBar(k) {
-        pill(tr('Ampliar'), W / 2 - 60 * s, bottom, k > 0.12 && k < 0.3, '#FF9F0A');
-        pill(tr('Hecho'), W / 2 + 60 * s, bottom, k > 0.8 && k < 0.92, '#34C759');
-        tap(W / 2 - 60 * s, bottom, onbRamp(k, 0.12, 0.25)); tap(W / 2 + 60 * s, bottom, onbRamp(k, 0.8, 0.92));
-      },
-      tapTape(k) { const [x, y] = at(P.tape.x + P.tape.w / 2, P.tape.y + P.tape.h / 2); tap(x, y, onbRamp(k, 0.22, 0.38), '#34C759'); tap(x, y, onbRamp(k, 0.66, 0.8), '#34C759'); },
-      comment(k) {
-        if (k <= 0) return;
-        const [x, y] = at(P.comment.x + 30, P.comment.y + 10), w = 200 * s, h = 76 * s;
-        panel(x, y, w, h, k);
-        ctx.save(); ctx.globalAlpha = k; ctx.fillStyle = COMMENT_COLORS[4]; ctx.beginPath(); ctx.roundRect(x, y, w, 26 * s, [14 * s, 14 * s, 0, 0]); ctx.fill();
-        txt('Folia', x + 12 * s, y + 13 * s, 13, '#fff', 700); txt(htmlText(P.comment.html), x + 12 * s, y + 50 * s, 15, onbGray(0.2)); ctx.restore();
-      },
-      tapAt(px, py, k) { const [x, y] = at(px, py); tap(x, y, k); },
-      ai(kind, k) {
-        const pw = Math.min(W - 24, 440 * s), x = W / 2 - pw / 2, y = 70 * s, a = onbSmooth(onbRamp(k, 0.24, 0.34));
-        pill(`✨ ${tr('IA')} ▾`, W / 2, 34 * s, k < 0.26, '#AF52DE', true);
-        tap(W / 2, 34 * s, onbRamp(k, 0.0, 0.12));
-        // El menú «✨ IA ▾» del lazo, con la opción que se elige resaltada
-        const m = onbSmooth(onbRamp(k, 0.04, 0.12)) * (1 - onbSmooth(onbRamp(k, 0.24, 0.3)));
-        if (m > 0) {
-          const rows = [['cards', 'Tarjetas'], ['summary', 'Resumir'], ['ocr', 'Transcribir a texto'], ['explain', 'Explicar']], mw = 230 * s, mx = W / 2 - mw / 2, my = 54 * s;
-          panel(mx, my, mw, (24 + rows.length * 34) * s, m);
-          ctx.save(); ctx.globalAlpha = m;
-          txt(tr('Con lo seleccionado'), mx + 14 * s, my + 16 * s, 11, onbGray(0.45), 700);
-          rows.forEach(([id, n], j) => {
-            const ry = my + (40 + j * 34) * s;
-            if (id === kind && k > 0.14) { ctx.fillStyle = 'rgba(175,82,222,.16)'; ctx.beginPath(); ctx.roundRect(mx + 6 * s, ry - 14 * s, mw - 12 * s, 28 * s, 8 * s); ctx.fill(); }
-            txt(tr(n), mx + 16 * s, ry, 14, onbGray(0.15), id === kind ? 700 : 500);
-          });
-          ctx.restore();
-        }
-        const ph = { ocr: 130, summary: 160, cards: 150 }[kind] * s;
-        panel(x, y, pw, ph, a);
-        ctx.save(); ctx.globalAlpha = a;
-        const head = { ocr: 'Transcripción', summary: 'Resumen', cards: 'Tarjetas' }[kind];
-        txt(tr(head), x + 16 * s, y + 22 * s, 16, onbGray(0.1), 700); example(x + pw - 80 * s, y + 22 * s);
-        const typed = onbRamp(k, 0.34, 0.9);
-        if (kind === 'ocr') P.ocrText.split('\n').forEach((line, j) => txt(line.slice(0, Math.ceil(line.length * onbRamp(typed, j / 2, (j + 1) / 2))), x + 16 * s, y + (60 + j * 28) * s, 15, onbGray(0.2)));
-        if (kind === 'summary') ['Dolor torácico de esfuerzo.', 'Pensar en angina estable.', 'Pedir ECG y troponinas.'].forEach((t, j) => { if (typed > j / 3) txt(`•  ${tr(t)}`, x + 16 * s, y + (60 + j * 30) * s, 15, onbGray(0.2)); });
-        if (kind === 'cards') {
-          if (typed > 0.1) { txt(tr('¿Qué produce la mitocondria?'), x + 16 * s, y + 60 * s, 15, onbGray(0.1), 700); txt(tr('ATP, la energía de la célula.'), x + 16 * s, y + 86 * s, 15, onbGray(0.3)); }
-          if (typed > 0.5) { ctx.fillStyle = 'rgba(175,82,222,.5)'; ctx.fillRect(x + 16 * s, y + 108 * s, 3, 26 * s); txt(`«${tr('La mitocondria produce ATP para la célula.')}»`, x + 26 * s, y + 121 * s, 13, onbGray(0.45), 500); }
-        }
-        ctx.restore();
-      },
-      makeCard(k) {
-        sel(loop(220, 335, 95, 92), onbSmooth(onbRamp(k, 0, 0.4)));
-        if (k < 0.4) return;
-        const [x, y] = at(220, 450);
-        pill(`💡 ${tr('Crear tarjeta')}`, x, y, k > 0.5 && k < 0.65, '#FF9F0A');
-        tap(x, y, onbRamp(k, 0.5, 0.65));
-        const f = onbSmooth(onbRamp(k, 0.65, 0.95));
-        if (f > 0) { const cx = x + (W - 90 * s - x) * f, cy = y + (40 * s - y) * f; panel(cx - 50 * s, cy - 32 * s, 100 * s, 64 * s, 1 - f * 0.3); txt(tr('¿Qué orgánulo es?'), cx, cy, 10, onbGray(0.2), 600, 'center'); }
-      },
-      cloze(k) {
-        const [x, y] = at(P.hl1.points[0][0], 192), pulse = 0.5 + 0.5 * Math.sin(k * 18);
-        ctx.save(); ctx.globalAlpha = 0.4 * pulse * (1 - onbRamp(k, 0.4, 0.5)); ctx.fillStyle = '#FFD60A'; ctx.fillRect(x - 6, y - 22 * z, 90 * z, 44 * z); ctx.restore();
-        const a = onbSmooth(onbRamp(k, 0.35, 0.55)), pw = Math.min(W - 24, 420 * s), px = W / 2 - pw / 2, py = H / 2 + 40 * s;
-        panel(px, py, pw, 110 * s, a);
-        if (a <= 0) return;
-        ctx.save(); ctx.globalAlpha = a;
-        txt(tr('Tarjetas de huecos'), px + 16 * s, py + 22 * s, 12, onbGray(0.45), 700);
-        const front = tr('La mitocondria produce ATP para la célula.').replace('ATP', CLOZE_GAP);
-        txt(front, px + 16 * s, py + 62 * s, 16, onbGray(0.15), 600);
-        ctx.restore();
-      },
-      review(k) {
-        const flip = onbSmooth(onbRamp(k, 0.25, 0.4)), back = flip > 0.5, sx = Math.max(0.02, Math.abs(Math.cos(flip * Math.PI)));
-        ctx.save(); ctx.fillStyle = 'rgba(0,0,0,.55)'; ctx.fillRect(0, 0, W, H); ctx.restore();
-        const cw = Math.min(W - 32, 460 * s), ch = 220 * s;
-        ctx.save(); ctx.translate(W / 2, H / 2 - 30 * s); ctx.scale(sx, 1);
-        ctx.shadowColor = 'rgba(0,0,0,.4)'; ctx.shadowBlur = 24; ctx.fillStyle = back ? 'rgb(255,248,225)' : '#fff'; ctx.beginPath(); ctx.roundRect(-cw / 2, -ch / 2, cw, ch, 18 * s); ctx.fill(); ctx.restore();
-        ctx.save(); ctx.translate(W / 2, H / 2 - 30 * s); ctx.scale(sx, 1);
-        if (!back) txt(tr('La mitocondria produce ATP para la célula.').replace('ATP', CLOZE_GAP), 0, 0, 17, onbGray(0.15), 600, 'center');
-        else txt('ATP', 0, 0, 34, '#C93400', 800, 'center');
-        ctx.restore();
-        if (k > 0.45) {
-          const g = CARD_GRADES.map(([, n]) => tr(n)), colors = ['#FF3B30', '#FF9F0A', '#34C759', '#007AFF'];
-          const step = Math.min(110 * s, (W - 24) / 4);
-          g.forEach((n, j) => pill(n, W / 2 + (j - 1.5) * step, H / 2 + 110 * s, j === 2 && k > 0.7, colors[j]));
-          tap(W / 2 + 0.5 * step, H / 2 + 110 * s, onbRamp(k, 0.68, 0.84), '#34C759');
-        }
-      },
-      shield(k) {
-        const ok = k > 0.55, c = ok ? '#34C759' : '#FF9F0A', sz = 110 * s, x = W / 2 - sz / 2, y = H / 2 - sz / 2 - 20 * s;
-        ctx.save(); ctx.fillStyle = 'rgba(0,0,0,.45)'; ctx.fillRect(0, 0, W, H); ctx.restore();
-        ctx.save(); ctx.translate(x, y); ctx.scale(sz / 24, sz / 24);
-        const sh = new Path2D(ICONS.shield.match(/d="([^"]+)"/)[1]); ctx.fillStyle = c + '40'; ctx.fill(sh); ctx.strokeStyle = c; ctx.lineWidth = 1.2; ctx.stroke(sh); ctx.restore();
-        const sv = onbRamp(k, 0.2, 0.55);
-        if (sv > 0 && sv < 1) { ctx.strokeStyle = '#0A84FF'; ctx.lineWidth = 5; ctx.lineCap = 'round'; ctx.beginPath(); ctx.arc(W / 2, y + sz / 2, sz * 0.7, -Math.PI / 2, -Math.PI / 2 + sv * Math.PI * 2); ctx.stroke(); }
-        txt(tr(ok ? 'Copia de seguridad al día' : 'Copia de seguridad: toca hacer una'), W / 2, y + sz + 34 * s, 17, '#fff', 700, 'center');
-      },
+    const A = P.arrow, ax = A.x1 + (A.x1b - A.x1) * onbEase(onbRamp(T, A.drag[0], A.drag[1]));
+    handles([[172, 299], [ax, 299]], onbSpring(onbRamp(T, A.snap + 0.1, A.snap + 0.5)) * (1 - onbRamp(T, A.drag[1] + 0.5, A.drag[1] + 0.8)));
+    const E = P.ell;
+    handles([[E.cx - E.rx, E.cy], [E.cx + E.rx, E.cy], [E.cx, E.cy - E.ry], [E.cx, E.cy + E.ry]], onbSpring(onbRamp(T, E.snap + 0.1, E.snap + 0.5)) * (1 - onbRamp(T, E.snap + 1.4, E.snap + 1.7)));
+    // Ondas de los toques
+    for (const tp of P.taps) {
+      if (!tp.ripple) continue;
+      const k = onbRamp(T, tp.t0 + 0.04, tp.t0 + 0.6);
+      if (k <= 0 || k >= 1) continue;
+      const [x, y] = S.toScreen(...tp.ripple);
+      ctx.save(); ctx.globalAlpha = 1 - k; ctx.strokeStyle = '#fff'; ctx.lineWidth = 3; ctx.shadowColor = 'rgba(0,0,0,.35)'; ctx.shadowBlur = 8;
+      ctx.beginPath(); ctx.arc(x, y, 10 + 34 * onbEase(k), 0, 7); ctx.stroke(); ctx.restore();
+    }
+    // Contador del lazo y «Crear tarjeta»
+    const L = P.lasso, m = P.mkCard;
+    const pa = onbSpring(onbRamp(T, L.sel, L.sel + 0.45)) * (1 - onbRamp(T, m.t0, m.t0 + 0.3));
+    if (pa > 0) {
+      const top = S.toScreen(L.f.s.points[0][0] + 120, Math.min(...L.f.s.points.map((p) => p[1])));
+      const n = P.heart.length + P.labels.reduce((a, l) => a + l.list.length, 0) + P.lead.length + P.tint.length;
+      this.pill(ctx, P.L(`${n} trazos`, `${n} tratti`), Math.max(70, Math.min(S.W - 70, top[0])), Math.max(30, top[1] - 6), '#AF52DE', '#fff', pa, S.s);
+      const bot = S.toScreen(600, Math.max(...L.f.s.points.map((p) => p[1])));
+      const on = T > m.tap && T < m.tap + 0.3;
+      this.pill(ctx, `${tr('Crear tarjeta')}`, bot[0], Math.min(S.H - 120, bot[1] + 30), on ? '#FF9F0A' : (S.dark ? 'rgba(44,44,48,.95)' : '#fff'), on ? '#fff' : (S.dark ? '#fff' : '#1D1D1F'), pa, S.s, 'lightbulb');
+      this.makePos = [bot[0], Math.min(S.H - 120, bot[1] + 30)];
+    }
+  },
+  /** Una píldora con texto (y un icono opcional), centrada en (x, y). */
+  pill(ctx, text, x, y, bg, fg, a = 1, s = 1, ic = null) {
+    if (a <= 0) return;
+    const size = 15 * s;
+    ctx.save();
+    ctx.globalAlpha = Math.min(1, a);
+    ctx.font = `600 ${size}px ${ROUNDED}`;
+    const tw = ctx.measureText(text).width, iw = ic ? size * 1.4 : 0, w = tw + iw + 30 * s, h = 34 * s;
+    ctx.translate(x, y); ctx.scale(0.85 + 0.15 * a, 0.85 + 0.15 * a);
+    ctx.shadowColor = 'rgba(0,0,0,.22)'; ctx.shadowBlur = 16; ctx.shadowOffsetY = 4;
+    ctx.fillStyle = bg; ctx.beginPath(); ctx.roundRect(-w / 2, -h / 2, w, h, h / 2); ctx.fill();
+    ctx.shadowColor = 'transparent';
+    if (ic === 'lightbulb') { ctx.fillStyle = '#FFCC00'; ctx.beginPath(); ctx.arc(-w / 2 + 15 * s + size * 0.45, -1, size * 0.42, 0, 7); ctx.fill(); }
+    ctx.fillStyle = fg; ctx.textBaseline = 'middle'; ctx.textAlign = 'left';
+    ctx.fillText(text, -w / 2 + 15 * s + iw, 1);
+    ctx.restore();
+  },
+  /** El Apple Pencil: blanco, con su punta cónica y su sombra en la página; se levanta entre trazo y trazo. */
+  pencil(ctx, S) {
+    const p = this.pencilAt(S.T);
+    if (!p) return;
+    const k = Math.max(0.75, Math.min(1.35, S.z / 1.6)) * (S.W < 600 ? 0.8 : 1), [tx, ty] = S.toScreen(p.x, p.y);
+    const dir = [0.56, 0.83], len = 300 * k, r = 13 * k, lift = p.lift * 0.9;
+    const off = [dir[0] * 520 * k * p.away, dir[1] * 520 * k * p.away];
+    const x = tx + off[0] - 4 * lift * k, y = ty + off[1] - 7 * lift * k;
+    const nx = -dir[1], ny = dir[0];
+    const body = (c, ox, oy, sc) => {
+      const L = len * sc, R = r * sc;
+      c.beginPath();
+      c.moveTo(ox, oy);
+      c.lineTo(ox + dir[0] * 38 * k + nx * R, oy + dir[1] * 38 * k + ny * R);
+      c.lineTo(ox + dir[0] * L + nx * R, oy + dir[1] * L + ny * R);
+      c.arc(ox + dir[0] * L, oy + dir[1] * L, R, Math.atan2(ny, nx), Math.atan2(ny, nx) - Math.PI, true);
+      c.lineTo(ox + dir[0] * 38 * k - nx * R, oy + dir[1] * 38 * k - ny * R);
+      c.closePath();
     };
+    ctx.save();
+    // Sombra: se separa de la punta al levantarlo (con el truco de desplazar la forma fuera y dejar solo su sombra)
+    const sh = 8 + 16 * lift + 30 * p.away;
+    ctx.shadowColor = `rgba(0,0,0,${S.dark ? 0.45 : 0.22})`; ctx.shadowBlur = (10 + 14 * lift) * k * S.dpr;
+    ctx.shadowOffsetX = 10000 * S.dpr; ctx.shadowOffsetY = 0;
+    body(ctx, tx + off[0] + sh * k * 0.9 - 10000, ty + off[1] + sh * k * 0.5, 1.02);
+    ctx.fillStyle = '#000'; ctx.fill();
+    ctx.restore();
+    ctx.save();
+    // Cuerpo con su luz (cilindro: brillo a un lado, gris al otro)
+    body(ctx, x, y, 1 + lift * 0.03);
+    const g = ctx.createLinearGradient(x + nx * r, y + ny * r, x - nx * r, y - ny * r);
+    g.addColorStop(0, '#FFFFFF'); g.addColorStop(0.45, '#F7F7F9'); g.addColorStop(0.8, '#D9DADF'); g.addColorStop(1, '#B9BBC2');
+    ctx.fillStyle = g; ctx.fill();
+    ctx.strokeStyle = 'rgba(0,0,0,.12)'; ctx.lineWidth = 0.8; ctx.stroke();
+    // Cara plana (una banda de luz a lo largo)
+    ctx.strokeStyle = 'rgba(255,255,255,.95)'; ctx.lineWidth = 2 * k; ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.moveTo(x + dir[0] * 60 * k + nx * r * 0.45, y + dir[1] * 60 * k + ny * r * 0.45); ctx.lineTo(x + dir[0] * len * 0.92 + nx * r * 0.45, y + dir[1] * len * 0.92 + ny * r * 0.45); ctx.stroke();
+    // Punta: cono gris translúcido
+    ctx.fillStyle = 'rgba(120,122,130,.85)';
+    ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + dir[0] * 11 * k + nx * 4 * k, y + dir[1] * 11 * k + ny * 4 * k); ctx.lineTo(x + dir[0] * 11 * k - nx * 4 * k, y + dir[1] * 11 * k - ny * 4 * k); ctx.closePath(); ctx.fill();
+    ctx.restore();
+  },
+
+  // ---------- Capa de encima (sin inclinar): leyenda, tarjeta, audio, repaso, final ----------
+  overlay(g, S) {
+    const P = this.P, T = S.T;
+    this.legend(g, S);
+    if (T >= P.mkCard.t0 - 0.1 && T < P.mkCard.t1 + 0.6) this.cardFly(g, S);
+    if (T >= P.audio.t0 && T < P.audio.t1 + 0.5) this.audio(g, S);
+    if (T >= P.review.t0 && T < P.review.t1 + 0.1) this.reviewUI(g, S);
+    if (T >= P.end.t0) this.endUI(g, S);
+  },
+  glass(g, S, x, y, w, h, r, a = 1) {
+    g.save(); g.globalAlpha = a;
+    g.shadowColor = S.dark ? 'rgba(0,0,0,.5)' : 'rgba(30,30,60,.18)'; g.shadowBlur = 30; g.shadowOffsetY = 10;
+    g.fillStyle = S.dark ? 'rgba(38,38,44,.94)' : 'rgba(255,255,255,.96)'; g.beginPath(); g.roundRect(x, y, w, h, r); g.fill();
+    g.shadowColor = 'transparent'; g.strokeStyle = S.dark ? 'rgba(255,255,255,.1)' : 'rgba(0,0,0,.06)'; g.lineWidth = 1; g.stroke();
+    g.restore();
+  },
+  txt(g, t, x, y, size, color, weight = 600, align = 'left', font = ROUNDED) {
+    g.font = `${weight} ${size}px ${font}`; g.fillStyle = color; g.textAlign = align; g.textBaseline = 'middle'; g.fillText(t, x, y);
+  },
+  legend(g, S) {
+    const P = this.P, T = S.T, Lg = P.legend;
+    const a = onbSpring(onbRamp(T, Lg.t0, Lg.t0 + 0.5)) * (1 - onbEase(onbRamp(T, Lg.t1 - 0.3, Lg.t1)));
+    if (a <= 0) return;
+    const s = S.s, w = 250 * s, h = 112 * s, x = S.W < 600 ? (S.W - w) / 2 : S.W - w - 36 * s, y = S.W < 600 ? 70 * s : 90 * s;
+    g.save(); g.translate(x + w / 2, y); g.scale(0.9 + 0.1 * a, 0.9 + 0.1 * a); g.translate(-(x + w / 2), -y);
+    this.glass(g, S, x, y, w, h, 18 * s, Math.min(1, a));
+    g.globalAlpha = Math.min(1, a);
+    const fg = S.dark ? '#F5F5F7' : '#1D1D1F', sub = S.dark ? 'rgba(235,235,245,.6)' : 'rgba(60,60,67,.6)';
+    this.txt(g, P.L('Significado de los colores', 'Significato dei colori'), x + 18 * s, y + 24 * s, 12 * s, sub, 700);
+    [[HL_COLORS[0], P.L('Síntomas', 'Sintomi')], [HL_COLORS[1], P.L('Tratamiento', 'Terapia')]].forEach(([c, n], j) => {
+      const yy = y + (56 + j * 32) * s;
+      g.fillStyle = c; g.beginPath(); g.roundRect(x + 18 * s, yy - 8 * s, 30 * s, 16 * s, 8 * s); g.fill();
+      this.txt(g, n, x + 60 * s, yy, 16 * s, fg, 600);
+    });
+    g.restore();
+  },
+  /** Texturas de una tarjeta (cara y dorso) en lienzos, hechas una vez por tamaño. */
+  cardTex(key, w, h, dpr, drawFace) {
+    const id = `${key}:${Math.round(w)}x${Math.round(h)}`;
+    if (this.tex[id]) return this.tex[id];
+    const c = document.createElement('canvas'); c.width = Math.round(w * dpr); c.height = Math.round(h * dpr);
+    const x = c.getContext('2d'); x.scale(dpr, dpr);
+    x.fillStyle = '#fff'; x.beginPath(); x.roundRect(0, 0, w, h, Math.min(w, h) * 0.06); x.fill();
+    x.save(); x.beginPath(); x.roundRect(0, 0, w, h, Math.min(w, h) * 0.06); x.clip(); drawFace(x, w, h); x.restore();
+    return (this.tex[id] = c);
+  },
+  /** Gira una tarjeta en 3D (perspectiva de verdad, por franjas verticales): a = 0 cara, π dorso. */
+  flip(g0, front, back, cx, cy, w, h, a, shadow = 1) {
+    // Se pinta en una capa aparte a opacidad total (las franjas no dejan rayas) y luego con la del momento
+    const L = this.tex.layer || (this.tex.layer = document.createElement('canvas'));
+    if (L.width !== g0.canvas.width || L.height !== g0.canvas.height) { L.width = g0.canvas.width; L.height = g0.canvas.height; }
+    const g = L.getContext('2d'), alpha = g0.globalAlpha;
+    g.setTransform(1, 0, 0, 1, 0, 0); g.clearRect(0, 0, L.width, L.height); g.setTransform(g0.getTransform());
+    this.flipDraw(g, front, back, cx, cy, w, h, a, shadow);
+    g0.save(); g0.setTransform(1, 0, 0, 1, 0, 0); g0.globalAlpha = alpha; g0.drawImage(L, 0, 0); g0.restore();
+  },
+  flipDraw(g, front, back, cx, cy, w, h, a, shadow) {
+    const cos = Math.cos(a), sin = Math.sin(a), D = w * 2.4, N = 64, tex = cos >= 0 ? front : back;
+    g.save();
+    g.globalAlpha *= shadow;
+    // Sombra en el suelo: una mancha difusa bajo la tarjeta (con el truco de la sombra desplazada)
+    g.shadowColor = 'rgba(0,0,0,.45)'; g.shadowBlur = 40; g.shadowOffsetX = 10000;
+    g.fillStyle = '#000'; g.beginPath(); g.ellipse(cx - 10000, cy + h * 0.5, Math.max(4, w * Math.abs(cos) * 0.42), h * 0.07, 0, 0, 7); g.fill();
+    g.restore();
+    for (let i = 0; i < N; i++) {
+      const u0 = i / N, u1 = (i + 1) / N, x0 = (u0 - 0.5) * w, x1 = (u1 - 0.5) * w;
+      const s0 = D / (D + x0 * sin), s1 = D / (D + x1 * sin);
+      const X0 = cx + x0 * cos * s0, X1 = cx + x1 * cos * s1, hh = h * (s0 + s1) / 2;
+      const su = cos >= 0 ? u0 : 1 - u1, sw = tex.width / N;
+      const left = Math.min(X0, X1) - 0.3, width = Math.abs(X1 - X0) + 1;
+      if (width < 0.2) continue;
+      g.drawImage(tex, su * tex.width, 0, sw, tex.height, left, cy - hh / 2, width, hh);
+    }
+  },
+  /** Lazo › Crear tarjeta: el dibujo se levanta de la página, se gira y se va al mazo. */
+  cardFly(g, S) {
+    const P = this.P, T = S.T, m = P.mkCard, s = S.s;
+    const w = Math.min(S.W * 0.86, 560), h = w * 0.8, cx = S.W / 2, cy = S.H * 0.4;
+    const heartCv = this.tex.heart || (this.tex.heart = onbFilmHeartImage(P, { x: 430, y: 225, w: 380, h: 375 }, 1.6, true));
+    const front = this.cardTex('cf', w, h, S.dpr, (x, W, H) => {
+      const ih = H * 0.74, iw = ih * heartCv.width / heartCv.height;
+      x.drawImage(heartCv, (W - iw) / 2, H * 0.03, iw, ih);
+      x.fillStyle = '#F2F2F7'; x.fillRect(0, H * 0.79, W, H * 0.21);
+      this.txt(x, P.card.front, W / 2, H * 0.895, W / 21, '#1D1D1F', 700, 'center');
+    });
+    const back = this.cardTex('cb', w, h, S.dpr, (x, W, H) => {
+      const gr = x.createLinearGradient(0, 0, W, H); gr.addColorStop(0, '#FFF8EC'); gr.addColorStop(1, '#FFEFF4'); x.fillStyle = gr; x.fillRect(0, 0, W, H);
+      this.txt(x, P.L('Respuesta', 'Risposta'), W / 2, H * 0.24, W / 26, 'rgba(60,60,67,.55)', 700, 'center');
+      this.txt(x, P.card.back, W / 2, H * 0.47, W / 11, ONB_FILM_RED, 800, 'center');
+      this.txt(x, P.card.backSub, W / 2, H * 0.66, W / 17, '#1D1D1F', 600, 'center');
+    });
+    // Desde el sitio del dibujo en pantalla hasta el centro; luego al mazo (arriba a la derecha)
+    const [hx0, hy0] = S.toScreen(430, 225), [hx1, hy1] = S.toScreen(810, 600);
+    const up = onbEase(onbRamp(T, m.t0, m.t0 + 0.8)), out = onbEase(onbRamp(T, m.out, m.out + 0.6));
+    const deck = [S.W - 70 * s, 46 * s];
+    let ccx = (hx0 + hx1) / 2 + (cx - (hx0 + hx1) / 2) * up, ccy = (hy0 + hy1) / 2 + (cy - (hy0 + hy1) / 2) * up;
+    let sc = ((hx1 - hx0) / w) + (1 - (hx1 - hx0) / w) * up;
+    ccx += (deck[0] - ccx) * out; ccy += (deck[1] - ccy) * out; sc *= 1 - out * 0.88;
+    const a = Math.PI * onbEase(onbRamp(T, m.flip, m.flip + 0.75));
+    if (T < m.out + 0.6) {
+      g.save();
+      g.globalAlpha = Math.min(1, onbRamp(T, m.t0 - 0.05, m.t0 + 0.15)) * (1 - onbRamp(T, m.out + 0.45, m.out + 0.6));
+      this.flip(g, front, back, ccx, ccy, w * sc, h * sc, a + up * 0.0001 - (1 - up) * 0, up);
+      g.restore();
+    }
+    // Mazo: «+1» que rebota al llegar
+    const b = onbSpring(onbRamp(T, m.out + 0.45, m.out + 0.9)) * (1 - onbRamp(T, m.t1, m.t1 + 0.5));
+    if (b > 0) this.pill(g, P.L('Tarjetas  +1', 'Flashcard  +1'), deck[0] - 20 * s, deck[1], '#FF9F0A', '#fff', b, s);
+  },
+  /** Audio: la grabación suena y la tinta aparece al ritmo de la voz (onda, cabezal y tiempo). */
+  audio(g, S) {
+    const P = this.P, T = S.T, A = P.audio, s = S.s;
+    const a = onbSpring(onbRamp(T, A.t0, A.t0 + 0.5)) * (1 - onbEase(onbRamp(T, A.t1, A.t1 + 0.4)));
+    if (a <= 0) return;
+    const w = Math.min(S.W - 32, 560 * s), h = 72 * s, x = (S.W - w) / 2, y = (S.W < 600 ? 60 : 44) * s;
+    g.save(); g.globalAlpha = Math.min(1, a);
+    this.glass(g, S, x, y, w, h, h / 2);
+    g.globalAlpha = Math.min(1, a);
+    const playing = T >= A.play, u = onbRamp(T, A.play, A.t1 - 0.3);
+    // Botón: reproducir / pausa
+    const bx = x + h / 2, by = y + h / 2;
+    g.fillStyle = '#FF9500'; g.beginPath(); g.arc(bx, by, 22 * s, 0, 7); g.fill();
+    g.fillStyle = '#fff';
+    if (!playing) { g.beginPath(); g.moveTo(bx - 6 * s, by - 9 * s); g.lineTo(bx + 10 * s, by); g.lineTo(bx - 6 * s, by + 9 * s); g.closePath(); g.fill(); }
+    else { g.fillRect(bx - 7 * s, by - 8 * s, 5 * s, 16 * s); g.fillRect(bx + 2 * s, by - 8 * s, 5 * s, 16 * s); }
+    // Onda: alta cuando la voz «dice» una palabra (los tiempos de las palabras escritas)
+    const words = P.bnp.words, x0 = x + h + 8 * s, x1 = x + w - 70 * s, n = Math.max(24, Math.round((x1 - x0) / (6 * s)));
+    const dur = A.t1 - 0.3 - A.play, rnd = onbRandom(5);
+    for (let i = 0; i < n; i++) {
+      const tb = A.play + dur * i / n;
+      const speak = words.some((wd) => tb >= wd.t0 - 0.08 && tb <= wd.t1 + 0.04);
+      const amp = (speak ? 0.45 + 0.55 * rnd() : 0.08 + 0.1 * rnd()) * (playing && Math.abs(tb - (A.play + dur * u)) < 0.12 ? 1.15 : 1);
+      const bh = Math.max(3 * s, amp * h * 0.52), bxx = x0 + (x1 - x0) * i / n;
+      g.fillStyle = i / n <= u && playing ? '#FF9500' : (S.dark ? 'rgba(235,235,245,.28)' : 'rgba(60,60,67,.25)');
+      g.beginPath(); g.roundRect(bxx, by - bh / 2, 3.2 * s, bh, 1.6 * s); g.fill();
+    }
+    const secs = Math.floor(12 + dur * u * 1.6);
+    this.txt(g, `0:${String(secs).padStart(2, '0')}`, x + w - 22 * s, by, 15 * s, S.dark ? '#F5F5F7' : '#1D1D1F', 600, 'right');
+    g.restore();
+  },
+  /** Repaso de hoy: una tarjeta que se gira, «Bien» y la racha que sube a 7 días. */
+  reviewUI(g, S) {
+    const P = this.P, T = S.T, R = P.review, s = S.s;
+    const fade = onbEase(onbRamp(T, R.t0, R.t0 + 0.5)) * (1 - onbEase(onbRamp(T, R.t1 - 0.45, R.t1)));
+    if (fade <= 0) return;
+    g.save();
+    g.fillStyle = S.dark ? `rgba(8,8,12,${0.78 * fade})` : `rgba(244,243,240,${0.8 * fade})`; g.fillRect(0, 0, S.W, S.H);
+    const fg = S.dark ? '#F5F5F7' : '#1D1D1F', sub = S.dark ? 'rgba(235,235,245,.6)' : 'rgba(60,60,67,.6)';
+    g.globalAlpha = fade;
+    this.txt(g, tr('Repaso de hoy'), S.W / 2, S.H * 0.12, 15 * s, sub, 700, 'center');
+    const w = Math.min(S.W * 0.86, 580), h = w * 0.52, cx = S.W / 2, cy = S.H * 0.34;
+    const front = this.cardTex('rf', w, h, S.dpr, (x, W, H) => {
+      this.txt(x, P.reviewCard.front, W / 2, H * 0.42, W / 17, '#1D1D1F', 700, 'center');
+      this.txt(x, P.L('Toca para ver la respuesta', 'Tocca per vedere la risposta'), W / 2, H * 0.72, W / 30, 'rgba(60,60,67,.5)', 600, 'center');
+    });
+    const back = this.cardTex('rb', w, h, S.dpr, (x, W, H) => {
+      const gr = x.createLinearGradient(0, 0, W, H); gr.addColorStop(0, '#F0FFF4'); gr.addColorStop(1, '#EAF4FF'); x.fillStyle = gr; x.fillRect(0, 0, W, H);
+      this.txt(x, P.reviewCard.back, W / 2, H * 0.5, W / 13, '#1E7A3C', 800, 'center');
+    });
+    const inA = onbSpring(onbRamp(T, R.t0 + 0.1, R.t0 + 0.7)), away = onbRamp(T, R.grade + 0.25, R.grade + 0.6);
+    const a = Math.PI * onbEase(onbRamp(T, R.flip, R.flip + 0.7));
+    if (away < 1) {
+      g.save(); g.globalAlpha = fade * (1 - away);
+      this.flip(g, front, back, cx - onbEase(away) * S.W * 0.55, cy + (1 - inA) * 40, w * (0.9 + 0.1 * inA), h * (0.9 + 0.1 * inA), a);
+      g.restore();
+    }
+    // Botones de nota
+    const ga = onbSpring(onbRamp(T, R.flip + 0.6, R.flip + 1.0)) * (1 - away);
+    if (ga > 0) {
+      const names = CARD_GRADES.map(([, n]) => tr(n)), colors = ['#FF3B30', '#FF9F0A', '#34C759', '#0A84FF'], step = Math.min(118 * s, (S.W - 20) / 4);
+      names.forEach((n, j) => {
+        const on = j === 2 && T > R.grade && T < R.grade + 0.35;
+        this.pill(g, n, cx + (j - 1.5) * step, cy + h / 2 + 46 * s, on ? colors[j] : (S.dark ? 'rgba(58,58,62,.95)' : '#fff'), on ? '#fff' : colors[j], ga * fade, s * (S.W < 600 ? 0.82 : 1));
+      });
+      const k = onbRamp(T, R.grade, R.grade + 0.5);
+      if (k > 0 && k < 1) { g.save(); g.globalAlpha = 1 - k; g.strokeStyle = '#34C759'; g.lineWidth = 3; g.beginPath(); g.arc(cx + 0.5 * step, cy + h / 2 + 46 * s, 14 + 30 * k, 0, 7); g.stroke(); g.restore(); }
+    }
+    // Racha: anillo que se completa y el número que sube de 6 a 7
+    const st = onbSpring(onbRamp(T, R.streak, R.streak + 0.6));
+    if (st > 0) {
+      const rr = 62 * s, rx = cx, ry = cy + 10 * s;
+      g.save(); g.globalAlpha = fade * Math.min(1, st); g.translate(rx, ry); g.scale(0.8 + 0.2 * st, 0.8 + 0.2 * st);
+      const fill = 6 / 7 + onbEase(onbRamp(T, R.streak + 0.7, R.streak + 1.3)) / 7, done = onbRamp(T, R.streak + 1.25, R.streak + 2.0);
+      g.lineCap = 'round'; g.lineWidth = 11 * s;
+      g.strokeStyle = S.dark ? 'rgba(255,255,255,.12)' : 'rgba(0,0,0,.07)'; g.beginPath(); g.arc(0, 0, rr, 0, 7); g.stroke();
+      const gr = g.createLinearGradient(-rr, -rr, rr, rr); gr.addColorStop(0, '#FF9F0A'); gr.addColorStop(1, '#FF375F');
+      g.strokeStyle = gr; if (done > 0 && done < 1) { g.shadowColor = '#FF9F0A'; g.shadowBlur = 30 * Math.sin(Math.PI * done); }
+      g.beginPath(); g.arc(0, 0, rr, -Math.PI / 2, -Math.PI / 2 + fill * Math.PI * 2); g.stroke(); g.shadowColor = 'transparent';
+      // Llama
+      g.save(); g.translate(0, -16 * s); g.scale(s, s);
+      const fl = new Path2D('M0 -22 C 9 -10 15 -4 13 6 C 11 16 3 20 0 20 C -3 20 -11 16 -13 6 C -14 0 -10 -6 -6 -10 C -6 -4 -3 -1 0 0 C 2 -8 -1 -15 0 -22 Z');
+      g.fillStyle = gr; g.fill(fl); g.restore();
+      // Número que rueda
+      const roll = onbEase(onbRamp(T, R.streak + 0.8, R.streak + 1.2));
+      g.save(); g.beginPath(); g.rect(-40 * s, 4 * s, 80 * s, 36 * s); g.clip();
+      this.txt(g, '6', 0, 22 * s - roll * 34 * s, 30 * s, fg, 800, 'center', '-apple-system, "SF Pro Display", system-ui, sans-serif');
+      this.txt(g, '7', 0, 56 * s - roll * 34 * s, 30 * s, fg, 800, 'center', '-apple-system, "SF Pro Display", system-ui, sans-serif');
+      g.restore();
+      g.restore();
+      g.save(); g.globalAlpha = fade * Math.min(1, st);
+      this.txt(g, tr('días seguidos'), rx, ry + rr + 28 * s, 16 * s, fg, 700, 'center');
+      // La semana: los días hechos en naranja, hoy se enciende
+      const days = P.L('LMXJVSD', 'LMMGVSD');
+      for (let i = 0; i < 7; i++) {
+        const dx = rx + (i - 3) * 30 * s, dy = ry + rr + 62 * s, on = i < 6 || done > 0;
+        g.fillStyle = on ? '#FF9F0A' : (S.dark ? 'rgba(255,255,255,.14)' : 'rgba(0,0,0,.08)');
+        g.beginPath(); g.arc(dx, dy, (i === 6 ? 11 + 3 * Math.sin(Math.PI * Math.min(1, done * 1.5)) : 11) * s, 0, 7); g.fill();
+        this.txt(g, days[i], dx, dy + 0.5, 10 * s, on ? '#fff' : sub, 800, 'center');
+      }
+      g.restore();
+    }
+    g.restore();
+  },
+  /** Final: fondo que lo cubre todo, el icono de Folia con su «F» escrita, «Folia» a mano y un brillo que lo cruza. */
+  endUI(g, S) {
+    const P = this.P, T = S.T, E = P.end, s = S.s;
+    const bg = onbEase(onbRamp(T, E.t0 + 0.2, E.t0 + 1.3));
+    g.save();
+    g.fillStyle = S.dark ? `rgba(9,9,13,${0.94 * bg})` : `rgba(246,245,242,${0.94 * bg})`; g.fillRect(0, 0, S.W, S.H);
+    const size = Math.min(S.W * 0.26, S.H * 0.15), cx = S.W / 2, cy = S.H * 0.3;
+    const pop = onbSpring(onbRamp(T, E.t0 + 0.6, E.t0 + 1.4));
+    if (pop > 0) {
+      // Halo suave detrás del icono
+      const halo = g.createRadialGradient(cx, cy, 0, cx, cy, size * 2.2);
+      halo.addColorStop(0, `rgba(123,108,255,${0.28 * pop})`); halo.addColorStop(1, 'rgba(123,108,255,0)');
+      g.fillStyle = halo; g.fillRect(cx - size * 2.2, cy - size * 2.2, size * 4.4, size * 4.4);
+      g.save(); g.translate(cx, cy); g.scale(pop, pop);
+      g.shadowColor = 'rgba(107,92,255,.45)'; g.shadowBlur = 50; g.shadowOffsetY = 16;
+      const gr = g.createLinearGradient(-size / 2, -size / 2, size / 2, size / 2); gr.addColorStop(0, '#6B5CFF'); gr.addColorStop(1, '#B84DF2');
+      g.fillStyle = gr; g.beginPath(); g.roundRect(-size / 2, -size / 2, size, size, size * 0.23); g.fill();
+      g.shadowColor = 'transparent';
+      // Brillo que cruza el icono
+      const sh = onbRamp(T, E.tag - 0.3, E.tag + 0.6);
+      if (sh > 0 && sh < 1) {
+        g.save(); g.beginPath(); g.roundRect(-size / 2, -size / 2, size, size, size * 0.23); g.clip();
+        const xx = -size + sh * size * 2, lg = g.createLinearGradient(xx - size * 0.3, 0, xx + size * 0.3, 0);
+        lg.addColorStop(0, 'rgba(255,255,255,0)'); lg.addColorStop(0.5, 'rgba(255,255,255,.55)'); lg.addColorStop(1, 'rgba(255,255,255,0)');
+        g.fillStyle = lg; g.rotate(-0.4); g.fillRect(-size * 2, -size * 2, size * 4, size * 4); g.restore();
+      }
+      // La «F» se escribe dentro, en blanco
+      const F = this.tex.F || (this.tex.F = OnbHand.write('F', { x: 0, y: 0, h: 10, color: '#fff', width: 1.7, seed: 4, jitter: 0.3, slant: 0.12 }));
+      const kf = size * 0.036, fk = onbRamp(T, E.t0 + 0.9, E.t0 + 1.5) * F.dur;
+      g.save(); g.translate(-size * 0.2, size * 0.29); g.scale(kf, kf);
+      for (const st of F.strokes) this.partial(g, st, fk, '#fff', st.t0);
+      g.restore();
+      g.restore();
+    }
+    // «Folia» escrito a mano, con tinta de degradado
+    const Wd = P.word, hk = Math.min(S.W * 0.6 / Wd.width, size * 0.017), wx = cx - Wd.width * hk / 2, wy = cy + size * 0.6 + 30 * hk * 2;
+    const wk = onbRamp(T, E.word, E.word + 1.7) * Wd.dur;
+    if (wk > 0) {
+      const gr = g.createLinearGradient(wx, 0, wx + Wd.width * hk, 0); gr.addColorStop(0, S.dark ? '#9D8CFF' : '#5B4BFF'); gr.addColorStop(0.6, S.dark ? '#D77CFF' : '#A43AE6'); gr.addColorStop(1, S.dark ? '#FF7AB8' : '#E8306E');
+      g.save(); g.translate(wx, wy); g.scale(hk, hk);
+      for (const st of Wd.strokes) this.partial(g, st, wk, gr, st.t0);
+      g.restore();
+      // Remate: un trazo que subraya la palabra de un golpe, con brillo
+      const sw = onbEase(onbRamp(T, E.word + 1.75, E.word + 2.15));
+      if (sw > 0) {
+        const x0 = wx - 6 * hk, x1 = wx + Wd.width * hk * 1.02, y0 = wy + 30 * hk * 0.55;
+        const n = 40, pts = Array.from({ length: Math.max(2, Math.round(n * sw)) }, (_, i) => { const u = i / (n - 1); return [x0 + (x1 - x0) * u, y0 + Math.sin(u * Math.PI) * 6 * hk - u * 8 * hk, 0.25 + 0.5 * Math.sin(u * Math.PI)]; });
+        g.save(); g.shadowColor = S.dark ? 'rgba(215,124,255,.8)' : 'rgba(164,58,230,.5)'; g.shadowBlur = 18 * (1 - onbRamp(T, E.word + 2.1, E.word + 3)) + 4;
+        g.fillStyle = gr; g.fill(onbFilmPath({ tool: 'pen', kind: 'pen', width: 3.2 * hk }, pts)); g.restore();
+      }
+    }
+    // Remate: el lema aparece nítido desde el desenfoque
+    const tg = onbEase(onbRamp(T, E.tag, E.tag + 0.9));
+    if (tg > 0) {
+      g.save(); g.globalAlpha = tg; if ('filter' in g) g.filter = `blur(${((1 - tg) * 8).toFixed(1)}px)`;
+      this.txt(g, P.L('Tus apuntes, vivos.', 'I tuoi appunti, vivi.'), cx, wy + 30 * hk * 1.1 + 34 * s + (1 - tg) * 10, 24 * s, S.dark ? 'rgba(245,245,247,.82)' : 'rgba(29,29,31,.78)', 600, 'center', '-apple-system, "SF Pro Display", system-ui, sans-serif');
+      g.restore();
+    }
+    g.restore();
+  },
+  /** Un trazo de OnbHand dibujado hasta el tiempo k (relativo), con un color o degradado. */
+  partial(g, st, k, fill) {
+    if (k < st.t0) return;
+    let pts = st.points;
+    if (k < st.times[st.times.length - 1]) {
+      let n = 0; while (n < st.times.length && st.times[n] <= k) n++;
+      pts = st.points.slice(0, Math.max(1, n));
+    }
+    const s = Object.assign({}, st, { color: '#000' });
+    g.fillStyle = fill; g.fill(onbFilmPath(s, pts));
+  },
+
+  // ---------- Rótulos con tipografía cinética (DOM: nítidos a cualquier tamaño) ----------
+  caption(T, calm) {
+    const el = this.el.cap, P = this.P;
+    if (!el) return;
+    const i = P.caps.findIndex((c) => T >= c.t0 - 0.01 && T < c.t1);
+    if (i !== this.capIdx) {
+      this.capIdx = i;
+      if (i < 0) { el.innerHTML = ''; this.capSpans = []; return; }
+      const c = P.caps[i], words = [...c.a.split(' ').map((w) => [w, '']), ...(c.b ? c.b.split(' ').map((w) => [w, 'acc']) : [])];
+      el.innerHTML = words.map(([w, cl], j) => `<span class="${cl}" style="--j:${j}">${esc(w)}</span>`).join(' ');
+      this.capSpans = [...el.children].map((sp) => ({ sp, last: '' }));
+    }
+    if (i < 0) return;
+    const c = P.caps[i];
+    this.capSpans.forEach((o, j) => {
+      const d = c.t0 + j * 0.09 + (o.sp.classList.contains('acc') ? 0.25 : 0);
+      const p = calm ? 1 : onbEase(onbRamp(T, d, d + 0.6)), out = calm ? 0 : onbEase(onbRamp(T, c.t1 - 0.4, c.t1));
+      const st = `${(p * (1 - out)).toFixed(3)}|${((1 - p) * 14 + out * 10).toFixed(1)}|${((1 - p) * 0.4 - out * 0.15).toFixed(3)}|${(1.14 - 0.14 * p + out * 0.04).toFixed(3)}`;
+      if (st === o.last) return;
+      o.last = st;
+      const [op, bl, ty, sc] = st.split('|');
+      o.sp.style.opacity = op; o.sp.style.filter = +bl > 0.2 ? `blur(${bl}px)` : 'none'; o.sp.style.transform = `translateY(${ty}em) scale(${sc})`;
+    });
   },
 };
 
@@ -20043,7 +20999,8 @@ const Onboarding = {
         <div class="onb-nav">${glass(`<span class="onb-arrow back">${icon('back')}</span> Atrás`, 'back', false)}${glass(`${index + 1 === lessons.length ? 'Terminar' : 'Siguiente'} ${arrow}`, 'next', true)}</div></div>`;
     }
     if (stage === 'film') {
-      return `<div class="onb-film"><canvas class="onb-film-cv" aria-hidden="true"></canvas>
+      return `<div class="onb-film"><div class="onb-film-bg" aria-hidden="true"></div><canvas class="onb-film-cv" aria-hidden="true"></canvas><canvas class="onb-film-fx" aria-hidden="true"></canvas>
+        <div class="onb-film-scrim" aria-hidden="true"></div>
         <div class="onb-film-bar" aria-hidden="true"><i></i></div>
         <p class="onb-film-cap" aria-live="polite"></p>
         <button class="onb-glass onb-film-skip" data-onb="film-skip">Saltar ${arrow}</button>
@@ -20095,12 +21052,12 @@ const Onboarding = {
   /** La libreta de demostración: se crea entera y se enseña cómo se «escribe». Sin animaciones: se crea y se abre. */
   playFilm(st = this.el?.querySelector('.onb-stage:not(.out)')) {
     if (!st) return;
-    if (onbReduce()) { OnbFilm.ensure(); return this.act('film-open'); }
-    const end = st.querySelector('.onb-film-end'), cap = st.querySelector('.onb-film-cap'), bar = st.querySelector('.onb-film-bar i');
+    const end = st.querySelector('.onb-film-end'), bar = st.querySelector('.onb-film-bar i'), film = st.querySelector('.onb-film');
     end.hidden = true; st.querySelector('.onb-film-skip').hidden = false;
+    film.classList.toggle('calm', onbReduce());   // sin movimiento: los golpes quietos, con un fundido
+    film.classList.toggle('light', !isDarkTheme());
     OnbFilm.play(st.querySelector('.onb-film-cv'), {
-      speed: this.filmSpeed, at: this.filmAt, freeze: this.filmFreeze,
-      onStep: (i, text) => { cap.textContent = text; cap.classList.remove('in'); void cap.offsetWidth; cap.classList.add('in'); },
+      speed: this.filmSpeed, at: this.filmAt, freeze: this.filmFreeze, calm: onbReduce(),
       onProgress: (p) => { bar.style.width = `${(p * 100).toFixed(1)}%`; },
       onEnd: () => this.filmEnd(st),
     });
