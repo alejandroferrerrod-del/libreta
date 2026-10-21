@@ -1643,6 +1643,169 @@ body.is-card-dragging .crumbs button { box-shadow: inset 0 0 0 1.5px color-mix(i
   .daily-goal { justify-content: center; }
   .daily-dialog .actions .btn { flex: 1; }
 }
+
+/* ---------- Modo presentación (present.js): página a pantalla completa, láser, tinta temporal, foco y telón ---------- */
+.present { position: fixed; inset: 0; z-index: 150; background: #0B0B0D; overflow: hidden; touch-action: none; user-select: none; -webkit-user-select: none; outline: none; }
+.present.laser-on { cursor: none; }
+.present.ink-on { cursor: crosshair; }
+.pr-slot { position: absolute; inset: 0; }
+.pr-slot.in-next { animation: pr-in-next .22s ease-out; }
+.pr-slot.in-prev { animation: pr-in-prev .22s ease-out; }
+@keyframes pr-in-next { from { opacity: 0; transform: translateX(3%); } }
+@keyframes pr-in-prev { from { opacity: 0; transform: translateX(-3%); } }
+.pr-page { position: absolute; left: 0; top: 0; overflow: hidden; transform-origin: 0 0; box-shadow: 0 12px 60px rgba(0, 0, 0, .6); }
+.pr-layer { position: absolute; left: 0; top: 0; width: 100%; height: 100%; pointer-events: none; }
+.pr-fx { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.pr-black { position: absolute; inset: 0; background: #000; opacity: 0; pointer-events: none; transition: opacity .25s; }
+.present.black .pr-black { opacity: 1; }
+.pr-bar, .pr-exit, .pr-colors { position: absolute; background: color-mix(in srgb, var(--surface) 88%, transparent); backdrop-filter: blur(20px) saturate(1.6); -webkit-backdrop-filter: blur(20px) saturate(1.6);
+  border: 1px solid var(--hairline); box-shadow: var(--shadow); color: var(--ink); border-radius: 999px; opacity: 0; pointer-events: none; transition: opacity .2s, transform .2s; cursor: default; }
+.pr-bar { left: 50%; bottom: max(18px, env(safe-area-inset-bottom)); transform: translate(-50%, 10px); display: flex; align-items: center; gap: 2px; padding: 5px; }
+.pr-exit { top: max(14px, env(safe-area-inset-top)); right: 14px; transform: translateY(-8px); display: flex; align-items: center; gap: 6px; padding: 8px 15px 8px 11px; font-size: 14px; font-weight: 600; }
+.pr-exit svg { width: 18px; height: 18px; }
+.pr-colors { left: 50%; bottom: calc(max(18px, env(safe-area-inset-bottom)) + 62px); transform: translate(-50%, 10px); display: flex; gap: 8px; padding: 7px 11px; }
+.present.chrome .pr-bar, .present.chrome .pr-exit, .present.chrome.ink-on .pr-colors { opacity: 1; pointer-events: auto; }
+.present.chrome .pr-bar, .present.chrome.ink-on .pr-colors { transform: translate(-50%, 0); }
+.present.chrome .pr-exit { transform: none; }
+.pr-bar button { width: 40px; height: 40px; border: 0; border-radius: 999px; background: transparent; display: grid; place-items: center; position: relative; color: inherit; }
+.pr-bar button svg { width: 21px; height: 21px; }
+.pr-bar button:hover:not(:disabled), .pr-exit:hover { background: var(--fill); }
+.pr-bar button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); }
+.pr-dot { position: absolute; right: 6px; bottom: 6px; width: 10px; height: 10px; border-radius: 50%; background: var(--c); box-shadow: 0 0 0 1.5px var(--surface); }
+.pr-count { min-width: 62px; text-align: center; font-size: 13.5px; font-weight: 600; font-variant-numeric: tabular-nums; color: var(--ink-2); }
+.pr-sep { width: 1px; height: 22px; background: var(--hairline); margin: 0 4px; }
+.pr-colors button { width: 26px; height: 26px; border-radius: 50%; border: 0; background: var(--c); box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .25); }
+.pr-colors button[aria-pressed="true"] { outline: 2.5px solid var(--accent); outline-offset: 2px; }
+.pr-num { position: absolute; right: 18px; bottom: max(14px, env(safe-area-inset-bottom)); font-size: 13px; font-weight: 600; font-variant-numeric: tabular-nums; color: rgba(255, 255, 255, .55); opacity: 0; transition: opacity .4s; pointer-events: none; }
+.pr-num.show { opacity: 1; }
+.present.chrome .pr-num { opacity: 0; }
+.pr-hint { position: absolute; left: 50%; bottom: calc(max(18px, env(safe-area-inset-bottom)) + 66px); transform: translateX(-50%); width: max-content; max-width: calc(100% - 32px); display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 16px;
+  padding: 10px 16px; border-radius: 14px; background: rgba(28, 28, 30, .88); color: #fff; font-size: 13.5px; opacity: 0; transition: opacity .4s; pointer-events: none; }
+.pr-hint.show { opacity: 1; }
+.pr-hint span { white-space: nowrap; }
+.pr-hint kbd { font: 600 12px var(--font); padding: 1px 6px; border-radius: 5px; background: rgba(255, 255, 255, .16); margin-right: 6px; }
+.pr-hint kbd + kbd { margin-left: -3px; }
+@media (max-width: 480px) {
+  .pr-bar .pr-nav, .pr-count, .pr-sep { display: none; }
+  .pr-bar button { width: 42px; height: 42px; }
+  .pr-hint { font-size: 12.5px; flex-direction: column; align-items: center; gap: 4px; }
+}
+@media (prefers-reduced-motion: reduce) { .pr-slot.in-next, .pr-slot.in-prev { animation: none; } }
+/* ---------- Índice automático (outline.js): barra lateral «Índice» y panel ---------- */
+.toc-tools { display: flex; align-items: center; gap: 2px; margin: 8px 0 6px; }
+.toc-search { flex: 1; min-width: 0; width: auto; padding: 5px 8px; }
+.toc-search input { font-size: 14px; }
+.toc-search input::-webkit-search-cancel-button { display: none; }
+.toc-tools .icon-btn { width: 32px; height: 32px; color: var(--ink-2); }
+.toc-tools .icon-btn svg { width: 18px; height: 18px; }
+.toc-tools .toc-edit[aria-pressed="true"] { background: var(--accent-soft); color: var(--accent); }
+.toc-page-btn { width: 100%; justify-content: center; margin-bottom: 8px; white-space: normal; text-align: center; font-size: 13.5px; }
+.toc-page-btn svg { width: 16px; height: 16px; flex: none; }
+.toc-row { display: flex; align-items: center; gap: 6px; padding: 6px 8px; border-radius: 8px; cursor: pointer; font-size: 14px; line-height: 1.3; position: relative; }
+.toc-row:hover { background: var(--fill); }
+.toc-row.current { background: var(--accent-soft); }
+.toc-row.current::before { content: ""; position: absolute; left: 0; top: 6px; bottom: 6px; width: 3px; border-radius: 2px; background: var(--accent); }
+.toc-row.lvl0 { font-weight: 600; }
+.toc-row.lvl1 { padding-left: 20px; }
+.toc-row.lvl2 { padding-left: 34px; color: var(--ink-2); font-size: 13.5px; }
+.toc-row.off { opacity: .5; }
+.toc-row .toc-t { flex: 1; min-width: 0; overflow-wrap: break-word; }
+.toc-row mark { background: var(--mark, #FFE66B); color: inherit; border-radius: 2px; }
+.toc-row .pg { margin-left: auto; color: var(--muted); font-size: 12px; font-weight: 400; font-variant-numeric: tabular-nums; flex: none; }
+.toc-row .toc-star { color: #E0362C; display: inline-grid; flex: none; }
+.toc-row .toc-star svg { width: 13px; height: 13px; }
+.toc-ink { display: block; border-radius: 4px; max-width: 100%; box-shadow: 0 0 0 1px var(--hairline); }
+.toc-row .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.toc-eds { display: flex; flex: none; }
+.toc.editing .toc-row { flex-wrap: wrap; row-gap: 0; }   /* en «Editar», los botones van en su propia línea: el título no se parte */
+.toc.editing .toc-eds { flex-basis: 100%; justify-content: flex-end; margin-top: -2px; }
+.toc-eds .icon-btn { width: 28px; height: 28px; color: var(--ink-2); }
+.toc-eds .icon-btn svg { width: 16px; height: 16px; }
+.toc-eds .toc-lvl { font-size: 12px; font-weight: 700; border: 1px solid var(--line); width: 22px; height: 22px; margin: 3px; border-radius: 6px; }
+.toc-hidden-note { display: block; margin: 8px auto 0; border: 0; background: transparent; color: var(--accent); font-size: 13px; padding: 6px; }
+.toc-panel { position: fixed; z-index: 55; top: 100px; right: 20px; width: min(360px, calc(100% - 32px)); max-height: calc(100% - 140px); background: var(--surface); border: 1px solid var(--hairline); border-radius: 14px; box-shadow: var(--shadow); display: flex; flex-direction: column; animation: rise .2s ease-out; }
+.toc-panel .tp-head { display: flex; align-items: center; justify-content: space-between; padding: 8px 8px 0 16px; font-size: 16px; }
+.toc-panel .tp-body { display: flex; flex-direction: column; min-height: 0; padding: 0 12px 12px; }
+.toc-panel .toc-list { overflow: auto; min-height: 0; }
+.toc-help { padding-left: 20px; margin: 6px 0 10px; }
+.toc-help li { margin: 4px 0; }
+.toc-review { max-height: 50vh; overflow: auto; display: flex; flex-direction: column; gap: 4px; margin: 8px 0; }
+.toc-rv { display: flex; align-items: flex-start; gap: 10px; padding: 8px; border-radius: 8px; background: var(--surface-2); }
+.toc-rv input { margin-top: 3px; flex: none; }
+.toc-rv small { display: block; color: var(--muted); }
+.toc-rv em { color: var(--muted); font-style: normal; font-weight: 400; }
+@media (max-width: 760px) { .toc-panel { top: 64px; right: 16px; left: 16px; width: auto; max-height: calc(100% - 96px); } }
+
+/* ---------- Mapa de la libreta (map.js): vista de pájaro con capas ---------- */
+.nbmap { position: fixed; inset: 0; z-index: 58; display: flex; flex-direction: column; --map-o: 1; color: var(--ink); }
+.nbmap-bg { position: absolute; inset: 0; background: var(--desk); opacity: var(--map-o); pointer-events: none; }
+.nbmap-bar, .nbmap-layers, .nbmap-legend, .nbmap-zoom { opacity: var(--map-o); }
+.nbmap-bar { position: relative; display: flex; align-items: center; gap: 10px; padding: 8px 12px 4px; padding-top: max(8px, env(safe-area-inset-top)); }
+.nbmap-title { display: flex; flex-direction: column; min-width: 0; line-height: 1.2; }
+.nbmap-title b { font: 600 17px/1.2 var(--font-display); }
+.nbmap-title span { color: var(--muted); font-size: 13px; overflow-wrap: anywhere; }
+.nbmap-count { margin-left: auto; color: var(--muted); font-size: 13px; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.nbmap-count b { color: var(--ink); }
+.nbmap-layers { position: relative; display: flex; gap: 6px; padding: 6px 12px 8px; overflow-x: auto; scrollbar-width: none; flex: none; }
+.nbmap-layers::-webkit-scrollbar { display: none; }
+.nbmap-chip { flex: none; display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px 6px 9px; border-radius: 999px; border: 1px solid var(--line);
+  background: var(--surface); color: var(--ink-2); font-size: 13px; white-space: nowrap; transition: background .15s, color .15s, border-color .15s; }
+.nbmap-chip svg { width: 16px; height: 16px; }
+.nbmap-chip[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.nbmap-stage { position: relative; flex: 1; min-height: 0; }
+.nbmap-canvas { position: absolute; inset: 0; display: block; touch-action: none; cursor: grab; outline: none; }
+.nbmap-canvas:focus-visible { box-shadow: inset 0 0 0 2px var(--accent); }
+.nbmap-legend { position: absolute; left: 12px; bottom: 12px; width: min(300px, calc(100% - 24px)); max-height: calc(100% - 24px); overflow-y: auto;
+  display: flex; flex-direction: column; gap: 12px; padding: 12px 14px; border-radius: 14px; box-shadow: var(--shadow);
+  background: color-mix(in srgb, var(--surface) 92%, transparent); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); font-size: 13px; }
+.nbmap-legend section { display: flex; flex-direction: column; gap: 6px; }
+.nbmap-legend h3 { display: flex; align-items: center; gap: 6px; margin: 0; font-size: 13px; font-weight: 600; }
+.nbmap-legend h3 svg { width: 15px; height: 15px; color: var(--muted); }
+.nbmap-legend .btn { align-self: flex-start; display: inline-flex; align-items: center; gap: 6px; font-size: 13px; }
+.nbmap-legend .btn svg { width: 15px; height: 15px; }
+.nbmap-grad { height: 10px; border-radius: 5px; background: linear-gradient(90deg, #22A86B 0%, #C9B21F 8%, #EE8A2A 33%, #D9352B 100%); }
+.nbmap-ticks { display: flex; justify-content: space-between; color: var(--muted); font-size: 11.5px; }
+.nbmap-note { margin: 0; color: var(--muted); font-size: 12.5px; display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
+.nbmap-note b { color: var(--ink); }
+.nbmap-never { display: inline-block; width: 22px; height: 10px; border-radius: 3px;
+  background: repeating-linear-gradient(135deg, rgba(110,110,115,.75) 0 2px, transparent 2px 5px), color-mix(in srgb, #8E8E93 30%, transparent); }
+.nbmap-means { display: flex; flex-direction: column; gap: 4px; }
+.nbmap-mean { display: flex; align-items: center; gap: 8px; padding: 5px 8px; border-radius: 8px; border: 1px solid transparent; background: var(--fill); text-align: left; }
+.nbmap-mean i { flex: none; width: 12px; height: 12px; border-radius: 50%; box-shadow: 0 0 0 1px rgba(0,0,0,.12); }
+.nbmap-mean span { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.nbmap-mean b { color: var(--muted); font-weight: 600; font-variant-numeric: tabular-nums; }
+.nbmap-mean[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); }
+.nbmap-states { display: flex; flex-wrap: wrap; gap: 4px 12px; }
+.nbmap-states > span, .nbmap-tip-means > span { display: inline-flex; align-items: center; gap: 4px; }
+.nbmap-states i, .nbmap-tip-means i, .nbmap-tip .dot { display: inline-block; flex: none; width: 10px; height: 10px; border-radius: 50%; }
+.nbmap-zoom { position: absolute; right: 12px; bottom: 12px; display: flex; flex-direction: column; gap: 2px; padding: 4px; border-radius: 14px; box-shadow: var(--shadow);
+  background: color-mix(in srgb, var(--surface) 92%, transparent); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); }
+.nbmap-tip { position: absolute; z-index: 2; max-width: min(300px, calc(100% - 16px)); padding: 10px 12px; border-radius: 12px; box-shadow: var(--shadow); pointer-events: none;
+  background: color-mix(in srgb, var(--surface) 95%, transparent); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); font-size: 13px; display: flex; flex-direction: column; gap: 5px; }
+.nbmap-tip > div { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.nbmap-tip-h { gap: 2px 8px !important; }
+.nbmap-tip-h span { color: var(--muted); overflow-wrap: anywhere; }
+.nbmap-tip small { color: var(--muted); font-size: 12px; }
+.nbmap-tip-means { gap: 4px 10px !important; }
+.nbmap-tip-small { gap: 4px 12px !important; color: var(--ink-2); }
+.nbmap-tip-small > span { display: inline-flex; align-items: center; gap: 4px; }
+.nbmap-tip-small svg { width: 14px; height: 14px; }
+.nbmap-live { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+.nbmap-fold { display: none; }
+/* Pantalla estrecha o en vertical (map.js pone .compact): la leyenda va abajo y empieza plegada. */
+.nbmap.compact .nbmap-fold { display: flex; align-items: center; gap: 6px; width: 100%; padding: 2px 0; border: 0; background: none; font-weight: 600; font-size: 13px; text-align: left; }
+.nbmap.compact .nbmap-fold svg { width: 16px; height: 16px; color: var(--muted); }
+.nbmap.compact .nbmap-fold svg:last-child { margin-left: auto; transition: transform .2s; }
+.nbmap.compact .nbmap-fold[aria-expanded="true"] svg:last-child { transform: rotate(180deg); }
+.nbmap.compact .nbmap-legend.folded section { display: none; }
+.nbmap.compact .nbmap-legend.folded { width: auto; padding: 8px 14px; }
+.nbmap.compact .nbmap-legend { max-height: 45%; }
+@media (max-width: 639px) {
+  .nbmap-count { display: none; }
+  .nbmap-legend { left: 8px; bottom: 8px; width: min(300px, calc(100% - 72px)); gap: 10px; padding: 10px 12px; }
+  .nbmap-zoom { right: 8px; bottom: 8px; }
+}
+@media (prefers-reduced-motion: reduce) { .nbmap-chip, .nbmap-fold svg { transition: none !important; } }
 /* =============================================================================
    Tutorial de la primera vez (siempre en oscuro, como en la app nativa)
    ============================================================================= */
@@ -1960,6 +2123,8 @@ const ICONS = {
  "key": "<path d=\"M2.586 17.414A2 2 0 0 0 2 18.828V21a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h1a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h.172a2 2 0 0 0 1.414-.586l.814-.814a6.5 6.5 0 1 0-4-4z\" /> <circle cx=\"16.5\" cy=\"7.5\" r=\".5\" fill=\"currentColor\" />",
  "scanText": "<path d=\"M3 7V5a2 2 0 0 1 2-2h2\" /> <path d=\"M17 3h2a2 2 0 0 1 2 2v2\" /> <path d=\"M21 17v2a2 2 0 0 1-2 2h-2\" /> <path d=\"M7 21H5a2 2 0 0 1-2-2v-2\" /> <path d=\"M7 8h8\" /> <path d=\"M7 12h10\" /> <path d=\"M7 16h6\" />",
  "dots": "<circle cx=\"5.5\" cy=\"12\" r=\"1.6\" fill=\"currentColor\" stroke=\"none\"/><circle cx=\"12\" cy=\"12\" r=\"1.6\" fill=\"currentColor\" stroke=\"none\"/><circle cx=\"18.5\" cy=\"12\" r=\"1.6\" fill=\"currentColor\" stroke=\"none\"/>",
+  // Lucide (2026-10-21): índice automático (ocultar una entrada).
+ "eyeOff": "<path d=\"M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575 1 1 0 0 1 0 .696 10.747 10.747 0 0 1-1.444 2.49\" /> <path d=\"M14.084 14.158a3 3 0 0 1-4.242-4.242\" /> <path d=\"M17.479 17.499a10.75 10.75 0 0 1-15.417-5.151 1 1 0 0 1 0-.696 10.75 10.75 0 0 1 4.446-5.143\" /> <path d=\"m2 2 20 20\" />",
 };
 const icon = (name, extra = '') => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" ${extra}>${ICONS[name] || ''}</svg>`;
 
@@ -2285,7 +2450,7 @@ I18N.dict.it = {
   'No se ha podido cargar el generador de PDF. Revisa la conexión y recarga.': 'Impossibile caricare il generatore di PDF. Controlla la connessione e ricarica.',
   // --- Páginas ---
   'Arrastra una página para cambiarla de sitio. Clic para ir a ella; clic derecho para más opciones.': 'Trascina una pagina per spostarla. Clic per andarci; clic destro per altre opzioni.',
-  'Añadir al esquema…': 'Aggiungi all’indice…', 'Añadir al esquema': 'Aggiungi all’indice', 'Mover al principio': 'Sposta all’inizio', 'Mover al final': 'Sposta alla fine',
+  'Añadir al esquema…': 'Aggiungi all’indice…', 'Añadir al esquema': 'Aggiungi all’indice', 'Añadir al índice…': 'Aggiungi all’indice…', 'Añadir al índice': 'Aggiungi all’indice', 'Mover al principio': 'Sposta all’inizio', 'Mover al final': 'Sposta alla fine',
   'Mover antes': 'Sposta prima', 'Mover después': 'Sposta dopo', 'Título del apartado': 'Titolo della sezione', 'Renombrar apartado': 'Rinomina sezione',
   'Eliminar del esquema': 'Elimina dall’indice', 'Quitar sangría': 'Togli rientro', 'Añadir sangría': 'Aggiungi rientro',
   'Esquema vacío. Crea un índice: añade la página actual con un título y usa clic derecho para hacer apartados y subapartados.': 'Indice vuoto. Crea un indice: aggiungi la pagina attuale con un titolo e usa il clic destro per fare sezioni e sottosezioni.',
@@ -2563,6 +2728,35 @@ I18N.dict.it = {
   'Conectado. Ya puedes cerrar esta ventana.': 'Connesso. Ora puoi chiudere questa finestra.', '¿Desconectar Google Drive?': 'Disconnettere Google Drive?',
   'Tus libretas se quedan en este dispositivo y en tu Drive. Este dispositivo dejará de sincronizar hasta que vuelvas a conectar.': 'I tuoi quaderni restano su questo dispositivo e nel tuo Drive. Questo dispositivo smetterà di sincronizzare finché non ti riconnetti.',
   'Google Drive desconectado': 'Google Drive disconnesso',
+  // Índice automático (outline.js)
+  'Índice': 'Indice', 'Índice de la libreta': 'Indice del quaderno', 'Buscar en el índice': 'Cerca nell’indice', 'Editar el índice': 'Modifica l’indice',
+  'Editar el índice: renombrar, nivel y ocultar': 'Modifica l’indice: rinomina, livello e nascondi', 'Opciones del índice': 'Opzioni dell’indice',
+  'Ir': 'Vai', 'Nivel': 'Livello', 'Apartado': 'Sezione', 'Subapartado': 'Sottosezione', 'Renombrar en el índice': 'Rinomina nell’indice',
+  'Mostrar en el índice': 'Mostra nell’indice', 'Quitar del índice': 'Togli dall’indice', 'Ocultar en el índice': 'Nascondi nell’indice',
+  'Actualizar la página de índice': 'Aggiorna la pagina indice', 'Insertar página de índice': 'Inserisci pagina indice',
+  'Página en marcadores': 'Pagina nei segnalibri', 'En marcadores': 'Nei segnalibri', 'Nivel: tema, apartado o subapartado': 'Livello: argomento, sezione o sottosezione',
+  '1 entrada oculta': '1 voce nascosta', 'Título escrito a mano': 'Titolo scritto a mano', 'Quitado del índice': 'Tolto dall’indice',
+  'Oculto en el índice. Para verlo: ⋯ › Mostrar las ocultas': 'Nascosto nell’indice. Per vederlo: ⋯ › Mostra quelle nascoste',
+  'Ir a la página de índice': 'Vai alla pagina indice', 'Esconder las ocultas': 'Nascondi quelle nascoste', 'Mejorar con IA…': 'Migliora con IA…',
+  'Cómo se hace el índice': 'Come si crea l’indice', 'Cerrar el índice': 'Chiudi l’indice', 'Entendido': 'Capito', 'Aplicar': 'Applica',
+  'Aún no hay títulos. Escribe un título más grande que el resto (a mano o en un cuadro de texto), ponlo en negrita o añade la página con ⋯ › Añadir esta página.':
+    'Ancora nessun titolo. Scrivi un titolo più grande del resto (a mano o in una casella di testo), mettilo in grassetto o aggiungi la pagina con ⋯ › Aggiungi questa pagina.',
+  'Folia lo saca solo de tus apuntes, sin IA y sin conexión. Cuentan como títulos:': 'Folia lo ricava da sola dai tuoi appunti, senza IA e senza connessione. Contano come titoli:',
+  'La escritura a mano claramente más grande que la media de la libreta. Si la transcribes (Estudio › IA › Transcribir), sale con su texto y se puede buscar.':
+    'La scrittura a mano chiaramente più grande della media del quaderno. Se la trascrivi (Studio › IA › Trascrivi), appare con il suo testo e si può cercare.',
+  'Los cuadros de texto con la letra más grande que el resto, o con la primera línea en negrita.': 'Le caselle di testo con il carattere più grande del resto, o con la prima riga in grassetto.',
+  'Los títulos de los PDF importados.': 'I titoli dei PDF importati.', 'La primera línea de cada página, si destaca sobre las demás.': 'La prima riga di ogni pagina, se spicca sulle altre.',
+  'Lo escrito o subrayado con un color cuyo significado es «Título», «Tema» o «Apartado» (Página › Leyenda de colores).':
+    'Ciò che è scritto o evidenziato con un colore il cui significato è «Titolo», «Argomento» o «Sezione» (Pagina › Legenda dei colori).',
+  'Las páginas en marcadores y los apartados que añadas tú.': 'Le pagine nei segnalibri e le sezioni che aggiungi tu.',
+  'El tamaño decide el nivel: tema, apartado y subapartado. Con el lápiz de «Editar» puedes renombrar, cambiar el nivel u ocultar cualquier entrada.':
+    'La dimensione decide il livello: argomento, sezione e sottosezione. Con la matita di «Modifica» puoi rinominare, cambiare livello o nascondere qualsiasi voce.',
+  'Aún no hay títulos para hacer el índice': 'Ancora nessun titolo per fare l’indice', 'Página de índice insertada al principio': 'Pagina indice inserita all’inizio',
+  'Página de índice actualizada': 'Pagina indice aggiornata', 'Aún no hay títulos que mejorar': 'Ancora nessun titolo da migliorare',
+  'La IA está revisando el índice…': 'L’IA sta rivedendo l’indice…', 'No se ha podido mejorar el índice': 'Non è stato possibile migliorare l’indice',
+  'La IA no propone cambios: el índice ya está bien': 'L’IA non propone modifiche: l’indice va già bene', 'Mejorar el índice con IA': 'Migliora l’indice con IA',
+  'Elige qué cambios aplicar. Puedes deshacer cualquiera desde «Editar».': 'Scegli quali modifiche applicare. Puoi annullarne qualsiasi da «Modifica».',
+  '1 cambio aplicado al índice': '1 modifica applicata all’indice',
 };
 
 /** Textos con nombres o números dentro. */
@@ -2660,6 +2854,11 @@ I18N.patterns.it = [
     return m[0].split(' · ').map((part) => part.replace(/^(\d+) (.+)$/, (x, n, w) => `${n} ${W[w] || w}`)).join(' · ');
   }],
   [/^Importante · (.+)$/, 'Importante · $1'], [/^Pág\. (\d+) · (.+)$/, 'Pag. $1 · $2'],
+  // Índice automático (outline.js)
+  [/^Nivel (\d) de 3: cambiar$/, 'Livello $1 di 3: cambia'], [/^Ningún título contiene «(.+)»\.$/, 'Nessun titolo contiene «$1».'],
+  [/^(\d+) entradas ocultas$/, '$1 voci nascoste'], [/^Añadir esta página \((\d+)\) con un título…$/, 'Aggiungi questa pagina ($1) con un titolo…'],
+  [/^Mostrar las ocultas \((\d+)\)$/, 'Mostra quelle nascoste ($1)'], [/^Añadir la página (\d+) al índice$/, 'Aggiungi la pagina $1 all’indice'],
+  [/^(\d+) cambios aplicados al índice$/, '$1 modifiche applicate all’indice'],
 ];
 
 /** Palabras sueltas, para lo que mezcla números y nombres («3 libretas · 2 carpetas»). */
@@ -2668,6 +2867,40 @@ I18N.words.it = [
   ['vínculos', 'collegamenti'], ['vínculo', 'collegamento'], ['a la pág.', 'alla pag.'], ['desde pág.', 'da pag.'], ['pág.', 'pag.'],
   ['en la libreta', 'nel quaderno'], ['vez', 'volta'], ['veces', 'volte'], ['temas', 'argomenti'], ['seleccionados', 'selezionati'],
 ];
+
+// --- Modo presentación (present.js) ---
+Object.assign(I18N.dict.it, {
+  'Presentar': 'Presenta', 'Presentación': 'Presentazione', 'Herramientas de presentación': 'Strumenti di presentazione',
+  'Desliza para pasar de página': 'Scorri per cambiare pagina', 'Toca dos veces para borrar la tinta': 'Tocca due volte per cancellare l’inchiostro',
+  'Toca en el centro para ver los botones': 'Tocca al centro per vedere i pulsanti', 'Pasar página': 'Cambia pagina', 'Láser': 'Laser',
+  'Foco': 'Riflettore', 'Telón': 'Sipario', 'Pantalla en negro': 'Schermo nero', 'Esc': 'Esc', 'Color de la tinta': 'Colore dell’inchiostro',
+  'Puntero láser': 'Puntatore laser', 'Puntero láser (L)': 'Puntatore laser (L)', 'Tinta de presentación': 'Inchiostro di presentazione',
+  'Tinta de presentación: se borra sola (D)': 'Inchiostro di presentazione: si cancella da solo (D)',
+  'Foco: ilumina solo alrededor del puntero (F)': 'Riflettore: illumina solo intorno al puntatore (F)',
+  'Foco en círculo (F: cambiar a rectángulo)': 'Riflettore circolare (F: passa al rettangolo)', 'Foco en rectángulo (F: quitar el foco)': 'Riflettore rettangolare (F: togli il riflettore)',
+  'Telón: tapa la página y descúbrela paso a paso (T)': 'Sipario: copre la pagina e la scopre passo dopo passo (T)',
+  'Borrar la tinta': 'Cancella l’inchiostro', 'Borrar la tinta (C o doble toque)': 'Cancella l’inchiostro (C o doppio tocco)',
+  'Salir de la presentación': 'Esci dalla presentazione', 'Salir de la presentación (Esc)': 'Esci dalla presentazione (Esc)',
+  'Arrastra hacia abajo o toca para descubrir': 'Trascina in basso o tocca per scoprire', 'Arrastra hacia abajo o pulsa ↓ para descubrir': 'Trascina in basso o premi ↓ per scoprire',
+});
+// --- Mapa de la libreta (map.js) ---
+Object.assign(I18N.dict.it, {
+  'Mapa de la libreta': 'Mappa del quaderno', 'Cerrar el mapa': 'Chiudi la mappa', 'Cerrar el mapa (Esc)': 'Chiudi la mappa (Esc)', 'Capas del mapa': 'Livelli della mappa',
+  'Calor de repaso': 'Calore del ripasso', 'Audio': 'Audio', 'Zoom del mapa': 'Zoom della mappa', 'Acercar (+)': 'Ingrandisci (+)', 'Alejar (−)': 'Riduci (−)',
+  'Ver todas las páginas (0)': 'Vedi tutte le pagine (0)', 'página': 'pagina', 'páginas': 'pagine',
+  'Páginas de la libreta. Flechas para moverte, Intro para abrir': 'Pagine del quaderno. Frecce per muoverti, Invio per aprire',
+  '1 sem': '1 sett.', '3 meses': '3 mesi', 'Según tus tarjetas de cada página y los repasos de la libreta.': 'In base alle flashcard di ogni pagina e ai ripassi del quaderno.',
+  'Ir a la más olvidada': 'Vai alla più dimenticata', 'Toca un significado para ver solo sus páginas.': 'Tocca un significato per vedere solo le sue pagine.',
+  'Ningún color de la leyenda está usado en esta libreta.': 'Nessun colore della legenda è usato in questo quaderno.',
+  'Esta libreta aún no tiene leyenda de colores.': 'Questo quaderno non ha ancora una legenda dei colori.',
+  'pendiente': 'da ripassare', 'pendientes': 'da ripassare', 'aprendiendo': 'in apprendimento', 'dominada': 'padroneggiata', 'dominadas': 'padroneggiate',
+  'Repasar las pendientes': 'Ripassa quelle in sospeso', 'Aún no hay tarjetas hechas desde estas páginas.': 'Non ci sono ancora flashcard create da queste pagine.',
+  '(tarjetas de esta página)': '(flashcard di questa pagina)', '(toda la libreta)': '(tutto il quaderno)', 'cinta': 'nastro', 'cintas': 'nastri',
+  'comentario': 'commento', 'comentarios': 'commenti', 'Con audio': 'Con audio', 'enlace a otra página': 'collegamento a un’altra pagina',
+  'enlaces a otras páginas': 'collegamenti ad altre pagine', 'enlace a otra libreta': 'collegamento a un altro quaderno', 'enlaces a otras libretas': 'collegamenti ad altri quaderni',
+  'En marcadores': 'Nei segnalibri', 'Leyenda': 'Legenda',
+});
+I18N.patterns.it.push([/^(\d+) sem$/, '$1 sett.']);
 
 'use strict';
 // =============================================================================
@@ -3296,6 +3529,7 @@ function normalizeNotebook(nb) {
   for (const p of nb.pages || []) if ('pdf' in p && !(p.pdf && typeof p.pdf.id === 'string' && Number.isInteger(p.pdf.index) && p.pdf.index >= 0)) delete p.pdf;
   if ('scrollMode' in nb && !PAGE_MODES.includes(nb.scrollMode)) delete nb.scrollMode;   // modo de páginas (opcional)
   if ('reviews' in nb || 'lastReviewed' in nb) Recall.normalize(nb);   // curva del olvido (opcional, recall.js)
+  Outline.normalize(nb);   // índice (opcional, outline.js): `indexEdits` y `page.toc`
   Voice.normalize(nb);   // audio sincronizado (opcional, voice.js): `t` de trazos y elementos, marcas y onda
   for (const page of nb.pages) {
     page.w = page.w || PORTRAIT.w; page.h = page.h || PORTRAIT.h;
@@ -6578,6 +6812,7 @@ function movePage(nb, from, to) {
 function duplicatePage(nb, i) {
   const copy = clone(nb.pages[i]);
   copy.id = uid(); copy.items.forEach((it) => { it.id = uid(); }); copy.strokes.forEach((s) => { s.id = uid(); }); copy.bookmarked = false;
+  delete copy.toc;   // la copia de una página de índice es una página normal (outline.js)
   nb.pages.splice(i + 1, 0, copy);
   touch(); buildPages(); renderSidebar(); renderPagesWindow();
 }
@@ -6592,13 +6827,13 @@ function pageContextMenu(e, nb, i, { full = false } = {}) {
   e.preventDefault();
   const page = nb.pages[i], last = nb.pages.length - 1;
   popover({ x: e.clientX, y: e.clientY }, `<button data-act="bm">${page.bookmarked ? 'Quitar de marcadores' : 'Guardar en marcadores'}</button>
-    <button data-act="outline">Añadir al esquema…</button><hr><button data-act="dup">${icon('copy')}Duplicar</button>
+    <button data-act="outline">Añadir al índice…</button><hr><button data-act="dup">${icon('copy')}Duplicar</button>
     <button data-act="first" ${i === 0 ? 'disabled' : ''}>${icon('arrowUp')}Mover al principio</button>
     ${full ? `<button data-act="prev" ${i === 0 ? 'disabled' : ''}>Mover antes</button><button data-act="next" ${i === last ? 'disabled' : ''}>Mover después</button>` : ''}
     <button data-act="last" ${i === last ? 'disabled' : ''}>${icon('arrowDown')}Mover al final</button><hr>
     <button data-act="del" class="danger" ${nb.pages.length < 2 ? 'disabled' : ''}>${icon('trash')}Eliminar…</button>`, (act) => {
     if (act === 'bm') { toggleBookmark(page); renderPagesWindow(); }
-    if (act === 'outline') promptDialog('Añadir al esquema', `Página ${i + 1}`, (title) => addOutline(nb, page, title), 'Título del apartado');
+    if (act === 'outline') promptDialog('Añadir al índice', `Página ${i + 1}`, (title) => addOutline(nb, page, title), 'Título del apartado');
     if (act === 'dup') duplicatePage(nb, i);
     if (act === 'first') movePage(nb, i, 0);
     if (act === 'prev') movePage(nb, i, i - 1);
@@ -8078,7 +8313,7 @@ function renderEditor() {
   // Uno solo: el del editor anterior se apaga (cada renderEditor crea un #desk nuevo).
   renderEditor.ro?.disconnect();
   if (window.ResizeObserver) (renderEditor.ro = new ResizeObserver(queueRedraw)).observe(desk);
-  desk.addEventListener('wheel', (e) => { if (e.ctrlKey || e.metaKey) { e.preventDefault(); setZoom(S.zoom * (e.deltaY < 0 ? 1.1 : 1 / 1.1)); } }, { passive: false });
+  desk.addEventListener('wheel', (e) => { if (e.ctrlKey || e.metaKey) { e.preventDefault(); if (NbMap.wheelOut(e)) return; setZoom(S.zoom * (e.deltaY < 0 ? 1.1 : 1 / 1.1)); } }, { passive: false });
   desk.addEventListener('dragover', (e) => { if ([...(e.dataTransfer?.items || [])].some((i) => i.kind === 'file')) e.preventDefault(); });
   desk.addEventListener('drop', (e) => {
     if (S.reading) { e.preventDefault(); return toast('Estás en modo lectura'); }
@@ -8546,6 +8781,7 @@ function attachPinchZoom(desk) {
     if (e.cancelable) e.preventDefault();
     const [a, b] = e.touches, [x, y] = mid(a, b);
     pinch.next = [pinch.zoom * dist(a, b) / pinch.d, x, y];
+    if (NbMap.pinchOut(pinch.next[0])) { cancelAnimationFrame(pinch.raf); pinch = null; pinchActive = false; redrawPages(); return; }   // mapa de la libreta (map.js)
     if (!pinch.raf) pinch.raf = requestAnimationFrame(() => { if (!pinch) return; pinch.raf = 0; zoomAt(pinch.next[0], pinch.anchor, pinch.next[1], pinch.next[2]); });
   }, { passive: false });
   const end = (e) => {
@@ -8685,9 +8921,8 @@ function updateCurrentPage() {
     currentPageIndex = index;
     updateBookmarkButton();
     $$('.thumb').forEach((t) => t.classList.toggle('current', Number(t.dataset.index) === index));
-    $$('.outline-row').forEach((r) => r.classList.toggle('current', r.dataset.current === 'true'));
-    if (S.sidebarMode === 'outline') renderSidebar();
   }
+  Outline.scrolled();   // índice: resalta la sección que se lee (outline.js)
 }
 function scrollToPage(pageId, smooth = true) {
   const v = views.get(pageId), desk = $('#desk');
@@ -9007,6 +9242,7 @@ function pageMenu(anchor) {
     <div class="label">Zoom (también con Ctrl + rueda)</div>
     <button data-act="zoom-in">${icon('plus')} Acercar</button><button data-act="zoom-out">${icon('minus')} Alejar</button><button data-act="zoom-fit">${icon('pages')} Ajustar al ancho</button>
     <hr><button data-act="fullscreen">${icon(isFullscreen() ? 'shrink' : 'expand')} ${isFullscreen() ? 'Salir de pantalla completa' : 'Pantalla completa'} <span class="kbd-hint">${onbKey('fullscreen')}</span></button>
+    ${Present.menuHtml()}
     ${fingerSwitch()}
     <button data-act="shortcuts">${icon('keyboard')} Atajos de teclado…</button>
     ${Onboarding.menuHtml()}
@@ -9017,6 +9253,7 @@ function pageMenu(anchor) {
     if (Onboarding.menuAct(act)) return;   // «Tutorial»: todo, novedades o un capítulo
     if (PageMode.menuAct(act)) return;   // «Páginas»: continuo, por páginas u horizontal
     if (act === 'fullscreen') return toggleFullscreen();
+    if (Present.menuAct(act)) return;   // «Presentar» (present.js)
     if (act === 'finger') return toggleFinger();
     if (act === 'zoom-in') return setZoom(S.zoom * 1.2);
     if (act === 'zoom-out') return setZoom(S.zoom / 1.2);
@@ -9043,13 +9280,15 @@ setInterval(updateStudyBadge, 60000);
 function studyMenu(anchor) {
   updateCurrentPage();
   const nb = activeNb(), n = Cards.due(nb).length;
-  popover(anchor, `${Daily.menuHtml()}<hr><div class="label">Tarjetas</div>
+  popover(anchor, `${Daily.menuHtml()}
+    ${NbMap.menuHtml()}<hr><div class="label">Tarjetas</div>
     <button data-act="cards-review">${icon('lightbulb')} Repasar <span class="study-count${n ? ' on' : ''}">${n === 1 ? '1 pendiente' : `${n} pendientes`}</span></button>
     <button data-act="cards-all" ${Cards.all(nb).length ? '' : 'disabled'} title="Practicar también las que aún no tocan: no cambia cuándo vuelven">${icon('rotate')} Repasar todas (aunque no toquen)</button>
     <button data-act="cards-new">${icon('plus')} Nueva tarjeta…</button><button data-act="cards-list">${icon('pages')} Todas las tarjetas…</button>
     <button data-act="cloze">${icon('textMark')} Tarjetas de huecos de lo subrayado…</button>
     ${Recall.menuHtml(nb)}
     ${Tape.menuHtml(nb)}
+    ${Outline.menuHtml()}
     <hr><div class="label">Colores</div>
     <button data-act="color-sum">${icon('layers')} Resumen por color</button>
     <hr><div class="label study-ai">${icon('sparkles')} IA</div>
@@ -9059,6 +9298,7 @@ function studyMenu(anchor) {
     <button data-act="ai-key">${icon('key')} Clave de IA…</button>
     <hr><button data-act="pomo">${icon('timer')} Temporizador de estudio…</button>`, (act) => {
     if (Daily.menuAct(act)) return;   // «Repaso de hoy» (daily.js), de todas las libretas
+    if (NbMap.menuAct(act)) return;   // «Mapa de la libreta» (map.js)
     if (act === 'cards-review') return Cards.review(nb);
     if (act === 'cards-all') return Cards.review(nb, { all: true });
     if (act === 'cards-new') return Cards.createDialog(nb);
@@ -9069,6 +9309,7 @@ function studyMenu(anchor) {
     if (act === 'ai-key') return AI.keyDialog();
     if (act === 'pomo') return Pomo.openPanel(anchor);
     if (Recall.menuAct(act, nb)) return;   // «Marcar como repasada» (curva del olvido)
+    if (Outline.menuAct(act)) return;   // «Índice de la libreta» (outline.js)
     Tape.menuAct(act, nb, anchor);   // «Repaso activo»: cintas y repaso por color
   });
   openPopover?.el.classList.add('study-pop');
@@ -12168,6 +12409,7 @@ async function showLinkPreview(target, source) {
 function followLink(target) {
   if (target.nb === S.active) {
     const pageId = target.page || activeNb().pages[0].id;
+    if (target.y > 0) return Outline.jump(pageId, target.y);   // enlace a una altura (página de índice, outline.js)
     scrollToPage(pageId);
     setTimeout(() => flashRect(pageId, null), 350);
     return;
@@ -12203,7 +12445,7 @@ function renderSidebar() {
   el.innerHTML = `<div class="seg" role="tablist" aria-label="Vista de la barra lateral">
       <button data-mode="thumbs" aria-pressed="${S.sidebarMode === 'thumbs'}" title="Miniaturas" aria-label="Miniaturas">${icon('pages')}</button>
       <button data-mode="bookmarks" aria-pressed="${S.sidebarMode === 'bookmarks'}" title="Marcadores" aria-label="Marcadores">${icon('bookmark')}</button>
-      <button data-mode="outline" aria-pressed="${S.sidebarMode === 'outline'}" title="Esquema" aria-label="Esquema">${icon('outline')}</button></div>
+      <button data-mode="outline" aria-pressed="${S.sidebarMode === 'outline'}" title="Índice" aria-label="Índice">${icon('outline')}</button></div>
     <div class="body" id="side-body"></div>`;
   el.querySelector('.seg').onclick = (e) => { const b = e.target.closest('[data-mode]'); if (b) { S.sidebarMode = b.dataset.mode; savePrefs(); renderSidebar(); } };
   const body = $('#side-body', el);
@@ -12220,7 +12462,7 @@ function renderSidebar() {
     };
     loadThumbs(body, nb);
   }
-  if (S.sidebarMode === 'outline') renderOutline(body, nb);
+  if (S.sidebarMode === 'outline') Outline.mount(body, nb);   // índice automático (outline.js)
   body.scrollTop = keep;
 }
 function renderThumbs(body, nb) {
@@ -12284,43 +12526,6 @@ function addOutline(nb, page, title) {
   nb.outline.splice(index, 0, { id: uid(), title, pageId: page.id, level: index > 0 ? nb.outline[index - 1].level : 0 });
   touch(); renderSidebar();
 }
-function renderOutline(body, nb) {
-  const num = (id) => nb.pages.findIndex((p) => p.id === id);
-  const current = [...nb.outline].reverse().find((o) => num(o.pageId) >= 0 && num(o.pageId) <= currentPageIndex)?.id;
-  body.innerHTML = `<button class="btn" id="ol-add" style="width:100%;justify-content:center;margin-bottom:10px">+ Añadir página ${currentPageIndex + 1}</button>
-    ${nb.outline.length ? nb.outline.map((o) => `<div class="outline-row ${o.id === current ? 'current' : ''}" data-current="${o.id === current}" data-ol="${o.id}" draggable="true" style="padding-left:${6 + o.level * 16}px">
-      <span class="lvl${o.level}">${esc(o.title)}</span><span class="pg">${num(o.pageId) >= 0 ? num(o.pageId) + 1 : '—'}</span></div>`).join('')
-      : '<p class="side-empty">Esquema vacío. Crea un índice: añade la página actual con un título y usa clic derecho para hacer apartados y subapartados.</p>'}`;
-  $('#ol-add', body).onclick = () => promptDialog(`Añadir la página ${currentPageIndex + 1} al esquema`, '', (title) => addOutline(nb, nb.pages[currentPageIndex], title), 'Título del apartado');
-  body.onclick = (e) => { const r = e.target.closest('[data-ol]'); if (r) { const o = nb.outline.find((x) => x.id === r.dataset.ol); if (o && num(o.pageId) >= 0) scrollToPage(o.pageId); } };
-  body.oncontextmenu = (e) => {
-    const r = e.target.closest('[data-ol]');
-    if (!r) return;
-    e.preventDefault();
-    const i = nb.outline.findIndex((x) => x.id === r.dataset.ol), o = nb.outline[i];
-    popover({ x: e.clientX, y: e.clientY }, `<button data-act="rename">Renombrar…</button>
-      <button data-act="in" ${i === 0 || o.level > nb.outline[i - 1].level || o.level >= 3 ? 'disabled' : ''}>Sangrar (subapartado)</button>
-      <button data-act="out" ${o.level === 0 ? 'disabled' : ''}>Quitar sangría</button><hr><button data-act="del">Eliminar del esquema</button>`, (act) => {
-      if (act === 'rename') return promptDialog('Renombrar apartado', o.title, (v) => { o.title = v; touch(); renderSidebar(); }, 'Título');
-      if (act === 'in') o.level++;
-      if (act === 'out') o.level--;
-      if (act === 'del') nb.outline.splice(i, 1);
-      touch(); renderSidebar();
-    });
-  };
-  body.ondragstart = (e) => { const r = e.target.closest('[data-ol]'); if (r) e.dataTransfer.setData('text/x-libreta-outline', r.dataset.ol); };
-  body.ondragover = (e) => { if (e.dataTransfer.types.includes('text/x-libreta-outline')) e.preventDefault(); };
-  body.ondrop = (e) => {
-    const id = e.dataTransfer.getData('text/x-libreta-outline'), r = e.target.closest('[data-ol]');
-    if (!id || !r || r.dataset.ol === id) return;
-    e.preventDefault();
-    const from = nb.outline.findIndex((x) => x.id === id);
-    const [moved] = nb.outline.splice(from, 1);
-    nb.outline.splice(nb.outline.findIndex((x) => x.id === r.dataset.ol), 0, moved);
-    if (nb.outline[0]) nb.outline[0].level = 0;
-    touch(); renderSidebar();
-  };
-}
 
 // ---------- Búsqueda en la libreta ----------
 /** Cierra el panel de búsqueda y quita el fondo «activo» de su botón. */
@@ -12358,6 +12563,685 @@ function openSearchPanel() {
   });
   panel.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeSearchPanel(); });
 }
+
+// =============================================================================
+// Índice automático de la libreta (`Outline`, pestaña «Índice» de la barra lateral y panel en el móvil)
+// Saca los títulos de lo que ya está escrito, sin IA: cuadros de texto con letra grande o en negrita, títulos de los
+// PDF (texto más grande que el resto), la escritura a mano más grande que la media de la libreta (con su texto si se
+// transcribió, `page.ocr`; si no, se ve el propio trazo), la primera línea destacada de cada página, los colores cuyo
+// significado es «título» (nb.legend), los marcadores y los apartados puestos a mano (nb.outline).
+// El índice NO se guarda: se calcula al pintarlo. Solo se guarda lo que cambia quien estudia (`nb.indexEdits`:
+// renombrar, ocultar, nivel) y la página de índice (`page.toc`, con enlaces internos de links.js).
+// =============================================================================
+const OUTLINE_MAX = 300;   // entradas como mucho
+const OUTLINE_TEXT_MAX = 120;   // una línea más larga no es un título
+const OUTLINE_TITLE_RE = /t[ií]tulo|encabezado|apartado|secci[oó]n|^temas?$|titolo|intestazione|sezione|argomento/i;
+const OUTLINE_TOC = 'toc:';   // prefijo de los ids de lo que escribe la página de índice (cuadros y trazos copiados)
+const OUTLINE_AI_SCHEMA = {
+  type: 'OBJECT',
+  properties: { entradas: { type: 'ARRAY', items: { type: 'OBJECT', properties: { n: { type: 'INTEGER' }, titulo: { type: 'STRING' }, nivel: { type: 'INTEGER' }, quitar: { type: 'BOOLEAN' } }, required: ['n', 'titulo', 'nivel'] } } },
+  required: ['entradas'],
+};
+const OUTLINE_AI_SYSTEM = 'Revisas el índice que una app de apuntes ha sacado sola de los títulos de una libreta (suelen ser apuntes de Medicina). '
+  + 'Para cada entrada devuelve: su número n, el título corregido (arregla letras mal leídas y mayúsculas; no lo resumas ni lo traduzcas; si viene una imagen, es el título escrito a mano: léelo), '
+  + 'su nivel (0 = tema, 1 = apartado, 2 = subapartado) y quitar = true solo si claramente no es un título (una frase suelta, una fecha, un número). No inventes entradas nuevas.';
+
+const Outline = {
+  q: '',              // lo que se busca dentro del índice
+  edit: false,        // modo «Editar»: cada fila enseña renombrar, nivel y ocultar
+  showHidden: false,  // ver también las ocultas (para volver a mostrarlas)
+  cache: null,        // { key, list }
+  cur: null,          // clave de la entrada que se está leyendo
+  raf: 0, refreshTimer: 0, seen: '',
+
+  // ---------- Medidas ----------
+  median(a) { if (!a.length) return 0; const s = [...a].sort((x, y) => x - y); return s[s.length >> 1]; },
+  box(points) {
+    let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+    for (const p of points) { if (p[0] < x0) x0 = p[0]; if (p[0] > x1) x1 = p[0]; if (p[1] < y0) y0 = p[1]; if (p[1] > y1) y1 = p[1]; }
+    return { x: x0, y: y0, w: x1 - x0, h: y1 - y0 };
+  },
+  hex(c) { return typeof Meaning !== 'undefined' && Meaning.hex ? Meaning.hex(c) : (typeof c === 'string' ? c.toLowerCase() : ''); },
+  /** Colores cuyo significado (leyenda de la libreta) es «título», «apartado», «tema»… */
+  titleColors(nb) {
+    return new Set(Object.entries(nb.legend || {}).filter(([, v]) => OUTLINE_TITLE_RE.test(String(v).trim())).map(([k]) => k.toLowerCase()));
+  },
+  clean(t) { return String(t || '').replace(/\s+/g, ' ').replace(/^[\s•·\-–—*#]+/, '').replace(/[\s:]+$/, '').trim(); },
+
+  // ---------- Líneas de cada página ----------
+  /** Líneas de escritura a mano: los trazos de bolígrafo agrupados por altura (sin formas ni dibujos grandes). */
+  inkLines(page, titleColors) {
+    const pen = [], hl = [];
+    for (const s of page.strokes) {
+      if (!s.points?.length) continue;
+      const b = this.box(s.points);
+      if (s.tool === 'highlighter') { if (titleColors.size) hl.push({ s, b }); continue; }
+      if (s.shape || (b.h < 3 && b.w < 3) || b.h > page.h * 0.2 || b.w > page.w * 0.8) continue;
+      pen.push({ s, b });
+    }
+    pen.sort((a, b) => (a.b.y + a.b.h / 2) - (b.b.y + b.b.h / 2));
+    const lines = [];
+    for (const p of pen) {
+      const cy = p.b.y + p.b.h / 2;
+      let line = null;
+      for (let i = lines.length - 1; i >= 0 && i >= lines.length - 6; i--) {
+        const L = lines[i];
+        if (cy < L.y - 2 || cy > L.y + L.h + 2) continue;
+        const gap = Math.max(0, p.b.x - (L.x + L.w), L.x - (p.b.x + p.b.w));
+        if (gap > Math.max(80, this.median(L.hs) * 5)) continue;
+        line = L; break;
+      }
+      if (!line) { lines.push({ x: p.b.x, y: p.b.y, w: p.b.w, h: p.b.h, hs: [p.b.h], strokes: [p.s] }); continue; }
+      const x1 = Math.max(line.x + line.w, p.b.x + p.b.w), y1 = Math.max(line.y + line.h, p.b.y + p.b.h);
+      line.x = Math.min(line.x, p.b.x); line.y = Math.min(line.y, p.b.y); line.w = x1 - line.x; line.h = y1 - line.y;
+      line.hs.push(p.b.h); line.strokes.push(p.s);
+    }
+    for (const L of lines) {
+      L.size = this.median(L.hs);
+      const colored = L.strokes.filter((s) => titleColors.has(this.hex(s.color))).length;
+      L.color = titleColors.size > 0 && (colored * 2 >= L.strokes.length
+        || hl.some(({ s, b }) => titleColors.has(this.hex(s.color)) && b.y + b.h / 2 >= L.y - L.size && b.y + b.h / 2 <= L.y + L.h + L.size
+          && Math.min(b.x + b.w, L.x + L.w) - Math.max(b.x, L.x) >= L.w * 0.4));
+    }
+    return lines;
+  },
+  /** Líneas de un cuadro de texto, con el tamaño y el estilo de la mayor parte de sus letras. */
+  textLines(item, titleColors) {
+    const div = document.createElement('div');
+    div.innerHTML = item.html || '';
+    const base = item.base || DEFAULT_TEXT, out = [];
+    const FONT_SIZES = [0, 10, 13, 16, 18, 24, 32, 48];
+    let cur = null;
+    const push = () => { if (cur && cur.text.trim()) out.push(cur); cur = null; };
+    const walk = (node, st) => {
+      for (const n of node.childNodes) {
+        if (n.nodeType === 3) {
+          if (!n.nodeValue) continue;
+          cur = cur || { text: '', runs: [] };
+          cur.text += n.nodeValue; cur.runs.push({ n: n.nodeValue.trim().length, ...st });
+          continue;
+        }
+        if (n.nodeType !== 1) continue;
+        if (n.tagName === 'BR') { push(); continue; }
+        const block = ['DIV', 'P', 'LI', 'UL', 'OL'].includes(n.tagName);
+        if (block) push();
+        const s = { ...st }, css = n.style || {};
+        const fs = parseFloat(css.fontSize); if (fs > 0 && /px$/.test(css.fontSize)) s.size = fs;
+        if (n.tagName === 'FONT' && n.getAttribute('size')) s.size = FONT_SIZES[Number(n.getAttribute('size'))] || s.size;
+        if (/^(B|STRONG)$/.test(n.tagName) || /bold|[6-9]00/.test(css.fontWeight || '')) s.bold = true;
+        if (css.color) s.color = css.color;
+        if (css.backgroundColor) s.bg = css.backgroundColor;
+        walk(n, s);
+        if (block) push();
+      }
+    };
+    walk(div, { size: base.size || DEFAULT_TEXT.size, bold: !!base.bold, color: base.color, bg: base.bg || '' });
+    push();
+    let y = item.y + 6;
+    return out.map((l, i) => {
+      const total = l.runs.reduce((a, r) => a + r.n, 0) || 1, by = new Map();
+      for (const r of l.runs) by.set(r.size, (by.get(r.size) || 0) + r.n);
+      const size = [...by.entries()].sort((a, b) => b[1] - a[1])[0][0];
+      const bold = l.runs.filter((r) => r.bold).reduce((a, r) => a + r.n, 0) >= total * 0.8;
+      const color = titleColors.size > 0 && l.runs.filter((r) => titleColors.has(this.hex(r.color)) || titleColors.has(this.hex(r.bg))).reduce((a, r) => a + r.n, 0) >= total * 0.6;
+      const line = { i, text: this.clean(l.text), size, bold, color, x: item.x, y, w: item.w || 300, h: size * 1.3, of: out.length };
+      y += size * 1.35;
+      return line;
+    });
+  },
+  /** Líneas del texto de un PDF importado (tramos a la misma altura y del mismo tamaño). */
+  pdfLines(page) {
+    const runs = (page.pdfRuns || []).map((r, i) => ({ ...r, i })).filter((r) => r.s && r.h > 0).sort((a, b) => a.y - b.y || a.x - b.x);
+    const lines = [];
+    for (const r of runs) {
+      const L = lines.find((l) => Math.abs(l.y - r.y) < 0.4 * Math.min(l.h, r.h) && Math.abs(l.h - r.h) < 0.25 * l.h);
+      if (L) { L.runs.push(r); const x1 = Math.max(L.x + L.w, r.x + r.w); L.x = Math.min(L.x, r.x); L.w = x1 - L.x; }
+      else lines.push({ x: r.x, y: r.y, w: r.w, h: r.h, size: r.h, runs: [r] });
+    }
+    for (const L of lines) {
+      L.runs.sort((a, b) => a.x - b.x);
+      L.text = this.clean(L.runs.map((r) => r.s).join(' '));
+      L.i = L.runs[0].i;
+    }
+    return lines;
+  },
+
+  // ---------- Detección ----------
+  /** Todas las líneas candidatas de la libreta (sin la página de índice), con su tamaño respecto a la media. */
+  candidates(nb) {
+    const titleColors = this.titleColors(nb), pages = [];
+    const textSizes = [], pdfSizes = [], inkSizes = [];
+    nb.pages.forEach((page, pi) => {
+      if (page.toc) return;
+      const ink = this.inkLines(page, titleColors);
+      ink.forEach((L) => inkSizes.push(...L.hs));
+      // La escritura transcrita (page.ocr): cada línea de texto va con su línea de tinta si salen las mismas.
+      const ocr = typeof AI !== 'undefined' && AI.ocrOf ? AI.ocrOf(page) : [];
+      for (const o of ocr) {
+        const r = o.rect, inside = ink.filter((L) => !L.ocr && L.x + L.w / 2 >= r.x && L.x + L.w / 2 <= r.x + r.w && L.y + L.h / 2 >= r.y && L.y + L.h / 2 <= r.y + r.h);
+        const texts = String(o.text || '').split('\n').map((t) => this.clean(t)).filter(Boolean);
+        if (!inside.length || !texts.length) continue;
+        inside.forEach((L) => { L.ocr = o.id; });
+        if (inside.length === texts.length) inside.forEach((L, i) => { L.text = texts[i]; L.idx = i; });
+        else { inside[0].text = texts[0]; inside[0].idx = 0; }
+      }
+      const text = [];
+      for (const it of page.items) if (it.type === 'text' && !String(it.id).startsWith(OUTLINE_TOC)) for (const l of this.textLines(it, titleColors)) { text.push({ ...l, item: it }); for (let k = 0; k < Math.min(10, Math.ceil(l.text.length / 20)); k++) textSizes.push(l.size); }
+      const pdf = this.pdfLines(page);
+      pdf.forEach((L) => { for (let k = 0; k < Math.min(10, Math.ceil(L.text.length / 20)); k++) pdfSizes.push(L.size); });
+      pages.push({ page, pi, ink, text, pdf });
+    });
+    const textBase = textSizes.length >= 12 ? this.median(textSizes) : Math.min(this.median(textSizes) || DEFAULT_TEXT.size, DEFAULT_TEXT.size);
+    return { pages, titleColors, base: { text: textBase, pdf: this.median(pdfSizes) || 1, ink: inkSizes.length >= 20 ? this.median(inkSizes) : 0 } };
+  },
+  /** Los títulos de la libreta, en orden de lectura, con su nivel (0, 1, 2). Sin lo que se haya cambiado a mano. */
+  detect(nb) {
+    const { pages, base } = this.candidates(nb), found = [];
+    const add = (e) => { if (found.length < OUTLINE_MAX * 2) found.push(e); };
+    for (const { page, pi, ink, text, pdf } of pages) {
+      const before = found.length;
+      // Cuadros de texto: letra más grande que la media, en negrita como primera línea, o de un color «título».
+      for (const l of text) {
+        if (l.text.length < 2 || l.text.length > OUTLINE_TEXT_MAX) continue;
+        let r = l.size / base.text;
+        const boldHead = l.bold && l.i === 0 && l.of > 1 && l.text.length <= 80 && r >= 0.95;
+        if (!(r >= 1.3 || l.color || boldHead)) continue;
+        if (boldHead && r < 1.3) r = Math.max(r, 1.12);
+        if (l.color) r = Math.max(r, 1.6);
+        add({ key: `t:${l.item.id}:${l.i}`, src: 'text', page, pi, x: l.x, y: l.y, w: l.w, h: l.h, title: l.text, r });
+      }
+      // PDF: lo que tiene la letra más grande que la media del PDF.
+      for (const L of pdf) {
+        if (L.text.length < 2 || L.text.length > OUTLINE_TEXT_MAX) continue;
+        const r = L.size / base.pdf;
+        if (r >= 1.3) add({ key: `p:${page.id}:${L.i}`, src: 'pdf', page, pi, x: L.x, y: L.y, w: L.w, h: L.h, title: L.text, r });
+      }
+      // Escritura a mano: transcrita (con su texto) o, si no, el propio trazo (como mucho 3 por página).
+      let inkOnly = 0;
+      for (const L of ink) {
+        const r = base.ink ? L.size / base.ink : 0;
+        const wordy = L.w >= L.size * 2.2;
+        if (L.text) {
+          if ((r >= 1.4 || L.color) && L.text.length <= OUTLINE_TEXT_MAX) add({ key: `o:${L.ocr}:${L.idx}`, src: 'ocr', page, pi, x: L.x, y: L.y, w: L.w, h: L.h, title: L.text, r: L.color ? Math.max(r, 1.6) : r });
+        } else if (!L.ocr && wordy && (r >= 1.6 || L.color) && inkOnly < 3) {
+          inkOnly++;
+          add({ key: `k:${page.id}:${L.strokes[0].id}`, src: 'ink', page, pi, x: L.x, y: L.y, w: L.w, h: L.h, title: '', strokes: L.strokes, r: L.color ? Math.max(r, 1.6) : r });
+        }
+      }
+      // La primera línea destacada de la página: arriba del todo y claramente más grande que las demás de la página.
+      const have = new Set(found.slice(before).map((e) => e.key));
+      const top = (lines, minN, ratio) => {
+        if (lines.length < minN) return null;
+        const first = [...lines].sort((a, b) => a.y - b.y)[0];
+        if (first.y > page.h * 0.4) return null;
+        const med = this.median(lines.map((l) => l.size));
+        return first.size >= med * ratio ? first : null;
+      };
+      const tt = top(text, 3, 1.2);
+      if (tt && tt.text.length >= 2 && tt.text.length <= OUTLINE_TEXT_MAX && !have.has(`t:${tt.item.id}:${tt.i}`)) add({ key: `t:${tt.item.id}:${tt.i}`, src: 'text', page, pi, x: tt.x, y: tt.y, w: tt.w, h: tt.h, title: tt.text, r: 1.25 });
+      const tp = top(pdf, 3, 1.2);
+      if (tp && tp.text.length >= 2 && tp.text.length <= OUTLINE_TEXT_MAX && !have.has(`p:${page.id}:${tp.i}`)) add({ key: `p:${page.id}:${tp.i}`, src: 'pdf', page, pi, x: tp.x, y: tp.y, w: tp.w, h: tp.h, title: tp.text, r: 1.25 });
+      const ti = top(ink, 4, 1.35);
+      if (ti && ti.w >= ti.size * 2.2 && !have.has(ti.text ? `o:${ti.ocr}:${ti.idx}` : `k:${page.id}:${ti.strokes[0].id}`)) {
+        if (ti.text) add({ key: `o:${ti.ocr}:${ti.idx}`, src: 'ocr', page, pi, x: ti.x, y: ti.y, w: ti.w, h: ti.h, title: ti.text, r: 1.3 });
+        else if (!ti.ocr) add({ key: `k:${page.id}:${ti.strokes[0].id}`, src: 'ink', page, pi, x: ti.x, y: ti.y, w: ti.w, h: ti.h, title: '', strokes: ti.strokes, r: 1.3 });
+      }
+    }
+    // Niveles por familia: lo tecleado, los PDF y lo escrito a mano tienen cada uno sus tamaños (el título más grande
+    // de cada familia es un «tema»), así un cuadro de texto no queda por debajo de una letra a mano enorme.
+    for (const fam of [['text'], ['pdf'], ['ocr', 'ink']]) this.levels(found.filter((e) => fam.includes(e.src)));
+    // Apartados puestos a mano (nb.outline): arriba de su página, con su nivel.
+    const index = new Map(nb.pages.map((p, i) => [p.id, i]));
+    for (const o of nb.outline || []) {
+      const pi = index.get(o.pageId), page = nb.pages[pi];
+      if (pi === undefined || page.toc) continue;
+      found.push({ key: `m:${o.id}`, src: 'manual', page, pi, x: 0, y: -1, w: page.w, h: 0, title: String(o.title || ''), level: Math.max(0, Math.min(2, o.level | 0)), manual: o });
+    }
+    // Marcadores: la página guardada lleva una estrella; si no tiene ningún título, entra con su nombre.
+    for (const [pi, page] of nb.pages.entries()) {
+      if (!page.bookmarked || page.toc) continue;
+      const mine = found.filter((e) => e.pi === pi);
+      if (mine.length) { mine.sort((a, b) => a.y - b.y)[0].star = true; continue; }
+      found.push({ key: `b:${page.id}`, src: 'bookmark', page, pi, x: 0, y: -1, w: page.w, h: 0, title: '', level: 0, star: true });
+    }
+    found.sort((a, b) => a.pi - b.pi || a.y - b.y || a.x - b.x);
+    return found.slice(0, OUTLINE_MAX);
+  },
+  /** Niveles por tamaño (dentro de una familia): los títulos se agrupan de más grande a más pequeño (cada grupo, ≥ 12 % menor que el anterior). */
+  levels(list) {
+    const rs = [...new Set(list.map((e) => Math.round(e.r * 100) / 100))].sort((a, b) => b - a);
+    const level = new Map();
+    let n = 0, start = rs[0];
+    for (const r of rs) { if (r < start * 0.88) { n = Math.min(2, n + 1); start = r; } level.set(r, n); }
+    for (const e of list) e.level = level.get(Math.round(e.r * 100) / 100) || 0;
+  },
+  /** El índice tal como se ve: lo detectado con los cambios hechos a mano (nombre, nivel, oculta). Se recuerda
+   *  mientras la libreta no cambie (nb._v sube con cada `touch`). */
+  list(nb) {
+    const key = `${nb.id}:${nb._v || 0}:${I18N.lang}:${nb.pages.length}`;
+    if (this.cache?.key === key) return this.cache.list;
+    const edits = nb.indexEdits || {};
+    const list = this.detect(nb).map((e) => {
+      const ed = edits[e.key] || {};
+      const auto = e.title || (e.src === 'bookmark' ? this.pageTitle(nb, e.page, e.pi) : '');
+      return { ...e, auto, title: typeof ed.t === 'string' && ed.t ? ed.t : auto, level: Number.isInteger(ed.l) ? ed.l : e.level, hidden: ed.h === true, renamed: !!ed.t };
+    });
+    this.cache = { key, list };
+    return list;
+  },
+  /** Nombre de una página sin título: su primera línea de texto si la tiene; si no, «Página N». */
+  pageTitle(nb, page, pi) {
+    const first = page.items.filter((it) => it.type === 'text').sort((a, b) => a.y - b.y)[0];
+    const t = first && this.clean(htmlText(first.html).split('\n')[0]);
+    return t && t.length <= OUTLINE_TEXT_MAX ? t : tr(`Página ${pi + 1}`);
+  },
+  label(e) { return e.title || tr('Título escrito a mano'); },
+
+  // ---------- Cambios hechos a mano (nb.indexEdits) ----------
+  setEdit(nb, key, patch) {
+    const all = nb.indexEdits || {}, ed = Object.assign({}, all[key], patch);
+    for (const k of Object.keys(ed)) if (ed[k] === undefined || ed[k] === null || ed[k] === false || ed[k] === '') delete ed[k];
+    if (Object.keys(ed).length) all[key] = ed; else delete all[key];
+    if (Object.keys(all).length) nb.indexEdits = all; else delete nb.indexEdits;
+    touch(nb);
+    this.refresh(true);
+  },
+  /** Libretas guardadas: quita lo mal formado de `indexEdits` y un `toc` que no sea `true` (no inventa nada). */
+  normalize(nb) {
+    if ('indexEdits' in nb) {
+      const src = nb.indexEdits, out = {};
+      if (src && typeof src === 'object' && !Array.isArray(src)) {
+        for (const [k, v] of Object.entries(src)) {
+          if (typeof k !== 'string' || k.length > 200 || !v || typeof v !== 'object') continue;
+          const ed = {};
+          if (typeof v.t === 'string' && v.t.trim()) ed.t = v.t.trim().slice(0, 200);
+          if (v.h === true) ed.h = true;
+          if (Number.isInteger(v.l) && v.l >= 0 && v.l <= 2) ed.l = v.l;
+          if (Object.keys(ed).length) out[k] = ed;
+        }
+      }
+      if (Object.keys(out).length) nb.indexEdits = out; else delete nb.indexEdits;
+    }
+    for (const p of nb.pages || []) if ('toc' in p && p.toc !== true) delete p.toc;
+  },
+  rename(nb, e) {
+    promptDialog('Renombrar en el índice', this.label(e), (v) => {
+      if (e.manual) { e.manual.title = v; touch(nb); return this.refresh(true); }
+      this.setEdit(nb, e.key, { t: v === e.auto ? undefined : v });
+    }, 'Título');
+  },
+  setLevel(nb, e, l) {
+    l = Math.max(0, Math.min(2, l));
+    if (e.manual) { e.manual.level = l; touch(nb); return this.refresh(true); }
+    this.setEdit(nb, e.key, { l: l === this.detect(nb).find((x) => x.key === e.key)?.level ? undefined : l });
+  },
+  hide(nb, e, on = true) {
+    if (e.manual && on) { nb.outline = nb.outline.filter((o) => o !== e.manual); touch(nb); toast('Quitado del índice'); return this.refresh(true); }
+    this.setEdit(nb, e.key, { h: on || undefined });
+    if (on) toast(`Oculto en el índice. Para verlo: ⋯ › Mostrar las ocultas`);
+  },
+
+  // ---------- Dónde se está leyendo y saltar ----------
+  /** Página y altura (px de página) de lo que se lee: un tercio de la ventana hacia abajo. */
+  where() {
+    const nb = activeNb(), desk = $('#desk'), page = nb?.pages[currentPageIndex], v = page && views.get(page.id);
+    if (!v || !desk) return null;
+    const dr = desk.getBoundingClientRect(), ir = v.inner.getBoundingClientRect();
+    return { pi: currentPageIndex, y: (dr.top + desk.clientHeight / 3 - ir.top) / (S.zoom || 1) };
+  },
+  currentOf(list) {
+    const w = this.where();
+    if (!w) return null;
+    let cur = null;
+    for (const e of list) { if (e.hidden) continue; if (e.pi < w.pi || (e.pi === w.pi && e.y <= w.y + 8)) cur = e; else break; }
+    return cur;
+  },
+  /** Lleva a una altura exacta de una página (en «por páginas» y «diapositivas», a la página) y resalta la zona. */
+  jump(pageId, y = null, rect = null) {
+    const nb = activeNb(), v = views.get(pageId), desk = $('#desk');
+    if (!nb || !v || !desk) return;
+    if (y == null || y <= 0 || PageMode.snapped()) scrollToPage(pageId);
+    else {
+      const dr = desk.getBoundingClientRect(), ir = v.inner.getBoundingClientRect();
+      const top = desk.scrollTop + ir.top - dr.top + y * S.zoom - Math.min(140, desk.clientHeight / 4);
+      desk.scrollTo({ top: Math.max(0, top), behavior: reduceMotion() ? 'auto' : 'smooth' });
+      currentPageIndex = nb.pages.findIndex((p) => p.id === pageId);
+      PageMode.aimed(currentPageIndex);
+      updateBookmarkButton();
+    }
+    if (rect) setTimeout(() => flashRect(pageId, rect), 350);
+  },
+  go(e) {
+    this.jump(e.page.id, e.y > 0 ? e.y : null, e.h > 0 ? { x: e.x, y: e.y, w: Math.max(40, e.w), h: e.h } : null);
+    if (innerWidth <= 760) this.closePanel();   // en el móvil el panel tapa la página
+  },
+  /** Al desplazarse (enganche en updateCurrentPage): resalta la sección que se lee y, si la libreta cambió, rehace la lista. */
+  scrolled() {
+    if (this.raf || !document.querySelector('.toc-list')) return;
+    this.raf = requestAnimationFrame(() => {
+      this.raf = 0;
+      const nb = activeNb();
+      if (!nb) return;
+      if (this.seen !== `${nb.id}:${nb._v || 0}`) { clearTimeout(this.refreshTimer); this.refreshTimer = setTimeout(() => this.refresh(), 700); }
+      this.mark();
+    });
+  },
+  mark() {
+    const nb = activeNb();
+    if (!nb) return;
+    const cur = this.currentOf(this.list(nb))?.key || null;
+    const changed = cur !== this.cur;
+    this.cur = cur;
+    for (const r of $$('.toc-row')) {
+      const on = r.dataset.key === cur;
+      r.classList.toggle('current', on);
+      if (on) r.setAttribute('aria-current', 'location'); else r.removeAttribute('aria-current');
+      if (on && changed) {
+        const list = r.closest('.toc-list, .body'), lr = list?.getBoundingClientRect(), rr = r.getBoundingClientRect();
+        if (lr && (rr.top < lr.top || rr.bottom > lr.bottom)) list.scrollTop += rr.top - lr.top - lr.height / 3;
+      }
+    }
+  },
+
+  // ---------- Pintar ----------
+  /** Monta el índice (buscador, botones y lista) en la barra lateral o en el panel. */
+  mount(host, nb) {
+    host.classList.add('toc');
+    host.innerHTML = `<div class="toc-tools">
+        <label class="search toc-search">${icon('search')}<input type="search" placeholder="Buscar" aria-label="Buscar en el índice" autocomplete="off"></label>
+        <button class="icon-btn toc-edit" data-tt="edit" aria-pressed="${this.edit}" aria-label="Editar el índice" title="Editar el índice: renombrar, nivel y ocultar">${icon('rename')}</button>
+        <button class="icon-btn" data-tt="menu" aria-haspopup="menu" aria-label="Opciones del índice" title="Opciones del índice">${icon('dots')}</button></div>
+      <button class="btn toc-page-btn" data-tt="page"></button>
+      <div class="toc-list" role="list" aria-label="Índice de la libreta"></div>`;
+    const input = $('input', host);
+    input.value = this.q;
+    input.addEventListener('input', () => { this.q = input.value; this.drawList(host, activeNb()); });
+    input.addEventListener('keydown', (e) => { if (e.key === 'Escape' && input.value) { e.stopPropagation(); input.value = this.q = ''; this.drawList(host, activeNb()); } });
+    host.onclick = (e) => {
+      const nb = activeNb();
+      const tt = e.target.closest('[data-tt]');
+      if (tt?.dataset.tt === 'edit') { this.edit = !this.edit; return this.refresh(true); }
+      if (tt?.dataset.tt === 'menu') return this.menu(tt, nb);
+      if (tt?.dataset.tt === 'page') return this.writePages(nb);
+      const row = e.target.closest('[data-key]');
+      const ent = row && this.list(nb).find((x) => x.key === row.dataset.key);
+      if (!ent) return;
+      const ed = e.target.closest('[data-ed]')?.dataset.ed;
+      if (ed === 'rename') return this.rename(nb, ent);
+      if (ed === 'level') return this.setLevel(nb, ent, (ent.level + 1) % 3);
+      if (ed === 'hide') return this.hide(nb, ent, true);
+      if (ed === 'show') return this.hide(nb, ent, false);
+      this.go(ent);
+    };
+    host.onkeydown = (e) => { const row = e.target.closest?.('.toc-row'); if (row && e.target === row && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); row.click(); } };
+    host.oncontextmenu = (e) => {
+      const row = e.target.closest('[data-key]'), nb = activeNb(), ent = row && this.list(nb).find((x) => x.key === row.dataset.key);
+      if (!ent) return;
+      e.preventDefault();
+      popover({ x: e.clientX, y: e.clientY }, `<button data-act="go">${icon('pages')} Ir</button><button data-act="rename">${icon('rename')} Renombrar…</button>
+        <hr><div class="label">Nivel</div>${[0, 1, 2].map((l) => `<button data-act="l${l}">${ent.level === l ? icon('check') : '<svg width="17" height="17"></svg>'} ${['Tema', 'Apartado', 'Subapartado'][l]}</button>`).join('')}
+        <hr>${ent.hidden ? `<button data-act="show">${icon('eye')} Mostrar en el índice</button>` : `<button data-act="hide">${icon('eyeOff')} ${ent.manual ? 'Quitar del índice' : 'Ocultar en el índice'}</button>`}`, (act) => {
+        if (act === 'go') return this.go(ent);
+        if (act === 'rename') return this.rename(nb, ent);
+        if (act[0] === 'l') return this.setLevel(nb, ent, Number(act[1]));
+        this.hide(nb, ent, act === 'hide');
+      });
+    };
+    this.drawList(host, nb);
+  },
+  drawList(host, nb) {
+    if (!nb) return;
+    const all = this.list(nb), q = fold(this.q.trim());
+    const nHidden = all.filter((e) => e.hidden).length;
+    const rows = all.filter((e) => (this.showHidden || this.edit || !e.hidden) && (!q || fold(this.label(e)).includes(q)));
+    const btn = $('.toc-page-btn', host);
+    btn.innerHTML = nb.pages.some((p) => p.toc) ? `${icon('rotate')} Actualizar la página de índice` : `${icon('plus')} Insertar página de índice`;
+    btn.disabled = !all.some((e) => !e.hidden);
+    $('.toc-edit', host).setAttribute('aria-pressed', this.edit);
+    host.classList.toggle('editing', this.edit);
+    const list = $('.toc-list', host);
+    const hl = (t) => {
+      const s = esc(t);
+      if (!q) return s;
+      const i = fold(t).indexOf(q);
+      return i < 0 ? s : `${esc(t.slice(0, i))}<mark>${esc(t.slice(i, i + q.length))}</mark>${esc(t.slice(i + q.length))}`;
+    };
+    const cur = this.currentOf(all)?.key;
+    this.cur = cur;
+    list.innerHTML = rows.length ? rows.map((e) => `<div class="toc-row lvl${e.level}${e.key === cur ? ' current' : ''}${e.hidden ? ' off' : ''}${e.manual ? ' outline-row' : ''}" role="listitem button" tabindex="0" data-key="${esc(e.key)}"${e.key === cur ? ' aria-current="location"' : ''}>
+        <span class="toc-t" translate="no">${e.src === 'ink' && !e.renamed ? `<canvas class="toc-ink" data-ink="${esc(e.key)}" aria-hidden="true"></canvas><span class="sr">${esc(this.label(e))}</span>` : hl(this.label(e))}</span>
+        ${e.star ? `<span class="toc-star" title="Página en marcadores" aria-label="En marcadores">${icon('bookmarkFill')}</span>` : ''}
+        <span class="pg">${e.pi + 1}</span>
+        ${this.edit ? `<span class="toc-eds"><button class="icon-btn" data-ed="rename" aria-label="Renombrar" title="Renombrar">${icon('rename')}</button><button class="icon-btn toc-lvl" data-ed="level" aria-label="Nivel ${e.level + 1} de 3: cambiar" title="Nivel: tema, apartado o subapartado">${e.level + 1}</button>${e.hidden ? `<button class="icon-btn" data-ed="show" aria-label="Mostrar en el índice" title="Mostrar en el índice">${icon('eye')}</button>` : `<button class="icon-btn" data-ed="hide" aria-label="${e.manual ? 'Quitar del índice' : 'Ocultar en el índice'}" title="${e.manual ? 'Quitar del índice' : 'Ocultar en el índice'}">${icon('eyeOff')}</button>`}</span>` : ''}
+      </div>`).join('')
+      : q ? `<p class="side-empty">Ningún título contiene «${esc(this.q.trim())}».</p>`
+        : `<p class="side-empty">Aún no hay títulos. Escribe un título más grande que el resto (a mano o en un cuadro de texto), ponlo en negrita o añade la página con ⋯ › Añadir esta página.</p>`;
+    if (!this.edit && !this.showHidden && nHidden && !q) list.insertAdjacentHTML('beforeend', `<button class="toc-hidden-note" data-tt="show-hidden">${nHidden === 1 ? '1 entrada oculta' : `${nHidden} entradas ocultas`}</button>`);
+    $('.toc-hidden-note', list)?.addEventListener('click', (e) => { e.stopPropagation(); this.showHidden = true; this.refresh(true); });
+    this.drawInk(list, all);
+    this.seen = `${nb.id}:${nb._v || 0}`;
+  },
+  /** El título escrito a mano, dibujado en pequeño con sus propios trazos (sobre el color del papel). */
+  drawInk(root, list) {
+    for (const c of $$('canvas[data-ink]', root)) {
+      const e = list.find((x) => x.key === c.dataset.ink);
+      if (!e?.strokes) continue;
+      const pad = 4, hCss = 26, sc = Math.min(hCss / (e.h + pad * 2), 170 / (e.w + pad * 2)), dpr = Math.min(2, devicePixelRatio || 1);
+      const w = Math.ceil((e.w + pad * 2) * sc), h = Math.ceil((e.h + pad * 2) * sc);
+      c.width = w * dpr; c.height = h * dpr; c.style.width = w + 'px'; c.style.height = h + 'px';
+      c.style.background = (PAPERS[e.page.paper] || PAPERS.white).fill;
+      const ctx = c.getContext('2d');
+      ctx.setTransform(sc * dpr, 0, 0, sc * dpr, (pad - e.x) * sc * dpr, (pad - e.y) * sc * dpr);
+      for (const s of e.strokes) drawStroke(ctx, s, e.page.paper);
+    }
+  },
+  /** Vuelve a pintar todos los índices abiertos (barra lateral y panel). `now`: sin esperar. */
+  refresh() {
+    clearTimeout(this.refreshTimer);
+    const nb = activeNb();
+    for (const host of $$('.toc')) {
+      const keep = $('.toc-list', host)?.scrollTop || 0;
+      this.drawList(host, nb);
+      const l = $('.toc-list', host); if (l) l.scrollTop = keep;
+    }
+  },
+
+  // ---------- Menú ⋯ ----------
+  menu(anchor, nb) {
+    updateCurrentPage();
+    const toc = nb.pages.find((p) => p.toc), nHidden = this.list(nb).filter((e) => e.hidden).length;
+    popover(anchor, `<button data-act="add">${icon('plus')} Añadir esta página (${currentPageIndex + 1}) con un título…</button>
+      ${toc ? `<button data-act="goto">${icon('pages')} Ir a la página de índice</button>` : ''}
+      <button data-act="hidden" ${nHidden || this.showHidden ? '' : 'disabled'}>${icon(this.showHidden ? 'eyeOff' : 'eye')} ${this.showHidden ? 'Esconder las ocultas' : `Mostrar las ocultas (${nHidden})`}</button>
+      ${AI.key() ? `<hr><button data-act="ai">${icon('sparkles')} Mejorar con IA…</button>` : ''}
+      <hr><button data-act="help">${icon('outline')} Cómo se hace el índice</button>`, (act) => {
+      if (act === 'add') return promptDialog(`Añadir la página ${currentPageIndex + 1} al índice`, '', (title) => { addOutline(nb, nb.pages[currentPageIndex], title); this.refresh(); }, 'Título del apartado');
+      if (act === 'goto') return scrollToPage(toc.id);
+      if (act === 'hidden') { this.showHidden = !this.showHidden; return this.refresh(); }
+      if (act === 'ai') return this.improve(nb);
+      if (act === 'help') return this.help();
+    });
+  },
+  help() {
+    dialog(`<h2>Cómo se hace el índice</h2>
+      <p>Folia lo saca solo de tus apuntes, sin IA y sin conexión. Cuentan como títulos:</p>
+      <ul class="toc-help">
+        <li>La escritura a mano claramente más grande que la media de la libreta. Si la transcribes (Estudio › IA › Transcribir), sale con su texto y se puede buscar.</li>
+        <li>Los cuadros de texto con la letra más grande que el resto, o con la primera línea en negrita.</li>
+        <li>Los títulos de los PDF importados.</li>
+        <li>La primera línea de cada página, si destaca sobre las demás.</li>
+        <li>Lo escrito o subrayado con un color cuyo significado es «Título», «Tema» o «Apartado» (Página › Leyenda de colores).</li>
+        <li>Las páginas en marcadores y los apartados que añadas tú.</li>
+      </ul>
+      <p>El tamaño decide el nivel: tema, apartado y subapartado. Con el lápiz de «Editar» puedes renombrar, cambiar el nivel u ocultar cualquier entrada.</p>
+      <div class="actions"><button class="btn primary" data-act="ok">Entendido</button></div>`, (_a, _b, close) => close());
+  },
+
+  // ---------- Panel (móvil, o desde Estudio sin barra lateral) ----------
+  closePanel() { $('.toc-panel')?.remove(); },
+  openPanel() {
+    this.closePanel();
+    const nb = activeNb();
+    if (!nb) return;
+    const panel = document.createElement('div');
+    panel.className = 'toc-panel';
+    panel.setAttribute('role', 'dialog');
+    panel.setAttribute('aria-label', 'Índice de la libreta');
+    panel.innerHTML = `<div class="tp-head"><b>Índice</b><button class="icon-btn" data-x aria-label="Cerrar el índice">${icon('close')}</button></div><div class="tp-body"></div>`;
+    document.body.appendChild(panel);
+    this.mount($('.tp-body', panel), nb);
+    $('[data-x]', panel).onclick = () => this.closePanel();
+    panel.addEventListener('keydown', (e) => { if (e.key === 'Escape') this.closePanel(); });
+    $('input', panel).focus({ preventScroll: true });
+  },
+  /** «Estudio › Índice de la libreta»: en la barra lateral si cabe; si no, en el panel. */
+  open() {
+    if (innerWidth > 760) {
+      S.sidebarMode = 'outline'; savePrefs();
+      if (!S.sidebar) setSidebar(true); else renderSidebar();
+      setTimeout(() => $('#sidebar .toc input')?.focus({ preventScroll: true }), 30);
+    } else this.openPanel();
+  },
+  menuHtml() { return `<button data-act="toc">${icon('outline')} Índice de la libreta</button>`; },
+  menuAct(act) { if (act !== 'toc') return false; this.open(); return true; },
+
+  // ---------- Página de índice ----------
+  isToc(x) { return String(x.id || '').startsWith(OUTLINE_TOC); },
+  /** Dónde va cada entrada en las páginas de índice: [[{ e, y, lines }]] (una lista por página). */
+  layout(list, ref) {
+    const chunks = [[]];
+    let y = 160;
+    for (const e of list) {
+      const size = e.level === 0 ? 22 : 19, x = 80 + e.level * 34, w = ref.w - x - 70;
+      const lines = e.src === 'ink' && !e.renamed ? 1 : Math.max(1, Math.ceil(((this.label(e).length + 6) * size * 0.55) / w));
+      const h = Math.max(36, lines * size * 1.4 + 12);
+      if (y + h > ref.h - 60 && chunks[chunks.length - 1].length) { chunks.push([]); y = 80; }
+      chunks[chunks.length - 1].push({ e, y, x, w, size });
+      y += h;
+    }
+    return chunks;
+  },
+  /** Inserta (al principio) o actualiza la página de índice: el índice como texto, con un enlace a cada sección.
+   *  Lo que se haya escrito a mano en esa página se conserva; solo se rehace lo que puso el índice. */
+  writePages(nb) {
+    const list = this.list(nb).filter((e) => !e.hidden);
+    if (!list.length) return toast('Aún no hay títulos para hacer el índice');
+    const ref = nb.pages.find((p) => !p.toc) || nb.pages[0];
+    let tocs = nb.pages.filter((p) => p.toc);
+    const fresh = !tocs.length;
+    const chunks = this.layout(list, tocs[0] || ref);
+    if (tocs.length < chunks.length) {
+      const add = Array.from({ length: chunks.length - tocs.length }, () => Object.assign(newPage('blank', ref.paper, ref.w > ref.h), { toc: true }));
+      nb.pages.splice(fresh ? 0 : nb.pages.indexOf(tocs[tocs.length - 1]) + 1, 0, ...add);
+    }
+    // Las que sobran: fuera si solo tenían el índice; si se escribió algo más en ellas, se quedan (sin el índice).
+    for (const p of nb.pages.filter((x) => x.toc).slice(chunks.length)) if (p.strokes.every((s) => this.isToc(s)) && p.items.every((it) => this.isToc(it))) nb.pages.splice(nb.pages.indexOf(p), 1);
+    tocs = nb.pages.filter((p) => p.toc);
+    const num = new Map(nb.pages.map((p, i) => [p.id, i + 1]));
+    const ink = displayColor('#1C1C1E', ref.paper) === '#1C1C1E' ? '#1C1C1E' : '#F2F2F7';
+    tocs.forEach((p, n) => {
+      p.strokes = p.strokes.filter((s) => !this.isToc(s));
+      p.items = p.items.filter((it) => !this.isToc(it));
+      if (n === 0) p.items.push({ id: OUTLINE_TOC + uid(), type: 'text', x: 80, y: 70, w: p.w - 150, html: esc(tr('Índice')), base: Object.assign(clone(DEFAULT_TEXT), { size: 40, bold: true, color: ink }) });
+      for (const { e, y, x, w, size } of chunks[n] || []) this.writeLine(nb, p, e, { x, y, w, size, n: num.get(e.page.id), ink });
+      p._v = (p._v || 0) + 1;
+    });
+    S.undo[nb.id] = []; S.redo[nb.id] = [];   // las páginas han cambiado de sitio: como al borrar una página
+    touch(nb); buildPages(); renderSidebar(); this.refresh();
+    requestAnimationFrame(() => scrollToPage(tocs[0].id));
+    toast(fresh ? 'Página de índice insertada al principio' : 'Página de índice actualizada');
+  },
+  writeLine(nb, p, e, { x, y, w, size, n, ink }) {
+    const target = { nb: nb.id, page: e.page.id };
+    if (e.y > 0) target.y = Math.round(e.y);
+    const link = (text) => `<a data-link='${esc(JSON.stringify(target))}'>${esc(text)}</a>`;
+    const base = Object.assign(clone(DEFAULT_TEXT), { size, color: ink, bold: e.level === 0 });
+    if (e.src === 'ink' && !e.renamed && e.strokes) {
+      // Título a mano sin transcribir: se copian sus trazos en pequeño y, al lado, el enlace con el número de página.
+      const sc = Math.min(1, 26 / Math.max(1, e.h), (w * 0.7) / Math.max(1, e.w));
+      for (const s of e.strokes) {
+        const c = clone(s);
+        c.id = OUTLINE_TOC + uid(); delete c.t; delete c.shape;
+        c.points = s.points.map(([px, py, pr]) => [x + (px - e.x) * sc, y + 4 + (py - e.y) * sc, pr]);
+        c.width = Math.max(1.2, s.width * sc);
+        p.strokes.push(c);
+      }
+      p.items.push({ id: OUTLINE_TOC + uid(), type: 'text', x: x + e.w * sc + 14, y: y + 2, w: 120, html: link(`→ ${n}`), base });
+      return;
+    }
+    p.items.push({ id: OUTLINE_TOC + uid(), type: 'text', x, y, w, html: sanitizeHTML(`${link(this.label(e))} · ${n}`), base });
+  },
+
+  // ---------- Mejorar con IA (solo si ya hay clave: AI.call de ai.js) ----------
+  async improve(nb) {
+    if (!AI.key()) return AI.keyDialog(() => this.improve(nb));
+    const list = this.list(nb).filter((e) => !e.hidden).slice(0, 150);
+    if (!list.length) return toast('Aún no hay títulos que mejorar');
+    const langName = { es: 'español', it: 'italiano' }[I18N.lang] || 'español';
+    const parts = [{ text: `Idioma de los apuntes: ${langName} (o el que tengan). Entradas del índice (n, título, nivel, página, de dónde sale):\n${list.map((e, n) => `${n}\t${e.src === 'ink' && !e.renamed ? '[imagen]' : this.label(e)}\t${e.level}\tpág. ${e.pi + 1}\t${e.src}`).join('\n')}` }];
+    let imgs = 0;
+    for (const [n, e] of list.entries()) {
+      if (e.src !== 'ink' || e.renamed || !e.strokes || imgs >= 24) continue;
+      parts.push({ text: `Imagen de la entrada ${n}:` }, { inlineData: { mimeType: 'image/jpeg', data: this.inkJpeg(e).split(',')[1] } });
+      imgs++;
+    }
+    const body = { systemInstruction: { parts: [{ text: OUTLINE_AI_SYSTEM }] }, contents: [{ role: 'user', parts }],
+      generationConfig: { responseMimeType: 'application/json', responseSchema: OUTLINE_AI_SCHEMA, temperature: 0.1 } };
+    const clean = (j) => {
+      const out = (Array.isArray(j?.entradas) ? j.entradas : []).filter((x) => Number.isInteger(x?.n) && list[x.n])
+        .map((x) => ({ n: x.n, titulo: this.clean(x.titulo).slice(0, 200), nivel: Number.isInteger(x.nivel) ? Math.max(0, Math.min(2, x.nivel)) : list[x.n].level, quitar: x.quitar === true }));
+      if (!out.length) throw new AIError('empty-text');
+      return out;
+    };
+    let res;
+    try { res = await AI.call(body, clean, 'La IA está revisando el índice…'); }
+    catch (e) { return AI.showError(e, () => this.improve(nb), 'No se ha podido mejorar el índice'); }
+    this.review(nb, list, res);
+  },
+  inkJpeg(e) {
+    const pad = 8, sc = Math.min(2, 80 / Math.max(1, e.h)), c = document.createElement('canvas');
+    c.width = Math.ceil((e.w + pad * 2) * sc); c.height = Math.ceil((e.h + pad * 2) * sc);
+    const ctx = c.getContext('2d');
+    ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, c.width, c.height);
+    ctx.setTransform(sc, 0, 0, sc, (pad - e.x) * sc, (pad - e.y) * sc);
+    for (const s of e.strokes) drawStroke(ctx, s, 'white');
+    return c.toDataURL('image/jpeg', 0.85);
+  },
+  /** Revisión de lo que propone la IA: se elige qué aplicar (se guarda como cambios hechos a mano). */
+  review(nb, list, res) {
+    const changes = res.map((x) => ({ ...x, e: list[x.n] })).filter((x) => x.quitar || x.nivel !== x.e.level || (x.titulo && x.titulo !== this.label(x.e)));
+    if (!changes.length) return toast('La IA no propone cambios: el índice ya está bien');
+    const lv = ['Tema', 'Apartado', 'Subapartado'];
+    dialog(`<h2>Mejorar el índice con IA</h2><p>Elige qué cambios aplicar. Puedes deshacer cualquiera desde «Editar».</p>
+      <div class="toc-review">${changes.map((x, i) => `<label class="toc-rv"><input type="checkbox" data-i="${i}" checked>
+        <span><small>Pág. ${x.e.pi + 1} · <span translate="no">${esc(x.e.src === 'ink' && !x.e.renamed ? tr('Título escrito a mano') : this.label(x.e))}</span></small>
+        <b>${x.quitar ? 'Ocultar en el índice' : `<span translate="no">${esc(x.titulo || this.label(x.e))}</span>${x.nivel !== x.e.level ? ` · <em>${esc(lv[x.nivel])}</em>` : ''}`}</b></span></label>`).join('')}</div>
+      <div class="actions"><button class="btn" data-act="cancel">Cancelar</button><button class="btn primary" data-act="apply">Aplicar</button></div>`, (act, _b, close, sc) => {
+      if (act === 'cancel') return close();
+      if (act !== 'apply') return;
+      const auto = new Map(this.detect(nb).map((d) => [d.key, d]));
+      const all = nb.indexEdits || {};
+      let n = 0;
+      for (const cb of $$('input[data-i]', sc)) {
+        if (!cb.checked) continue;
+        const x = changes[Number(cb.dataset.i)], e = x.e;
+        n++;
+        if (e.manual) { if (x.quitar) nb.outline = nb.outline.filter((o) => o !== e.manual); else { if (x.titulo) e.manual.title = x.titulo; e.manual.level = x.nivel; } continue; }
+        const ed = Object.assign({}, all[e.key]);
+        if (x.quitar) ed.h = true;
+        else {
+          if (x.titulo && x.titulo !== (auto.get(e.key)?.title || e.auto)) ed.t = x.titulo; else delete ed.t;
+          if (x.nivel !== auto.get(e.key)?.level) ed.l = x.nivel; else delete ed.l;
+        }
+        if (Object.keys(ed).length) all[e.key] = ed; else delete all[e.key];
+      }
+      if (Object.keys(all).length) nb.indexEdits = all; else delete nb.indexEdits;
+      close();
+      touch(nb); this.refresh();
+      toast(n === 1 ? '1 cambio aplicado al índice' : `${n} cambios aplicados al índice`);
+    }, true);
+  },
+};
 
 // =============================================================================
 // Editor: copiar, cortar y pegar, deshacer y rehacer, y teclado
@@ -15196,6 +16080,1470 @@ const Tape = {
 };
 
 // =============================================================================
+// Mapa de la libreta (`NbMap`): vista de pájaro de todas las páginas en un lienzo grande, para orientarse y estudiar.
+// Cuadrícula que se adapta a la ventana (con esquema, cada apartado empieza fila con su título), zoom y desplazamiento
+// suaves (pellizco, rueda, arrastre, teclado) y capas que se encienden: calor de repaso, colores con significado,
+// tarjetas y su estado, cintas, comentarios, audio, marcadores y enlaces entre páginas dibujados como líneas.
+// Tocar una página entra en ella: el mapa se acerca hasta que la miniatura cae justo encima de la página real.
+// No guarda nada ni cambia el formato: todo se calcula al abrirlo con lo que ya hay (tarjetas, repasos, elementos).
+// Rendimiento: un solo <canvas>; miniaturas con drawPageQuick en lienzos pequeños, solo de lo que se ve, de una en una
+// y a la resolución que pide el zoom (128 / 360 / 900 px). Nada de html2canvas.
+// =============================================================================
+ICONS.map = ICONS.map || '<path d="M14.1 5.55a2 2 0 0 0 1.8 0l3.65-1.83A1 1 0 0 1 21 4.62v12.76a1 1 0 0 1-.55.9l-4.55 2.27a2 2 0 0 1-1.8 0l-4.2-2.1a2 2 0 0 0-1.8 0l-3.65 1.83A1 1 0 0 1 3 19.38V6.62a1 1 0 0 1 .55-.9L8.1 3.45a2 2 0 0 1 1.8 0z"/><path d="M15 5.76v15"/><path d="M9 3.24v15"/>';
+ICONS.thermo = ICONS.thermo || '<path d="M14 4v10.54a4 4 0 1 1-4 0V4a2 2 0 0 1 4 0Z"/><path d="M12 11v6" stroke-width="2.6"/>';
+
+/** [clave, nombre, icono] de cada capa, en el orden de los botones. */
+const MAP_LAYERS = [
+  ['heat', 'Calor de repaso', 'thermo'], ['meaning', 'Colores con significado', 'palette'], ['cards', 'Tarjetas', 'lightbulb'],
+  ['tape', 'Cintas', 'tape'], ['comments', 'Comentarios', 'comment'], ['audio', 'Audio', 'mic'], ['bookmarks', 'Marcadores', 'bookmark'],
+  ['links', 'Enlaces', 'link'],
+];
+const MAP_MASTERED = 21;   // días de intervalo a partir de los que una tarjeta cuenta como dominada (como «madura» en Anki)
+const MAP_HEAT = [[0, '#22A86B'], [7, '#C9B21F'], [30, '#EE8A2A'], [90, '#D9352B']];   // días sin repasar → color
+const MAP_TIERS = [128, 360, 900];   // ancho en px reales de las miniaturas; la de 128 se guarda de todas las páginas
+const MAP_KEEP = { 360: 48, 900: 8 };   // cuántas se guardan de las grandes (las últimas usadas)
+const MAP_C = { due: '#FF9500', learn: '#0A84FF', mastered: '#2FA65A', tape: '#B8873B', comments: '#7D5FE0', audio: '#E5397A', links: '#0A7CFF', bookmark: '#E0362C' };
+
+const NbMap = {
+  el: null, cv: null, ctx: null, nb: null,
+  L: null,          // posición de cada página en el mapa (px de página) y títulos de los apartados
+  F: [],            // lo que hay en cada página (facts)
+  cam: { k: 1, x: 0, y: 0 },   // pantalla = (mundo − x, y) × k
+  layers: new Set(['cards', 'bookmarks', 'links']),   // capas encendidas (en memoria: se recuerdan mientras la app sigue abierta)
+  filter: '',       // color de la leyenda elegido: lo demás se atenúa
+  hover: -1, focus: -1, current: -1,
+  others: 1,        // opacidad de las demás páginas (al entrar en una se desvanecen)
+  keep: -1,         // la página que no se desvanece
+  cache: new Map(), // `${id}:${tier}` → { v, cv }
+  want: [], busy: new Set(), pumping: false, raf: 0, anim: 0, painted: 0, drawMs: 0,
+
+  // ---------- Lógica pura (sin DOM): lo que hay en cada página ----------
+  /** Por página: tarjetas (pendientes, aprendiendo, dominadas y sus zonas), cintas, comentarios, audio, marcador,
+   *  enlaces (dentro de la libreta y a otras), colores con significado y el último repaso (tarjetas o libreta). */
+  facts(nb, now = Date.now()) {
+    const legend = Meaning.legend(nb), hasLegend = Object.keys(legend).length > 0, byId = new Map();
+    const nbLast = Recall.reviews(nb).at(-1) || 0;
+    const out = nb.pages.map((p, i) => {
+      const f = { i, id: p.id, cards: { due: 0, learn: 0, mastered: 0, rects: [] }, tapes: [], comments: [], recs: new Set(), voice: 0, audio: 0,
+        bookmark: !!p.bookmarked, links: [], ext: 0, meaning: new Map(), cardLast: 0, last: 0, src: '' };
+      byId.set(p.id, f);
+      const color = (c) => { if (!hasLegend) return; const h = Meaning.hex(c); if (h && legend[h]) f.meaning.set(h, (f.meaning.get(h) || 0) + 1); };
+      for (const s of p.strokes || []) { color(s.color); if (s.t?.rec) f.recs.add(s.t.rec); }
+      for (const it of p.items || []) {
+        if (it.t?.rec) f.recs.add(it.t.rec);
+        if (it.type === 'tape') f.tapes.push(it);
+        else if (it.type === 'comment') f.comments.push(it);
+        else if (it.type === 'voice') f.voice++;
+        else if (it.type === 'link' && it.target?.nb) {
+          if (it.target.nb === nb.id) f.links.push({ x: it.x + (it.w || 0) / 2, y: it.y + (it.h || 0) / 2, to: it.target.page || nb.pages[0]?.id });
+          else f.ext++;
+        }
+        if (it.type === 'sticky') for (const s of it.strokes || []) { color(s.color); if (s.t?.rec) f.recs.add(s.t.rec); }
+        if (hasLegend && (it.type === 'text' || it.type === 'sticky') && it.html) for (const m of Meaning.marks(it.html)) color(m.color);
+      }
+      return f;
+    });
+    for (const r of nb.recordings || []) for (const m of r.marks || []) byId.get(m.pageId)?.recs.add(r.id);
+    for (const c of Cards.all(nb)) {
+      const f = byId.get(c.pageId);
+      if (!f) continue;
+      const st = Cards.isDue(c, now) ? 'due' : (c.interval || 0) >= MAP_MASTERED ? 'mastered' : 'learn';
+      f.cards[st]++;
+      if (c.rect) f.cards.rects.push({ r: c.rect, st });
+      // Cuándo se contestó por última vez: Cards.schedule pone due = día de la respuesta + intervalo (o +1 min si «Otra vez»).
+      if (c.reps > 0 || c.lapses > 0) {
+        const t = Math.min(now, c.interval > 0 ? c.due - c.interval * CARD_DAY : c.due - 60000);
+        if (t > f.cardLast) f.cardLast = t;
+      }
+    }
+    for (const f of out) {
+      f.audio = f.voice + f.recs.size;
+      f.last = Math.max(f.cardLast, nbLast);
+      f.src = !f.last ? '' : f.cardLast >= nbLast ? 'cards' : 'nb';
+    }
+    return out;
+  },
+  /** Días (de calendario) sin repasar; null si nunca. */
+  days(f, now = Date.now()) { return f.last ? Math.max(0, Recall.daysBetween(f.last, now)) : null; },
+  heatColor(d) {
+    if (d == null) return '#8E8E93';
+    const S0 = MAP_HEAT;
+    if (d <= S0[0][0]) return S0[0][1];
+    for (let i = 1; i < S0.length; i++) {
+      if (d <= S0[i][0]) {
+        const [a, ca] = S0[i - 1], [b, cb] = S0[i], t = (d - a) / (b - a);
+        const n = (c) => [1, 3, 5].map((j) => parseInt(c.slice(j, j + 2), 16));
+        const A = n(ca), B = n(cb);
+        return '#' + A.map((v, j) => Math.round(v + (B[j] - v) * t).toString(16).padStart(2, '0')).join('');
+      }
+    }
+    return S0[S0.length - 1][1];
+  },
+  /** Texto corto para el lienzo: «Hoy», «9 d», «3 sem», «2 meses». */
+  agoShort(d) { return d == null ? tr('Nunca') : d < 1 ? tr('Hoy') : d < 14 ? tr(`${d} d`) : d < 60 ? tr(`${Math.round(d / 7)} sem`) : tr(`${Math.round(d / 30)} meses`); },
+  /** Apartados de primer nivel del esquema: [{ i (página), title }]. */
+  sections(nb) {
+    const idx = new Map(nb.pages.map((p, i) => [p.id, i])), out = [];
+    for (const o of nb.outline || []) {
+      const i = idx.get(o.pageId);
+      if (o.level || i == null || out.some((s) => s.i === i)) continue;
+      out.push({ i, title: String(o.title || '') });
+    }
+    return out.sort((a, b) => a.i - b.i);
+  },
+  /** Cuadrícula: el número de columnas que deja las páginas más grandes en la ventana (vw × vh px).
+   *  Con 2–40 apartados en el esquema, cada uno empieza fila y lleva su título encima. */
+  layout(nb, vw, vh) {
+    const pages = nb.pages, n = pages.length;
+    const cw = Math.max(...pages.map((p) => p.w)), ch = Math.max(...pages.map((p) => p.h));
+    const gx = cw * 0.14, gy = ch * 0.2, head = ch * 0.3;
+    const secs = this.sections(nb), useSecs = secs.length >= 2 && secs.length <= 40;
+    const groups = [];
+    if (useSecs) {
+      if (secs[0].i > 0) groups.push({ from: 0, to: secs[0].i, title: '' });
+      secs.forEach((s, k) => groups.push({ from: s.i, to: k + 1 < secs.length ? secs[k + 1].i : n, title: s.title }));
+    } else groups.push({ from: 0, to: n, title: '' });
+    const size = (cols) => {
+      let H = 0;
+      groups.forEach((g, k) => { const rows = Math.ceil((g.to - g.from) / cols); H += (g.title ? head : 0) + rows * ch + (rows - 1) * gy + (k ? gy * 1.2 : 0); });
+      return { W: cols * cw + (cols - 1) * gx, H };
+    };
+    let best = null;
+    for (let cols = 1; cols <= Math.min(n, 80); cols++) {
+      const { W, H } = size(cols), k = Math.min(vw / W, vh / H);
+      if (!best || k > best.k * 1.0001) best = { cols, k };
+    }
+    const cols = best.cols, cells = new Array(n), heads = [];
+    let y = 0;
+    groups.forEach((g, k) => {
+      if (k) y += gy * 1.2;
+      if (g.title) { heads.push({ x: 0, y, h: head, title: g.title, i: g.from }); y += head; }
+      for (let i = g.from; i < g.to; i++) {
+        const c = (i - g.from) % cols, r = Math.floor((i - g.from) / cols), p = pages[i];
+        cells[i] = { x: c * (cw + gx) + (cw - p.w) / 2, y: y + r * (ch + gy) + (ch - p.h) / 2, w: p.w, h: p.h, col: c };
+      }
+      const rows = Math.ceil((g.to - g.from) / cols);
+      y += rows * ch + (rows - 1) * gy;
+    });
+    return { cells, heads, cols, cw, ch, gx, gy, W: size(cols).W, H: y };
+  },
+
+  // ---------- Abrir y cerrar ----------
+  isOpen() { return !!this.el; },
+  toggle() { return this.el ? this.close() : this.open(); },
+  menuHtml() { return `<button data-act="nb-map">${icon('map')} Mapa de la libreta <span class="kbd-hint">M</span></button>`; },
+  menuAct(act) { if (act !== 'nb-map') return false; this.open(); return true; },
+  async open() {
+    const nb = activeNb();
+    if (this.el || !nb || S.view !== 'editor' || !nb.pages.length) return;
+    closePopover?.();
+    updateCurrentPage();
+    this.nb = nb; this.F = this.facts(nb); this.current = currentPageIndex; this.focus = currentPageIndex; this.kbd = false; this.folded = this.compact(); this.hover = -1; this.filter = '';
+    this.font = getComputedStyle(document.body).fontFamily;
+    const el = (this.el = document.createElement('div'));
+    el.className = 'nbmap';
+    el.setAttribute('role', 'dialog'); el.setAttribute('aria-modal', 'true'); el.setAttribute('aria-label', 'Mapa de la libreta');
+    el.innerHTML = `<div class="nbmap-bg"></div>
+      <header class="nbmap-bar">
+        <button class="icon-btn" data-map="close" aria-label="Cerrar el mapa" title="Cerrar el mapa (Esc)">${icon('close')}</button>
+        <div class="nbmap-title"><b>Mapa de la libreta</b><span translate="no">${esc(nb.title)}</span></div>
+        <span class="nbmap-count"><b>${nb.pages.length}</b> <span>${nb.pages.length === 1 ? 'página' : 'páginas'}</span></span>
+      </header>
+      <div class="nbmap-layers" role="group" aria-label="Capas del mapa">${MAP_LAYERS.map(([k, name, ic]) => `<button class="nbmap-chip" data-layer="${k}" aria-pressed="${this.layers.has(k)}">${icon(ic)}<span>${name}</span></button>`).join('')}</div>
+      <div class="nbmap-stage">
+        <canvas class="nbmap-canvas" tabindex="0" aria-label="Páginas de la libreta. Flechas para moverte, Intro para abrir"></canvas>
+        <div class="nbmap-legend"></div>
+        <div class="nbmap-zoom" role="group" aria-label="Zoom del mapa">
+          <button class="icon-btn" data-map="in" aria-label="Acercar" title="Acercar (+)">${icon('plus')}</button>
+          <button class="icon-btn" data-map="out" aria-label="Alejar" title="Alejar (−)">${icon('minus')}</button>
+          <button class="icon-btn" data-map="fit" aria-label="Ver todas las páginas" title="Ver todas las páginas (0)">${icon('maximize')}</button>
+        </div>
+        <div class="nbmap-tip" hidden></div>
+        <div class="nbmap-live" aria-live="polite"></div>
+      </div>`;
+    el.classList.toggle('compact', this.compact());
+    document.body.appendChild(el);
+    this.cv = $('.nbmap-canvas', el); this.ctx = this.cv.getContext('2d');
+    this.bind();
+    this.legend();
+    this.resize(false);
+    // Se abre desde la página en la que estás: su miniatura empieza encima de la página real y el mapa se aleja.
+    const cur = this.current, start = this.editorCam(cur), fit = this.fitCam();
+    await this.ensure(cur, 360);
+    if (!this.el) return;
+    this.cv.focus({ preventScroll: true });
+    if (!start || reduceMotion()) { this.cam = fit; this.setFade(1); this.others = 1; this.dirty(); return; }
+    this.cam = start; this.keep = cur; this.others = 0; this.setFade(0);
+    this.tween(fit, 420, (e) => { this.others = e; this.setFade(e); }, () => { this.keep = -1; this.others = 1; this.setFade(1); });
+  },
+  /** Cerrar: el mapa se acerca a la página actual (la del editor) y desaparece. */
+  close(instant = false) { if (this.el) this.enter(this.current, { stay: true, instant }); },
+  /** Entra en la página i: el editor salta a ella y el mapa se acerca hasta que su miniatura cubre la página real. */
+  async enter(i, opts = {}) {
+    if (!this.el || this.leaving) return;
+    const page = this.nb.pages[i];
+    if (!page) return;
+    this.leaving = true; this.hideTip();
+    if (!opts.stay) { scrollToPage(page.id, false); updateBookmarkButton(); }
+    this.current = i;
+    const end = () => { this.leaving = false; this.destroy(); if (!opts.stay) setTimeout(() => S.view === 'editor' && flashRect(page.id, null), 60); };
+    const to = this.editorCam(i);
+    if (opts.instant || !to || reduceMotion()) return end();
+    await this.ensure(i, 360);
+    if (!this.el) return;
+    this.keep = i; this.hover = -1; this.focus = -1;
+    this.tween(to, 380, (e) => { this.others = 1 - e; this.setFade(1 - e); }, end);
+  },
+  destroy() {
+    cancelAnimationFrame(this.raf); cancelAnimationFrame(this.anim); this.raf = this.anim = 0;
+    clearTimeout(this.holdTimer); clearTimeout(this.wheelTimer);
+    this.el?.remove(); this.el = this.cv = this.ctx = null; this.nb = null; this.F = []; this.want = []; this.leaving = false;
+    removeEventListener('keydown', this.onKey, true); removeEventListener('resize', this.onResize);
+    // Las miniaturas grandes se sueltan; las pequeñas (128 px) se quedan para la próxima vez.
+    for (const [k, v] of this.cache) if (v.tier !== MAP_TIERS[0]) this.cache.delete(k);
+    $('#desk')?.focus?.({ preventScroll: true });
+  },
+  setFade(o) { this.el?.style.setProperty('--map-o', String(Math.max(0, Math.min(1, o)))); },
+
+  // ---------- Cámara ----------
+  resize(keep = true) {
+    this.el.classList.toggle('compact', this.compact());
+    const st = $('.nbmap-stage', this.el), r = st.getBoundingClientRect();
+    const old = { vw: this.vw, vh: this.vh, cam: { ...this.cam } };
+    this.dpr = Math.min(window.devicePixelRatio || 1, 2);
+    this.vw = Math.max(1, r.width); this.vh = Math.max(1, r.height);
+    this.cv.width = Math.round(this.vw * this.dpr); this.cv.height = Math.round(this.vh * this.dpr);
+    this.cv.style.width = this.vw + 'px'; this.cv.style.height = this.vh + 'px';
+    const ins = this.insets();
+    this.L = this.layout(this.nb, this.vw - 48 - ins.left, this.vh - ins.bottom - 48);
+    const fit = this.fitCam();
+    this.kMin = fit.k * 0.6;
+    this.kMax = Math.max(fit.k * 1.5, Math.min(this.vw / this.L.cw, this.vh / this.L.ch) * 2.2);
+    if (keep && old.vw) {   // el centro de la vista se queda donde estaba
+      const cx = old.cam.x + old.vw / 2 / old.cam.k, cy = old.cam.y + old.vh / 2 / old.cam.k;
+      this.cam = this.clampCam({ k: old.cam.k, x: cx - this.vw / 2 / old.cam.k, y: cy - this.vh / 2 / old.cam.k });
+    }
+    this.dirty();
+  },
+  /** Lo que tapa la leyenda: abajo en pantallas estrechas, a la izquierda en las anchas (el ajuste deja ese hueco libre). */
+  insets() {
+    const lg = this.el && $('.nbmap-legend', this.el);
+    if (!lg || lg.hidden) return { left: 0, bottom: 0 };
+    return this.compact() ? { left: 0, bottom: lg.offsetHeight + 12 } : { left: lg.offsetWidth + 12, bottom: 0 };
+  },
+  bottomPad() { return this.insets().bottom; },
+  compact() { return innerWidth < 640 || innerWidth < innerHeight; },
+  fitCam() {
+    const L = this.L, pad = 24, { left, bottom } = this.insets();
+    const k = Math.min((this.vw - pad * 2 - left) / L.W, (this.vh - pad * 2 - bottom) / L.H);
+    return { k, x: L.W / 2 - (this.vw + left) / 2 / k, y: L.H / 2 - (this.vh - bottom) / 2 / k };
+  },
+  /** La cámara con la que la página i del mapa cae exactamente encima de la página del editor. */
+  editorCam(i) {
+    const page = this.nb?.pages[i], v = page && views.get(page.id), c = this.L?.cells[i];
+    if (!v || !c || !this.cv) return null;
+    const w = v.wrap.getBoundingClientRect(), s = this.cv.getBoundingClientRect();
+    if (!w.width) return null;
+    const k = w.width / c.w;
+    return { k, x: c.x - (w.left - s.left) / k, y: c.y - (w.top - s.top) / k };
+  },
+  clampCam(c) {
+    const L = this.L, k = Math.max(this.kMin, Math.min(this.kMax, c.k));
+    const vw = this.vw / k, vh = this.vh / k;
+    // Siempre queda algo de libreta a la vista: como mucho media pantalla de vacío por cada lado.
+    const x = Math.max(-vw * 0.5, Math.min(L.W - vw * 0.5, c.x)), y = Math.max(-vh * 0.5, Math.min(L.H - vh * 0.5, c.y));
+    return { k, x, y };
+  },
+  /** Zoom alrededor del punto de pantalla (sx, sy). */
+  zoomAt(k, sx, sy, cam = this.cam) {
+    const wx = cam.x + sx / cam.k, wy = cam.y + sy / cam.k;
+    const nk = Math.max(this.kMin, Math.min(this.kMax, k));
+    this.cam = this.clampCam({ k: nk, x: wx - sx / nk, y: wy - sy / nk });
+    this.dirty();
+  },
+  zoomBy(f, animate = true) {
+    const to = this.clampCam({ k: this.cam.k * f, x: 0, y: 0 });
+    const sx = this.vw / 2, sy = this.vh / 2, wx = this.cam.x + sx / this.cam.k, wy = this.cam.y + sy / this.cam.k;
+    const target = this.clampCam({ k: to.k, x: wx - sx / to.k, y: wy - sy / to.k });
+    if (!animate || reduceMotion()) { this.cam = target; return this.dirty(); }
+    this.tween(target, 220);
+  },
+  /** Anima la cámara hasta `to`: si cambia el zoom, como un zoom alrededor del punto que no se mueve (sin bandazos). */
+  tween(to, dur, step, done) {
+    cancelAnimationFrame(this.anim);
+    const a = { ...this.cam }, r = to.k / a.k, t0 = performance.now();
+    let fx = 0, fy = 0, pure = Math.abs(1 - r) < 1e-3;
+    if (!pure) { fx = (a.x - to.x) * to.k / (1 - r); fy = (a.y - to.y) * to.k / (1 - r); }
+    const wx = a.x + fx / a.k, wy = a.y + fy / a.k;
+    const frame = (now) => {
+      if (!this.el) return;
+      const p = dur ? Math.min(1, (now - t0) / dur) : 1, e = p < 0.5 ? 4 * p * p * p : 1 - (-2 * p + 2) ** 3 / 2;
+      if (pure) this.cam = { k: a.k, x: a.x + (to.x - a.x) * e, y: a.y + (to.y - a.y) * e };
+      else { const k = a.k * r ** e; this.cam = { k, x: wx - fx / k, y: wy - fy / k }; }
+      step?.(e);
+      this.draw();
+      if (p < 1) { this.anim = requestAnimationFrame(frame); return; }
+      this.anim = 0; this.cam = { ...to };
+      done?.(); this.dirty();
+    };
+    this.anim = requestAnimationFrame(frame);
+  },
+  /** Mueve la cámara (animada) hasta ver la página i a buen tamaño. */
+  flyTo(i) {
+    const c = this.L.cells[i];
+    if (!c) return;
+    const k = Math.max(this.cam.k, Math.min(this.kMax, Math.min(this.vw / c.w, this.vh / c.h) * 0.55));
+    const to = this.clampCam({ k, x: c.x + c.w / 2 - this.vw / 2 / k, y: c.y + c.h / 2 - (this.vh - this.bottomPad()) / 2 / k });
+    if (reduceMotion()) { this.cam = to; this.dirty(); } else this.tween(to, 480);
+  },
+  /** Que la página i se vea entera (si se sale, la cámara se desplaza lo justo). */
+  reveal(i) {
+    const c = this.L.cells[i], k = this.cam.k;
+    if (!c) return;
+    let { x, y } = this.cam;
+    const m = 30 / k, vw = this.vw / k, vh = (this.vh - this.bottomPad()) / k;
+    if (c.x - m < x) x = c.x - m; else if (c.x + c.w + m > x + vw) x = c.x + c.w + m - vw;
+    if (c.y - m < y) y = c.y - m; else if (c.y + c.h + m > y + vh) y = c.y + c.h + m - vh;
+    if (x !== this.cam.x || y !== this.cam.y) this.tween(this.clampCam({ k, x, y }), reduceMotion() ? 0 : 200);
+    else this.dirty();
+  },
+  /** Página bajo el punto de pantalla (sx, sy), o −1. */
+  hit(sx, sy) {
+    const wx = this.cam.x + sx / this.cam.k, wy = this.cam.y + sy / this.cam.k;
+    return this.L.cells.findIndex((c) => wx >= c.x && wx <= c.x + c.w && wy >= c.y && wy <= c.y + c.h);
+  },
+
+  // ---------- Gestos y teclado ----------
+  bind() {
+    const el = this.el, cv = this.cv, pts = new Map();
+    let drag = null, pinch = null, vel = null, lastTap = null;
+    const local = (e) => { const r = cv.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top]; };
+    el.addEventListener('click', (e) => {
+      const b = e.target.closest('[data-map], [data-layer], [data-mc], [data-mact]');
+      if (!b) return;
+      if (b.dataset.map === 'close') return this.close();
+      if (b.dataset.map === 'in') return this.zoomBy(1.5);
+      if (b.dataset.map === 'out') return this.zoomBy(1 / 1.5);
+      if (b.dataset.map === 'fit') return reduceMotion() ? ((this.cam = this.fitCam()), this.dirty()) : this.tween(this.fitCam(), 320);
+      if (b.dataset.layer) return this.toggleLayer(b.dataset.layer);
+      if (b.dataset.mc != null) { this.filter = this.filter === b.dataset.mc ? '' : b.dataset.mc; this.legend(); return this.dirty(); }
+      this.legendAct(b.dataset.mact);
+    });
+    cv.addEventListener('pointerdown', (e) => {
+      if (this.leaving || (e.pointerType === 'mouse' && e.button !== 0)) return;
+      cancelAnimationFrame(this.anim); this.anim = 0; this.others = 1; this.keep = -1; this.setFade(1);
+      try { cv.setPointerCapture(e.pointerId); } catch (err) { /* puntero sintético o ya suelto */ }
+      const [x, y] = local(e);
+      pts.set(e.pointerId, { x, y });
+      vel = null;
+      if (pts.size === 1) {
+        drag = { x, y, cam: { ...this.cam }, t: performance.now(), moved: false, type: e.pointerType, held: false, hist: [[x, y, performance.now()]] };
+        clearTimeout(this.holdTimer);
+        if (e.pointerType !== 'mouse') this.holdTimer = setTimeout(() => { if (drag && !drag.moved) { drag.held = true; const i = this.hit(x, y); if (i >= 0) { this.focus = i; this.showTip(i, x, y); this.dirty(); } } }, 450);
+      } else if (pts.size === 2) {
+        clearTimeout(this.holdTimer);
+        const [a, b] = [...pts.values()];
+        pinch = { d: Math.max(1, Math.hypot(a.x - b.x, a.y - b.y)), cam: { ...this.cam }, mx: (a.x + b.x) / 2, my: (a.y + b.y) / 2 };
+        if (drag) drag.moved = true;
+      }
+    });
+    cv.addEventListener('pointermove', (e) => {
+      const [x, y] = local(e);
+      if (!pts.has(e.pointerId)) {   // ratón sin pulsar: qué página hay debajo
+        if (e.pointerType === 'mouse' && !this.anim && !this.leaving) {
+          const i = this.hit(x, y);
+          if (i !== this.hover) { this.hover = i; this.dirty(); }
+          cv.style.cursor = i >= 0 ? 'pointer' : 'grab';
+          if (i >= 0) this.showTip(i, x, y); else this.hideTip();
+        }
+        return;
+      }
+      pts.set(e.pointerId, { x, y });
+      if (pinch && pts.size >= 2) {
+        const [a, b] = [...pts.values()], d = Math.max(1, Math.hypot(a.x - b.x, a.y - b.y)), mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2;
+        const c0 = pinch.cam, wx = c0.x + pinch.mx / c0.k, wy = c0.y + pinch.my / c0.k;
+        const k = Math.max(this.kMin, Math.min(this.kMax, c0.k * d / pinch.d));
+        this.cam = this.clampCam({ k, x: wx - mx / k, y: wy - my / k });
+        return this.dirty();
+      }
+      if (!drag) return;
+      const dx = x - drag.x, dy = y - drag.y;
+      if (!drag.moved && Math.hypot(dx, dy) > 6) { drag.moved = true; clearTimeout(this.holdTimer); this.hideTip(); cv.style.cursor = 'grabbing'; }
+      if (!drag.moved) return;
+      this.cam = this.clampCam({ k: drag.cam.k, x: drag.cam.x - dx / drag.cam.k, y: drag.cam.y - dy / drag.cam.k });
+      drag.hist.push([x, y, performance.now()]); if (drag.hist.length > 5) drag.hist.shift();
+      this.dirty();
+    });
+    const up = (e) => {
+      if (!pts.has(e.pointerId)) return;
+      pts.delete(e.pointerId);
+      clearTimeout(this.holdTimer);
+      if (pinch) { if (pts.size < 2) pinch = null; if (!pts.size) drag = null; else if (drag) { const p = [...pts.values()][0]; drag = { ...drag, x: p.x, y: p.y, cam: { ...this.cam }, moved: true, hist: [] }; } return; }
+      if (!drag || pts.size) return;
+      const d = drag; drag = null;
+      cv.style.cursor = '';
+      if (e.type === 'pointercancel') return;
+      if (d.moved) {   // inercia: sigue deslizándose y se frena
+        const h = d.hist, a = h[0], b = h[h.length - 1];
+        if (h.length > 1 && b[2] - a[2] > 0 && performance.now() - b[2] < 80 && !reduceMotion()) {
+          vel = { x: (b[0] - a[0]) / (b[2] - a[2]), y: (b[1] - a[1]) / (b[2] - a[2]) };
+          this.glide(vel);
+        }
+        return;
+      }
+      if (d.held) return;   // pulsación larga: solo enseña la información
+      const [x, y] = local(e), i = this.hit(x, y), now = performance.now();
+      if (i >= 0) return this.enter(i);
+      // Doble toque en el vacío: ver toda la libreta.
+      if (lastTap && now - lastTap < 320) { lastTap = null; return this.tween(this.fitCam(), reduceMotion() ? 0 : 320); }
+      lastTap = now;
+    };
+    cv.addEventListener('pointerup', up);
+    cv.addEventListener('pointercancel', up);
+    cv.addEventListener('pointerleave', (e) => { if (e.pointerType === 'mouse' && !pts.size) { this.hover = -1; this.hideTip(); this.dirty(); } });
+    cv.addEventListener('wheel', (e) => {
+      e.preventDefault();
+      if (this.leaving) return;
+      cancelAnimationFrame(this.anim); this.anim = 0;
+      const [x, y] = local(e), unit = e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? this.vh : 1;
+      const dx = e.deltaX * unit, dy = e.deltaY * unit;
+      // Pellizco del trackpad (llega con Ctrl) o rueda de ratón (saltos grandes y redondos): zoom. Dos dedos: desplazar.
+      const mouse = !e.ctrlKey && dx === 0 && Math.abs(dy) >= 40 && Number.isInteger(e.deltaY);
+      if (e.ctrlKey || e.metaKey || mouse) this.zoomAt(this.cam.k * Math.exp(-dy * (mouse ? 0.0022 : 0.012)), x, y);
+      else { this.cam = this.clampCam({ ...this.cam, x: this.cam.x + dx / this.cam.k, y: this.cam.y + dy / this.cam.k }); this.dirty(); }
+      this.hideTip();
+    }, { passive: false });
+    cv.addEventListener('focus', () => { if (this.focus < 0) this.focus = this.current; this.dirty(); this.announce(this.focus); });
+    this.onKey = (e) => this.key(e);
+    this.onResize = () => this.el && this.resize(true);
+    addEventListener('keydown', this.onKey, true);
+    addEventListener('resize', this.onResize);
+  },
+  glide(v) {
+    let last = performance.now();
+    const frame = (now) => {
+      if (!this.el) return;
+      const dt = Math.min(40, now - last); last = now;
+      const f = Math.exp(-dt / 260);
+      v = { x: v.x * f, y: v.y * f };
+      this.cam = this.clampCam({ ...this.cam, x: this.cam.x - (v.x * dt) / this.cam.k, y: this.cam.y - (v.y * dt) / this.cam.k });
+      this.draw();
+      if (Math.hypot(v.x, v.y) > 0.02) this.anim = requestAnimationFrame(frame); else { this.anim = 0; this.dirty(); }
+    };
+    this.anim = requestAnimationFrame(frame);
+  },
+  /** Teclado mientras el mapa está abierto: los atajos del editor no llegan (no se cambia de herramienta por detrás). */
+  key(e) {
+    if (!this.el) return;
+    if (e.target.closest?.('.scrim, input, textarea')) return;
+    const k = e.key;
+    const stop = () => { e.preventDefault(); e.stopPropagation(); };
+    if (k === 'Escape' || ((k === 'm' || k === 'M') && !e.metaKey && !e.ctrlKey && !e.altKey)) { stop(); return this.close(); }
+    if (e.metaKey || e.ctrlKey) { if (k === '+' || k === '=' || k === '-' || k === '0') { stop(); return k === '0' ? this.tween(this.fitCam(), 0) : this.zoomBy(k === '-' ? 1 / 1.5 : 1.5); } return; }
+    if (k === 'Tab') return;   // moverse por los botones del mapa
+    e.stopPropagation();   // ningún atajo de una tecla (P, H, E…) llega al editor de detrás
+    if (k === '+' || k === '=') { e.preventDefault(); return this.zoomBy(1.5); }
+    if (k === '-' || k === '_') { e.preventDefault(); return this.zoomBy(1 / 1.5); }
+    if (k === '0') { e.preventDefault(); return this.tween(this.fitCam(), reduceMotion() ? 0 : 320); }
+    if (document.activeElement !== this.cv) return;   // en un botón: Intro y espacio son del botón
+    if ((k === 'Enter' || k === ' ') && this.focus >= 0) { e.preventDefault(); return this.enter(this.focus); }
+    const dir = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1] }[k];
+    if (!dir) return;
+    e.preventDefault();
+    this.kbd = true;
+    const i = this.neighbour(this.focus < 0 ? this.current : this.focus, dir);
+    if (i < 0) return;
+    this.focus = i; this.reveal(i); this.announce(i);
+    const c = this.L.cells[i], k2 = this.cam.k;
+    this.showTip(i, (c.x + c.w - this.cam.x) * k2, (c.y - this.cam.y) * k2);
+  },
+  /** La página vecina en esa dirección (izquierda/derecha: la anterior/siguiente; arriba/abajo: la más cercana en la otra fila). */
+  neighbour(i, [dx, dy]) {
+    const n = this.L.cells.length;
+    if (dx) return Math.max(0, Math.min(n - 1, i + dx)) === i ? -1 : i + dx;
+    const c = this.L.cells[i], cx = c.x + c.w / 2, cy = c.y + c.h / 2;
+    let best = -1, bd = Infinity;
+    this.L.cells.forEach((o, j) => {
+      const oy = o.y + o.h / 2;
+      if (dy > 0 ? oy <= cy + 1 : oy >= cy - 1) return;
+      const d = Math.abs(oy - cy) * 4 + Math.abs(o.x + o.w / 2 - cx);
+      if (d < bd) { bd = d; best = j; }
+    });
+    return best;
+  },
+  announce(i) { const el = this.el && $('.nbmap-live', this.el); if (el && i >= 0) el.textContent = this.tipText(i); },
+
+  // ---------- Capas y leyenda ----------
+  toggleLayer(k) {
+    if (this.layers.has(k)) this.layers.delete(k); else this.layers.add(k);
+    $$('[data-layer]', this.el).forEach((b) => b.setAttribute('aria-pressed', this.layers.has(b.dataset.layer)));
+    if (k === 'meaning' && !this.layers.has(k)) this.filter = '';
+    this.legend(); this.dirty();
+  },
+  legend() {
+    const box = this.el && $('.nbmap-legend', this.el);
+    if (!box) return;
+    const nb = this.nb, F = this.F, parts = [];
+    if (this.layers.has('heat')) {
+      const never = F.filter((f) => !f.last).length, oldest = this.coldest();
+      parts.push(`<section><h3>${icon('thermo')} Calor de repaso</h3>
+        <div class="nbmap-grad" aria-hidden="true"></div><div class="nbmap-ticks"><span>Hoy</span><span>1 sem</span><span>1 mes</span><span>3 meses</span></div>
+        <p class="nbmap-note"><span class="nbmap-never" aria-hidden="true"></span> <span>Nunca repasada</span>${never ? ` · <b>${never}</b>` : ''}</p>
+        <p class="nbmap-note">Según tus tarjetas de cada página y los repasos de la libreta.</p>
+        ${oldest >= 0 ? `<button class="btn" data-mact="coldest">${icon('thermo')} Ir a la más olvidada</button>` : ''}</section>`);
+    }
+    if (this.layers.has('meaning')) {
+      const leg = Meaning.legend(nb), keys = Object.keys(leg);
+      const rows = keys.map((c) => ({ c, n: F.filter((f) => f.meaning.has(c)).length })).filter((r) => r.n).sort((a, b) => b.n - a.n);
+      parts.push(`<section><h3>${icon('palette')} Colores con significado</h3>${rows.length
+        ? `<div class="nbmap-means">${rows.map((r) => `<button class="nbmap-mean" data-mc="${r.c}" aria-pressed="${this.filter === r.c}"><i style="background:${r.c}"></i><span translate="no">${esc(leg[r.c])}</span><b>${r.n}</b></button>`).join('')}</div>
+          <p class="nbmap-note">Toca un significado para ver solo sus páginas.</p>`
+        : `<p class="nbmap-note">${keys.length ? 'Ningún color de la leyenda está usado en esta libreta.' : 'Esta libreta aún no tiene leyenda de colores.'}</p>
+          <button class="btn" data-mact="legend">${icon('palette')} Leyenda de colores…</button>`}</section>`);
+    }
+    if (this.layers.has('cards')) {
+      const t = F.reduce((a, f) => ({ due: a.due + f.cards.due, learn: a.learn + f.cards.learn, mastered: a.mastered + f.cards.mastered }), { due: 0, learn: 0, mastered: 0 });
+      const any = t.due + t.learn + t.mastered;
+      parts.push(`<section><h3>${icon('lightbulb')} Tarjetas</h3>${any
+        ? `<div class="nbmap-states"><span><i style="background:${MAP_C.due}"></i><b>${t.due}</b> <span>pendientes</span></span><span><i style="background:${MAP_C.learn}"></i><b>${t.learn}</b> <span>aprendiendo</span></span><span><i style="background:${MAP_C.mastered}"></i><b>${t.mastered}</b> <span>dominadas</span></span></div>
+          ${t.due ? `<button class="btn" data-mact="review">${icon('lightbulb')} Repasar las pendientes</button>` : ''}`
+        : '<p class="nbmap-note">Aún no hay tarjetas hechas desde estas páginas.</p>'}</section>`);
+    }
+    // En pantallas estrechas la leyenda empieza plegada (una línea) para dejar sitio a las páginas.
+    box.innerHTML = `<button class="nbmap-fold" data-mact="fold" aria-expanded="${!this.folded}">${icon('layers')}<span>Leyenda</span>${icon('chevronDown')}</button>${parts.join('')}`;
+    box.classList.toggle('folded', !!this.folded);
+    box.hidden = !parts.length;
+  },
+  legendAct(act) {
+    const nb = this.nb;
+    if (act === 'fold') { this.folded = !this.folded; return this.legend(); }
+    if (act === 'coldest') { const i = this.coldest(); if (i >= 0) { this.focus = i; this.flyTo(i); this.announce(i); } return; }
+    if (act === 'legend') { this.close(true); return Meaning.legendDialog(nb); }
+    if (act === 'review') { this.close(true); return Cards.review(nb); }
+  },
+  /** La página que lleva más tiempo sin repasar (las nunca repasadas primero, si las hay con contenido). */
+  coldest() {
+    let best = -1, bt = Infinity;
+    const pages = this.nb.pages;
+    this.F.forEach((f, i) => {
+      const p = pages[i], empty = !p.strokes.length && !p.items.length && !p.bg;
+      if (empty) return;
+      const t = f.last || 0;
+      if (t < bt) { bt = t; best = i; }
+    });
+    return best;
+  },
+
+  // ---------- Información de una página ----------
+  tipHtml(i) {
+    const f = this.F[i], nb = this.nb, leg = Meaning.legend(nb), d = this.days(f);
+    const sec = [...this.L.heads].reverse().find((h) => h.i <= i);
+    const rows = [];
+    rows.push(`<div class="nbmap-tip-h"><b>Página ${i + 1}</b>${sec ? `<span translate="no">${esc(sec.title)}</span>` : ''}</div>`);
+    rows.push(`<div><i class="dot" style="background:${this.heatColor(d)}"></i>${d == null ? '<span>Nunca repasada</span>' : d === 0 ? '<span>Repasada hoy</span>' : d === 1 ? '<span>Repasada ayer</span>' : `<span>Repasada hace ${d} días</span>`}${f.last ? ` <small>${f.src === 'cards' ? '(tarjetas de esta página)' : '(toda la libreta)'}</small>` : ''}</div>`);
+    const c = f.cards;
+    if (c.due + c.learn + c.mastered) rows.push(`<div class="nbmap-states">${c.due ? `<span><i style="background:${MAP_C.due}"></i><b>${c.due}</b> <span>${c.due === 1 ? 'pendiente' : 'pendientes'}</span></span>` : ''}${c.learn ? `<span><i style="background:${MAP_C.learn}"></i><b>${c.learn}</b> <span>aprendiendo</span></span>` : ''}${c.mastered ? `<span><i style="background:${MAP_C.mastered}"></i><b>${c.mastered}</b> <span>${c.mastered === 1 ? 'dominada' : 'dominadas'}</span></span>` : ''}</div>`);
+    if (f.meaning.size) rows.push(`<div class="nbmap-tip-means">${[...f.meaning.keys()].map((k) => `<span><i style="background:${k}"></i><span translate="no">${esc(leg[k])}</span></span>`).join('')}</div>`);
+    const small = [];
+    if (f.tapes.length) small.push(`${icon('tape')}<b>${f.tapes.length}</b> <span>${f.tapes.length === 1 ? 'cinta' : 'cintas'}</span>`);
+    if (f.comments.length) small.push(`${icon('comment')}<b>${f.comments.length}</b> <span>${f.comments.length === 1 ? 'comentario' : 'comentarios'}</span>`);
+    if (f.audio) small.push(`${icon('mic')}<span>Con audio</span>`);
+    if (f.links.length) small.push(`${icon('link')}<b>${f.links.length}</b> <span>${f.links.length === 1 ? 'enlace a otra página' : 'enlaces a otras páginas'}</span>`);
+    if (f.ext) small.push(`${icon('link')}<b>${f.ext}</b> <span>${f.ext === 1 ? 'enlace a otra libreta' : 'enlaces a otras libretas'}</span>`);
+    if (f.bookmark) small.push(`${icon('bookmarkFill')}<span>En marcadores</span>`);
+    if (small.length) rows.push(`<div class="nbmap-tip-small">${small.map((s) => `<span>${s}</span>`).join('')}</div>`);
+    return rows.join('');
+  },
+  tipText(i) { const t = document.createElement('div'); t.innerHTML = this.tipHtml(i); return [...t.children].map((c) => c.textContent.replace(/\s+/g, ' ').trim()).join('. '); },
+  showTip(i, x, y) {
+    const tip = this.el && $('.nbmap-tip', this.el);
+    if (!tip || this.leaving) return;
+    if (tip.dataset.i !== String(i)) { tip.innerHTML = this.tipHtml(i); tip.dataset.i = i; }
+    tip.hidden = false;
+    const w = tip.offsetWidth, h = tip.offsetHeight;
+    let left = x + 16, top = y + 16;
+    if (left + w > this.vw - 8) left = Math.max(8, x - w - 16);
+    if (top + h > this.vh - 8) top = Math.max(8, y - h - 16);
+    tip.style.left = left + 'px'; tip.style.top = top + 'px';
+  },
+  hideTip() { const tip = this.el && $('.nbmap-tip', this.el); if (tip) { tip.hidden = true; tip.dataset.i = ''; } },
+
+  // ---------- Miniaturas ----------
+  /** La mejor miniatura que ya hay de la página (y pide la que hace falta para `need` px reales). */
+  thumb(page, need, prio) {
+    const v = page._v || 0;
+    const tier = MAP_TIERS.find((t) => t >= need) || MAP_TIERS[MAP_TIERS.length - 1];
+    const exact = this.cache.get(`${page.id}:${tier}`);
+    if (exact && exact.v === v) { if (tier !== MAP_TIERS[0]) { this.cache.delete(`${page.id}:${tier}`); this.cache.set(`${page.id}:${tier}`, exact); } return exact.cv; }
+    if (!this.busy.has(`${page.id}:${tier}`)) this.want.push({ page, tier, prio });
+    for (let j = MAP_TIERS.length - 1; j >= 0; j--) { const o = this.cache.get(`${page.id}:${MAP_TIERS[j]}`); if (o) return o.cv; }
+    return null;
+  },
+  /** Que la página i tenga ya su miniatura de `tier` (para las animaciones de entrar y salir). */
+  async ensure(i, tier) {
+    const page = this.nb?.pages[i];
+    if (!page) return;
+    const o = this.cache.get(`${page.id}:${tier}`);
+    if (o && o.v === (page._v || 0)) return;
+    this.store(page, tier, await this.paint(page, tier));
+  },
+  store(page, tier, cv) {
+    if (!cv) return;
+    const key = `${page.id}:${tier}`;
+    this.cache.delete(key);
+    this.cache.set(key, { v: page._v || 0, cv, tier });
+    this.painted++;
+    const max = MAP_KEEP[tier];
+    if (!max) return;
+    const same = [...this.cache].filter(([, o]) => o.tier === tier);
+    for (let j = 0; j < same.length - max; j++) this.cache.delete(same[j][0]);
+  },
+  /** Pinta una miniatura en un lienzo propio (sin dataURL). Los fondos de PDF e imágenes que no estaban ya
+   *  cargados se sueltan al acabar: con cientos de páginas no se quedan todos decodificados en memoria. */
+  async paint(page, tier) {
+    const c = document.createElement('canvas'), s = tier / page.w;
+    c.width = tier; c.height = Math.max(1, Math.round(page.h * s));
+    const ctx = c.getContext('2d');
+    if (tier === MAP_TIERS[0]) {   // la de la barra lateral, si ya está hecha, sirve
+      const url = cachedThumb(page);
+      if (url) {
+        const img = await new Promise((r) => { const im = new Image(); im.onload = () => r(im); im.onerror = () => r(null); im.src = url; });
+        if (img) { ctx.drawImage(img, 0, 0, c.width, c.height); return c; }
+      }
+    }
+    const srcs = [page.bg, ...page.items.filter((it) => it.type === 'image').map((it) => it.src)].filter((u) => u && !imageCache.has(u));
+    ctx.scale(s, s);
+    try { await drawPageQuick(ctx, page); } catch (e) { drawPaper(ctx, page); }
+    for (const u of srcs) imageCache.delete(u);
+    return c;
+  },
+  /** Hace las miniaturas pedidas, la más cercana al centro primero, de una en una y dejando respirar. */
+  async pump() {
+    if (this.pumping) return;
+    this.pumping = true;
+    try {
+      let n = 0;
+      while (this.el && this.want.length) {
+        const job = this.want.shift(), key = `${job.page.id}:${job.tier}`;
+        const have = this.cache.get(key);
+        if (this.busy.has(key) || (have && have.v === (job.page._v || 0))) continue;
+        this.busy.add(key);
+        const t0 = performance.now();
+        const cv = await this.paint(job.page, job.tier);
+        this.busy.delete(key);
+        if (!this.el) break;
+        this.store(job.page, job.tier, cv);
+        this.dirty();
+        if (performance.now() - t0 > 4 || ++n % 3 === 0) await new Promise((r) => setTimeout(r, 0));
+      }
+    } finally { this.pumping = false; }
+  },
+
+  // ---------- Dibujo ----------
+  dirty() { if (this.el && !this.raf && !this.anim) this.raf = requestAnimationFrame(() => { this.raf = 0; this.draw(); }); },
+  draw() {
+    const ctx = this.ctx;
+    if (!ctx || !this.L) return;
+    const t0 = performance.now();
+    const { k, x: camX, y: camY } = this.cam, dpr = this.dpr, vw = this.vw, vh = this.vh, L = this.L, nb = this.nb;
+    const dark = isDarkTheme(), ink = dark ? '#F2F2F7' : '#1C1C1E', muted = dark ? 'rgba(235,235,245,.62)' : 'rgba(60,60,67,.62)';
+    const accent = dark ? '#0A84FF' : '#007AFF';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, vw, vh);
+    const scr = (c) => ({ x: (c.x - camX) * k, y: (c.y - camY) * k, w: c.w * k, h: c.h * k });
+    const cx = vw / 2, cy = vh / 2;
+    this.want = [];
+    // Títulos de los apartados (texto a tamaño de pantalla, el de la libreta: no se traduce).
+    ctx.globalAlpha = this.others;
+    for (const h of L.heads) {
+      const y = (h.y + h.h - L.gy * 0.25 - camY) * k, x = (h.x - camX) * k;
+      if (y < -30 || y > vh + 30) continue;
+      const fs = Math.max(11, Math.min(22, h.h * k * 0.42));
+      if (h.h * k < 12) continue;
+      ctx.font = `700 ${fs}px ${this.font}`;
+      ctx.fillStyle = ink; ctx.textBaseline = 'alphabetic'; ctx.textAlign = 'start';
+      ctx.fillText(h.title, Math.max(x, 8), y);
+      ctx.fillStyle = accent; ctx.fillRect(Math.max(x, 8), y + 5, Math.min(L.W * k, Math.max(28, fs * 2)), 2.5);
+    }
+    // Páginas.
+    const showNum = L.gy * k >= 18;
+    ctx.font = `600 12px ${this.font}`;
+    for (let i = 0; i < L.cells.length; i++) {
+      const r = scr(L.cells[i]);
+      if (r.x > vw + 20 || r.y > vh + 20 || r.x + r.w < -20 || r.y + r.h + 18 < -20) continue;
+      const page = nb.pages[i], f = this.F[i];
+      let a = i === this.keep ? 1 : this.others;
+      if (this.filter && this.layers.has('meaning') && !f.meaning.has(this.filter)) a *= 0.18;
+      ctx.globalAlpha = a;
+      if (a < 0.01) continue;
+      const prio = Math.hypot(r.x + r.w / 2 - cx, r.y + r.h / 2 - cy) - (i === this.keep ? 1e6 : 0);
+      this.drawPage(ctx, page, f, r, prio, { dark, ink, muted, accent, i });
+      if (showNum && r.w >= 22) {
+        ctx.globalAlpha = a;
+        const d = this.layers.has('heat') ? this.days(f) : undefined;
+        const label = d === undefined ? String(i + 1) : `${i + 1} · ${this.agoShort(d)}`;
+        const fits = ctx.measureText(label).width <= r.w + L.gx * k * 0.8;
+        ctx.fillStyle = i === this.current ? accent : muted; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+        ctx.fillText(fits ? label : String(i + 1), r.x + r.w / 2, r.y + r.h + (i === this.current || i === this.hover ? 9 : 5));
+      }
+    }
+    ctx.globalAlpha = this.others;
+    if (this.layers.has('links')) this.drawLinks(ctx, scr, accent);
+    ctx.globalAlpha = 1;
+    this.want.sort((p, q) => p.prio - q.prio);
+    if (this.want.length) this.pump();
+    this.drawMs = performance.now() - t0;
+  },
+  drawPage(ctx, page, f, r, prio, o) {
+    const L = this.layers, a = ctx.globalAlpha;
+    if (r.w > 14) { ctx.fillStyle = o.dark ? 'rgba(0,0,0,.45)' : 'rgba(0,0,0,.13)'; ctx.fillRect(r.x + 0.6, r.y + 1.6, r.w, r.h); }
+    const img = this.thumb(page, r.w * this.dpr, prio);
+    if (img) ctx.drawImage(img, r.x, r.y, r.w, r.h);
+    else { ctx.fillStyle = (PAPERS[page.paper] || PAPERS.white).fill; ctx.fillRect(r.x, r.y, r.w, r.h); }
+    const sc = r.w / page.w;
+    // Calor de repaso: un velo del color de los días que lleva sin repasarse; rayado gris si nunca.
+    if (L.has('heat')) {
+      const d = this.days(f), col = this.heatColor(d);
+      ctx.globalAlpha = a * 0.34; ctx.fillStyle = d == null ? this.hatch(o.dark) : col; ctx.fillRect(r.x, r.y, r.w, r.h);
+      ctx.globalAlpha = a; ctx.strokeStyle = col; ctx.lineWidth = Math.max(2, Math.min(5, r.w * 0.03)); ctx.strokeRect(r.x, r.y, r.w, r.h);
+    }
+    // Zonas: cintas y tarjetas (solo si la página se ve lo bastante grande).
+    if (r.w >= 70) {
+      ctx.lineWidth = 1.6;
+      if (L.has('tape')) for (const t of f.tapes) { ctx.strokeStyle = MAP_C.tape; ctx.setLineDash(t.open ? [4, 3] : []); ctx.strokeRect(r.x + t.x * sc, r.y + t.y * sc, t.w * sc, t.h * sc); }
+      if (L.has('cards')) for (const c of f.cards.rects) { ctx.strokeStyle = MAP_C[c.st]; ctx.setLineDash([5, 3]); ctx.strokeRect(r.x + c.r.x * sc, r.y + c.r.y * sc, c.r.w * sc, c.r.h * sc); }
+      ctx.setLineDash([]);
+    }
+    // Colores con significado: un lomo a la izquierda con un tramo por color (según lo que se usa).
+    if (L.has('meaning') && f.meaning.size) {
+      const tot = [...f.meaning.values()].reduce((s, n) => s + n, 0), w = Math.max(3, Math.min(9, r.w * 0.05));
+      let y = r.y;
+      for (const [c, n] of f.meaning) {
+        const h = r.h * n / tot;
+        ctx.fillStyle = c; ctx.globalAlpha = a * (this.filter && this.filter !== c ? 0.35 : 1);
+        ctx.fillRect(r.x - w - 2, y, w, Math.max(1, h - 1)); y += h;
+      }
+      ctx.globalAlpha = a;
+      if (this.filter && f.meaning.has(this.filter)) { ctx.strokeStyle = this.filter; ctx.lineWidth = 2.5; ctx.strokeRect(r.x - 1.5, r.y - 1.5, r.w + 3, r.h + 3); }
+    }
+    // Marcador: la cinta roja de la esquina.
+    if (L.has('bookmarks') && f.bookmark) {
+      const w = Math.max(5, Math.min(18, r.w * 0.09)), x = r.x + r.w - w * 1.8, h = w * 1.7;
+      ctx.fillStyle = MAP_C.bookmark;
+      ctx.beginPath(); ctx.moveTo(x, r.y); ctx.lineTo(x + w, r.y); ctx.lineTo(x + w, r.y + h); ctx.lineTo(x + w / 2, r.y + h - w * 0.45); ctx.lineTo(x, r.y + h); ctx.closePath(); ctx.fill();
+    }
+    // Insignias: tarjetas por estado, cintas, comentarios, audio y enlaces a otras libretas.
+    const badges = [];
+    if (L.has('cards')) for (const st of ['due', 'learn', 'mastered']) if (f.cards[st]) badges.push([MAP_C[st], 'card', f.cards[st]]);
+    if (L.has('tape') && f.tapes.length) badges.push([MAP_C.tape, 'tape', f.tapes.length]);
+    if (L.has('comments') && f.comments.length) badges.push([MAP_C.comments, 'comment', f.comments.length]);
+    if (L.has('audio') && f.audio) badges.push([MAP_C.audio, 'mic', 0]);
+    if (L.has('links') && f.ext) badges.push([MAP_C.links, 'out', f.ext]);
+    if (badges.length) this.drawBadges(ctx, badges, r);
+    // Página actual (la del editor), la del teclado y la de debajo del ratón.
+    if (o.i === this.current) { ctx.strokeStyle = o.accent; ctx.lineWidth = 2.5; ctx.strokeRect(r.x - 3, r.y - 3, r.w + 6, r.h + 6); }
+    const kf = o.i === this.focus && this.kbd && document.activeElement === this.cv;
+    if (o.i === this.hover || kf) {
+      ctx.strokeStyle = kf ? o.accent : o.ink; ctx.lineWidth = 2; ctx.setLineDash(kf ? [] : [6, 4]);
+      ctx.strokeRect(r.x - 6, r.y - 6, r.w + 12, r.h + 12); ctx.setLineDash([]);
+    }
+  },
+  hatch(dark) {
+    const key = dark ? 'hd' : 'hl';
+    if (this[key]) return this[key];
+    const c = document.createElement('canvas'); c.width = c.height = 10;
+    const x = c.getContext('2d');
+    x.strokeStyle = dark ? '#8E8E93' : '#6E6E73'; x.lineWidth = 2.2;
+    x.beginPath(); x.moveTo(-2, 12); x.lineTo(12, -2); x.moveTo(8, 12); x.lineTo(12, 8); x.moveTo(-2, 2); x.lineTo(2, -2); x.stroke();
+    return (this[key] = this.ctx.createPattern(c, 'repeat'));
+  },
+  drawBadges(ctx, list, r) {
+    if (r.w < 44) {   // muy lejos: solo puntitos de color
+      const d = Math.max(2.2, Math.min(3.5, r.w * 0.08));
+      list.slice(0, 5).forEach(([c], j) => { ctx.fillStyle = c; ctx.beginPath(); ctx.arc(r.x + d + 2 + j * (d * 2 + 2), r.y + r.h - d - 2, d, 0, 7); ctx.fill(); });
+      return;
+    }
+    const h = Math.max(13, Math.min(22, r.w * 0.11)), gap = 3, fs = Math.round(h * 0.62);
+    let x = r.x + 4, y = r.y + r.h - h - 4;
+    ctx.font = `700 ${fs}px ${this.font}`;
+    ctx.textBaseline = 'middle'; ctx.textAlign = 'start';
+    for (const [c, g, n] of list) {
+      const tw = n ? ctx.measureText(String(n)).width + 3 : 0, w = h + tw + (n ? 3 : 0);
+      if (x + w > r.x + r.w - 2) { x = r.x + 4; y -= h + gap; if (y < r.y) break; }
+      ctx.fillStyle = c; ctx.beginPath(); ctx.roundRect(x, y, w, h, h / 2); ctx.fill();
+      this.glyph(ctx, g, x + h / 2, y + h / 2, h * 0.56);
+      if (n) { ctx.fillStyle = '#fff'; ctx.fillText(String(n), x + h - 1, y + h / 2 + 0.5); }
+      x += w + gap;
+    }
+  },
+  /** Iconitos blancos para las insignias, centrados en (x, y), de lado s. */
+  glyph(ctx, g, x, y, s) {
+    ctx.save(); ctx.translate(x, y); ctx.scale(s / 10, s / 10);
+    ctx.strokeStyle = '#fff'; ctx.fillStyle = '#fff'; ctx.lineWidth = 1.6; ctx.lineCap = ctx.lineJoin = 'round';
+    ctx.beginPath();
+    if (g === 'card') { ctx.roundRect(-4.5, -3.2, 9, 6.4, 1.2); ctx.stroke(); ctx.beginPath(); ctx.moveTo(-2.4, 0); ctx.lineTo(2.4, 0); ctx.stroke(); }
+    else if (g === 'tape') { ctx.rect(-4.8, -2.6, 9.6, 5.2); ctx.fill(); }
+    else if (g === 'comment') { ctx.moveTo(-4.5, -3.5); ctx.lineTo(4.5, -3.5); ctx.lineTo(4.5, 2.2); ctx.lineTo(-1, 2.2); ctx.lineTo(-3.6, 4.6); ctx.lineTo(-3.6, 2.2); ctx.lineTo(-4.5, 2.2); ctx.closePath(); ctx.fill(); }
+    else if (g === 'mic') { ctx.roundRect(-1.8, -4.8, 3.6, 6, 1.8); ctx.fill(); ctx.beginPath(); ctx.arc(0, -0.6, 3.6, 0.15, Math.PI - 0.15); ctx.moveTo(0, 3); ctx.lineTo(0, 4.8); ctx.stroke(); }
+    else if (g === 'out') { ctx.moveTo(-3.5, 3.5); ctx.lineTo(3.5, -3.5); ctx.moveTo(-0.5, -3.5); ctx.lineTo(3.5, -3.5); ctx.lineTo(3.5, 0.5); ctx.stroke(); }
+    ctx.restore();
+  },
+  /** Enlaces dentro de la libreta: una curva desde donde está el enlace hasta la página a la que lleva, con su flecha. */
+  drawLinks(ctx, scr, accent) {
+    const idx = new Map(this.nb.pages.map((p, i) => [p.id, i])), a = ctx.globalAlpha;
+    ctx.strokeStyle = accent; ctx.fillStyle = accent; ctx.lineCap = 'round';
+    this.F.forEach((f, i) => {
+      if (!f.links.length) return;
+      const from = scr(this.L.cells[i]), sc = from.w / this.nb.pages[i].w;
+      for (const l of f.links) {
+        const j = idx.get(l.to);
+        if (j == null) continue;
+        const to = scr(this.L.cells[j]);
+        const x0 = from.x + l.x * sc, y0 = from.y + l.y * sc;
+        if (j === i) continue;
+        // Llega al centro del borde de arriba de la página (o de abajo, si se va hacia arriba).
+        const up = to.y + to.h / 2 < y0, x1 = to.x + to.w / 2, y1 = up ? to.y + to.h + 2 : to.y - 2;
+        const minX = Math.min(x0, x1), maxX = Math.max(x0, x1), minY = Math.min(y0, y1), maxY = Math.max(y0, y1);
+        if (maxX < -40 || minX > this.vw + 40 || maxY < -80 || minY > this.vh + 80) continue;
+        const dx = x1 - x0, dy = y1 - y0, len = Math.hypot(dx, dy) || 1;
+        const bend = Math.min(120, len * 0.25), mx = (x0 + x1) / 2 - (dy / len) * bend, my = (y0 + y1) / 2 + (dx / len) * bend - (up ? -bend * 0.3 : bend * 0.3);
+        ctx.globalAlpha = a * 0.9; ctx.lineWidth = 2.2;
+        ctx.beginPath(); ctx.moveTo(x0, y0); ctx.quadraticCurveTo(mx, my, x1, y1); ctx.stroke();
+        const ang = Math.atan2(y1 - my, x1 - mx), s = 8;
+        ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x1 - s * Math.cos(ang - 0.45), y1 - s * Math.sin(ang - 0.45)); ctx.lineTo(x1 - s * Math.cos(ang + 0.45), y1 - s * Math.sin(ang + 0.45)); ctx.closePath(); ctx.fill();
+        ctx.beginPath(); ctx.arc(x0, y0, 3.2, 0, 7); ctx.fill();
+      }
+    });
+    ctx.globalAlpha = a;
+  },
+
+  // ---------- Enganches del editor ----------
+  /** Pellizco de dos dedos (modo lápiz) que sigue cerrándose con el zoom ya al mínimo: abre el mapa. */
+  pinchOut(raw) {
+    if (this.el || raw > 0.3 * 0.55 || S.zoom > 0.3001) return false;
+    this.open();
+    return true;
+  },
+  /** Ctrl + rueda / pellizco del trackpad alejando con el zoom ya al mínimo: si se insiste, abre el mapa. */
+  wheelOut(e) {
+    if (this.el || S.zoom > 0.3001 || e.deltaY <= 0) { this.wheelAcc = 0; return false; }
+    const now = performance.now();
+    if (now - (this.wheelAt || 0) > 600) this.wheelAcc = 0;
+    this.wheelAt = now;
+    this.wheelAcc = (this.wheelAcc || 0) + e.deltaY * (e.deltaMode === 1 ? 16 : 1);
+    if (this.wheelAcc < 420) return false;
+    this.wheelAcc = 0; this.open();
+    return true;
+  },
+};
+
+// =============================================================================
+// Modo presentación (Present): explicar los apuntes a otros (clase, sesión de estudio, pantalla compartida).
+// La página a pantalla completa sobre fondo oscuro y sin interfaz; se pasa con flechas, espacio, clic en los bordes o
+// deslizando el dedo. Herramientas que NUNCA tocan la libreta ni el deshacer: puntero láser (estela que se apaga en
+// ~1 s), tinta de presentación (se borra sola a los pocos segundos, o toda con C o doble toque), foco (oscurece todo
+// salvo un círculo o rectángulo alrededor del puntero) y telón (tapa la página y se descubre de arriba abajo
+// arrastrando, o paso a paso por párrafos con ↓/espacio, también con un mando de presentaciones).
+// Rendimiento: la página se pinta una vez (copia estática a la escala de la pantalla); lo demás va en un único lienzo
+// superpuesto que solo se repinta con requestAnimationFrame mientras algo se mueve o se apaga.
+// =============================================================================
+const PRESENT_INK = ['#FF3B30', '#FFD60A', '#30D158', '#0A84FF', '#FFFFFF'];
+const PRESENT_ICONS = {
+  present: '<rect x="2.5" y="3.5" width="19" height="13" rx="2"/><path d="M12 16.5V21"/><path d="M8 21h8"/><path d="m10.2 7.4 4.3 2.6-4.3 2.6z"/>',
+  laser: '<path d="M3.5 20.5 14 10"/><circle cx="17" cy="7" r="2.6" fill="currentColor"/><path d="M17 1.8v1.4"/><path d="M22.2 7h-1.4"/><path d="m20.7 3.3-1 1"/><path d="m20.7 10.7-1-1"/>',
+  focus: '<circle cx="12" cy="12" r="4.2"/><circle cx="12" cy="12" r="9.3" stroke-dasharray="2.2 2.8"/>',
+  focusRect: '<rect x="7" y="9" width="10" height="6" rx="2"/><rect x="2.5" y="4.5" width="19" height="15" rx="3" stroke-dasharray="2.2 2.8"/>',
+  curtain: '<path d="M3.5 3.5h17"/><path d="M5.5 3.5v9.7c0 1 .8 1.8 1.8 1.8h9.4c1 0 1.8-.8 1.8-1.8V3.5" fill="currentColor" fill-opacity=".3"/><path d="M9.5 3.5V15M14.5 3.5V15"/><path d="m9.5 18.5 2.5 2.5 2.5-2.5"/>',
+  ink: '<path d="M13 20.5h8"/><path d="M16.4 3.6a2 2 0 0 1 2.9 2.9L7.5 18.3 3 19.5l1.2-4.5z"/>',
+};
+const prIcon = (name) => (PRESENT_ICONS[name]
+  ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${PRESENT_ICONS[name]}</svg>`
+  : icon(name));
+
+const Present = {
+  LASER_MS: 1000,   // vida de la estela del láser
+  INK_MS: 5000,     // la tinta de presentación se ve 5 s desde que se levanta el trazo…
+  INK_FADE: 700,    // …y se apaga en los últimos 0,7 s
+  on: false, el: null, nb: null, index: 0, pageEl: null, inkCanvas: null,
+  tool: 'laser',    // 'laser' | 'ink' | null (sin herramienta: el dedo solo pasa páginas)
+  color: PRESENT_INK[0], focus: 'off', focusR: 130, curtain: false, black: false,
+  edge: 0, edgeTo: 0,               // telón: hasta dónde está descubierta la página (px de página)
+  trail: [], ink: [], revealed: new Set(),   // estela del láser (px de pantalla), tinta temporal (px de página), cintas destapadas aquí
+  ptr: null, spot: null, hover: false, lastMove: 0, down: null, pens: new Set(), lastTap: null,
+  fit: { s: 1, ox: 0, oy: 0, k: 1, W: 0, H: 0 }, raf: 0, timers: {}, h: null, ownFull: false, stopsKey: '', stopsVal: null,
+
+  // ---------- Entrada desde el menú «⋯» y el atajo ----------
+  menuHtml() { return `<button data-act="present">${prIcon('present')} Presentar <span class="kbd-hint">${onbKey('present')}</span></button>`; },
+  menuAct(act) { if (act !== 'present') return false; this.start(); return true; },
+
+  page() { return this.nb.pages[this.index]; },
+  /** Pantalla táctil o de móvil: la ayuda habla de tocar y deslizar, no de teclas. */
+  touchy: () => matchMedia('(pointer: coarse)').matches || innerWidth < 500,
+  toPage(x, y) { const f = this.fit; return [(x - f.ox) / f.s, (y - f.oy) / f.s]; },
+
+  start(nb = activeNb(), index = null) {
+    if (this.on || !nb?.pages.length) return;
+    if (index == null) { if (S.view === 'editor' && nb === activeNb()) updateCurrentPage(); index = nb === activeNb() ? currentPageIndex : 0; }
+    closePopover();
+    document.activeElement?.blur?.();
+    Object.assign(this, { on: true, nb, index: Math.max(0, Math.min(nb.pages.length - 1, index)), trail: [], ink: [], down: null, ptr: null, spot: null, black: false, lastTap: null, stopsKey: '' });
+    this.revealed = new Set(); this.pens = new Set();
+    this.focusR = Math.round(Math.max(70, Math.min(150, Math.min(innerWidth, innerHeight) * 0.17)));   // foco a la medida de la pantalla
+    this.build();
+    this.h = {
+      key: (e) => this.onKey(e), down: (e) => this.onDown(e), move: (e) => this.onMove(e), up: (e) => this.onUp(e),
+      wheel: (e) => this.onWheel(e), click: (e) => this.onClick(e), resize: () => this.onResize(), fs: () => this.onFs(),
+      lost: () => { this.cancelDown(); this.pens.clear(); },   // pestaña oculta a mitad de un trazo: el pointerup no llegará
+    };
+    addEventListener('keydown', this.h.key, true);
+    addEventListener('resize', this.h.resize);
+    addEventListener('blur', this.h.lost);
+    document.addEventListener('visibilitychange', this.h.lost);
+    document.addEventListener('fullscreenchange', this.h.fs);
+    document.addEventListener('webkitfullscreenchange', this.h.fs);
+    const el = this.el;
+    el.addEventListener('pointerdown', this.h.down);
+    el.addEventListener('pointermove', this.h.move);
+    el.addEventListener('pointerup', this.h.up);
+    el.addEventListener('pointercancel', this.h.up);
+    el.addEventListener('wheel', this.h.wheel, { passive: false });
+    el.addEventListener('click', this.h.click);
+    el.addEventListener('contextmenu', (e) => e.preventDefault());
+    this.fullscreen(true);
+    this.sizeFx();
+    this.show(this.index, 0);
+    this.updateBar();
+    this.showChrome();
+    this.hint();
+  },
+
+  exit() {
+    if (!this.on) return;
+    this.on = false;
+    cancelAnimationFrame(this.raf); this.raf = 0;
+    for (const t of Object.values(this.timers)) clearTimeout(t);
+    this.timers = {};
+    removeEventListener('keydown', this.h.key, true);
+    removeEventListener('resize', this.h.resize);
+    removeEventListener('blur', this.h.lost);
+    document.removeEventListener('visibilitychange', this.h.lost);
+    document.removeEventListener('fullscreenchange', this.h.fs);
+    document.removeEventListener('webkitfullscreenchange', this.h.fs);
+    this.release(this.pageEl);
+    if (this.fx) this.fx.width = this.fx.height = 0;
+    this.el.remove();
+    Object.assign(this, { el: null, pageEl: null, inkCanvas: null, fx: null, fxCtx: null, trail: [], ink: [], down: null });
+    this.fullscreen(false);
+    // El editor se queda en la página que se estaba presentando.
+    const page = this.nb.pages[this.index];
+    if (S.view === 'editor' && activeNb() === this.nb && page) scrollToPage(page.id, false);
+  },
+
+  build() {
+    const el = document.createElement('div');
+    el.className = 'present';
+    el.setAttribute('role', 'dialog'); el.setAttribute('aria-modal', 'true'); el.setAttribute('aria-label', 'Presentación');
+    el.tabIndex = -1;
+    const touchy = this.touchy();
+    el.innerHTML = `<div class="pr-slot"></div><canvas class="pr-fx" aria-hidden="true"></canvas><div class="pr-black"></div>
+      <div class="pr-num" aria-hidden="true"></div>
+      <div class="pr-hint" aria-hidden="true">${touchy
+        ? '<span>Desliza para pasar de página</span><span>Toca dos veces para borrar la tinta</span><span>Toca en el centro para ver los botones</span>'
+        : '<span><kbd>←</kbd><kbd>→</kbd>Pasar página</span><span><kbd>L</kbd>Láser</span><span><kbd>D</kbd>Tinta</span><span><kbd>F</kbd>Foco</span><span><kbd>T</kbd>Telón</span><span><kbd>B</kbd>Pantalla en negro</span><span><kbd>Esc</kbd>Salir</span>'}</div>
+      <div class="pr-colors" role="group" aria-label="Color de la tinta">${PRESENT_INK.map((c) => `<button data-pr="color" data-v="${c}" style="--c:${c}" aria-label="Color ${c}"></button>`).join('')}</div>
+      <div class="pr-bar" role="toolbar" aria-label="Herramientas de presentación">
+        <button class="pr-nav" data-pr="prev" aria-label="Página anterior" title="Página anterior">${icon('back')}</button>
+        <span class="pr-count"></span>
+        <button class="pr-nav" data-pr="next" aria-label="Página siguiente" title="Página siguiente">${icon('chevronRight')}</button>
+        <span class="pr-sep"></span>
+        <button data-pr="laser" aria-label="Puntero láser" title="Puntero láser (L)">${prIcon('laser')}</button>
+        <button data-pr="ink" aria-label="Tinta de presentación" title="Tinta de presentación: se borra sola (D)">${prIcon('ink')}<span class="pr-dot"></span></button>
+        <button data-pr="focus" aria-label="Foco" title="Foco: ilumina solo alrededor del puntero (F)">${prIcon('focus')}</button>
+        <button data-pr="curtain" aria-label="Telón" title="Telón: tapa la página y descúbrela paso a paso (T)">${prIcon('curtain')}</button>
+        <button data-pr="clear" aria-label="Borrar la tinta" title="Borrar la tinta (C o doble toque)">${icon('eraser')}</button>
+      </div>
+      <button class="pr-exit" data-pr="exit" aria-label="Salir de la presentación" title="Salir de la presentación (Esc)">${icon('close')}<span>Salir</span></button>`;
+    document.body.appendChild(el);
+    this.el = el;
+    this.slot = el.querySelector('.pr-slot');
+    this.fx = el.querySelector('.pr-fx');
+    this.fxCtx = this.fx.getContext('2d');
+    el.focus({ preventScroll: true });
+  },
+
+  // ---------- Página ----------
+  measure(page) {
+    const W = this.el.clientWidth || innerWidth, H = this.el.clientHeight || innerHeight, pad = W < 600 ? 8 : 28;
+    const s = Math.max(0.05, Math.min((W - 2 * pad) / page.w, (H - 2 * pad) / page.h));
+    return { s, ox: (W - page.w * s) / 2, oy: (H - page.h * s) / 2, k: Math.min(3, s * Math.min(devicePixelRatio || 1, 2)), W, H };
+  },
+  /** Copia estática de la página (papel, fondo, elementos y tinta) con los lienzos a la escala de la pantalla. */
+  buildPage(page, k) {
+    const el = document.createElement('div');
+    el.className = 'pr-page';
+    el.dataset.page = page.id;
+    el.style.cssText = `width:${page.w}px;height:${page.h}px;background:${PAPERS[page.paper]?.fill || '#fff'}`;
+    const layer = () => {
+      const c = document.createElement('canvas');
+      c.className = 'pr-layer'; c.width = Math.max(1, Math.round(page.w * k)); c.height = Math.max(1, Math.round(page.h * k)); c._k = k;
+      el.appendChild(c);
+      const ctx = c.getContext('2d'); ctx.setTransform(k, 0, 0, k, 0, 0);
+      return [c, ctx];
+    };
+    const [, pctx] = layer();
+    drawPaper(pctx, page);
+    if (page.bg || PdfDocs.usable(page)) {
+      const img = document.createElement('img');
+      img.className = 'pr-layer'; img.alt = ''; img.draggable = false;
+      if (page.bg) img.src = page.bg;
+      el.appendChild(img);
+      // Con el PDF original, el fondo nítido a la escala de la pantalla (mientras, el JPEG guardado).
+      // Se espera un poco: pasando páginas deprisa no se pinta ninguna de las que solo se ven de paso.
+      clearTimeout(this.timers.pdf);
+      if (PdfDocs.usable(page)) this.timers.pdf = setTimeout(() => { if (this.on && this.pageEl === el) PdfDocs.image(page, k).then((url) => { if (url && this.pageEl === el) img.src = url; }); }, 150);
+    }
+    for (const it of page.items) {
+      if (['link', 'comment', 'tape', 'voice'].includes(it.type)) continue;   // comentarios y enlaces son de quien estudia
+      const d = staticItem(it, page);
+      d.dataset.prId = it.id;
+      el.appendChild(d);
+    }
+    [this.inkCanvas] = layer();
+    return el;
+  },
+  /** Tinta de la libreta y cintas tapadas (las destapadas en la presentación, no). */
+  paintInk() {
+    const c = this.inkCanvas, page = this.page();
+    if (!c) return;
+    const ctx = c.getContext('2d');
+    ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, c.width, c.height); ctx.setTransform(c._k, 0, 0, c._k, 0, 0);
+    for (const s of page.strokes) drawStroke(ctx, s, page.paper);
+    for (const it of page.items) if (it.type === 'tape' && !it.open && !this.revealed.has(it.id)) Tape.draw(ctx, it);
+  },
+  release(el) { el?.querySelectorAll('canvas').forEach((c) => { c.width = c.height = 0; }); },
+  mount(page, dir) {
+    const f = this.fit = this.measure(page);
+    const el = this.buildPage(page, f.k);
+    el.style.transform = `translate(${f.ox}px, ${f.oy}px) scale(${f.s})`;
+    this.release(this.pageEl);
+    this.slot.replaceChildren(el);
+    this.pageEl = el;
+    this.paintInk();
+    this.slot.classList.remove('in-next', 'in-prev');
+    if (dir && !reduceMotion()) { void this.slot.offsetWidth; this.slot.classList.add(dir > 0 ? 'in-next' : 'in-prev'); }
+  },
+  show(i, dir = 0) {
+    const n = this.nb.pages.length;
+    this.index = Math.max(0, Math.min(n - 1, i));
+    const page = this.page();
+    this.ink = []; this.trail = []; this.revealed.clear(); this.down = null;
+    this.edge = this.edgeTo = this.curtain && dir < 0 ? page.h : 0;   // al volver atrás, la página ya descubierta
+    this.mount(page, dir);
+    this.updateBar(); this.flashNum(); this.kick();
+  },
+  /** Adelante: con el telón, descubre el párrafo siguiente; si ya está todo a la vista, página siguiente. */
+  forward() {
+    if (this.curtain && this.edgeTo < this.page().h - 0.5) return this.reveal(1);
+    if (this.index < this.nb.pages.length - 1) this.show(this.index + 1, 1); else this.flashNum();
+  },
+  back() {
+    if (this.curtain && this.edgeTo > 0.5) return this.reveal(-1);
+    if (this.index > 0) this.show(this.index - 1, -1); else this.flashNum();
+  },
+  onResize() {
+    if (!this.on || this.timers.resize) return;
+    this.timers.resize = setTimeout(() => {
+      this.timers.resize = 0;
+      if (!this.on) return;
+      const page = this.page(), f = this.measure(page);
+      if (Math.abs(f.k - this.fit.k) / this.fit.k > 0.15) this.mount(page, 0);   // escala muy distinta: se repinta nítida
+      else { this.fit = { ...f, k: this.fit.k }; this.pageEl.style.transform = `translate(${f.ox}px, ${f.oy}px) scale(${f.s})`; }
+      this.sizeFx(); this.kick();
+    }, 80);
+  },
+  sizeFx() {
+    const r = this.fxDpr = Math.min(devicePixelRatio || 1, 2), W = this.el.clientWidth || innerWidth, H = this.el.clientHeight || innerHeight;
+    this.fx.width = Math.round(W * r); this.fx.height = Math.round(H * r);
+  },
+
+  // ---------- Telón: paradas por párrafos (tinta, cuadros de texto, post-its, imágenes y líneas del PDF) ----------
+  stops(page) {
+    const key = `${page.id}:${page._v || 0}`;
+    if (this.stopsKey === key) return this.stopsVal;
+    const iv = [];
+    for (const s of page.strokes) {
+      let t = Infinity, b = -Infinity;
+      for (const p of s.points) { if (p[1] < t) t = p[1]; if (p[1] > b) b = p[1]; }
+      const w = (s.width || 2) / 2;
+      if (t <= b) iv.push([t - w, b + w]);
+    }
+    for (const it of page.items) {
+      if (['comment', 'link'].includes(it.type)) continue;
+      const h = it.h || this.pageEl?.querySelector(`[data-pr-id="${it.id}"]`)?.offsetHeight || 0;
+      if (h) iv.push([it.y, it.y + h]);
+    }
+    for (const r of page.pdfRuns || []) if (r.h) iv.push([r.y, r.y + r.h]);
+    iv.sort((a, b) => a[0] - b[0]);
+    const merge = (list, gap) => {
+      const out = [];
+      for (const [t, b] of list) { const last = out.at(-1); if (last && t <= last[1] + gap) last[1] = Math.max(last[1], b); else out.push([t, b]); }
+      return out;
+    };
+    const lines = merge(iv, 6);
+    this.stopsKey = key;
+    return (this.stopsVal = { lines, paras: merge(lines, 18) });
+  },
+  nextStop(page, e) {
+    const { lines, paras } = this.stops(page);
+    if (!paras.length) return Math.min(page.h, e + page.h / 5);   // sin nada que medir (PDF escaneado): por quintos
+    const para = paras.find(([, b]) => b + 10 > e + 4);
+    if (!para) return page.h;
+    let stop = para[1];
+    if (stop - e > page.h * 0.3) { const ln = lines.find(([, b]) => b + 10 > e + 4); if (ln) stop = ln[1]; }   // párrafo enorme: por renglones
+    return Math.min(page.h, stop + 10);
+  },
+  prevStop(page, e) {
+    const { paras } = this.stops(page);
+    if (!paras.length) return Math.max(0, e - page.h / 5);
+    let best = 0;
+    for (const [, b] of paras) if (b + 10 < e - 4) best = b + 10;
+    return best;
+  },
+  reveal(dir) {
+    const page = this.page();
+    this.edgeTo = dir > 0 ? this.nextStop(page, this.edgeTo) : this.prevStop(page, this.edgeTo);
+    if (reduceMotion()) this.edge = this.edgeTo;
+    this.updateBar(); this.kick();
+  },
+
+  // ---------- Herramientas ----------
+  setTool(t) { this.tool = this.tool === t ? null : t; this.updateBar(); this.kick(); },
+  cycleFocus() {
+    this.focus = { off: 'circle', circle: 'rect', rect: 'off' }[this.focus];
+    this.spot = null;
+    this.updateBar(); this.kick();
+  },
+  focusSize(f) { this.focusR = Math.max(50, Math.min(420, this.focusR * f)); this.kick(); },
+  toggleCurtain() {
+    this.curtain = !this.curtain;
+    this.edge = this.edgeTo = 0;
+    this.updateBar(); this.kick();
+  },
+  toggleBlack() { this.black = !this.black; this.el.classList.toggle('black', this.black); },
+  clearInk() { this.ink = []; this.kick(); },
+  /** Toque en una cinta tapada: se destapa solo aquí (la libreta no cambia); otro toque la vuelve a tapar. */
+  tapTape(px, py) {
+    const t = this.page().items.find((it) => it.type === 'tape' && !it.open && px >= it.x && px <= it.x + it.w && py >= it.y && py <= it.y + it.h);
+    if (!t) return false;
+    if (this.revealed.has(t.id)) this.revealed.delete(t.id); else this.revealed.add(t.id);
+    this.paintInk();
+    return true;
+  },
+
+  // ---------- Interfaz: barra, número de página y ayuda ----------
+  updateBar() {
+    const el = this.el, q = (k) => el.querySelector(`[data-pr="${k}"]`), n = this.nb.pages.length;
+    el.querySelector('.pr-count').textContent = `${this.index + 1} / ${n}`;
+    q('prev').disabled = this.index === 0 && !(this.curtain && this.edgeTo > 0.5);
+    q('next').disabled = this.index >= n - 1 && !(this.curtain && this.edgeTo < this.page().h - 0.5);
+    q('laser').setAttribute('aria-pressed', String(this.tool === 'laser'));
+    q('ink').setAttribute('aria-pressed', String(this.tool === 'ink'));
+    q('ink').style.setProperty('--c', this.color);
+    const fb = q('focus');
+    fb.setAttribute('aria-pressed', String(this.focus !== 'off'));
+    fb.innerHTML = prIcon(this.focus === 'rect' ? 'focusRect' : 'focus');
+    const fl = { off: 'Foco: ilumina solo alrededor del puntero (F)', circle: 'Foco en círculo (F: cambiar a rectángulo)', rect: 'Foco en rectángulo (F: quitar el foco)' }[this.focus];
+    fb.title = fl; fb.setAttribute('aria-label', fl);
+    q('curtain').setAttribute('aria-pressed', String(this.curtain));
+    el.querySelectorAll('[data-pr="color"]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.v === this.color)));
+    el.classList.toggle('ink-on', this.tool === 'ink');
+    el.classList.toggle('laser-on', this.tool === 'laser');
+  },
+  showChrome() {
+    if (!this.on) return;
+    this.el.classList.add('chrome');
+    clearTimeout(this.timers.chrome);
+    this.timers.chrome = setTimeout(() => {
+      if (this.el?.querySelector('.pr-bar:hover, .pr-exit:hover, .pr-colors:hover, .pr-bar :focus-visible')) return this.showChrome();
+      this.el?.classList.remove('chrome');
+    }, 2600);
+  },
+  toggleChrome() { if (this.el.classList.contains('chrome')) { clearTimeout(this.timers.chrome); this.el.classList.remove('chrome'); } else this.showChrome(); },
+  flashNum() {
+    const num = this.el.querySelector('.pr-num');
+    num.textContent = `${this.index + 1} / ${this.nb.pages.length}`;
+    num.classList.add('show');
+    clearTimeout(this.timers.num);
+    this.timers.num = setTimeout(() => num.classList.remove('show'), 1600);
+  },
+  hint() {
+    const h = this.el.querySelector('.pr-hint');
+    h.classList.add('show');
+    this.timers.hint = setTimeout(() => h.classList.remove('show'), 4500);
+  },
+
+  // ---------- Pantalla completa del navegador ----------
+  fullscreen(on) {
+    const d = document, el = d.documentElement, full = () => d.fullscreenElement || d.webkitFullscreenElement;
+    if (on) {
+      if (full()) return;
+      const req = el.requestFullscreen || el.webkitRequestFullscreen;
+      if (!req) return;   // Safari del iPhone: la capa ya ocupa toda la ventana
+      // Si se sale de la presentación mientras el navegador aún la estaba concediendo, se deshace al llegar.
+      try { this.ownFull = true; const p = req.call(el); if (p?.then) p.then(() => { if (!this.on) { this.ownFull = true; this.fullscreen(false); } }, () => { this.ownFull = false; }); } catch (e) { this.ownFull = false; }
+    } else if (this.ownFull) {
+      this.ownFull = false;
+      if (full()) try { const p = (d.exitFullscreen || d.webkitExitFullscreen).call(d); if (p?.catch) p.catch(() => {}); } catch (e) { /* ya fuera */ }
+    }
+  },
+  /** Esc en la pantalla completa del navegador la cierra él (sin darnos la tecla): también se sale de la presentación. */
+  onFs() {
+    const full = document.fullscreenElement || document.webkitFullscreenElement;
+    if (this.on && this.ownFull && !full) { this.ownFull = false; this.exit(); }
+  },
+
+  // ---------- Teclado ----------
+  onKey(e) {
+    if (!this.on) return;
+    e.stopPropagation();   // nada del editor (atajos, herramientas, deshacer) mientras se presenta
+    if (Shortcuts.match(e)?.id === 'present') { e.preventDefault(); return this.exit(); }
+    if (e.metaKey || e.ctrlKey || e.altKey) return;   // combinaciones del navegador (recargar, pantalla completa…)
+    const k = e.key;
+    if ((k === ' ' || k === 'Enter') && e.target.closest?.('.present button')) return;   // el botón con el foco
+    let done = true;
+    if (k === 'Escape') this.exit();
+    else if (['ArrowRight', 'ArrowDown', 'PageDown', ' ', 'Enter'].includes(k)) this.forward();
+    else if (['ArrowLeft', 'ArrowUp', 'PageUp', 'Backspace'].includes(k)) this.back();
+    else if (k === 'Home') this.show(0, 0);
+    else if (k === 'End') this.show(this.nb.pages.length - 1, 0);
+    else {
+      switch (k.toLowerCase()) {
+        case 'l': this.setTool('laser'); break;
+        case 'd': this.setTool('ink'); break;
+        case 'c': case 'delete': this.clearInk(); break;
+        case 'f': this.cycleFocus(); break;
+        case 't': this.toggleCurtain(); break;
+        case 'b': case '.': this.toggleBlack(); break;
+        case '+': case '=': this.focusSize(1.15); break;
+        case '-': this.focusSize(1 / 1.15); break;
+        default: done = false;
+      }
+    }
+    if (done) e.preventDefault();
+  },
+  onWheel(e) {
+    e.preventDefault();
+    if (this.focus !== 'off') return this.focusSize(e.deltaY < 0 ? 1.08 : 1 / 1.08);   // la rueda cambia el tamaño del foco
+    const now = performance.now();
+    if (Math.abs(e.deltaY) < 25 || now - (this.wheelAt || 0) < 450) return;
+    this.wheelAt = now;
+    if (e.deltaY > 0) this.forward(); else this.back();
+  },
+  onClick(e) {
+    const b = e.target.closest('[data-pr]');
+    if (!b || b.disabled) return;
+    if (e.detail > 0) b.blur();   // con el ratón, el espacio sigue pasando página (no vuelve a pulsar el botón)
+    const act = b.dataset.pr;
+    if (act === 'prev') this.back();
+    else if (act === 'next') this.forward();
+    else if (act === 'laser' || act === 'ink') this.setTool(act);
+    else if (act === 'focus') this.cycleFocus();
+    else if (act === 'curtain') this.toggleCurtain();
+    else if (act === 'clear') this.clearInk();
+    else if (act === 'exit') this.exit();
+    else if (act === 'color') { this.color = b.dataset.v; this.tool = 'ink'; this.updateBar(); }
+    if (this.on) this.showChrome();
+  },
+
+  // ---------- Puntero: láser, tinta, telón, pasar páginas ----------
+  onDown(e) {
+    if (e.target.closest('.pr-bar, .pr-exit, .pr-colors')) return;
+    if (e.pointerType === 'pen') { this.pens.clear(); this.pens.add(e.pointerId); }   // solo hay un lápiz: un pointerup perdido no lo deja «apoyado»
+    else if (e.pointerType === 'touch' && this.pens.size) return;   // palma con el lápiz apoyado
+    if (this.down) {
+      if (this.down.type === 'touch' && e.pointerType === 'touch') this.cancelDown();   // dos dedos: no es un trazo
+      return;
+    }
+    e.preventDefault();
+    try { this.el.setPointerCapture(e.pointerId); } catch (err) { /* evento simulado */ }
+    const now = performance.now(), x = e.clientX, y = e.clientY, page = this.page(), [px, py] = this.toPage(x, y);
+    const fingerOnly = e.pointerType === 'touch' && PenInput.seen && !PenInput.finger;   // modo lápiz: el dedo pasa páginas
+    let mode = this.tool || 'swipe';
+    if (this.curtain && px >= 0 && px <= page.w && py >= this.edge - 30 / this.fit.s && this.edge < page.h - 0.5) mode = 'curtain';
+    else if (fingerOnly) mode = 'swipe';
+    this.down = { id: e.pointerId, type: e.pointerType, x0: x, y0: y, t0: now, mode, moved: false, stroke: null, off: py - this.edge };
+    this.ptr = { x, y }; this.hover = e.pointerType !== 'touch'; this.lastMove = now;
+    if (mode === 'ink') { this.down.stroke = { color: this.color, pts: [[px, py]], done: 0 }; this.ink.push(this.down.stroke); }
+    if (mode === 'laser') this.trail.push({ x, y, t: now, brk: true });
+    this.kick();
+  },
+  onMove(e) {
+    const d = this.down;
+    if (d && d.id !== e.pointerId) return;
+    const overUi = !d && e.target.closest?.('.pr-bar, .pr-exit, .pr-colors');
+    if (e.pointerType === 'mouse' && !d && (overUi || e.clientY > this.fit.H - 130 || e.clientY < 80)) this.showChrome();   // cerca de los botones
+    if (overUi || (!d && e.pointerType === 'touch')) return;
+    const now = performance.now(), evs = e.getCoalescedEvents?.() || [], list = evs.length ? evs : [e];
+    for (const ev of list) {
+      const x = ev.clientX, y = ev.clientY;
+      if (!d) { if (this.tool === 'laser') this.addTrail(x, y, now); continue; }   // ratón o lápiz sin apoyar: el láser sigue al puntero
+      if (!d.moved && Math.hypot(x - d.x0, y - d.y0) > 8) d.moved = true;
+      if (d.mode === 'ink') {
+        const [px, py] = this.toPage(x, y), last = d.stroke.pts.at(-1);
+        if (Math.hypot(px - last[0], py - last[1]) * this.fit.s > 1.2) d.stroke.pts.push([px, py]);
+      } else if (d.mode === 'laser') this.addTrail(x, y, now);
+      else if (d.mode === 'curtain') this.edge = this.edgeTo = Math.max(0, Math.min(this.page().h, this.toPage(x, y)[1] - d.off));
+    }
+    this.ptr = { x: e.clientX, y: e.clientY }; this.hover = e.pointerType !== 'touch'; this.lastMove = now;
+    this.kick();
+  },
+  addTrail(x, y, t) {
+    const last = this.trail.at(-1);
+    if (last && Math.hypot(x - last.x, y - last.y) < 1.5) { last.t = t; return; }
+    this.trail.push({ x, y, t });
+    if (this.trail.length > 800) this.trail.splice(0, this.trail.length - 800);
+  },
+  cancelDown() {
+    const d = this.down;
+    if (d?.stroke) this.ink.splice(this.ink.indexOf(d.stroke), 1);
+    this.down = null; this.kick();
+  },
+  onUp(e) {
+    if (e.pointerType === 'pen') this.pens.delete(e.pointerId);
+    const d = this.down;
+    if (!d || d.id !== e.pointerId) return;
+    if (e.type === 'pointercancel') return this.cancelDown();
+    this.down = null;
+    const now = performance.now(), dx = e.clientX - d.x0, dy = e.clientY - d.y0, dt = now - d.t0;
+    if (d.stroke) d.stroke.done = now;
+    // Deslizar el dedo a un lado pasa de página (rápido si dibuja; a cualquier velocidad si solo pasa páginas).
+    const swipe = d.mode === 'swipe', flick = d.mode !== 'curtain' && (d.type === 'touch' || swipe)
+      && Math.abs(dx) > (swipe ? 50 : 70) && Math.abs(dx) > 1.6 * Math.abs(dy) && (swipe || dt < 300);
+    if (flick) {
+      if (d.stroke) this.ink.splice(this.ink.indexOf(d.stroke), 1);
+      this.trail = [];
+      return dx < 0 ? this.forward() : this.back();
+    }
+    if (!d.moved && dt < 500) {
+      if (d.stroke) this.ink.splice(this.ink.indexOf(d.stroke), 1);   // un toque no es tinta
+      this.tap(e.clientX, e.clientY, d);
+    }
+    this.kick();
+  },
+  tap(x, y, d) {
+    const [px, py] = this.toPage(x, y), zone = this.fit.W * 0.16;
+    if (this.tapTape(px, py)) return;
+    if (x < zone) return this.back();
+    if (x > this.fit.W - zone) return this.forward();
+    if (d.mode === 'curtain') return this.reveal(1);   // tocar el telón descubre el párrafo siguiente
+    const now = performance.now(), lt = this.lastTap;
+    if (lt && now - lt.t < 330 && Math.hypot(x - lt.x, y - lt.y) < 40) {   // doble toque: borra la tinta
+      this.lastTap = null; clearTimeout(this.timers.tap);
+      return this.clearInk();
+    }
+    this.lastTap = { x, y, t: now };
+    if (d.type === 'touch') { clearTimeout(this.timers.tap); this.timers.tap = setTimeout(() => this.on && this.toggleChrome(), 330); }
+  },
+
+  // ---------- Capa superpuesta: un lienzo, un fotograma solo cuando algo cambia ----------
+  kick() { if (this.on && !this.raf) this.raf = requestAnimationFrame(() => this.frame()); },
+  frame() {
+    this.raf = 0;
+    if (!this.on) return;
+    const ctx = this.fxCtx, f = this.fit, r = this.fxDpr, now = performance.now(), page = this.page();
+    ctx.setTransform(r, 0, 0, r, 0, 0);
+    ctx.clearRect(0, 0, f.W, f.H);
+    let busy = false, wake = Infinity;
+    // 1. Tinta de presentación (px de página: sigue a la página si cambia el tamaño de la ventana).
+    if (this.ink.length) {
+      this.ink = this.ink.filter((st) => !st.done || now - st.done < this.INK_MS);
+      ctx.save();
+      ctx.translate(f.ox, f.oy); ctx.scale(f.s, f.s);
+      ctx.lineCap = ctx.lineJoin = 'round'; ctx.lineWidth = 4.5;
+      for (const st of this.ink) {
+        const left = st.done ? this.INK_MS - (now - st.done) : Infinity;
+        if (left <= this.INK_FADE) busy = true; else if (st.done) wake = Math.min(wake, left - this.INK_FADE);
+        ctx.globalAlpha = Math.max(0, Math.min(1, left / this.INK_FADE));
+        ctx.strokeStyle = st.color;
+        this.path(ctx, st.pts); ctx.stroke();
+      }
+      ctx.restore();
+    }
+    // 2. Telón.
+    if (this.curtain) {
+      if (Math.abs(this.edgeTo - this.edge) > 0.5) { this.edge += (this.edgeTo - this.edge) * 0.25; busy = true; } else this.edge = this.edgeTo;
+      const x = f.ox, w = page.w * f.s, y = f.oy + this.edge * f.s, b = f.oy + page.h * f.s;
+      if (y < b - 0.5) {
+        ctx.fillStyle = '#24262B'; ctx.fillRect(x, y, w, b - y);
+        const g = ctx.createLinearGradient(0, y, 0, y + 16);
+        g.addColorStop(0, 'rgba(255,255,255,.10)'); g.addColorStop(1, 'rgba(255,255,255,0)');
+        ctx.fillStyle = g; ctx.fillRect(x, y, w, Math.min(16, b - y));
+        ctx.fillStyle = 'rgba(255,255,255,.45)'; ctx.beginPath(); ctx.roundRect(x + w / 2 - 22, y + 8, 44, 5, 2.5); ctx.fill();
+        if (this.edge < 1 && b - y > 90) {
+          ctx.fillStyle = 'rgba(255,255,255,.55)'; ctx.font = `600 ${Math.max(13, Math.min(17, w / 30))}px ${getComputedStyle(this.el).fontFamily}`;
+          ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+          ctx.fillText(tr(this.touchy() ? 'Arrastra hacia abajo o toca para descubrir' : 'Arrastra hacia abajo o pulsa ↓ para descubrir'), x + w / 2, y + Math.min(b - y, f.H) / 2, w - 32);
+          ctx.textAlign = 'start';
+        }
+      }
+    }
+    // 3. Foco: todo oscuro salvo alrededor del puntero (se desliza suave hasta él).
+    if (this.focus !== 'off') {
+      const t = this.ptr || { x: f.W / 2, y: f.H / 2 };
+      if (!this.spot) this.spot = { ...t };
+      const k = reduceMotion() ? 1 : 0.3;
+      this.spot.x += (t.x - this.spot.x) * k; this.spot.y += (t.y - this.spot.y) * k;
+      if (Math.hypot(t.x - this.spot.x, t.y - this.spot.y) > 0.5) busy = true; else this.spot = { ...t };
+      const R = this.focusR, { x, y } = this.spot, hole = () => {
+        if (this.focus === 'circle') { ctx.moveTo(x + R, y); ctx.arc(x, y, R, 0, Math.PI * 2); } else ctx.roundRect(x - R * 1.6, y - R * 0.6, R * 3.2, R * 1.2, 18);
+      };
+      ctx.beginPath(); ctx.rect(0, 0, f.W, f.H); hole();
+      ctx.fillStyle = 'rgba(0,0,0,.72)'; ctx.fill('evenodd');
+      ctx.beginPath(); hole(); ctx.strokeStyle = 'rgba(255,255,255,.22)'; ctx.lineWidth = 2; ctx.stroke();
+    }
+    // 4. Láser: estela que adelgaza y se apaga en LASER_MS, con un punto brillante en la punta.
+    const T = this.LASER_MS, trail = this.trail;
+    while (trail.length && now - trail[0].t > T) trail.shift();
+    if (trail.length > 1) { busy = true; this.drawTrail(ctx, trail, now); }
+    if (this.tool === 'laser' && this.ptr) {
+      const holding = this.down?.mode === 'laser', age = now - this.lastMove;
+      const a = holding ? 1 : this.hover ? Math.max(0, Math.min(1, (1800 - age) / 400)) : 0;
+      if (a > 0) {
+        if (a < 1) busy = true; else if (!holding) wake = Math.min(wake, 1400 - age);
+        const { x, y } = this.ptr, g = ctx.createRadialGradient(x, y, 0, x, y, 17);
+        g.addColorStop(0, `rgba(255,244,240,${a})`); g.addColorStop(0.22, `rgba(255,59,48,${a})`); g.addColorStop(1, 'rgba(255,59,48,0)');
+        ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, 17, 0, Math.PI * 2); ctx.fill();
+      }
+    }
+    if (busy) this.kick();
+    else if (wake < Infinity) { clearTimeout(this.timers.wake); this.timers.wake = setTimeout(() => this.kick(), Math.max(16, wake)); }
+  },
+  drawTrail(ctx, trail, now) {
+    const T = this.LASER_MS;
+    ctx.lineCap = ctx.lineJoin = 'round';
+    for (const [w, rgb, al] of [[20, '255,45,35', 0.16], [7.5, '255,59,48', 0.9], [2.4, '255,238,234', 0.95]]) {
+      for (let i = 1; i < trail.length; i++) {
+        const p = trail[i], q = trail[i - 1];
+        if (p.brk) continue;
+        const life = 1 - (now - p.t) / T;
+        if (life <= 0) continue;
+        ctx.lineWidth = w * (0.3 + 0.7 * life);
+        ctx.strokeStyle = `rgba(${rgb},${(al * life).toFixed(3)})`;
+        ctx.beginPath(); ctx.moveTo(q.x, q.y); ctx.lineTo(p.x, p.y); ctx.stroke();
+      }
+    }
+  },
+  path(ctx, pts) {
+    ctx.beginPath();
+    ctx.moveTo(pts[0][0], pts[0][1]);
+    if (pts.length === 1) { ctx.lineTo(pts[0][0] + 0.01, pts[0][1]); return; }
+    for (let i = 1; i < pts.length - 1; i++) ctx.quadraticCurveTo(pts[i][0], pts[i][1], (pts[i][0] + pts[i + 1][0]) / 2, (pts[i][1] + pts[i + 1][1]) / 2);
+    const l = pts.at(-1);
+    ctx.lineTo(l[0], l[1]);
+  },
+};
+
+// =============================================================================
 // Paleta flotante (pensada para el lápiz en el iPad): las herramientas a mano sin subir hasta la barra.
 // Dos modos (botón de la paleta en la barra, junto a Deshacer; ver paletteMenu en editor.js):
 //  · «Fija»: cápsula con bolígrafo, subrayador, goma, lazo, deshacer, rehacer, colores y grosor. Se arrastra
@@ -15751,12 +18099,14 @@ const SHORTCUT_ACTIONS = [
   ['bookmark', 'Páginas', 'Marcador de la página', 'editor', [K('d', { mod: true })]],
   ['share', 'Páginas', 'Compartir', 'editor', [K('s', { mod: true, shift: true })]],
   ['toggleSidebar', 'Páginas', 'Mostrar u ocultar la barra lateral', 'editor', [K('s', { mod: true, alt: true })]],
+  ['notebookMap', 'Páginas', 'Mapa de la libreta', 'editor', [K('m')]],
   ['record', 'Otros', 'Grabar audio', 'editor', [K('r', { alt: true })]],
   ['toggleVoiceNotes', 'Otros', 'Mostrar u ocultar notas de voz', 'editor', [K('r', { alt: true, shift: true })]],
   ['readMode', 'Otros', 'Modo lectura', 'editor', [K('l', { mod: true, shift: true })]],
   ['timer', 'Otros', 'Temporizador de estudio', 'editor', [K('t', { alt: true })]],
   // En el Mac, ⌃⌘F como en todas las apps; en Windows, Ctrl+Mayús+F (F11 lo coge el navegador).
   ['fullscreen', 'Otros', 'Pantalla completa', 'both', [IS_MAC ? K('f', { mod: true, ctrl: true }) : K('f', { mod: true, shift: true })]],
+  ['present', 'Otros', 'Presentar', 'editor', [K('p', { mod: true, alt: true })]],   // ⌥⌘P, como en Keynote
   ['newNotebook', 'Otros', 'Nueva libreta', 'library', [K('n', { alt: true })]],
   ['shortcutsSettings', 'Otros', 'Atajos de teclado', 'both', [K('?')]],
 ];
@@ -15873,6 +18223,7 @@ const Shortcuts = {
       case 'bookmark': return $('#bm-btn')?.click();
       case 'share': return $('#share-btn')?.click();
       case 'toggleSidebar': return $('#side-btn')?.click();
+      case 'notebookMap': return NbMap.toggle();
       case 'timer':
         if (!Pomo.visible) { Pomo.visible = true; Pomo.changed(); }
         return $('#pomo-btn') && Pomo.openPanel($('#pomo-btn'));
@@ -15880,6 +18231,7 @@ const Shortcuts = {
       case 'toggleVoiceNotes': return Voice.setShown(!S.showVoiceNotes);
       case 'readMode': return setReading(!activeNb()?.reading);
       case 'fullscreen': return toggleFullscreen();
+      case 'present': return Present.start();
       case 'newNotebook': return newNotebookDialog();
       case 'shortcutsSettings': return shortcutsDialog();
       default: {
