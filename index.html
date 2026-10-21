@@ -524,6 +524,8 @@ html.pen-mode .ink { touch-action: pan-x pan-y; }
 .comment-panel.cp-empty .cp-ph { display: block; }
 .comment-panel .cp-date { padding: 0 12px 8px; margin-top: -2px; font-size: 11.5px; color: var(--muted); font-variant-numeric: tabular-nums; }
 .lasso-box { position: absolute; border: 1.5px dashed #007AFF; background: rgba(0, 122, 255, .06); cursor: move; border-radius: 4px; }
+/* Tiradores de una forma: el punto se ve de 16 px, pero con el dedo se coge en un círculo de 40 px (--z: zoom, la capa va ampliada). */
+@media (pointer: coarse) { .shape-handles [data-h]::before { content: ''; position: absolute; inset: calc(-8px / var(--z, 1)); border-radius: 50%; } }   /* 32 px para el dedo sin robar trazos al lápiz */
 .ink-on .layer.items { pointer-events: none; }
 .add-page { border: 2px dashed var(--line); background: transparent; color: var(--muted); border-radius: 10px; padding: 14px 22px; }
 .add-page:hover { color: var(--accent); border-color: var(--accent); }
@@ -10371,6 +10373,7 @@ const ShapeEdit = {
     const el = document.createElement('div');
     el.className = 'shape-handles';
     el.style.cssText = 'position:absolute;left:0;top:0;width:0;height:0;pointer-events:none';
+    el.style.setProperty('--z', S.zoom);   // para el círculo que se coge con el dedo (style.css)
     const line = stroke.shape.type === 'line';
     const kinds = line ? ['p0', 'p1'] : ['nw', 'n', 'ne', 'e', 'se', 's', 'sw', 'w'];
     const size = 16 / S.zoom, cursors = { nw: 'nwse', se: 'nwse', ne: 'nesw', sw: 'nesw', n: 'ns', s: 'ns', e: 'ew', w: 'ew' };
