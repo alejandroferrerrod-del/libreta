@@ -1837,13 +1837,14 @@ body.is-card-dragging .crumbs button { box-shadow: inset 0 0 0 1.5px color-mix(i
 .onb-arrow { display: inline-flex; } .onb-arrow svg { width: 18px; height: 18px; stroke-width: 2.4; }
 .onb-skip { position: absolute; top: 24px; right: 24px; z-index: 5; padding: 10px 18px; font-size: 15px; }
 /* Bienvenida */
-.onb-logo { width: 200px; height: 200px; margin: -24px 0 -30px; }   /* el icono de la app (dibujado en el lienzo con onbLogo) */
-.onb-logo canvas { width: 100%; height: 100%; display: block; }
-.onb-word { margin: 0; font: 900 64px/1 var(--rounded); display: flex; }
-.onb-word span { display: inline-block; background: linear-gradient(#fff, #CCBFFF); -webkit-background-clip: text; background-clip: text; color: transparent; animation: onb-letter .6s cubic-bezier(.3,1.5,.5,1) both; animation-delay: calc(1.1s + var(--i) * .07s); }
-@keyframes onb-letter { from { opacity: 0; transform: translateY(24px); filter: blur(6px); } }
-.onb-late { animation: onb-up .8s 1.8s ease-out both; margin-top: -8px; }
-.onb-late2 { animation: onb-pop .7s 2.4s cubic-bezier(.3,1.5,.5,1) both; }
+/* El logotipo del final de la película (onbLogoScene): el lienzo de 600 × 600 sobresale de su caja para que el halo no se corte. */
+.onb-logo { --k: 1; position: relative; width: calc(340px * var(--k)); height: calc(330px * var(--k)); margin: 0 0 4px; pointer-events: none; }
+.onb-logo canvas { position: absolute; left: 50%; top: calc(-214px * var(--k)); width: calc(600px * var(--k)); height: calc(600px * var(--k)); transform: translateX(-50%); display: block; }
+/* El lema aparece nítido desde el desenfoque, como en la película */
+.onb-motto { margin: 0; font: 600 24px/1.2 -apple-system, "SF Pro Display", system-ui, sans-serif; color: rgba(245,245,247,.82); animation: onb-motto .9s 2.25s ease-out both; }
+@keyframes onb-motto { from { opacity: 0; transform: translateY(10px); filter: blur(8px); } }
+.onb-late { animation: onb-up .8s 2.7s ease-out both; }
+.onb-late2 { animation: onb-pop .7s 3s cubic-bezier(.3,1.5,.5,1) both; }
 @keyframes onb-up { from { opacity: 0; transform: translateY(12px); } }
 @keyframes onb-pop { from { opacity: 0; transform: scale(.9); } }
 /* Nombre */
@@ -1993,7 +1994,7 @@ body.is-card-dragging .crumbs button { box-shadow: inset 0 0 0 1.5px color-mix(i
   .onb-skip { top: 12px; right: 12px; padding: 8px 14px; font-size: 14px; }
   .onb-center { padding: 56px 16px 24px; gap: 20px; }
   .onb-title { font-size: 30px; } .onb-sub { font-size: 17px; }
-  .onb-word { font-size: 52px; }
+  .onb-logo { --k: .82; } .onb-motto { font-size: 20px; }
   .onb-choice { width: min(270px, 100%); height: auto; min-height: 170px; }
   .onb-head { padding: 56px 16px 12px; gap: 18px; }
   .onb-grid { padding: 8px 16px; grid-template-columns: 1fr; gap: 10px; }
@@ -2586,7 +2587,7 @@ I18N.dict.it = {
   'Mostrar u ocultar la barra lateral': 'Mostra o nascondi la barra laterale', 'Mostrar u ocultar notas de voz': 'Mostra o nascondi le note vocali', 'Marcador de la página': 'Segnalibro della pagina',
   'Espacio': 'Spazio', 'Supr': 'Canc', 'Mayús': 'Maiusc', 'Haz clic en un atajo para cambiarlo. Clic derecho para quitarlo.': 'Fai clic su una scorciatoia per cambiarla. Clic destro per toglierla.',
   // --- Tutorial ---
-  'Tutorial de Folia': 'Tutorial di Folia', 'Omitir tutorial': 'Salta il tutorial', 'Tus apuntes, a mano y a tu manera.': 'I tuoi appunti, a mano e a modo tuo.',
+  'Tutorial de Folia': 'Tutorial di Folia', 'Omitir tutorial': 'Salta il tutorial', 'Tus apuntes, vivos.': 'I tuoi appunti, vivi.',
   '¿Cómo te llamas?': 'Come ti chiami?', 'Así te puedo guiar durante el recorrido.': 'Così posso guidarti durante il percorso.', 'Tu nombre': 'Il tuo nome',
   'Prefiero no decirlo': 'Preferisco non dirlo', 'Continuar': 'Continua', '¡Encantado!': 'Piacere!',
   '¿Te enseño cómo funciona Folia? Son un par de minutos y eliges qué ver.': 'Ti mostro come funziona Folia? Sono un paio di minuti e scegli tu cosa vedere.',
@@ -20408,7 +20409,6 @@ function onbFilmBuild() {
   P.end = { t0: t, word: t + 0.9, tag: t + 2.7, t1: t + 5.2 };
   cam(t + 1.6, 1260, 640, 3600, 1900, 0, 0);
   P.total = P.end.t1;
-  P.word = OnbHand.write('Folia', { x: 0, y: 0, h: 30, color: '#fff', width: 4.4, seed: 21, v: 9 });
 
   // ===== La libreta guardada (lo mismo que se ve, más unas piezas para tocar) =====
   p1.strokes.push(...P.ink.filter((f) => f.page === p1).map((f) => f.s));
@@ -20560,6 +20560,51 @@ function onbLogo(g, size, o = {}) {
     for (const st of F.strokes) OnbFilm.partial(g, st, fk, '#fff');
     g.restore();
   }
+}
+
+/** «Folia» escrito a mano con el alfabeto de la película (siempre igual: semilla fija). */
+let onbLogoW = null;
+const onbLogoWord = () => onbLogoW || (onbLogoW = OnbHand.write('Folia', { x: 0, y: 0, h: 30, color: '#fff', width: 4.4, seed: 21, v: 9 }));
+/** Tiempos de la escena del logotipo (segundos desde que aparece el icono): a partir de `ONB_LOGO_END` queda quieta. */
+const ONB_LOGO_END = 3.4;
+/** Centro del icono en el lienzo de la bienvenida (600 × 600): deja sitio al halo por arriba. */
+const ONB_LOGO_CY = 290;
+/** El logotipo completo del final de la película (y de la bienvenida del tutorial): halo, icono que salta con su «F»
+ *  escrita y un brillo, «Folia» escrito a mano en degradado y el subrayado curvo que brilla al trazarse.
+ *  t: segundos desde que empieza (≥ ONB_LOGO_END, todo quieto). o: { cx, cy (centro del icono), size (lado del icono),
+ *  maxW (ancho máximo de la palabra), dark }. Devuelve { wy, hk } (línea base y escala de la palabra) para el lema. */
+function onbLogoScene(g, t, o) {
+  const { cx, cy, size, dark } = o;
+  const pop = onbSpring(onbRamp(t, 0, 0.8));
+  if (pop > 0) {
+    // Halo suave detrás del icono
+    const halo = g.createRadialGradient(cx, cy, 0, cx, cy, size * 2.2);
+    halo.addColorStop(0, `rgba(123,108,255,${0.28 * pop})`); halo.addColorStop(1, 'rgba(123,108,255,0)');
+    g.fillStyle = halo; g.fillRect(cx - size * 2.2, cy - size * 2.2, size * 4.4, size * 4.4);
+    g.save(); g.translate(cx, cy); g.scale(pop, pop);
+    g.shadowColor = 'rgba(107,92,255,.45)'; g.shadowBlur = 50; g.shadowOffsetY = 16;
+    // El icono (el mismo que el de la app): la «F» se escribe dentro y un brillo lo cruza
+    onbLogo(g, size, { f: onbRamp(t, 0.3, 0.9), shine: onbRamp(t, 1.8, 2.7) });
+    g.restore();
+  }
+  // «Folia» escrito a mano, con tinta de degradado
+  const Wd = onbLogoWord(), hk = Math.min(o.maxW / Wd.width, size * 0.017), wx = cx - Wd.width * hk / 2, wy = cy + size * 0.6 + 30 * hk * 2;
+  const wk = onbRamp(t, 0.3, 2) * Wd.dur;
+  if (wk > 0) {
+    const gr = g.createLinearGradient(wx, 0, wx + Wd.width * hk, 0); gr.addColorStop(0, dark ? '#9D8CFF' : '#5B4BFF'); gr.addColorStop(0.6, dark ? '#D77CFF' : '#A43AE6'); gr.addColorStop(1, dark ? '#FF7AB8' : '#E8306E');
+    g.save(); g.translate(wx, wy); g.scale(hk, hk);
+    for (const st of Wd.strokes) OnbFilm.partial(g, st, wk, gr);
+    g.restore();
+    // Remate: un trazo que subraya la palabra de un golpe, con brillo
+    const sw = onbEase(onbRamp(t, 2.05, 2.45));
+    if (sw > 0) {
+      const x0 = wx - 6 * hk, x1 = wx + Wd.width * hk * 1.02, y0 = wy + 30 * hk * 0.55;
+      const n = 40, pts = Array.from({ length: Math.max(2, Math.round(n * sw)) }, (_, i) => { const u = i / (n - 1); return [x0 + (x1 - x0) * u, y0 + Math.sin(u * Math.PI) * 6 * hk - u * 8 * hk, 0.25 + 0.5 * Math.sin(u * Math.PI)]; });
+      g.save(); g.shadowColor = dark ? 'rgba(215,124,255,.8)' : 'rgba(164,58,230,.5)'; g.shadowBlur = 18 * (1 - onbRamp(t, 2.4, 3.3)) + 4;
+      g.fillStyle = gr; g.fill(onbFilmPath({ tool: 'pen', kind: 'pen', width: 3.2 * hk }, pts)); g.restore();
+    }
+  }
+  return { wy, hk };
 }
 
 const OnbFilm = {
@@ -21281,35 +21326,7 @@ const OnbFilm = {
     g.save();
     g.fillStyle = S.dark ? `rgba(9,9,13,${0.94 * bg})` : `rgba(246,245,242,${0.94 * bg})`; g.fillRect(0, 0, S.W, S.H);
     const size = Math.min(S.W * 0.26, S.H * 0.15), cx = S.W / 2, cy = S.H * 0.3;
-    const pop = onbSpring(onbRamp(T, E.t0 + 0.6, E.t0 + 1.4));
-    if (pop > 0) {
-      // Halo suave detrás del icono
-      const halo = g.createRadialGradient(cx, cy, 0, cx, cy, size * 2.2);
-      halo.addColorStop(0, `rgba(123,108,255,${0.28 * pop})`); halo.addColorStop(1, 'rgba(123,108,255,0)');
-      g.fillStyle = halo; g.fillRect(cx - size * 2.2, cy - size * 2.2, size * 4.4, size * 4.4);
-      g.save(); g.translate(cx, cy); g.scale(pop, pop);
-      g.shadowColor = 'rgba(107,92,255,.45)'; g.shadowBlur = 50; g.shadowOffsetY = 16;
-      // El icono (el mismo que el de la app): la «F» se escribe dentro y un brillo lo cruza
-      onbLogo(g, size, { f: onbRamp(T, E.t0 + 0.9, E.t0 + 1.5), shine: onbRamp(T, E.tag - 0.3, E.tag + 0.6) });
-      g.restore();
-    }
-    // «Folia» escrito a mano, con tinta de degradado
-    const Wd = P.word, hk = Math.min(S.W * 0.6 / Wd.width, size * 0.017), wx = cx - Wd.width * hk / 2, wy = cy + size * 0.6 + 30 * hk * 2;
-    const wk = onbRamp(T, E.word, E.word + 1.7) * Wd.dur;
-    if (wk > 0) {
-      const gr = g.createLinearGradient(wx, 0, wx + Wd.width * hk, 0); gr.addColorStop(0, S.dark ? '#9D8CFF' : '#5B4BFF'); gr.addColorStop(0.6, S.dark ? '#D77CFF' : '#A43AE6'); gr.addColorStop(1, S.dark ? '#FF7AB8' : '#E8306E');
-      g.save(); g.translate(wx, wy); g.scale(hk, hk);
-      for (const st of Wd.strokes) this.partial(g, st, wk, gr, st.t0);
-      g.restore();
-      // Remate: un trazo que subraya la palabra de un golpe, con brillo
-      const sw = onbEase(onbRamp(T, E.word + 1.75, E.word + 2.15));
-      if (sw > 0) {
-        const x0 = wx - 6 * hk, x1 = wx + Wd.width * hk * 1.02, y0 = wy + 30 * hk * 0.55;
-        const n = 40, pts = Array.from({ length: Math.max(2, Math.round(n * sw)) }, (_, i) => { const u = i / (n - 1); return [x0 + (x1 - x0) * u, y0 + Math.sin(u * Math.PI) * 6 * hk - u * 8 * hk, 0.25 + 0.5 * Math.sin(u * Math.PI)]; });
-        g.save(); g.shadowColor = S.dark ? 'rgba(215,124,255,.8)' : 'rgba(164,58,230,.5)'; g.shadowBlur = 18 * (1 - onbRamp(T, E.word + 2.1, E.word + 3)) + 4;
-        g.fillStyle = gr; g.fill(onbFilmPath({ tool: 'pen', kind: 'pen', width: 3.2 * hk }, pts)); g.restore();
-      }
-    }
+    const { wy, hk } = onbLogoScene(g, T - E.t0 - 0.6, { cx, cy, size, maxW: S.W * 0.6, dark: S.dark });
     // Remate: el lema aparece nítido desde el desenfoque
     const tg = onbEase(onbRamp(T, E.tag, E.tag + 0.9));
     if (tg > 0) {
@@ -21482,9 +21499,8 @@ const Onboarding = {
     const colors = (c) => `--c1:${c[0]};--c2:${c[1]}`;
     if (stage === 'welcome') {
       return `<div class="onb-center">
-        <div class="onb-logo" aria-hidden="true"><canvas></canvas></div>
-        <h1 class="onb-word" aria-label="Folia">${[...'Folia'].map((c, i) => `<span style="--i:${i}">${c}</span>`).join('')}</h1>
-        <p class="onb-sub onb-late">Tus apuntes, a mano y a tu manera.</p>
+        <h1 class="onb-logo" aria-label="Folia"><canvas aria-hidden="true"></canvas></h1>
+        <p class="onb-motto">Tus apuntes, vivos.</p>
         <div class="onb-langs onb-late" role="group" aria-label="Idioma">${languageButtons('onb-glass')}</div>
         <div class="onb-late2">${glass(`Empezar ${arrow}`, 'start', true)}</div></div>`;
     }
@@ -21565,7 +21581,7 @@ const Onboarding = {
     st.querySelectorAll('.onb-nav .onb-glass').forEach((b, i) => { const nb = fresh.querySelectorAll('.onb-nav .onb-glass')[i]; if (nb) b.innerHTML = nb.innerHTML; });
   },
   after(stage, st) {
-    if (stage === 'welcome') setTimeout(() => st.querySelector('[data-onb="start"]')?.focus({ preventScroll: true }), 2500);
+    if (stage === 'welcome') setTimeout(() => st.querySelector('[data-onb="start"]')?.focus({ preventScroll: true }), 3000);
     if (stage === 'welcome') this.startLogo(st.querySelector('.onb-logo canvas'));
     if (stage === 'name') {
       const input = st.querySelector('#onb-name');
@@ -21781,26 +21797,19 @@ const Onboarding = {
     };
     this.raf = requestAnimationFrame(frame);
   },
-  /** Bienvenida: el icono de Folia (el de la app) aparece con un rebote, la «F» se escribe y lo cruza un brillo. */
+  /** Bienvenida: el logotipo del final de la película (onbLogoScene), con la misma animación, y luego quieto.
+   *  El lienzo es más grande que su caja (.onb-logo) para que el halo no se corte. */
   startLogo(canvas) {
     if (!canvas) return;
-    const dpr = Math.min(devicePixelRatio || 1, 2), W = 200, size = 132, ctx = canvas.getContext('2d');
-    canvas.width = canvas.height = W * dpr;
-    const start = performance.now(), calm = onbReduce();
+    const dpr = Math.min(devicePixelRatio || 1, 2), W = 600, H = 600, ctx = canvas.getContext('2d');
+    canvas.width = W * dpr; canvas.height = H * dpr;
+    const start = performance.now() + 150, calm = onbReduce();
     const frame = (now) => {
       if (!document.contains(canvas)) return;
-      const t = calm ? 9 : (now - start) / 1000, pop = onbSpring(onbRamp(t, 0.1, 1));
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, W, W);
-      if (pop > 0) {
-        const halo = ctx.createRadialGradient(W / 2, W / 2, 0, W / 2, W / 2, W / 2);
-        halo.addColorStop(0, `rgba(123,108,255,${0.45 * Math.min(1, pop)})`); halo.addColorStop(1, 'rgba(123,108,255,0)');
-        ctx.fillStyle = halo; ctx.fillRect(0, 0, W, W);
-        ctx.save(); ctx.translate(W / 2, W / 2); ctx.scale(pop, pop);
-        ctx.shadowColor = 'rgba(107,92,255,.6)'; ctx.shadowBlur = 30; ctx.shadowOffsetY = 10;
-        onbLogo(ctx, size, { f: onbEase(onbRamp(t, 0.55, 1.25)), shine: onbRamp(t, 1.35, 2.2) });
-        ctx.restore();
-      }
-      if (t < 2.3) requestAnimationFrame(frame);
+      const t = calm ? ONB_LOGO_END : Math.max(0, now - start) / 1000;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, W, H);
+      onbLogoScene(ctx, Math.min(t, ONB_LOGO_END), { cx: W / 2, cy: ONB_LOGO_CY, size: 132, maxW: 330, dark: true });
+      if (t < ONB_LOGO_END) requestAnimationFrame(frame);
     };
     requestAnimationFrame(frame);
   },
