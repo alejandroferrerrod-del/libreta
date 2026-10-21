@@ -1406,6 +1406,25 @@ body.is-card-dragging .crumbs button { box-shadow: inset 0 0 0 1.5px color-mix(i
 .safety-pop .storage-line b.warn { color: var(--safe-warn); }
 .safety-pop .sp-tip { margin: 2px 0 0; color: var(--muted); font-size: 12.5px; line-height: 1.35; }
 
+/* ---------- Sincronizar con Google Drive (nube junto al escudo, sync.js) ---------- */
+.pill-group .sync-btn { position: relative; color: var(--ink-2); }
+.pill-group .sync-btn svg { width: 21px; height: 21px; }
+.sync-btn[data-state="ok"] { color: var(--safe-ok); }
+.sync-btn[data-state="offline"] { color: var(--muted); }
+.sync-btn[data-state="offline"]::after { content: ""; position: absolute; left: 50%; top: 50%; width: 22px; height: 1.75px; border-radius: 1px;
+  background: currentColor; transform: translate(-50%, -50%) rotate(-40deg); box-shadow: 0 0 0 1.5px var(--bar); }
+.sync-btn[data-state="syncing"] svg, .sync-btn[data-state="connecting"] svg { animation: sync-breathe 1.4s ease-in-out infinite; color: var(--accent); }
+@keyframes sync-breathe { 50% { opacity: .35; transform: translateY(-1px); } }
+.sync-btn .sync-dot { display: none; position: absolute; top: 5px; right: 4px; width: 15px; height: 15px; border-radius: 50%; place-items: center;
+  background: var(--safe-warn); color: #fff; font: 800 10px/1 var(--font); font-style: normal; box-shadow: 0 0 0 2px var(--bar); }
+.sync-btn[data-state="reconnect"] .sync-dot, .sync-btn[data-state="error"] .sync-dot { display: grid; }
+.safety-pop.sync-pop[data-state="ok"] .sp-badge { background: color-mix(in srgb, var(--safe-ok) 16%, transparent); color: var(--safe-ok); }
+.safety-pop.sync-pop:is([data-state="off"], [data-state="setup"], [data-state="syncing"], [data-state="connecting"]) .sp-badge { background: color-mix(in srgb, var(--accent) 14%, transparent); color: var(--accent); }
+.safety-pop.sync-pop .storage-line b { min-width: 0; overflow-wrap: anywhere; text-align: right; }
+.popover .sync-row-label { white-space: normal; }
+/* Móvil: con la nube hay un botón más arriba a la derecha; se estrechan para que quepa también ⚙︎. */
+@media (max-width: 480px) { .lib-header:not(.selecting) { gap: 6px; padding-left: 10px; padding-right: 10px; } .lib-header .pill-group button { width: 36px; } }
+
 /* ---------- Barra de opciones compacta (2026-10-20): mismos tamaños, iconos y lo secundario en «Más» ---------- */
 .options { gap: 8px; }
 .options > *, .options .ogrp > *, .options .item-acts > * { flex: none; }
@@ -2524,10 +2543,35 @@ I18N.dict.it = {
   '¿Qué hay debajo de la cinta?': 'Cosa c’è sotto il nastro?', '¿Lo recuerdas?': 'Te lo ricordi?', 'Zona destapada': 'Zona scoperta', 'Zona tapada': 'Zona coperta', 'Último': 'Ultimo',
   'Mal': 'Male', 'Mal (1)': 'Male (1)', 'Bien (2)': 'Bene (2)', 'Se acabó el tiempo': 'Tempo scaduto', '¡Repaso hecho!': 'Ripasso fatto!', 'Últimos 7 días': 'Ultimi 7 giorni', 'min': 'min',
   'Queda 1 cosa para mañana.': 'Resta 1 cosa per domani.', '1 tarjeta': '1 flashcard', '1 zona para recordar': '1 zona da ricordare',
+  // Sincronizar con Google Drive (sync.js)
+  'Sincronizar con Google Drive': 'Sincronizza con Google Drive', 'Conectar con Google Drive': 'Connetti Google Drive', 'Conectando con Google…': 'Connessione a Google…',
+  'Sincronizando…': 'Sincronizzazione…', 'Sin conexión': 'Senza connessione', 'Vuelve a conectar': 'Riconnetti', 'No se pudo sincronizar': 'Sincronizzazione non riuscita',
+  'Conectado con Google Drive': 'Connesso a Google Drive', 'Sincronizado hace un momento': 'Sincronizzato poco fa', 'Sincronizar entre dispositivos': 'Sincronizza tra dispositivi',
+  'Cuenta': 'Account', 'Última sincronización': 'Ultima sincronizzazione', 'Volver a conectar': 'Riconnetti', 'Sincronizar ahora': 'Sincronizza ora', 'Desconectar': 'Disconnetti',
+  'Falta configurar la conexión con Google (el ID de cliente). Mientras tanto, usa la copia de seguridad para pasar tus libretas a otro dispositivo.': 'Manca la configurazione della connessione con Google (l’ID client). Nel frattempo, usa il backup per passare i tuoi quaderni a un altro dispositivo.',
+  'Tus libretas iguales en el iPad y en el Mac. Folia las guarda en tu Google Drive, en una carpeta oculta solo para Folia. Sin servidores nuestros: van de este navegador a tu Drive.': 'I tuoi quaderni uguali sull’iPad e sul Mac. Folia li salva nel tuo Google Drive, in una cartella nascosta solo per Folia. Nessun server nostro: vanno da questo browser al tuo Drive.',
+  'Termina en la ventana de Google. Si no la ves, puede que el navegador la haya bloqueado.': 'Completa nella finestra di Google. Se non la vedi, forse il browser l’ha bloccata.',
+  'Subiendo y bajando los cambios. Puedes seguir usando Folia.': 'Caricamento e scaricamento delle modifiche. Puoi continuare a usare Folia.',
+  'Se sincronizará cuando vuelva la conexión. Tus cambios se guardan en este dispositivo.': 'Si sincronizzerà quando torna la connessione. Le tue modifiche restano salvate su questo dispositivo.',
+  'Por seguridad, Google pide confirmar la conexión cada cierto tiempo. Toca «Volver a conectar» para seguir sincronizando.': 'Per sicurezza, Google chiede di confermare la connessione ogni tanto. Tocca «Riconnetti» per continuare a sincronizzare.',
+  'Tu Google Drive está lleno. Libera espacio y se volverá a intentar.': 'Il tuo Google Drive è pieno. Libera spazio e si riproverà.',
+  'Google Drive no ha contestado bien. Se volverá a intentar en unos minutos; no se ha perdido nada.': 'Google Drive non ha risposto correttamente. Si riproverà tra qualche minuto; non si è perso nulla.',
+  'Tus libretas se sincronizan solas al abrir Folia, al volver a ella y unos segundos después de cada cambio.': 'I tuoi quaderni si sincronizzano da soli quando apri Folia, quando ci torni e qualche secondo dopo ogni modifica.',
+  'Falta configurar la conexión con Google Drive.': 'Manca la configurazione della connessione con Google Drive.',
+  'Google pide que confirmes tu cuenta: toca la nube › «Volver a conectar».': 'Google chiede di confermare il tuo account: tocca la nuvola › «Riconnetti».',
+  'No se ha conectado con Google Drive.': 'Google Drive non è stato connesso.', 'Conectado con Google Drive. Sincronizando tus libretas…': 'Connesso a Google Drive. Sincronizzazione dei tuoi quaderni…',
+  'Conectado. Ya puedes cerrar esta ventana.': 'Connesso. Ora puoi chiudere questa finestra.', '¿Desconectar Google Drive?': 'Disconnettere Google Drive?',
+  'Tus libretas se quedan en este dispositivo y en tu Drive. Este dispositivo dejará de sincronizar hasta que vuelvas a conectar.': 'I tuoi quaderni restano su questo dispositivo e nel tuo Drive. Questo dispositivo smetterà di sincronizzare finché non ti riconnetti.',
+  'Google Drive desconectado': 'Google Drive disconnesso',
 };
 
 /** Textos con nombres o números dentro. */
 I18N.patterns.it = [
+  // Sincronizar con Google Drive (sync.js)
+  [/^Sincronizado hace (\d+) min$/, 'Sincronizzato $1 min fa'], [/^Sincronizado hace (\d+) h$/, 'Sincronizzato $1 h fa'], [/^Sincronizado el (.+)$/, 'Sincronizzato il $1'],
+  [/^«(.+)» cambió en los dos dispositivos: se conservan las dos versiones\.$/, '«$1» è cambiato su entrambi i dispositivi: si conservano le due versioni.'],
+  [/^(\d+) libretas cambiaron en los dos dispositivos: se conservan las dos versiones de cada una\.$/, '$1 quaderni sono cambiati su entrambi i dispositivi: si conservano le due versioni di ciascuno.'],
+  [/^«(.+)» se había borrado aquí, pero tenía cambios de otro dispositivo: se ha recuperado\.$/, '«$1» era stato eliminato qui, ma aveva modifiche da un altro dispositivo: è stato recuperato.'],
   // Repaso de hoy (daily.js)
   [/^~(\d+) min$/, '~$1 min'], [/^(\d+) min$/, '$1 min'], [/^(\d+) días seguidos$/, '$1 giorni di fila'], [/^(\d+) días hechos$/, '$1 giorni fatti'],
   [/^(\d+) tarjetas$/, '$1 flashcard'], [/^(\d+) zonas para recordar$/, '$1 zone da ricordare'], [/^Objetivo: (\d+) min$/, 'Obiettivo: $1 min'],
@@ -3184,8 +3228,9 @@ const Store = {
       tx.objectStore('notebooks').put(clone(nb));
       tx.onerror = () => this.fail();
     } catch (e) { this.fail(); }
+    Sync.dirty(nb, true);   // sincronizar con Google Drive (sync.js) unos segundos después
   },
-  remove(id) { try { this.db?.transaction('notebooks', 'readwrite').objectStore('notebooks').delete(id); } catch (e) { this.fail(); } },
+  remove(id) { try { this.db?.transaction('notebooks', 'readwrite').objectStore('notebooks').delete(id); } catch (e) { this.fail(); } Sync.removed(id); },
   async get(key, fallback) {
     if (!this.db) return fallback;
     return new Promise((resolve) => {
@@ -3349,6 +3394,7 @@ function touch(nb = activeNb()) {
   if (!nb) return;
   nb.modified = Date.now();
   nb._v = (nb._v || 0) + 1;
+  Sync.dirty(nb);   // su huella para la sincronización se vuelve a calcular
   clearTimeout(saveTimers[nb.id]);
   saveTimers[nb.id] = setTimeout(() => Store.put(nb), 500);
 }
@@ -4180,7 +4226,7 @@ function renderLibrary() {
       <div class="spacer"></div>
       <button class="prominent ${S.dynamic ? 'purple' : ''}" id="dyn-btn" aria-pressed="${S.dynamic}" title="Tus carpetas y libretas como una constelación, con sus vínculos">${icon('sparkles')}<span class="label">${S.dynamic ? 'Salir del modo dinámico' : 'Modo dinámico'}</span></button>
       <div class="pill-group" role="group" aria-label="Vista y ajustes">
-        ${DataSafety.buttonHTML()}
+        ${Sync.buttonHTML()}${DataSafety.buttonHTML()}
         <button id="select-btn" title="Seleccionar varias libretas o carpetas" aria-label="Seleccionar" ${S.dynamic ? 'disabled' : ''}>${icon('checkCircle')}</button>
         <button id="settings-btn" aria-haspopup="menu" title="Ajustes: apariencia, atajos, copias de seguridad…" aria-label="Ajustes">${icon('settings')}</button>
       </div>
@@ -4222,7 +4268,10 @@ function renderLibrary() {
     $('#new-btn').addEventListener('click', (e) => newMenu(e.currentTarget));
     $('#settings-btn').addEventListener('click', (e) => settingsMenu(e.currentTarget));
     // El indicador de la copia se vuelve a pintar solo (refreshNag): el clic se recoge en la cabecera.
-    $('.lib-header').addEventListener('click', (e) => { const b = e.target.closest('#safety-btn'); if (b) DataSafety.menu(b); });
+    $('.lib-header').addEventListener('click', (e) => {
+      const b = e.target.closest('#safety-btn'); if (b) DataSafety.menu(b);
+      const c = e.target.closest('#sync-btn'); if (c) Sync.menu(c);   // Google Drive (sync.js)
+    });
   }
   $('.title-row')?.addEventListener('click', (e) => {
     if (e.target.closest('#sort-btn')) return sortMenu(e.target.closest('#sort-btn'));
@@ -4231,6 +4280,7 @@ function renderLibrary() {
   $('#lib-main')?.addEventListener('click', onLibraryClick);
   if (!q && !S.dynamic) attachCardDrag($('#lib-main'));
   if (S.dynamic && !q) startDynamic($('#dyn'));
+  Sync.onLibrary();   // cambios de otro dispositivo que esperaban a que se cerrara su libreta
 }
 function goFolder(id) { S.folder = id || null; S.picked = new Set(); S.query = ''; renderLibrary(); }
 function setSelecting(on) { S.selecting = on; S.picked = new Set(); renderLibrary(); }
@@ -4288,9 +4338,12 @@ function settingsMenu(anchor) {
     ${DataSafety.boxHTML()}
     <button data-act="save">${icon('download')} Hacer copia ahora</button>
     <button data-act="load">${icon('upload')} Recuperar copia…</button>
+    <hr><div class="label">Sincronizar entre dispositivos</div>
+    <button data-act="sync">${SYNC_ICON} <span class="sync-row-label">${esc(Sync.label())}</span></button>
     ${window.libretaInstall ? `<hr><button data-act="install">${icon('fileDown')} Instalar Folia en este ordenador</button>` : ''}`, (act) => {
     if (act === 'save') saveBackup();
     if (act === 'load') loadBackup();
+    if (act === 'sync') Sync.menu($('#sync-btn') || anchor);   // Google Drive (sync.js)
     if (act === 'shortcuts') shortcutsDialog();
     if (act === 'fullscreen') toggleFullscreen();
     if (act === 'finger') toggleFinger();
@@ -6016,7 +6069,7 @@ const Folders = {
     return out;
   },
 
-  save() { Store.set('folders', this.list); },
+  save() { Store.set('folders', this.list); Sync.foldersChanged(); },
   create(name, parent = null, color = null) {
     const f = { id: uid(), name: name.trim() || 'Carpeta sin título', parent: parent || null, color: validFolderColor(color) ? color : null, created: Date.now(), modified: Date.now() };
     this.list.push(f);
@@ -17911,6 +17964,676 @@ const Onboarding = {
 };
 
 // =============================================================================
+// Sincronizar con Google Drive (2026-10-21, aprobado por el usuario). Las libretas viajan entre los
+// dispositivos de quien usa Folia a través de SU Google Drive, en la carpeta oculta de la app
+// (appDataFolder): no hay servidor nuestro. Sin librerías: OAuth 2 de Google con un token que llega a
+// una ventana emergente (o, en la app instalada del iPad, a la propia página) y la API REST de Drive v3
+// con fetch. Formato en Drive y reglas: docs/ARQUITECTURA.md §2.1 («Sincronizar con Google Drive»).
+// Regla de oro: nada local se borra por un fallo o una respuesta rara; solo una lápida explícita borra,
+// y si las dos versiones cambiaron se conservan las dos.
+// =============================================================================
+const FOLIA_GOOGLE_CLIENT_ID = '489743890485-d4slc2s0ut06k86s2pj8jbedpcglceil.apps.googleusercontent.com';   // ID de cliente OAuth de Google (es público, no es secreto). Vacío = sin configurar.
+const SYNC_SCOPE = 'https://www.googleapis.com/auth/drive.appdata';
+const SYNC_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/></svg>';
+const SYNC_EXAMPLE_TITLES = ['Bienvenida a Folia', 'Benvenuto in Folia', 'Biología · Tema 3', 'Biologia · Tema 3'];
+
+/** Huella corta de un texto (cyrb53, 53 bits en hexadecimal): para saber si una libreta cambió. */
+function syncHash(str) {
+  let h1 = 0xdeadbeef, h2 = 0x41c6ce57;
+  for (let i = 0; i < str.length; i++) {
+    const c = str.charCodeAt(i);
+    h1 = Math.imul(h1 ^ c, 2654435761); h2 = Math.imul(h2 ^ c, 1597334677);
+  }
+  h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+  h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+  return (4294967296 * (2097151 & h2) + (h1 >>> 0)).toString(16);
+}
+/** Nombre corto de este dispositivo (va en las copias de conflicto: «(conflicto, iPad, …)»). */
+function syncDevice() {
+  const ua = navigator.userAgent || '';
+  if (/iPad/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1)) return 'iPad';
+  if (/iPhone|iPod/.test(ua)) return 'iPhone';
+  if (/Android/.test(ua)) return 'Android';
+  if (/CrOS/.test(ua)) return 'Chromebook';
+  if (/Macintosh|Mac OS X/.test(ua)) return 'Mac';
+  if (/Windows/.test(ua)) return 'Windows';
+  if (/Linux/.test(ua)) return 'Linux';
+  return I18N.lang === 'it' ? 'altro dispositivo' : 'otro dispositivo';
+}
+/** JSON con las claves ordenadas: para comparar dos versiones sin que importe el orden. */
+function syncStable(v) {
+  if (Array.isArray(v)) return '[' + v.map(syncStable).join(',') + ']';
+  if (v && typeof v === 'object') return '{' + Object.keys(v).sort().filter((k) => v[k] !== undefined).map((k) => JSON.stringify(k) + ':' + syncStable(v[k])).join(',') + '}';
+  return JSON.stringify(v ?? null);
+}
+const syncErr = (kind, status = 0) => Object.assign(new Error('sync:' + kind), { kind, status });
+
+// ---------- Drive (API REST v3) ----------
+const SyncDrive = {
+  API: 'https://www.googleapis.com/drive/v3',
+  UP: 'https://www.googleapis.com/upload/drive/v3',
+  BIG: 5 * 1024 * 1024,   // más de esto: subida reanudable (la multiparte es para archivos pequeños)
+  async req(url, opts = {}) {
+    let res;
+    const headers = Object.assign({ Authorization: 'Bearer ' + Sync.token }, opts.headers || {});
+    try { res = await fetch(url, Object.assign({}, opts, { headers })); } catch (e) { throw syncErr('offline'); }
+    if (res.ok) return res;
+    let reason = '';
+    try { const j = await res.json(); reason = j?.error?.errors?.[0]?.reason || j?.error?.status || ''; } catch (e) { /* sin detalle */ }
+    if (res.status === 401) throw syncErr('auth', 401);
+    if (/storageQuota|quotaExceeded/i.test(reason)) throw syncErr('quota', res.status);
+    if (res.status === 429 || res.status >= 500 || (res.status === 403 && /rate|limit/i.test(reason))) throw syncErr('later', res.status);
+    throw syncErr('http', res.status);
+  },
+  async json(res) { try { return await res.json(); } catch (e) { throw syncErr('odd'); } },
+  /** Todos los archivos de Folia en la carpeta oculta (con sus propiedades). */
+  async list() {
+    const files = [];
+    let page = '';
+    for (let guard = 0; guard < 200; guard++) {
+      const q = new URLSearchParams({ spaces: 'appDataFolder', pageSize: '1000', fields: 'nextPageToken,files(id,name,modifiedTime,appProperties)' });
+      if (page) q.set('pageToken', page);
+      const j = await this.json(await this.req(`${this.API}/files?${q}`));
+      if (!j || !Array.isArray(j.files)) throw syncErr('odd');
+      files.push(...j.files);
+      if (!j.nextPageToken) return files;
+      page = j.nextPageToken;
+    }
+    throw syncErr('odd');
+  },
+  async text(id) { return (await this.req(`${this.API}/files/${encodeURIComponent(id)}?alt=media`)).text(); },
+  async blob(id) { return (await this.req(`${this.API}/files/${encodeURIComponent(id)}?alt=media`)).blob(); },
+  /** Crea (`id` null) o sustituye un archivo de la carpeta oculta: metadatos + contenido. Devuelve su id. */
+  async save(id, meta, blob) {
+    const m = id ? meta : Object.assign({ parents: ['appDataFolder'] }, meta);
+    const url = id ? `${this.UP}/files/${encodeURIComponent(id)}` : `${this.UP}/files`, method = id ? 'PATCH' : 'POST';
+    const type = blob.type || 'application/octet-stream';
+    if (blob.size > this.BIG) {
+      const res = await this.req(`${url}?uploadType=resumable&fields=id`, { method, body: JSON.stringify(m),
+        headers: { 'Content-Type': 'application/json; charset=UTF-8', 'X-Upload-Content-Type': type, 'X-Upload-Content-Length': String(blob.size) } });
+      const loc = res.headers.get('Location');
+      if (loc) { const j = await this.json(await this.req(loc, { method: 'PUT', body: blob, headers: { 'Content-Type': type } })); if (j?.id) return j.id; throw syncErr('odd'); }
+      // Sin la dirección de la sesión: se intenta como multiparte.
+    }
+    const b = 'folia' + Math.random().toString(36).slice(2);
+    const body = new Blob([`--${b}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${JSON.stringify(m)}\r\n--${b}\r\nContent-Type: ${type}\r\n\r\n`, blob, `\r\n--${b}--`]);
+    const j = await this.json(await this.req(`${url}?uploadType=multipart&fields=id`, { method, body, headers: { 'Content-Type': `multipart/related; boundary=${b}` } }));
+    if (!j?.id) throw syncErr('odd');
+    return j.id;
+  },
+  remove(id) { return this.req(`${this.API}/files/${encodeURIComponent(id)}`, { method: 'DELETE' }); },
+  async email() {
+    try { return (await (await this.req(`${this.API}/about?fields=user(emailAddress)`)).json())?.user?.emailAddress || ''; } catch (e) { return ''; }
+  },
+};
+
+// ---------- Este dispositivo (lo que el motor lee y escribe aquí) ----------
+// El motor (Sync.engine) solo habla con este objeto: así las pruebas usan otro «dispositivo» en memoria.
+const SyncLocal = {
+  device: syncDevice(),
+  notebooks: () => S.notebooks,
+  /** Lo que no se sube: los ejemplos sin abrir, la demo «Así es Folia» y los ejemplos dentro de «Ejemplos». */
+  skip(nb) {
+    if (nb.example || onbIsDemo(nb)) return true;
+    const f = Folders.byId(nb.folder);
+    return !!f && !f.parent && ['Ejemplos', 'Esempi'].includes(f.name) && SYNC_EXAMPLE_TITLES.includes(nb.title);
+  },
+  /** La carpeta «Ejemplos» no se sube mientras solo tenga ejemplos (cada dispositivo tiene la suya). */
+  skipFolder(f) {
+    return !f.parent && ['Ejemplos', 'Esempi'].includes(f.name) && !Folders.children(f.id).length && Folders.notebooksIn(f.id).every((nb) => this.skip(nb));
+  },
+  /** Abierta en el editor: no se cambia por debajo (se aplica al salir de ella). */
+  busy: (id) => S.view === 'editor' && S.active === id,
+  put(nb) {
+    if (nb.folder && !Folders.byId(nb.folder)) nb.folder = null;   // su carpeta no está: al inicio (si no, no se vería)
+    const i = S.notebooks.findIndex((n) => n.id === nb.id);
+    if (i >= 0) S.notebooks[i] = nb; else S.notebooks.push(nb);
+    delete S.undo[nb.id]; delete S.redo[nb.id];   // deshacer no puede devolver la versión de antes por encima
+    clearTimeout(saveTimers[nb.id]); delete saveTimers[nb.id];
+    Sync.quiet = true; try { Store.put(nb); } finally { Sync.quiet = false; }
+  },
+  remove(id) { const nb = nbById(id); if (!nb) return; Sync.quiet = true; try { deleteNotebook(nb); } finally { Sync.quiet = false; } },
+  folders: () => Folders.list,
+  addFolder(f) { Folders.list.push(f); },
+  removeFolder(id) { Folders.remove(id); },
+  saveFolders() { Sync.quiet = true; try { Folders.save(); } finally { Sync.quiet = false; } },
+  daily: () => Daily.backup(),
+  mergeDaily: (d) => Daily.restore(d),
+  getBlob: (key) => Store.getAudio(key),
+  async putBlob(key, blob) { await Store.putAudio(key, blob); if (key.startsWith('pdf:')) PdfDocs.missing.delete(key.slice(4)); },
+  loadState: () => Store.get('sync', null),
+  saveState: (st) => Store.set('sync', st),
+};
+
+// ---------- Sincronización ----------
+const Sync = {
+  clientId: FOLIA_GOOGLE_CLIENT_ID,
+  token: null, exp: 0,        // token de acceso: solo en memoria y en sessionStorage (nunca en IndexedDB ni en la copia)
+  prefs: { on: false, email: '' },   // localStorage `libreta-sync`
+  status: 'idle',             // 'idle' | 'syncing' | 'offline' | 'error' | 'connecting'
+  error: '',                  // 'quota' | 'later' | 'odd' | 'http'
+  last: 0,                    // ms de la última sincronización buena (de esta sesión o guardada en el estado)
+  st: null,                   // estado de este dispositivo (kv `sync`), cargado en init()
+  quiet: false,               // el motor está escribiendo: Store.put/remove no avisan
+  hashes: new WeakMap(),      // libreta → huella (se olvida en cada cambio)
+  gen: 0,                     // época: cambia al desconectar; el motor de una época vieja no guarda nada
+  running: null, again: false, timer: 0, retry: 60000, waiting: null, pending: null, started: false,
+
+  // --- Estado y preferencias ---
+  loadPrefs() { try { const p = JSON.parse(localStorage.getItem('libreta-sync') || 'null'); if (p && typeof p === 'object') this.prefs = { on: !!p.on, email: typeof p.email === 'string' ? p.email : '' }; } catch (e) { /* sin preferencias */ } },
+  savePrefs() { try { if (this.prefs.on) localStorage.setItem('libreta-sync', JSON.stringify(this.prefs)); else localStorage.removeItem('libreta-sync'); } catch (e) { /* sin almacenamiento */ } },
+  setToken(t, seconds) {
+    this.token = t || null;
+    this.exp = t ? Date.now() + Math.max(60, Number(seconds) || 3600) * 1000 - 60000 : 0;   // un minuto antes, por si acaso
+    try { if (t) sessionStorage.setItem('folia-sync-token', JSON.stringify({ t, exp: this.exp })); else sessionStorage.removeItem('folia-sync-token'); } catch (e) { /* solo en memoria */ }
+  },
+  hasToken() { return !!this.token && Date.now() < this.exp; },
+  freshState: () => ({ v: 1, nb: {}, del: {}, bins: {}, dup: {}, need: [], fbase: [], last: 0 }),
+  /** Estado guardado en kv `sync`, corregido si llega raro (nunca hace perder datos: como mucho, se resube). */
+  cleanState(raw) {
+    const st = this.freshState();
+    if (!raw || typeof raw !== 'object') return st;
+    for (const k of ['nb', 'del', 'bins', 'dup']) if (raw[k] && typeof raw[k] === 'object') st[k] = Object.assign({}, raw[k]);
+    if (Array.isArray(raw.need)) st.need = raw.need.filter((k) => typeof k === 'string');
+    if (Array.isArray(raw.fbase)) st.fbase = raw.fbase.filter((k) => typeof k === 'string');
+    st.last = Number(raw.last) || 0;
+    return st;
+  },
+
+  // --- Huella de una libreta: sin lo que cambia solo con mirarla o abrirla (modified, lastPageId, contadores _v,
+  // la miniatura de una portada «página», el modo de lectura y el modo de páginas): mirar no crea conflictos ni resube.
+  hashOf(nb) {
+    let h = this.hashes.get(nb);
+    if (!h) {
+      const o = Object.assign({}, nb);
+      for (const k of ['modified', 'lastPageId', '_v', 'reading', 'scrollMode']) delete o[k];
+      if (o.cover && o.cover.type === 'page') { o.cover = Object.assign({}, o.cover); delete o.cover.image; }
+      if (Array.isArray(o.pages)) o.pages = o.pages.map((p) => { if (!p || !('_v' in p)) return p; const q = Object.assign({}, p); delete q._v; return q; });
+      h = syncHash(JSON.stringify(o));
+      this.hashes.set(nb, h);
+    }
+    return h;
+  },
+  /** Enganche de touch() y Store.put(): la libreta cambió (se recalcula su huella y se sincroniza en unos segundos). */
+  dirty(nb, save = false) {
+    if (nb) this.hashes.delete(nb);
+    if (save && !this.quiet) this.soon(8000);
+  },
+  /** Enganche de Store.remove(): libreta borrada aquí. Si ya estaba en Drive, se apunta su lápida. */
+  removed(id) {
+    // Se apunta aunque aún no estuviera subida (pudo borrarse a mitad de su primera subida); si no llegó a Drive, se olvida sola.
+    if (this.quiet || !this.st || !this.prefs.on) return;
+    this.st.del[id] = Date.now();
+    SyncLocal.saveState(this.st);
+    this.soon(8000);
+  },
+  /** Enganche de Folders.save(): carpetas cambiadas. */
+  foldersChanged() { if (!this.quiet) this.soon(8000); },
+
+  // --- Conectar (OAuth 2 de Google, flujo de token) ---
+  redirectUri() { return location.origin + location.pathname.replace(/index\.html$/, ''); },
+  /** En la app instalada del iPad (pantalla de inicio) una ventana emergente se abre en Safari y no vuelve: se va y se vuelve en la misma página. */
+  useRedirect() { return navigator.standalone === true; },
+  authUrl(silent) {
+    const state = 'folia' + Math.random().toString(36).slice(2);
+    try { sessionStorage.setItem('folia-sync-state', state); } catch (e) { /* solo en memoria */ }
+    this.waiting = { state, silent };
+    const q = new URLSearchParams({ client_id: this.clientId, redirect_uri: this.redirectUri(), response_type: 'token', scope: SYNC_SCOPE, include_granted_scopes: 'true', state });
+    if (silent) q.set('prompt', 'none');
+    if (this.prefs.email) q.set('login_hint', this.prefs.email);
+    return 'https://accounts.google.com/o/oauth2/v2/auth?' + q;
+  },
+  /** Pide el token. `silent`: ya se dio permiso antes (prompt=none: la ventana se cierra sola). Debe llamarse desde un toque. */
+  connect(silent = false) {
+    if (!this.clientId) { toast('Falta configurar la conexión con Google Drive.'); return; }
+    const url = this.authUrl(silent);
+    const away = () => { flushAll(); try { sessionStorage.setItem('folia-sync-away', '1'); } catch (e) { /* nada */ } setTimeout(() => location.assign(url), 400); };
+    if (this.useRedirect()) return away();
+    try { sessionStorage.removeItem('folia-sync-away'); } catch (e) { /* nada */ }   // la ventana emergente copia este almacén
+    const w = window.open(url, 'folia-google', 'width=480,height=640');
+    if (!w) return away();   // ventanas emergentes bloqueadas: se va y se vuelve en esta misma página
+    this.status = 'connecting'; this.paint();
+    clearTimeout(this.waitTimer);
+    this.waitTimer = setTimeout(() => { if (this.status === 'connecting') { this.status = 'idle'; this.waiting = null; this.paint(); } }, 120000);
+  },
+  /** Respuesta de Google (desde la ventana emergente o al volver a esta página). */
+  receive(data) {
+    if (!data || data.type !== 'folia-auth' || !this.waiting || data.state !== this.waiting.state) return;
+    const silent = this.waiting.silent;
+    this.waiting = null; clearTimeout(this.waitTimer);
+    if (data.access_token) {
+      const first = !this.prefs.on;
+      this.setToken(data.access_token, data.expires_in);
+      this.prefs.on = true; this.savePrefs();
+      this.status = 'idle'; this.error = '';
+      if (first) toast('Conectado con Google Drive. Sincronizando tus libretas…');
+      SyncDrive.email().then((e) => { if (e && e !== this.prefs.email) { this.prefs.email = e; this.savePrefs(); this.paint(); } });
+      this.paint();
+      this.soon(0);
+      return;
+    }
+    this.status = 'idle';
+    if (silent && /interaction_required|login_required|consent_required|account_selection_required/.test(data.error || '')) {
+      toast('Google pide que confirmes tu cuenta: toca la nube › «Volver a conectar».');
+      this.forceAsk = true;
+    } else if (data.error) toast('No se ha conectado con Google Drive.');
+    this.paint();
+  },
+  /** Al arrancar: si esta página es la vuelta de Google, se recoge el token. Devuelve true si es la ventana emergente (no arranca la app). */
+  catchRedirect() {
+    let p;
+    try { p = new URLSearchParams((location.hash || '').slice(1)); } catch (e) { return false; }
+    const state = p.get('state') || '';
+    if (!state.startsWith('folia') || !(p.get('access_token') || p.get('error'))) return false;
+    const data = { type: 'folia-auth', state, access_token: p.get('access_token') || '', expires_in: Number(p.get('expires_in')) || 3600, error: p.get('error') || '' };
+    try { history.replaceState(null, '', location.pathname + location.search); } catch (e) { /* nada */ }
+    // ¿Esta pestaña se fue a Google ella misma (app instalada del iPad o ventanas bloqueadas)? Si no, es la ventana emergente
+    // (window.opener y window.name pueden perderse al pasar por Google, así que no se usan para decidirlo).
+    let away = false;
+    try { away = sessionStorage.getItem('folia-sync-away') === '1'; sessionStorage.removeItem('folia-sync-away'); } catch (e) { /* nada */ }
+    if (!away) {
+      // Ventana emergente: se pasa el token a la ventana de Folia y se cierra.
+      try { const bc = new BroadcastChannel('folia-auth'); bc.postMessage(data); bc.close(); } catch (e) { /* sin canal */ }
+      try { window.opener?.postMessage(data, location.origin); } catch (e) { /* sin ventana madre */ }
+      document.body.innerHTML = `<p style="font:16px system-ui;padding:24px">${tr('Conectado. Ya puedes cerrar esta ventana.')}</p>`;
+      setTimeout(() => window.close(), 150);
+      return true;
+    }
+    // Se fue a Google desde esta misma página: se comprueba que la respuesta es la que se pidió.
+    let mine = '';
+    try { mine = sessionStorage.getItem('folia-sync-state') || ''; } catch (e) { /* nada */ }
+    if (mine === state) this.pending = data;
+    return false;
+  },
+  disconnect() {
+    confirmDialog('¿Desconectar Google Drive?', 'Tus libretas se quedan en este dispositivo y en tu Drive. Este dispositivo dejará de sincronizar hasta que vuelvas a conectar.', 'Desconectar', () => {
+      this.prefs = { on: false, email: '' }; this.savePrefs();
+      this.gen++;   // una pasada en marcha ya no guarda su estado (se descarta)
+      this.setToken(null);
+      this.st = this.freshState(); SyncLocal.saveState(this.st);   // al volver a conectar se compara todo otra vez (sin borrar nada)
+      this.last = 0; this.status = 'idle'; this.error = '';
+      clearTimeout(this.timer);
+      this.paint();
+      toast('Google Drive desconectado');
+    });
+  },
+
+  // --- Arranque y cuándo se sincroniza ---
+  async init() {
+    if (this.started) return;
+    this.started = true;
+    this.loadPrefs();
+    try { const t = JSON.parse(sessionStorage.getItem('folia-sync-token') || 'null'); if (t?.t && t.exp > Date.now()) { this.token = t.t; this.exp = t.exp; } } catch (e) { /* sin token */ }
+    this.st = this.cleanState(await SyncLocal.loadState());
+    this.last = this.st.last;
+    try { const bc = new BroadcastChannel('folia-auth'); bc.onmessage = (e) => this.receive(e.data); } catch (e) { /* sin canal: solo postMessage */ }
+    addEventListener('message', (e) => { if (e.origin === location.origin) this.receive(e.data); });
+    if (this.pending) {
+      // Vuelta de Google en esta misma página (app instalada del iPad).
+      try { this.waiting = { state: this.pending.state, silent: false }; } catch (e) { /* nada */ }
+      this.receive(this.pending); this.pending = null;
+    }
+    document.addEventListener('visibilitychange', () => {
+      if (!this.prefs.on) return;
+      if (document.visibilityState === 'visible') this.soon(800);
+      else if (this.timer && this.hasToken()) this.soon(0);   // al irse a otra app, se sube lo pendiente
+    });
+    addEventListener('online', () => { if (this.prefs.on) this.soon(800); });
+    addEventListener('offline', () => { if (this.prefs.on && this.status !== 'syncing') { this.status = 'offline'; this.paint(); } });
+    // Cada 30 s se repinta «hace X min»; cada 3 min, con la app a la vista, se mira si hay cambios de otro dispositivo.
+    let ticks = 0;
+    setInterval(() => {
+      if (!this.prefs.on) return;
+      this.paint();
+      if (++ticks % 6 === 0 && document.visibilityState === 'visible' && this.hasToken() && !this.running) this.soon(0);
+    }, 30000);
+    this.paint();
+    if (this.prefs.on && this.hasToken()) this.soon(1500);
+  },
+  soon(ms) {
+    if (!this.prefs.on || !this.clientId) return;
+    clearTimeout(this.timer);
+    this.timer = setTimeout(() => { this.timer = 0; this.run(); }, ms);
+  },
+  /** Al volver a la biblioteca: si había cambios esperando a que se cerrara la libreta, se aplican ya. */
+  onLibrary() { if (this.st?.waitingBusy && this.prefs.on) { this.st.waitingBusy = false; this.soon(300); } },
+  async run() {
+    if (!this.prefs.on || !this.clientId) return;
+    if (!this.hasToken()) { this.setToken(null); this.paint(); return; }
+    if (this.running) { this.again = true; return this.running; }
+    if (navigator.onLine === false) { this.status = 'offline'; this.paint(); this.later(60000); return; }
+    this.status = 'syncing'; this.paint();
+    this.running = (async () => {
+      try {
+        const res = await this.engine(SyncLocal, this.st);
+        this.status = 'idle'; this.error = ''; this.retry = 60000;
+        this.last = this.st.last;
+        this.report(res);
+      } catch (e) {
+        const kind = e?.kind || 'odd';
+        if (kind === 'stopped') this.status = 'idle';   // se desconectó a mitad: nada que avisar
+        else if (kind === 'auth') { this.setToken(null); this.status = 'idle'; }
+        else if (kind === 'offline') { this.status = 'offline'; this.later(60000); }
+        else { this.status = 'error'; this.error = kind; this.later(this.retry); this.retry = Math.min(this.retry * 2, 600000); }
+      } finally {
+        this.running = null;
+        this.paint();
+        if (this.again) { this.again = false; this.soon(1000); }
+      }
+    })();
+    return this.running;
+  },
+  later(ms) { clearTimeout(this.retryTimer); this.retryTimer = setTimeout(() => this.soon(0), ms); },
+  /** Tras sincronizar: avisos y biblioteca al día. */
+  report(res) {
+    if (res.conflicts.length) toast(res.conflicts.length === 1 ? `«${res.conflicts[0]}» cambió en los dos dispositivos: se conservan las dos versiones.` : `${res.conflicts.length} libretas cambiaron en los dos dispositivos: se conservan las dos versiones de cada una.`);
+    else if (res.restored.length) toast(`«${res.restored[0]}» se había borrado aquí, pero tenía cambios de otro dispositivo: se ha recuperado.`);
+    if (res.changed && S.view === 'library' && !document.body.classList.contains('is-card-dragging') && document.activeElement?.id !== 'search') renderLibrary();
+    else if (res.changed && S.view === 'editor' && typeof renderTabs === 'function') renderTabs();
+  },
+
+  // --- El motor: junta lo de este dispositivo (`L`) con lo de Drive ---
+  async engine(L, st) {
+    const gen = this.gen;
+    const save = () => { if (gen !== this.gen) throw syncErr('stopped'); L.saveState(st); };
+    const res = { up: 0, down: 0, conflicts: [], restored: [], removed: 0, changed: false, busy: 0 };
+    const files = await SyncDrive.list();
+    const remote = new Map(), bins = new Map(), metas = [], dups = [];
+    for (const f of files) {
+      const p = f.appProperties || {};
+      if (p.k === 'nb' && p.id) {
+        const e = { file: f.id, id: p.id, h: p.h || '', del: p.h === 'deleted', dev: p.dev || '', m: Number(p.m) || 0, time: Date.parse(f.modifiedTime) || 0 };
+        const cur = remote.get(p.id);
+        if (!cur) { remote.set(p.id, e); continue; }
+        // Dos archivos de la misma libreta (dos dispositivos la subieron a la vez): se sigue con el conocido (o el más reciente) y el otro se guarda como conflicto.
+        const keepNew = st.nb[p.id]?.f === e.file || (st.nb[p.id]?.f !== cur.file && e.time > cur.time);
+        dups.push(keepNew ? cur : e); if (keepNew) remote.set(p.id, e);
+      } else if (p.k === 'bin' && p.key) bins.set(p.key, { file: f.id, size: Number(p.size) || 0 });
+      else if (p.k === 'meta') metas.push(f);
+    }
+
+    // 1. Carpetas (y «Repaso de hoy»): primero, para que las libretas que bajen encuentren su carpeta.
+    if (await this.syncMeta(L, st, metas, save)) res.changed = true;
+
+    // 2. Binarios (audio y PDF originales): se suben una vez por id y se bajan cuando hacen falta.
+    const keysOf = (nb) => [...(nb.recordings || []).map((r) => r.id), ...new Set([...(nb.pdfs || []).map((f) => f.id), ...nb.pages.map((p) => p.pdf?.id).filter(Boolean)].map((id) => 'pdf:' + id))].filter((k) => typeof k === 'string');
+    const upBlobs = async (nb) => {
+      for (const key of keysOf(nb)) {
+        const rb = bins.get(key);
+        if (rb && st.bins[key]) continue;
+        const blob = await L.getBlob(key);
+        if (!blob) continue;
+        if (!rb || rb.size !== blob.size) {
+          const file = await SyncDrive.save(rb?.file || null, { name: `bin-${encodeURIComponent(key)}`, appProperties: { k: 'bin', key, size: String(blob.size) } }, blob);
+          bins.set(key, { file, size: blob.size });
+        }
+        st.bins[key] = blob.size; save();
+      }
+    };
+    const needBlobs = (nb) => { for (const key of keysOf(nb)) if (!st.need.includes(key)) st.need.push(key); };
+
+    // 3. Libretas.
+    const fetchNb = async (r) => {
+      let nb;
+      try { nb = JSON.parse(await SyncDrive.text(r.file)); } catch (e) { if (e?.kind) throw e; return null; }
+      if (!nb || typeof nb !== 'object' || nb.id !== r.id || !Array.isArray(nb.pages)) return null;   // respuesta rara: no se toca nada
+      return normalizeNotebook(nb);
+    };
+    /** ¿Sigue la libreta de aquí como antes de pedir la de Drive? (`was` = el objeto y su huella, o null si no existía).
+     *  Si mientras bajaba se escribió en ella, se renombró, se abrió o apareció, no se aplica nada: la próxima pasada lo ve. */
+    const still = (id, was) => {
+      const now = L.notebooks().find((n) => n.id === id);
+      const ok = was ? now === was.nb && this.hashOf(now) === was.lh && !L.busy(id) : !now;
+      if (!ok) { st.waitingBusy = true; res.busy++; }
+      return ok;
+    };
+    const download = async (r, was = null) => {
+      const nb = await fetchNb(r);
+      if (!nb || !still(r.id, was)) return null;
+      L.put(nb);
+      st.nb[nb.id] = { l: this.hashOf(nb), r: r.h, f: r.file };
+      needBlobs(nb); save();
+      res.down++; res.changed = true;
+      return nb;
+    };
+    const upload = async (nb, file) => {
+      await upBlobs(nb);
+      const h = this.hashOf(nb);
+      const blob = new Blob([JSON.stringify(nb)], { type: 'application/json' });
+      const f = await SyncDrive.save(file, { name: `nb-${nb.id}.json`, mimeType: 'application/json', appProperties: { k: 'nb', id: nb.id, h, m: String(nb.modified || 0), dev: L.device } }, blob);
+      st.nb[nb.id] = { l: h, r: h, f };
+      if (L.notebooks().some((n) => n.id === nb.id)) delete st.del[nb.id];   // si se borró durante la subida, su lápida sigue
+      save();
+      res.up++;
+    };
+    /** La otra versión, como libreta aparte «Título (conflicto, iPad, 21 oct 10:30)» con ids nuevos. */
+    const conflictCopy = (other, dev, when) => {
+      const copy = clone(other);
+      copy.id = uid();
+      const date = new Date(when || Date.now()).toLocaleString(LOCALE(), { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+      copy.title = `${other.title} (${I18N.lang === 'it' ? 'conflitto' : 'conflicto'}, ${dev || (I18N.lang === 'it' ? 'altro dispositivo' : 'otro dispositivo')}, ${date})`;
+      delete copy.example;
+      const ids = new Map();
+      for (const p of copy.pages) { const id = uid(); ids.set(p.id, id); p.id = id; }
+      (copy.outline || []).forEach((o) => { o.pageId = ids.get(o.pageId) || o.pageId; });
+      (copy.cards || []).forEach((c) => { c.id = uid(); if (c.pageId) c.pageId = ids.get(c.pageId) || c.pageId; });
+      if (copy.cover?.pageId) copy.cover.pageId = ids.get(copy.cover.pageId) || copy.cover.pageId;
+      if (copy.lastPageId) copy.lastPageId = ids.get(copy.lastPageId) || null;
+      return normalizeNotebook(copy);
+    };
+
+    const ids = new Set([...L.notebooks().map((n) => n.id), ...remote.keys(), ...Object.keys(st.del)]);
+    for (const id of ids) {
+      const nb = L.notebooks().find((n) => n.id === id);
+      if (nb && L.skip(nb)) continue;
+      const r = remote.get(id), b = st.nb[id];
+      if (!nb) {
+        if (!r || r.del) { delete st.del[id]; delete st.nb[id]; continue; }
+        if (st.del[id] && b && r.h === b.r) {
+          // Borrada aquí y sin cambios en Drive: se deja su lápida (el archivo no se borra: así los demás lo saben).
+          await SyncDrive.save(r.file, { appProperties: { k: 'nb', id, h: 'deleted', m: String(st.del[id]), dev: L.device } }, new Blob([JSON.stringify({ id, deleted: st.del[id] })], { type: 'application/json' }));
+          delete st.del[id]; delete st.nb[id]; save();
+          continue;
+        }
+        // Nueva en Drive, borrada aquí pero cambiada en otro dispositivo (gana la que tiene cambios), o perdida en este navegador.
+        const got = await download(r);
+        if (got && st.del[id]) res.restored.push(got.title);
+        if (got) delete st.del[id];
+        continue;
+      }
+      const lh = this.hashOf(nb);
+      const lChanged = !b || lh !== b.l, rChanged = !!r && (!b || r.h !== b.r);
+      if (!r) { await upload(nb, null); continue; }
+      if (r.del) {
+        if (lChanged) await upload(nb, r.file);   // borrada en otro dispositivo pero cambiada aquí: se conserva
+        else if (L.busy(id)) { res.busy++; st.waitingBusy = true; }
+        else { L.remove(id); delete st.nb[id]; delete st.del[id]; save(); res.removed++; res.changed = true; }
+        continue;
+      }
+      if (lh === r.h) { if (!b || b.l !== lh || b.r !== r.h || b.f !== r.file) { st.nb[id] = { l: lh, r: r.h, f: r.file }; save(); } continue; }
+      if (!lChanged && !rChanged) continue;
+      if (lChanged && !rChanged) { await upload(nb, r.file); continue; }
+      if (!lChanged && rChanged) {
+        if (L.busy(id)) { res.busy++; st.waitingBusy = true; } else await download(r, { nb, lh });
+        continue;
+      }
+      // Las dos cambiaron desde la última vez: no se pisa nada. Esta se queda como está y la otra pasa a ser una copia.
+      const other = await fetchNb(r);
+      if (!other || !L.notebooks().includes(nb)) continue;
+      const copy = conflictCopy(other, r.dev, other.modified || r.time);
+      L.put(copy); needBlobs(copy);
+      // La versión de Drive ya está a salvo en la copia: se apunta ya, para que un fallo al subir no cree otra copia.
+      st.nb[id] = { l: b?.l || '', r: r.h, f: r.file }; save();
+      await upload(copy, null);
+      await upload(nb, r.file);
+      res.conflicts.push(nb.title); res.changed = true;
+    }
+    // Archivos repetidos de una misma libreta: su versión se conserva como copia (si es distinta) y el repetido se quita.
+    for (const d of dups) {
+      if (d.del) { await SyncDrive.remove(d.file).catch(() => {}); continue; }
+      const kept = remote.get(d.id), nb = L.notebooks().find((n) => n.id === d.id);
+      if (!st.dup[d.file] && d.h !== kept?.h && (!nb || d.h !== this.hashOf(nb))) {
+        const other = await fetchNb(d);
+        if (!other) continue;
+        const copy = conflictCopy(other, d.dev, other.modified || d.time);
+        L.put(copy); needBlobs(copy);
+        st.dup[d.file] = Date.now(); save();   // ya copiado: no se vuelve a copiar aunque falle lo siguiente
+        await upload(copy, null);
+        res.conflicts.push(other.title); res.changed = true;
+      }
+      await SyncDrive.remove(d.file);
+      delete st.dup[d.file]; save();
+    }
+    // 4. Binarios que faltan aquí (de libretas bajadas).
+    for (const key of [...st.need]) {
+      const rb = bins.get(key);
+      if (await L.getBlob(key)) { st.need = st.need.filter((k) => k !== key); continue; }
+      if (!rb) continue;   // aún no está en Drive: se vuelve a mirar la próxima vez
+      await L.putBlob(key, await SyncDrive.blob(rb.file));
+      st.bins[key] = rb.size;
+      st.need = st.need.filter((k) => k !== key); save();
+    }
+    st.last = Date.now(); save();
+    return res;
+  },
+  /** Carpetas (con lápidas) y «Repaso de hoy» en `folia-meta.json`. Devuelve si cambió algo aquí. */
+  async syncMeta(L, st, metas, save = () => L.saveState(st)) {
+    const R = { folders: [], tomb: {}, daily: null };
+    for (const f of metas.sort((a, b) => (Date.parse(a.modifiedTime) || 0) - (Date.parse(b.modifiedTime) || 0))) {
+      let j = null;
+      try { j = JSON.parse(await SyncDrive.text(f.id)); } catch (e) { if (e?.kind) throw e; }
+      // Roto o raro: cuenta como vacío y se rehace desde lo de aquí (sin borrar nada; como mucho se pierden sus lápidas).
+      if (!j || typeof j !== 'object') { R.broken = true; continue; }
+      for (const rf of Array.isArray(j.folders) ? j.folders : []) {
+        if (!rf || typeof rf.id !== 'string') continue;
+        const i = R.folders.findIndex((x) => x.id === rf.id);
+        if (i < 0) R.folders.push(rf); else if ((rf.modified || 0) > (R.folders[i].modified || 0)) R.folders[i] = rf;
+      }
+      for (const [id, t] of Object.entries(j.tomb && typeof j.tomb === 'object' ? j.tomb : {})) if (Number(t) > (R.tomb[id] || 0)) R.tomb[id] = Number(t);
+      if (j.daily && typeof j.daily === 'object') R.daily = R.daily ? Daily.merge(R.daily, j.daily) : j.daily;
+    }
+    const broken = !!R.broken; delete R.broken;
+    const before = syncStable(Object.assign({}, R, { folders: [...R.folders].sort((a, b) => (a.id < b.id ? -1 : 1)) }));
+    let changed = false;
+    const tomb = Object.assign({}, R.tomb), now = Date.now();
+    const lmap = new Map(L.folders().map((f) => [f.id, f]));
+    // Borradas aquí desde la última vez (estaban subidas y ya no están), salvo que cambiaran en otro dispositivo después.
+    for (const id of st.fbase) {
+      if (lmap.has(id) || tomb[id]) continue;
+      const rf = R.folders.find((x) => x.id === id);
+      if (rf && (rf.modified || 0) > (st.last || 0)) continue;
+      tomb[id] = now;
+    }
+    for (const rf of R.folders) {
+      const lf = lmap.get(rf.id);
+      if (tomb[rf.id] && (rf.modified || 0) <= tomb[rf.id] && !(lf && (lf.modified || 0) > tomb[rf.id])) continue;
+      if (!lf) { const f = { id: rf.id, name: String(rf.name || ''), parent: rf.parent || null, color: rf.color ?? null, created: rf.created || now, modified: rf.modified || now }; L.addFolder(f); lmap.set(f.id, f); changed = true; }
+      else if ((rf.modified || 0) > (lf.modified || 0)) {
+        for (const k of ['name', 'parent', 'color', 'modified']) if (k in rf) lf[k] = k === 'parent' ? rf.parent || null : rf[k];
+        changed = true;
+      }
+    }
+    // Borradas en otro dispositivo: su contenido pasa a la carpeta de arriba (nunca se borra una libreta por esto).
+    for (const lf of [...L.folders()]) {
+      const t = tomb[lf.id];
+      if (!t) continue;
+      if ((lf.modified || 0) > t) { delete tomb[lf.id]; continue; }   // cambiada aquí después: se conserva
+      if (!R.folders.some((x) => x.id === lf.id) || (R.folders.find((x) => x.id === lf.id).modified || 0) <= t) { L.removeFolder(lf.id); changed = true; }
+    }
+    // Carpetas cuya madre ya no existe: al primer nivel (si no, no se verían).
+    for (const f of L.folders()) if (f.parent && !L.folders().some((x) => x.id === f.parent)) { f.parent = null; changed = true; }
+    if (changed) L.saveFolders();
+    // «Repaso de hoy»: se juntan los dos historiales (por día, lo mayor; nunca se pierde un día).
+    if (R.daily && syncStable(R.daily) !== syncStable(L.daily())) L.mergeDaily(R.daily);
+    const up = L.folders().filter((f) => !L.skipFolder(f));
+    // Lápidas de más de un año: ya no hacen falta.
+    for (const [id, t] of Object.entries(tomb)) if (now - t > 400 * 864e5 || up.some((f) => f.id === id)) delete tomb[id];
+    const out = { folders: up.sort((a, b) => (a.id < b.id ? -1 : 1)).map((f) => ({ id: f.id, name: f.name, parent: f.parent || null, color: f.color ?? null, created: f.created || 0, modified: f.modified || 0 })), tomb, daily: L.daily() || R.daily || null };   // un dispositivo sin «Repaso de hoy» no borra el historial de Drive
+    if (broken || syncStable(out) !== before || metas.length !== 1) {
+      const blob = new Blob([JSON.stringify(Object.assign({ app: 'Folia', sync: 1 }, out))], { type: 'application/json' });
+      await SyncDrive.save(metas[0]?.id || null, { name: 'folia-meta.json', mimeType: 'application/json', appProperties: { k: 'meta' } }, blob);
+      for (const extra of metas.slice(1)) await SyncDrive.remove(extra.id).catch(() => {});
+    }
+    st.fbase = up.map((f) => f.id);
+    save();
+    return changed;
+  },
+
+  // --- Interfaz: la nube junto al escudo de la copia (biblioteca) y su menú ---
+  /** 'setup' | 'off' | 'connecting' | 'syncing' | 'offline' | 'reconnect' | 'error' | 'ok' */
+  view() {
+    if (!this.clientId) return 'setup';
+    if (this.status === 'connecting') return 'connecting';
+    if (!this.prefs.on) return 'off';
+    if (this.status === 'syncing') return 'syncing';
+    if (this.status === 'offline' || navigator.onLine === false) return 'offline';
+    if (!this.hasToken()) return 'reconnect';
+    if (this.status === 'error') return 'error';
+    return 'ok';
+  },
+  ago(ms) {
+    const s = (Date.now() - ms) / 1000;
+    if (s < 50) return 'Sincronizado hace un momento';
+    if (s < 3600) { const m = Math.max(1, Math.round(s / 60)); return `Sincronizado hace ${m} min`; }
+    if (s < 86400) { const h = Math.round(s / 3600); return `Sincronizado hace ${h} h`; }
+    return `Sincronizado el ${formatDate(ms)}`;
+  },
+  label() {
+    const v = this.view();
+    return { setup: 'Sincronizar con Google Drive', off: 'Conectar con Google Drive', connecting: 'Conectando con Google…', syncing: 'Sincronizando…', offline: 'Sin conexión',
+      reconnect: 'Vuelve a conectar', error: 'No se pudo sincronizar', ok: this.last ? this.ago(this.last) : 'Conectado con Google Drive' }[v];
+  },
+  buttonHTML() {
+    const v = this.view(), label = this.label();
+    return `<button id="sync-btn" class="sync-btn" data-state="${v}" aria-haspopup="menu" aria-expanded="false" title="${esc(label)}" aria-label="${esc(label)}">${SYNC_ICON}<i class="sync-dot" aria-hidden="true">${['reconnect', 'error'].includes(v) ? '!' : ''}</i></button>`;
+  },
+  menuHTML() {
+    const v = this.view();
+    const text = {
+      setup: 'Falta configurar la conexión con Google (el ID de cliente). Mientras tanto, usa la copia de seguridad para pasar tus libretas a otro dispositivo.',
+      off: 'Tus libretas iguales en el iPad y en el Mac. Folia las guarda en tu Google Drive, en una carpeta oculta solo para Folia. Sin servidores nuestros: van de este navegador a tu Drive.',
+      connecting: 'Termina en la ventana de Google. Si no la ves, puede que el navegador la haya bloqueado.',
+      syncing: 'Subiendo y bajando los cambios. Puedes seguir usando Folia.',
+      offline: 'Se sincronizará cuando vuelva la conexión. Tus cambios se guardan en este dispositivo.',
+      reconnect: 'Por seguridad, Google pide confirmar la conexión cada cierto tiempo. Toca «Volver a conectar» para seguir sincronizando.',
+      error: this.error === 'quota' ? 'Tu Google Drive está lleno. Libera espacio y se volverá a intentar.' : 'Google Drive no ha contestado bien. Se volverá a intentar en unos minutos; no se ha perdido nada.',
+      ok: 'Tus libretas se sincronizan solas al abrir Folia, al volver a ella y unos segundos después de cada cambio.',
+    }[v];
+    const who = this.prefs.on && this.prefs.email ? `<div class="storage-line"><span>Cuenta</span><b translate="no">${esc(this.prefs.email)}</b></div>` : '';
+    const last = this.prefs.on ? `<div class="storage-line"><span>Última sincronización</span><b translate="no">${this.last ? esc(new Date(this.last).toLocaleString(LOCALE(), { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })) : tr('Nunca')}</b></div>` : '';
+    const btns = !this.clientId ? ''
+      : !this.prefs.on ? `<button data-act="sync-connect">${SYNC_ICON} Conectar con Google Drive</button>`
+        : `${v === 'reconnect' ? `<button data-act="sync-reconnect">${SYNC_ICON} Volver a conectar</button>` : `<button data-act="sync-now" ${v === 'syncing' ? 'disabled' : ''}>${icon('rotate')} Sincronizar ahora</button>`}
+          <button data-act="sync-off">${icon('close')} Desconectar</button>`;
+    return `<div class="safety-pop sync-pop" data-state="${v}">
+      <div class="sp-head"><span class="sp-badge" aria-hidden="true">${SYNC_ICON}</span><div><b>${this.label()}</b><span>${text}</span></div></div>
+      ${who}${last}
+    </div>${btns}`;
+  },
+  menu(anchor) {
+    popover(anchor, this.menuHTML(), (act) => this.act(act));
+  },
+  act(act) {
+    if (act === 'sync-connect') this.connect(false);
+    if (act === 'sync-reconnect') { const ask = this.forceAsk; this.forceAsk = false; this.connect(!ask); }
+    if (act === 'sync-now') { if (this.hasToken()) this.run(); else this.connect(!this.forceAsk); }
+    if (act === 'sync-off') this.disconnect();
+  },
+  /** Vuelve a pintar la nube (y su menú, si está abierto) sin rehacer la biblioteca. */
+  paint() {
+    const b = document.getElementById('sync-btn');
+    if (b && (b.dataset.state !== this.view() || b.title !== tr(this.label()))) {
+      const open = b.getAttribute('aria-expanded') === 'true';
+      b.outerHTML = this.buttonHTML();
+      const nb2 = document.getElementById('sync-btn');
+      if (open && nb2) { nb2.setAttribute('aria-expanded', 'true'); if (openPopover) openPopover.anchor = nb2; }
+    }
+    const pop = openPopover?.el;
+    if (pop && pop.querySelector('.sync-pop')) pop.innerHTML = this.menuHTML();
+  },
+};
+
+// =============================================================================
 // Libretas de ejemplo (la primera vez) e inicio
 // =============================================================================
 /** Libretas de ejemplo creadas antes: el subrayado era un trazo que, según la letra del ordenador,
@@ -18024,13 +18747,15 @@ async function start() {
   S.active = null; // se empieza siempre en la biblioteca; las pestañas siguen abiertas
   // Si el navegador tarda en contestar, la biblioteca no espera: el aviso se repinta cuando se sabe.
   await Promise.race([safety, new Promise((r) => setTimeout(r, 300))]);
+  await Sync.init();   // Google Drive (sync.js): estado de este dispositivo y, si está conectado, primera sincronización
   renderLibrary();
   safety.then(() => DataSafety.refreshNag());
   Onboarding.maybeShow();
   // Descargas (PDF, PNG y copia): solo si el visor lo permite.
   try { if (window.claude?.use) S.downloads = await window.claude.use('downloads'); } catch (e) { S.downloads = null; }
 }
-start();
+// La ventana emergente de Google vuelve a esta misma página: solo pasa el token y se cierra (no arranca la app).
+if (!Sync.catchRedirect()) start();
 
 // ---------- App instalable (versión publicada, no en la página de claude.ai) ----------
 if ('serviceWorker' in navigator && location.protocol !== 'file:' && document.querySelector('link[rel="manifest"]')) {
