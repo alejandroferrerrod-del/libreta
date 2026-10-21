@@ -1837,15 +1837,8 @@ body.is-card-dragging .crumbs button { box-shadow: inset 0 0 0 1.5px color-mix(i
 .onb-arrow { display: inline-flex; } .onb-arrow svg { width: 18px; height: 18px; stroke-width: 2.4; }
 .onb-skip { position: absolute; top: 24px; right: 24px; z-index: 5; padding: 10px 18px; font-size: 15px; }
 /* Bienvenida */
-.onb-logo { width: 180px; height: 200px; position: relative; perspective: 600px; }
-.onb-cover { position: absolute; inset: 0; border-radius: 22px; background: linear-gradient(135deg, #6B5CFF, #B84DF2); border: 1.5px solid rgba(255,255,255,.35); box-shadow: 0 0 40px rgba(175,82,222,.7), inset 24px 0 0 rgba(0,0,0,.18); animation: onb-cover .9s cubic-bezier(.3,1.4,.5,1) both; }
-@keyframes onb-cover { from { opacity: 0; transform: scale(.4) rotateX(60deg) rotateY(24deg); } }
-.onb-sign { position: absolute; inset: 0; width: 100%; height: 100%; }
-.onb-sign path { fill: none; stroke: #fff; stroke-width: 5; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 400; stroke-dashoffset: 400; filter: drop-shadow(0 0 6px rgba(255,255,255,.8)); animation: onb-draw 1.2s .6s ease-in-out forwards; }
-@keyframes onb-draw { to { stroke-dashoffset: 0; } }
-.onb-nib { position: absolute; left: 24px; top: 104px; color: #fff; opacity: 0; animation: onb-nib 1.2s .6s ease-in-out forwards; }
-.onb-nib svg { width: 34px; height: 34px; stroke-width: 2.4; transform: rotate(-35deg); }
-@keyframes onb-nib { 0% { opacity: 1; transform: translate(0, 0); } 85% { opacity: 1; } 100% { opacity: 0; transform: translate(120px, -20px); } }
+.onb-logo { width: 200px; height: 200px; margin: -24px 0 -30px; }   /* el icono de la app (dibujado en el lienzo con onbLogo) */
+.onb-logo canvas { width: 100%; height: 100%; display: block; }
 .onb-word { margin: 0; font: 900 64px/1 var(--rounded); display: flex; }
 .onb-word span { display: inline-block; background: linear-gradient(#fff, #CCBFFF); -webkit-background-clip: text; background-clip: text; color: transparent; animation: onb-letter .6s cubic-bezier(.3,1.5,.5,1) both; animation-delay: calc(1.1s + var(--i) * .07s); }
 @keyframes onb-letter { from { opacity: 0; transform: translateY(24px); filter: blur(6px); } }
@@ -1936,7 +1929,6 @@ body.is-card-dragging .crumbs button { box-shadow: inset 0 0 0 1.5px color-mix(i
 }
 @media (prefers-reduced-motion: reduce) {
   .onb *, .onb-stage { animation-duration: .01s !important; animation-delay: 0s !important; transition-duration: .01s !important; }
-  .onb-sign path { stroke-dashoffset: 0; }
 }
 /* Idioma con banderas */
 .onb-langs { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
@@ -1967,7 +1959,9 @@ body.is-card-dragging .crumbs button { box-shadow: inset 0 0 0 1.5px color-mix(i
 .onb.peek { background: rgba(0,0,0,.25); cursor: pointer; }
 .onb.peek > .onb-aurora, .onb.peek > .onb-stages, .onb.peek > .onb-skip { opacity: 0; pointer-events: none; }
 .onb.peek > .onb-return { display: inline-flex; }
-.onb-ring { position: fixed; z-index: 201; pointer-events: none; border-radius: 14px; border: 3px solid #BF59FF; box-shadow: 0 0 0 4px rgba(191,89,255,.3), 0 0 24px rgba(191,89,255,.8); }
+/* «Muéstramelo» de algo que está en un menú: el menú se ve por encima del tutorial apartado (los toques siguen yendo al tutorial) */
+.popover.onb-lift { z-index: 201; pointer-events: none; }
+.onb-ring { position: fixed; z-index: 202; pointer-events: none; border-radius: 14px; border: 3px solid #BF59FF; box-shadow: 0 0 0 4px rgba(191,89,255,.3), 0 0 24px rgba(191,89,255,.8); }
 /* Pulso estable: un halo aparte que crece y se desvanece (el aro no cambia de tamaño ni de sitio). */
 .onb-ring::after { content: ""; position: absolute; inset: -3px; border-radius: inherit; border: 3px solid #BF59FF; pointer-events: none; animation: onb-ring 1.4s ease-out infinite; }
 @keyframes onb-ring { from { opacity: .9; transform: scale(1); } to { opacity: 0; transform: scale(1.25); } }
@@ -2632,6 +2626,13 @@ I18N.dict.it = {
   'Cinta de repaso': 'Nastro di ripasso', 'Tapa la respuesta y ponte a prueba.': 'Copri la risposta e mettiti alla prova.',
   'IA con tu clave': 'IA con la tua chiave', 'Tarjetas, resúmenes y transcribir tu letra.': 'Flashcard, riassunti e trascrizione della tua scrittura.',
   'Curva del olvido': 'Curva dell’oblio', '«Para repasar hoy»: lo que vas olvidando.': '«Da ripassare oggi»: quello che stai dimenticando.',
+  // Tutorial, versión 3: presentar, índice, mapa, Drive, repaso de hoy, audio sincronizado y formas con tiradores
+  'Formas con tiradores': 'Forme con maniglie', 'Estira o escala una forma perfecta.': 'Allunga o scala una forma perfetta.',
+  'Índice automático': 'Indice automatico', 'Sale solo de tus títulos.': 'Nasce da solo dai tuoi titoli.',
+  'Todas las páginas de un vistazo.': 'Tutte le pagine a colpo d’occhio.', 'Sincronizar con Drive': 'Sincronizzare con Drive',
+  'Tus libretas en todos tus equipos.': 'I tuoi quaderni su tutti i tuoi dispositivi.', 'Explica tus apuntes a pantalla completa.': 'Spiega i tuoi appunti a schermo intero.',
+  'Unos minutos al día, todo mezclado.': 'Pochi minuti al giorno, tutto mescolato.', 'Audio sincronizado': 'Audio sincronizzato',
+  'Toca lo escrito y oye ese momento.': 'Tocca ciò che hai scritto e senti quel momento.',
   'Arrastra hasta la carpeta': 'Trascina fino alla cartella', 'Biología': 'Biologia', 'Química': 'Chimica', 'Historia': 'Storia', 'Examen': 'Esame', '¿Capital de Italia?': 'Capitale d’Italia?',
   'Transcribir': 'Trascrivi', '¡Repasada!': 'Ripassato!', 'Se va olvidando…': 'Si sta dimenticando…',
   // Libreta de demostración «Así es Folia» (película del final del tutorial)
@@ -2652,7 +2653,7 @@ I18N.dict.it = {
   '¿Qué produce la mitocondria?': 'Cosa produce il mitocondrio?', 'ATP, la energía de la célula.': 'ATP, l’energia della cellula.',
   'La mitocondria produce ATP para la célula.': 'Il mitocondrio produce ATP per la cellula.', '¿Qué orgánulo es?': 'Che organello è?',
   // Textos dibujados en las animaciones del tutorial
-  'Dibuja': 'Disegna', 'Mantén quieto…': 'Tieni fermo…', '¡Círculo perfecto!': 'Cerchio perfetto!', '¡Examen': 'Esame', 'el lunes!': 'lunedì!',
+  'Dibuja': 'Disegna', 'Mantén quieto': 'Tieni fermo', '¡Círculo perfecto!': 'Cerchio perfetto!', '¡Examen': 'Esame', 'el lunes!': 'lunedì!',
   'Revisar esta parte': 'Rivedere questa parte', 'pág. 3': 'pag. 3', 'Arrastra para ordenar': 'Trascina per ordinare', 'Cardiología': 'Cardiologia',
   'Digestivo': 'Gastroenterologia', 'Cirugía vascular': 'Chirurgia vascolare', 'Clase de Cardiología': 'Lezione di Cardiologia', 'célula': 'cellula', 'La': 'La',
   'es la unidad…': 'è l’unità…', 'Biología · pág. 2': 'Biologia · pag. 2', 'Apuntes · pág. 7': 'Appunti · pag. 7', 'Resumen · pág. 1': 'Riassunto · pag. 1',
@@ -18333,8 +18334,13 @@ function shortcutsDialog() {
 const ONB_KEY = 'libreta-onboarding', ONB_NAME = 'libreta-user-name';
 /** Versión del contenido del tutorial (se guarda en ONB_KEY al terminarlo u omitirlo; «done» = 1).
  *  Al añadir temas nuevos: súbela y pon esa versión en su campo `v`, y saldrán en «Novedades». */
-const ONB_VERSION = 2;
+const ONB_VERSION = 3;
 const onbKey = (id) => { const b = Shortcuts.bindings(id)[0]; return b ? Shortcuts.display(b) : ''; };
+// Iconos de los temas nuevos (versión 3) que no están en icons.js: presentar (el de present.js), la nube de Drive y la llama del repaso.
+ICONS.present = ICONS.present || PRESENT_ICONS.present;
+ICONS.laser = ICONS.laser || PRESENT_ICONS.laser;
+ICONS.cloud = ICONS.cloud || '<path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/>';
+ICONS.flame = ICONS.flame || '<path d="M12 2.5c.6 3.2 4.9 5.6 4.9 10.4a4.9 4.9 0 0 1-9.8 0c0-2.3 1.2-3.7 2.2-4.8.2 1.6.9 2.6 1.8 3.1-.4-3.4.3-6.4.9-8.7z"/>';
 ICONS.shield = ICONS.shield || '<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/>';
 
 const ONB_CHAPTERS = [
@@ -18345,10 +18351,12 @@ const ONB_CHAPTERS = [
 
 // [id, título, subtítulo, icono, colores, capítulo, versión en que entró, dónde está en la app]
 // `ui`: 'editor:#sel' o 'library:#sel'; 'editor@pen:#sel' = solo con esa herramienta (barra de opciones,
-// que puede tenerlo dentro de «Más»). Lo usa «Muéstramelo» y las pruebas comprueban que existe.
+// que puede tenerlo dentro de «Más»); 'editor:#botón>>#dentro' = lo de dentro del menú que abre ese botón (se abre
+// para enseñarlo). Lo usa «Muéstramelo» y las pruebas comprueban que existe.
 const ONB_TOPICS = [
   ['language', 'Idioma', 'Español o italiano, cuando quieras.', 'globe', ['#34C759', '#FF3B30'], 'write', 1, ['library:#settings-btn']],
   ['handwriting', 'Escribir a mano', 'Pluma, bolígrafo y lápiz. Formas perfectas en directo.', 'pen', ['#5C73FF', '#8C54FF'], 'write', 2, ['editor:[data-tool="pen"]']],
+  ['shapes', 'Formas con tiradores', 'Estira o escala una forma perfecta.', 'shapes', ['#0A84FF', '#5E5CE6'], 'write', 3, ['editor@pen:[data-act="shapes"]']],
   ['palette', 'Paleta flotante', 'Tus colores siempre a mano.', 'palette', ['#FF9F0A', '#FF2D55'], 'write', 2, ['editor:#pal-btn']],
   ['highlighter', 'Subrayar', 'Libre, recto o perfectamente horizontal.', 'highlighter', ['#FFC71A', '#FF8C26'], 'write', 1, ['editor:[data-tool="highlighter"]']],
   ['ruler', 'Regla', 'Líneas rectas, medidas y ángulos.', 'ruler', ['#64D2FF', '#5E5CE6'], 'write', 2, ['editor@pen:[data-ruler="toggle"]']],
@@ -18363,8 +18371,12 @@ const ONB_TOPICS = [
   ['links', 'Enlaces entre libretas', 'Une ideas entre libretas y páginas.', 'link', ['#738CFF', '#33CCF2'], 'arrange', 1, ['editor:[data-tool="link"]']],
   ['pdf', 'Trabajar con PDF', 'Importa, selecciona texto y subráyalo.', 'pdf', ['#FF6666', '#E6408C'], 'arrange', 1, ['library:#new-btn']],
   ['search', 'Buscar', 'Encuentra cualquier palabra al instante.', 'search', ['#4DBFFF', '#66F2BF'], 'arrange', 1, ['editor:#find-btn']],
+  ['outline', 'Índice automático', 'Sale solo de tus títulos.', 'outline', ['#5AC8FA', '#5E5CE6'], 'arrange', 3, ['editor:#sidebar [data-mode="outline"]', 'editor:#study-btn>>[data-act="toc"]']],
+  ['nbmap', 'Mapa de la libreta', 'Todas las páginas de un vistazo.', 'map', ['#30D158', '#64D2FF'], 'arrange', 3, ['editor:#study-btn>>[data-act="nb-map"]']],
   ['dynamic', 'Modo dinámico', 'Tus libretas como una constelación.', 'sparkles', ['#BF59FF', '#4D66FF'], 'arrange', 1, []],
   ['backup', 'Copia de seguridad', 'El escudo te avisa si toca hacer copia.', 'shield', ['#34C759', '#30B0C7'], 'arrange', 2, ['library:#safety-btn']],
+  ['sync', 'Sincronizar con Drive', 'Tus libretas en todos tus equipos.', 'cloud', ['#0A84FF', '#34C759'], 'arrange', 3, ['library:#sync-btn']],
+  ['present', 'Presentar', 'Explica tus apuntes a pantalla completa.', 'present', ['#FF9F0A', '#FF375F'], 'arrange', 3, ['editor:#page-menu>>[data-act="present"]']],
   ['share', 'Compartir y exportar', 'PDF o imagen, listos para enviar.', 'share', ['#40D98C', '#338CFF'], 'arrange', 1, ['editor:#share-btn']],
   ['shortcuts', 'Atajos de teclado', 'Todo con el teclado, a tu manera.', 'keyboard', ['#99A6BF', '#667399'], 'arrange', 1, ['library:#settings-btn']],
   ['study', 'Menú Estudio', 'Tarjetas de repaso y de huecos.', 'study', ['#FF9F0A', '#FF375F'], 'learn', 2, ['editor:#study-btn']],
@@ -18372,7 +18384,9 @@ const ONB_TOPICS = [
   ['tape', 'Cinta de repaso', 'Tapa la respuesta y ponte a prueba.', 'tape', ['#34C759', '#A2845E'], 'learn', 2, ['editor@highlighter:[data-tape-act="draw"]']],
   ['ai', 'IA con tu clave', 'Tarjetas, resúmenes y transcribir tu letra.', 'sparkles', ['#AF52DE', '#007AFF'], 'learn', 2, ['editor:#study-btn']],
   ['recall', 'Curva del olvido', '«Para repasar hoy»: lo que vas olvidando.', 'graph', ['#FF453A', '#32D74B'], 'learn', 2, ['library:[data-recall]']],
+  ['daily', 'Repaso de hoy', 'Unos minutos al día, todo mezclado.', 'flame', ['#FF9F0A', '#FF453A'], 'learn', 3, ['library:[data-daily]', 'editor:#study-btn>>[data-act="daily"]']],
   ['voice', 'Grabaciones y notas de voz', 'Graba clases y pon el audio en la página.', 'waveform', ['#FF8C33', '#FF4D73'], 'learn', 1, ['editor:#mic-slot']],
+  ['audiosync', 'Audio sincronizado', 'Toca lo escrito y oye ese momento.', 'waveform', ['#FF9500', '#AF52DE'], 'learn', 3, ['editor:#mic-slot']],
   ['timer', 'Temporizador de estudio', 'Pomodoro con descansos y alarma.', 'timer', ['#FF5959', '#40CC80'], 'learn', 1, ['editor:#study-btn']],
 ].map(([id, title, subtitle, sym, colors, chapter, v, ui]) => ({ id, title, subtitle, sym, colors, chapter, v, ui }));
 const onbChapter = (id) => ONB_CHAPTERS.find((c) => c.id === id);
@@ -18415,7 +18429,7 @@ function onbLesson(id, name) {
       'Arrastra la esquina del recuadro para cambiar el aumento.'];
     case 'lasso': return [`${you}coge justo lo que quieres.`,
       [['lasso', `Lazo (${k('toolLasso')}): rodea y mueve, copia o borra.`],
-        ['layers', '«Filtro»: elige si coge tinta, textos, imágenes…'],
+        ['layers', '«Filtro»: elige si coge tinta, textos, imágenes o post-its.'],
         ['eyedropper', '«Solo este color»: toca un trazo y solo coge los de su color.']],
       'Solo coge lo que rodeas de verdad, y te dice cuántas cosas son.'];
     case 'text': return [`${you}añade cuadros de texto con el estilo que quieras.`,
@@ -18518,6 +18532,41 @@ function onbLesson(id, name) {
         ['chevronUpDown', 'Ajusta los minutos de estudio y de descanso.'],
         ['bell', 'Al llegar el descanso suena una alarma. Si lo empezaste sin querer, «Quitar temporizador».']],
       'Sigue contando aunque cambies de libreta o cierres la página.'];
+    case 'shapes': return [`${you}corrige una forma sin volver a dibujarla.`,
+      [['shapes', 'Dibuja una forma y mantén quieto al final: sale perfecta y con tiradores.'],
+        ['maximize', 'Las esquinas la escalan sin deformarla; los lados la estiran en un sentido.'],
+        ['lasso', '¿Luego? Rodéala sola con el lazo y vuelven sus tiradores.']],
+      'Cada arrastre se puede deshacer.'];
+    case 'outline': return [`${you}tu índice se hace solo.`,
+      [['outline', 'Folia lo saca de tus títulos: letra más grande, negrita, títulos del PDF o el color «Título».'],
+        ['search', 'Barra lateral › Índice: búscalo y toca un título para saltar a él.'],
+        ['pages', '«Insertar página de índice»: una página con enlaces a cada apartado.']],
+      'En el móvil está en Estudio › Índice de la libreta.'];
+    case 'nbmap': return [`${you}mira toda la libreta desde arriba.`,
+      [['map', `Estudio › Mapa de la libreta, la tecla ${k('notebookMap')} o pellizca fuerte con el zoom al mínimo.`],
+        ['layers', 'Capas: calor de repaso, colores, tarjetas y enlaces entre páginas.'],
+        ['select', 'Toca una página y entras en ella.']],
+      'En el calor de repaso, el rojo son páginas que hace tiempo que no miras.'];
+    case 'sync': return [`${you}tus apuntes, en todos tus equipos.`,
+      [['cloud', 'Toca la nube, junto al escudo de la biblioteca, y conecta tu Google Drive.'],
+        ['rotate', 'Desde entonces se sincroniza sola cada vez que cambias algo.'],
+        ['bell', 'Si la nube dice «Vuelve a conectar», tócala y listo.']],
+      'Si una libreta cambia en dos equipos a la vez, se guardan las dos versiones.'];
+    case 'present': return [`${you}explica tus apuntes como en clase.`,
+      [['present', `⋯ › Presentar (${k('present')}): la página a pantalla completa.`],
+        ['laser', 'L láser, D tinta que se borra sola, F foco y B pantalla en negro.'],
+        ['arrowDown', 'T telón: tapa la página y ↓ la descubre párrafo a párrafo.']],
+      'Nada de lo que dibujas al presentar se guarda. Esc para salir.'];
+    case 'daily': return [`${you}unos minutos al día y no se te olvida nada.`,
+      [['flame', '«Repaso de hoy», en la biblioteca o en Estudio: 5, 10 o 15 minutos.'],
+        ['lightbulb', 'Mezcla tus tarjetas pendientes con lo que se te está olvidando.'],
+        ['check', 'Contesta Bien o Mal y Folia decide cuándo vuelve a salir.']],
+      'Cada día que repasas suma uno a tu racha.'];
+    case 'audiosync': return [`${you}lo que escribes y lo que se dijo, juntos.`,
+      [['mic', 'Graba mientras escribes: cada trazo recuerda su momento.'],
+        ['play', 'Al reproducir, lo escrito va apareciendo al ritmo del audio.'],
+        ['vListen', '«Escuchar»: toca una palabra y oyes lo que se decía entonces.']],
+      '★ marca un momento importante; ±10 s y la velocidad están en la barra.'];
   }
   return ['', [], ''];
 }
@@ -18560,7 +18609,7 @@ function onbLessonIt(id, name) {
       'Trascina l’angolo del riquadro per cambiare l’ingrandimento.'];
     case 'lasso': return [`${you}prendi proprio quello che vuoi.`,
       [['lasso', `Lazo (${k('toolLasso')}): circonda e sposta, copia o cancella.`],
-        ['layers', '«Filtro»: scegli se prende inchiostro, testi, immagini…'],
+        ['layers', '«Filtro»: scegli se prende inchiostro, testi, immagini o post-it.'],
         ['eyedropper', '«Solo questo colore»: tocca un tratto e prende solo quelli del suo colore.']],
       'Prende solo ciò che circondi davvero, e ti dice quante cose sono.'];
     case 'text': return [`${you}aggiungi caselle di testo con lo stile che vuoi.`,
@@ -18663,6 +18712,41 @@ function onbLessonIt(id, name) {
         ['chevronUpDown', 'Regola i minuti di studio e di pausa.'],
         ['bell', 'Quando arriva la pausa suona una sveglia. Se l’hai avviato per sbaglio, «Rimuovi timer».']],
       'Continua a contare anche se cambi quaderno o chiudi la pagina.'];
+    case 'shapes': return [`${you}correggi una forma senza ridisegnarla.`,
+      [['shapes', 'Disegna una forma e resta fermo alla fine: diventa perfetta e con le maniglie.'],
+        ['maximize', 'Gli angoli la scalano senza deformarla; i lati la allungano in un verso.'],
+        ['lasso', 'Più tardi? Circondala da sola con il lazo e tornano le maniglie.']],
+      'Ogni trascinamento si può annullare.'];
+    case 'outline': return [`${you}il tuo indice si fa da solo.`,
+      [['outline', 'Folia lo ricava dai tuoi titoli: lettere più grandi, grassetto, titoli del PDF o il colore «Titolo».'],
+        ['search', 'Barra laterale › Indice: cercalo e tocca un titolo per saltarci.'],
+        ['pages', '«Inserisci pagina indice»: una pagina con i collegamenti a ogni sezione.']],
+      'Sul telefono è in Studio › Indice del quaderno.'];
+    case 'nbmap': return [`${you}guarda tutto il quaderno dall’alto.`,
+      [['map', `Studio › Mappa del quaderno, il tasto ${k('notebookMap')} o pizzica forte con lo zoom al minimo.`],
+        ['layers', 'Livelli: calore del ripasso, colori, flashcard e collegamenti tra pagine.'],
+        ['select', 'Tocca una pagina e ci entri.']],
+      'Nel calore del ripasso, il rosso sono pagine che non guardi da tempo.'];
+    case 'sync': return [`${you}i tuoi appunti, su tutti i tuoi dispositivi.`,
+      [['cloud', 'Tocca la nuvola, accanto allo scudo della libreria, e collega il tuo Google Drive.'],
+        ['rotate', 'Da allora si sincronizza da sola ogni volta che cambi qualcosa.'],
+        ['bell', 'Se la nuvola dice «Riconnetti», toccala e basta.']],
+      'Se un quaderno cambia su due dispositivi insieme, si tengono tutte e due le versioni.'];
+    case 'present': return [`${you}spiega i tuoi appunti come a lezione.`,
+      [['present', `⋯ › Presenta (${k('present')}): la pagina a schermo intero.`],
+        ['laser', 'L laser, D inchiostro che si cancella da solo, F focus e B schermo nero.'],
+        ['arrowDown', 'T sipario: copre la pagina e ↓ la scopre paragrafo per paragrafo.']],
+      'Niente di ciò che disegni mentre presenti viene salvato. Esc per uscire.'];
+    case 'daily': return [`${you}pochi minuti al giorno e non dimentichi niente.`,
+      [['flame', '«Ripasso di oggi», nella libreria o in Studio: 5, 10 o 15 minuti.'],
+        ['lightbulb', 'Mescola le flashcard in sospeso con ciò che stai dimenticando.'],
+        ['check', 'Rispondi Bene o Male e Folia decide quando ripresentarlo.']],
+      'Ogni giorno di ripasso aggiunge uno alla tua serie.'];
+    case 'audiosync': return [`${you}ciò che scrivi e ciò che si diceva, insieme.`,
+      [['mic', 'Registra mentre scrivi: ogni tratto ricorda il suo momento.'],
+        ['play', 'In riproduzione, ciò che hai scritto appare al ritmo dell’audio.'],
+        ['vListen', '«Ascolta»: tocca una parola e senti cosa si diceva in quel momento.']],
+      '★ segna un momento importante; ±10 s e la velocità sono nella barra.'];
   }
   return ['', [], ''];
 }
@@ -18688,6 +18772,8 @@ function onbIcon(name, color, size = 24, width = 2) {
 function onbGrad(ctx, colors, x0, y0, x1, y1) { const g = ctx.createLinearGradient(x0, y0, x1, y1); colors.forEach((c, i) => g.addColorStop(i / Math.max(1, colors.length - 1), c)); return g; }
 const onbGray = (w, a = 1) => `rgba(${Math.round(w * 255)},${Math.round(w * 255)},${Math.round(w * 255)},${a})`;
 const ROUNDED = 'ui-rounded, "SF Pro Rounded", "Segoe UI Variable Display", system-ui, sans-serif';
+/** Lo escrito dentro de las animaciones, en el idioma de la app (sin pasar por el diccionario, como en la película). */
+const onbL = (es, it) => (I18N.lang === 'it' ? it : es);
 
 // ---------- Demostraciones (cada tema, en un lienzo de 388 × 278) ----------
 const OnbDemos = {
@@ -18733,10 +18819,38 @@ const OnbDemos = {
     return { it, flip, travel, cursor, click: Math.max(0, 1 - near / 0.03) };
   },
   paper(ctx, W, H) { ctx.fillStyle = onbGray(0.97); ctx.beginPath(); ctx.roundRect(0, 0, W, H, 14); ctx.fill(); },
-  lines(ctx, x, y, w, widths = [0.9, 0.75, 0.85, 0.6], color = onbGray(0.78), gap = 22) {
-    ctx.fillStyle = color;
-    widths.forEach((k, i) => { ctx.beginPath(); ctx.roundRect(x, y + i * gap, w * k, 8, 4); ctx.fill(); });
+  /** Letra a mano de verdad (la de la película, OnbHand), guardada por texto y tamaño: { strokes, paths, dur, width }. */
+  hands: new Map(),
+  hand(text, h, seed = 7) {
+    const key = `${text}|${h}|${seed}`;
+    let w = this.hands.get(key);
+    if (!w) {
+      w = OnbHand.write(text, { x: 0, y: 0, h, color: '#000', width: Math.max(0.9, h * 0.17), seed, jitter: 0.7 });
+      w.paths = w.strokes.map((s) => onbFilmPath(s));
+      this.hands.set(key, w);
+    }
+    return w;
   },
+  /** Escribe `text` a mano desde (x, y = renglón) con la altura de la x `h`, hasta la fracción `k` (0…1) de su tiempo.
+   *  Devuelve { w: ancho, tip: [x, y] de la punta mientras se escribe (null si ya está entero) }. */
+  write(ctx, text, x, y, h, color, k = 1, seed = 7) {
+    const w = this.hand(text, h, seed), T = Math.max(0, Math.min(1, k)) * w.dur;
+    let tip = null;
+    if (k <= 0) return { w: w.width, tip: [x, y] };
+    ctx.save(); ctx.translate(x, y); ctx.fillStyle = color;
+    w.strokes.forEach((s, i) => {
+      if (k >= 1 || T >= s.times[s.times.length - 1]) { ctx.fill(w.paths[i]); return; }
+      if (T < s.t0) return;
+      let n = 0;
+      while (n < s.times.length && s.times[n] <= T) n++;
+      const pts = s.points.slice(0, Math.max(1, n));
+      ctx.fill(onbFilmPath(s, pts)); tip = pts[pts.length - 1];
+    });
+    ctx.restore();
+    return { w: w.width, tip: tip ? [x + tip[0], y + tip[1]] : null };
+  },
+  /** Ancho de `text` escrito a mano con la altura de la x `h`. */
+  handWidth(text, h, seed = 7) { return this.hand(text, h, seed).width; },
   label(ctx, text, x, y, font = `600 17px ${ROUNDED}`, color = onbGray(0.3), align = 'center') {
     ctx.font = font; ctx.fillStyle = color; ctx.textAlign = align; ctx.textBaseline = 'middle'; ctx.fillText(text, x, y);
   },
@@ -18762,23 +18876,23 @@ const OnbDemos = {
       ctx.strokeStyle = '#AF52DE'; ctx.lineWidth = 3;
       ctx.beginPath(); ctx.arc(ex, ey, 13, -Math.PI / 2, -Math.PI / 2 + hold * Math.PI * 2); ctx.stroke();
     }
-    this.label(ctx, tr(morph > 0.5 ? '¡Círculo perfecto!' : hold > 0 ? 'Mantén quieto…' : 'Dibuja'), cx, H - 14);
+    this.label(ctx, tr(morph > 0.5 ? '¡Círculo perfecto!' : hold > 0 ? 'Mantén quieto' : 'Dibuja'), cx, H - 14);
   },
   highlighter(ctx, W, H, t) {
     const p = onbCycle(t, 3.6), sweep = onbSmooth(onbRamp(p, 0.1, 0.45)), straighten = onbSmooth(onbRamp(p, 0.55, 0.65));
     this.paper(ctx, W, H);
-    const widths = [0.85, 0.7, 0.8, 0.9, 0.55];
-    widths.forEach((k, line) => {
-      const y = 20 + line * 34;
+    const rows = onbL(['Insuficiencia cardiaca', 'Disnea de esfuerzo', 'Ortopnea y edemas', 'Crepitantes en las bases', 'Tercer ruido'],
+      ['Insufficienza cardiaca', 'Dispnea da sforzo', 'Ortopnea ed edemi', 'Crepitii alle basi', 'Terzo tono']);
+    rows.forEach((txt, line) => {
+      const y = 36 + line * 34;
       if (line === 2 && sweep > 0) {
-        const len = (W - 40) * 0.8 * sweep;
-        ctx.strokeStyle = 'rgba(255,204,0,.65)'; ctx.lineWidth = 20; ctx.lineCap = 'round';
-        ctx.beginPath(); ctx.moveTo(20, y + 9);
-        for (let x = 0; x <= len; x += 4) ctx.lineTo(20 + x, y + 9 + (1 - straighten) * 4 * Math.sin(x / 18));
+        const len = (this.handWidth(txt, 10) + 10) * sweep;
+        ctx.strokeStyle = 'rgba(255,204,0,.6)'; ctx.lineWidth = 20; ctx.lineCap = 'round';
+        ctx.beginPath(); ctx.moveTo(20, y - 6);
+        for (let x = 0; x <= len; x += 4) ctx.lineTo(20 + x, y - 6 + (1 - straighten) * 4 * Math.sin(x / 18));
         ctx.stroke();
       }
-      ctx.fillStyle = onbGray(line === 2 ? 0.35 : 0.78);
-      ctx.beginPath(); ctx.roundRect(20, y + 5, (W - 40) * k, 8, 4); ctx.fill();
+      this.write(ctx, txt, 24, y, 10, ONB_FILM_INK, 1, 11 + line);
     });
     const modes = ['Libre', 'Recto', 'H / V'].map(tr);
     ctx.font = `600 12px ${ROUNDED}`;
@@ -18865,19 +18979,24 @@ const OnbDemos = {
   pdf(ctx, W, H, t) {
     const p = onbCycle(t, 4), select = onbSmooth(onbRamp(p, 0.08, 0.35)), panel = onbRamp(p, 0.38, 0.48), marked = p > 0.6;
     this.paper(ctx, W, H);
-    const w = W - 44, widths = [0.9, 0.8, 0.85, 0.5, 0.88, 0.7];
-    widths.forEach((k, line) => {
-      const y = 22 + line * 31;
+    // Texto de verdad, como el de un PDF (letra de imprenta)
+    const rows = onbL(['La insuficiencia cardiaca es un síndrome', 'clínico: el corazón no bombea la sangre', 'que necesita el organismo, o lo hace a', 'costa de presiones de llenado altas.', 'Su causa más frecuente es la', 'cardiopatía isquémica.'],
+      ['L’insufficienza cardiaca è una sindrome', 'clinica: il cuore non pompa il sangue', 'di cui l’organismo ha bisogno, o lo fa', 'a costo di pressioni di riempimento alte.', 'La causa più frequente è la', 'cardiopatia ischemica.']);
+    const font = '14.5px Georgia, "Times New Roman", serif';
+    ctx.font = font;
+    rows.forEach((txt, line) => {
+      const y = 34 + line * 31;
       if (line === 2 || line === 3) {
-        const width = line === 2 ? w * 0.85 * Math.min(1, select * 2) : w * 0.5 * Math.max(0, select * 2 - 1);
+        const full = ctx.measureText(txt).width + 6;
+        const width = line === 2 ? full * Math.min(1, select * 2) : full * Math.max(0, select * 2 - 1);
         ctx.fillStyle = marked ? 'rgba(255,204,0,.6)' : 'rgba(0,122,255,.3)';
-        if (width > 0) { ctx.beginPath(); ctx.roundRect(22, y, width, 16, 3); ctx.fill(); }
+        if (width > 0) { ctx.beginPath(); ctx.roundRect(19, y - 11, width, 21, 3); ctx.fill(); }
       }
-      ctx.fillStyle = onbGray(0.55); ctx.beginPath(); ctx.roundRect(22, y + 5, w * k, 6, 3); ctx.fill();
+      this.label(ctx, txt, 22, y, font, onbGray(0.18), 'left');
     });
     const sc = marked ? 0.8 : panel, op = marked ? 0 : panel;
     if (op > 0) {
-      ctx.save(); ctx.globalAlpha = op; ctx.translate(W / 2, 48); ctx.scale(sc, sc);
+      ctx.save(); ctx.globalAlpha = op; ctx.translate(W / 2, 124); ctx.scale(sc, sc);
       const pw = 4 * 26 + 30 + 24;
       ctx.shadowColor = 'rgba(0,0,0,.25)'; ctx.shadowBlur = 8; ctx.shadowOffsetY = 3;
       ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.roundRect(-pw / 2, -18, pw, 36, 18); ctx.fill(); ctx.shadowColor = 'transparent';
@@ -18934,20 +19053,22 @@ const OnbDemos = {
     this.label(ctx, tr(isBreak ? 'Descanso' : 'Estudio'), cx, cy + 40, `600 15px ${ROUNDED}`, color);
   },
   search(ctx, W, H, t) {
-    const p = onbCycle(t, 4), word = tr('célula'), typed = word.slice(0, Math.floor(onbRamp(p, 0.05, 0.3) * word.length)), results = onbRamp(p, 0.35, 0.5);
+    const p = onbCycle(t, 4), word = onbL('disnea', 'dispnea'), typed = word.slice(0, Math.floor(onbRamp(p, 0.05, 0.3) * word.length)), results = onbRamp(p, 0.35, 0.5);
     ctx.fillStyle = 'rgba(255,255,255,.12)'; ctx.beginPath(); ctx.roundRect(0, 0, W, 46, 12); ctx.fill();
     const mg = onbIcon('search', 'rgba(255,255,255,.7)', 20, 2); if (mg.complete) ctx.drawImage(mg, 12, 13, 20, 20);
     this.label(ctx, typed || tr('Buscar'), 42, 24, `20px ${ROUNDED}`, typed ? '#fff' : 'rgba(255,255,255,.4)', 'left');
-    const books = ['#34C759', '#007AFF', '#AF52DE'], where = ['Biología · pág. 2', 'Apuntes · pág. 7', 'Resumen · pág. 1'].map(tr);
+    const books = ['#FF3B30', '#007AFF', '#34C759'];
+    const where = onbL(['Cardiología · pág. 2', 'Caso clínico · pág. 1', 'Neumología · pág. 7'], ['Cardiologia · pag. 2', 'Caso clinico · pag. 1', 'Pneumologia · pag. 7']);
+    const around = onbL([['La ', ' de esfuerzo empeora'], ['Refiere ', ' y edemas'], ['Causas de ', ' aguda']], [['La ', ' da sforzo peggiora'], ['Riferisce ', ' ed edemi'], ['Cause di ', ' acuta']]);
     for (let i = 0; i < 3; i++) {
       const k = onbRamp(results, i * 0.25, i * 0.25 + 0.5);
       if (k <= 0) continue;
-      const y = 60 + i * 72 + 12 * (1 - k);
+      const y = 60 + i * 72 + 12 * (1 - k), [la, rest] = around[i];
       ctx.save(); ctx.globalAlpha = k;
       ctx.fillStyle = 'rgba(255,255,255,.07)'; ctx.beginPath(); ctx.roundRect(0, y, W, 62, 12); ctx.fill();
       ctx.fillStyle = books[i]; ctx.beginPath(); ctx.roundRect(10, y + 11, 30, 40, 4); ctx.fill();
       this.label(ctx, where[i], 52, y + 20, `12px ${ROUNDED}`, 'rgba(255,255,255,.6)', 'left');
-      const la = tr('La') + ' ', rest = ' ' + tr('es la unidad…'); ctx.font = `15px ${ROUNDED}`; const wl = ctx.measureText(la).width;
+      ctx.font = `15px ${ROUNDED}`; const wl = ctx.measureText(la).width;
       ctx.font = `700 15px ${ROUNDED}`; const wc = ctx.measureText(word).width;
       ctx.fillStyle = '#FFD60A'; ctx.beginPath(); ctx.roundRect(52 + wl - 3, y + 32, wc + 6, 20, 10); ctx.fill();
       this.label(ctx, la, 52, y + 42, `15px ${ROUNDED}`, '#fff', 'left');
@@ -19017,10 +19138,6 @@ const OnbDemos = {
     if (f > 0 && b) ctx.lineTo(a[0] + (b[0] - a[0]) * f, a[1] + (b[1] - a[1]) * f);
     ctx.stroke();
   },
-  /** Letra a mano de mentira: bucles como «eeee» entre x0 y x1. */
-  cursive(x0, x1, y, h, n = 90) {
-    return Array.from({ length: n + 1 }, (_, i) => { const u = i / n, a = u * (x1 - x0) / 7; return [x0 + u * (x1 - x0) - 4 * Math.sin(a), y - h * 0.5 * (1 - Math.cos(a)) * (0.7 + 0.3 * Math.sin(u * 9))]; });
-  },
   palette(ctx, W, H, t) {
     const p = onbCycle(t, 4.4);
     this.paper(ctx, W, H);
@@ -19035,9 +19152,9 @@ const OnbDemos = {
       ctx.fillStyle = c; ctx.beginPath(); ctx.arc(cx, y, 11, 0, 7); ctx.fill();
     });
     this.tap(ctx, cx, cy - 76 + 38, onbRamp(p, 0.02, 0.14)); this.tap(ctx, cx, cy - 76 + 76, onbRamp(p, 0.52, 0.64));
-    ctx.lineWidth = 4; ctx.lineCap = ctx.lineJoin = 'round';
-    ctx.strokeStyle = colors[1]; this.path(ctx, this.cursive(96, W - 30, 92, 26), onbSmooth(onbRamp(p, 0.12, 0.45)));
-    if (p >= 0.5) { ctx.strokeStyle = colors[2]; this.path(ctx, this.cursive(96, W - 60, 160, 26), onbSmooth(onbRamp(p, 0.62, 0.92))); }
+    // Con el azul, una definición; con el rojo, su fórmula
+    this.write(ctx, onbL('Gasto cardiaco', 'Gittata cardiaca'), 92, 104, 14, colors[1], onbSmooth(onbRamp(p, 0.12, 0.45)), 5);
+    if (p >= 0.5) this.write(ctx, onbL('GC = FC × VS', 'GC = FC × GS'), 92, 170, 14, colors[2], onbSmooth(onbRamp(p, 0.62, 0.92)), 6);
     // Los tres modos: desactivada, fija, al terminar el trazo
     ['palOff', 'palFixed', 'palStroke'].forEach((ic, i) => {
       const x = W - 112 + i * 36, y = H - 30, on = i === 1;
@@ -19071,19 +19188,19 @@ const OnbDemos = {
   zoomwin(ctx, W, H, t) {
     const p = onbCycle(t, 5), q = onbRamp(p, 0.08, 0.82);
     this.paper(ctx, W, H);
-    this.lines(ctx, 24, 18, W - 48, [0.9, 0.7], onbGray(0.82));
-    const pts = this.cursive(24, W - 30, 92, 14, 140);
-    const ink = (lw) => { ctx.strokeStyle = 'rgb(51,77,217)'; ctx.lineWidth = lw; ctx.lineCap = ctx.lineJoin = 'round'; this.path(ctx, pts, q); };
-    ink(2);
+    this.write(ctx, onbL('Ecocardiograma', 'Ecocardiogramma'), 24, 40, 9, ONB_FILM_INK, 1, 3);
+    const line = onbL('FEVI normal: más del 55 %', 'FEVS normale: oltre il 55 %'), lw = this.handWidth(line, 9, 4);
+    const ink = (k) => this.write(ctx, line, 24, 92, 9, 'rgb(51,77,217)', k, 4);
+    const tipX = ink(q).tip?.[0] ?? 24 + lw * Math.min(1, q);
     // El recuadro que sigue a la escritura
-    const gw = 96, gh = 36, gx = Math.min(W - 24 - gw, 24 + Math.max(0, (W - 54) * q - gw * 0.6)), gy = 68;
+    const gw = 96, gh = 36, gx = Math.max(16, Math.min(W - 24 - gw, tipX - gw * 0.6)), gy = 66;
     ctx.strokeStyle = '#007AFF'; ctx.lineWidth = 1.5; ctx.setLineDash([5, 4]); ctx.strokeRect(gx, gy, gw, gh); ctx.setLineDash([]);
     ctx.fillStyle = 'rgba(0,122,255,.07)'; ctx.fillRect(gx, gy, gw, gh);
     // Abajo, el panel ampliado: lo mismo, más grande
     const px = 14, py = 128, pw = W - 28, ph = H - 142, sc = pw / gw;
     ctx.save(); ctx.shadowColor = 'rgba(0,0,0,.18)'; ctx.shadowBlur = 8; ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.roundRect(px, py, pw, ph, 12); ctx.fill(); ctx.restore();
     ctx.save(); ctx.beginPath(); ctx.roundRect(px, py, pw, ph, 12); ctx.clip();
-    ctx.translate(px - gx * sc, py + 4 - gy * sc * (ph / pw / (gh / gw))); ctx.scale(sc, sc * (ph / pw) / (gh / gw)); ink(2);
+    ctx.translate(px - gx * sc, py + 4 - gy * sc * (ph / pw / (gh / gw))); ctx.scale(sc, sc * (ph / pw) / (gh / gw)); ink(q);
     ctx.restore();
     ctx.strokeStyle = '#007AFF'; ctx.lineWidth = 2; ctx.beginPath(); ctx.roundRect(px, py, pw, ph, 12); ctx.stroke();
     this.label(ctx, '↵', px + pw - 18, py + ph - 16, `700 16px ${ROUNDED}`, '#007AFF');
@@ -19092,16 +19209,16 @@ const OnbDemos = {
     const p = onbCycle(t, 5), loop = onbSmooth(onbRamp(p, 0.06, 0.34)), only = p > 0.55;
     this.paper(ctx, W, H);
     const blue = 'rgb(51,77,217)', red = '#FF3B30';
-    const strokes = [[70, 70, blue], [200, 64, red], [120, 130, red], [250, 135, blue], [90, 200, blue], [215, 205, red], [330, 70, red]];
+    const words = onbL(['Disnea', 'IECA', 'β-bloq', 'Edemas', 'Ortopnea', 'iSGLT2', 'BNP'], ['Dispnea', 'ACE-i', 'β-bloc', 'Edemi', 'Ortopnea', 'iSGLT2', 'BNP']);
+    const spots = [[70, 70, blue], [200, 64, red], [120, 130, red], [250, 135, blue], [90, 200, blue], [215, 205, red], [334, 70, red]];
     const inside = (i) => i < 6;
-    strokes.forEach(([x, y, c], i) => {
-      const sel = loop >= 1 && inside(i) && (!only || c === red);
+    spots.forEach(([x, y, c], i) => {
+      const sel = loop >= 1 && inside(i) && (!only || c === red), w = this.handWidth(words[i], 9, 20 + i);
       ctx.save();
-      if (sel) { ctx.shadowColor = c; ctx.shadowBlur = 10; }
-      ctx.strokeStyle = c; ctx.lineWidth = 3.5; ctx.lineCap = ctx.lineJoin = 'round';
-      this.path(ctx, this.cursive(x, x + 70, y + 10, 18, 40), 1);
+      if (sel) { ctx.shadowColor = c; ctx.shadowBlur = 8; }
+      this.write(ctx, words[i], x, y + 12, 9, c, 1, 20 + i);
       ctx.restore();
-      if (sel) { ctx.strokeStyle = 'rgba(0,122,255,.6)'; ctx.setLineDash([3, 3]); ctx.lineWidth = 1; ctx.strokeRect(x - 8, y - 14, 86, 32); ctx.setLineDash([]); }
+      if (sel) { ctx.strokeStyle = 'rgba(0,122,255,.6)'; ctx.setLineDash([3, 3]); ctx.lineWidth = 1; ctx.strokeRect(x - 6, y - 8, w + 12, 30); ctx.setLineDash([]); }
     });
     // El lazo: una línea discontinua que rodea casi toda la página
     ctx.strokeStyle = '#AF52DE'; ctx.lineWidth = 2; ctx.setLineDash([7, 5]); ctx.lineDashOffset = -t * 30;
@@ -19124,12 +19241,13 @@ const OnbDemos = {
     const p = onbCycle(t, 6), drop = onbSmooth(onbRamp(p, 0.02, 0.16));
     const zoom = onbSmooth(onbRamp(p, 0.26, 0.38)) * (1 - onbSmooth(onbRamp(p, 0.78, 0.9))), draw = onbSmooth(onbRamp(p, 0.4, 0.7));
     this.paper(ctx, W, H);
-    this.lines(ctx, 22, 22, W - 44);
+    onbL(['Soplo sistólico', 'en foco mitral', 'irradiado a la axila'], ['Soffio sistolico', 'in focolaio mitralico', 'irradiato all’ascella'])
+      .forEach((txt, i) => this.write(ctx, txt, 22, 38 + i * 28, 9, ONB_FILM_INK, 1, 30 + i));
     // Comentario: un círculo con nombre en la esquina
     ctx.fillStyle = '#AF52DE'; ctx.beginPath(); ctx.arc(W - 40, 40, 16, 0, 7); ctx.fill(); ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.stroke();
     this.label(ctx, 'S', W - 40, 41, `600 16px ${ROUNDED}`, '#fff');
     if (drop > 0) {
-      const s = 1 + 0.75 * zoom, x = 120 + (W / 2 - 120) * zoom, y = 150 - 160 * (1 - drop) + (H / 2 - 22 - 150) * zoom;
+      const s = 1 + 0.75 * zoom, x = 120 + (W / 2 - 120) * zoom, y = 168 - 160 * (1 - drop) + (H / 2 - 22 - 168) * zoom;
       ctx.save(); ctx.globalAlpha = drop; ctx.translate(x, y); ctx.rotate((-5 * (1 - zoom) + 14 * (1 - drop)) * Math.PI / 180); ctx.scale(s, s);
       ctx.shadowColor = 'rgba(0,0,0,.2)'; ctx.shadowBlur = 6; ctx.shadowOffsetY = 3;
       ctx.fillStyle = 'rgb(255,237,128)'; ctx.beginPath(); ctx.roundRect(-55, -55, 110, 110, 4); ctx.fill(); ctx.shadowColor = 'transparent';
@@ -19149,13 +19267,18 @@ const OnbDemos = {
     ctx.save(); ctx.beginPath(); ctx.roundRect(0, 0, W, H, 14); ctx.clip();
     ctx.fillStyle = onbGray(0.2); ctx.fillRect(0, 0, W, H);
     const pw = 120, ph = 160;
+    const titles = onbL(['Corazón', 'Pulmón', 'Riñón', 'Hígado'], ['Cuore', 'Polmone', 'Rene', 'Fegato']);
+    const rows = onbL(['Anatomía', 'Fisiología', 'Clínica', 'Tratamiento'], ['Anatomia', 'Fisiologia', 'Clinica', 'Terapia']);
+    const tint = ['#C8372D', '#2F66D0', '#1E8E5A', '#B26A00'];
     for (let i = 0; i < 4; i++) {
       // Vertical: una debajo de otra y se desplazan; horizontal: de lado, encajando de una en una
       const step = onbSmooth(Math.min(1, (q * 2) % 1.0001)) + Math.floor(q * 2);
       const x = horiz ? W / 2 - pw / 2 + (i - Math.min(2, step)) * (pw + 30) : W / 2 - pw / 2;
       const y = horiz ? 30 : 24 + i * (ph + 14) - q * (ph + 14) * 1.4;
+      if (x > W || x + pw < 0 || y > H || y + ph < 0) continue;
       ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.roundRect(x, y, pw, ph, 6); ctx.fill();
-      this.lines(ctx, x + 14, y + 18, pw - 28, [0.9, 0.7, 0.8, 0.6, 0.85], onbGray(0.82), 20);
+      this.write(ctx, titles[i], x + 12, y + 28, 7, tint[i], 1, 40 + i);
+      rows.forEach((r, k) => this.write(ctx, r, x + 12, y + 52 + k * 20, 5, ONB_FILM_INK, 1, 44 + i + k));
       this.label(ctx, String(i + 1), x + pw / 2, y + ph - 14, `600 12px ${ROUNDED}`, onbGray(0.5));
     }
     ctx.restore();
@@ -19208,11 +19331,14 @@ const OnbDemos = {
     ctx.save(); ctx.beginPath(); ctx.roundRect(0, 0, W, H, 14); ctx.clip();
     ctx.fillStyle = onbGray(0.1); ctx.fillRect(0, 0, W, H);
     ctx.fillStyle = onbGray(0.95); ctx.fillRect(0, 52, W, H - 52);
-    this.lines(ctx, 30, 90, W - 60, [0.8, 0.6, 0.9, 0.5], onbGray(0.82), 26);
+    // Lo escrito en la pestaña activa: cambia al abrir la nueva
+    const page = grow >= 1 ? onbL(['La nefrona', 'Glomérulo y túbulo', 'Filtra 180 l al día'], ['Il nefrone', 'Glomerulo e tubulo', 'Filtra 180 l al giorno'])
+      : onbL(['Ciclo cardiaco', 'Sístole y diástole', 'Ruidos: R1 y R2'], ['Ciclo cardiaco', 'Sistole e diastole', 'Toni: T1 e T2']);
+    page.forEach((txt, i) => this.write(ctx, txt, 30, 98 + i * 36, i ? 9 : 12, i ? ONB_FILM_INK : (grow >= 1 ? '#1E8E5A' : '#C8372D'), 1, 50 + i + (grow >= 1 ? 5 : 0)));
     // ⌄ a la izquierda
     ctx.fillStyle = menu > 0 ? onbGray(0.3) : onbGray(0.2); ctx.beginPath(); ctx.roundRect(8, 12, 32, 32, 8); ctx.fill();
     const chev = onbIcon('chevronDown', '#fff', 18, 2.4); if (chev.complete) ctx.drawImage(chev, 15, 19, 18, 18);
-    const names = [[tr('Biología'), '#FF3B30'], [tr('Química'), '#007AFF'], [tr('Historia'), '#34C759']];   // nombres cortos: caben enteros
+    const names = [[onbL('Cardio', 'Cardio'), '#FF3B30'], [onbL('Neuro', 'Neuro'), '#007AFF'], [onbL('Renal', 'Rene'), '#34C759']];   // nombres cortos: caben enteros
     const tw = 96;
     let x = 48;
     names.forEach(([n, c], i) => {
@@ -19233,7 +19359,7 @@ const OnbDemos = {
     this.tap(ctx, 24, 28, onbRamp(p, 0.48, 0.6), '#fff');
     if (menu > 0) {
       ctx.save(); ctx.globalAlpha = menu; ctx.translate(10, 52 + 8 * (1 - menu));
-      ctx.shadowColor = 'rgba(0,0,0,.3)'; ctx.shadowBlur = 14; ctx.fillStyle = onbGray(0.16); ctx.beginPath(); ctx.roundRect(0, 0, 190, 118, 12); ctx.fill(); ctx.shadowColor = 'transparent';
+      ctx.shadowColor = 'rgba(0,0,0,.3)'; ctx.shadowBlur = 14; ctx.fillStyle = onbGray(0.16); ctx.beginPath(); ctx.roundRect(0, 0, 190, 130, 12); ctx.fill(); ctx.shadowColor = 'transparent';
       names.forEach(([n, c], i) => {
         if (i === 2) { ctx.fillStyle = 'rgba(255,255,255,.1)'; ctx.beginPath(); ctx.roundRect(6, 6 + i * 36, 178, 32, 8); ctx.fill(); }
         ctx.fillStyle = c; ctx.beginPath(); ctx.roundRect(16, 14 + i * 36, 11, 16, 2); ctx.fill();
@@ -19274,13 +19400,14 @@ const OnbDemos = {
     ctx.fillStyle = back ? 'rgb(255,248,225)' : '#fff'; ctx.beginPath(); ctx.roundRect(-150, -78, 300, 156, 16); ctx.fill(); ctx.shadowColor = 'transparent';
     ctx.fillStyle = '#FF9F0A'; ctx.fillRect(-150, -78 + 14, 4, 30);
     if (!back) {
-      const a = tr('La') + ' ', b = ' ' + tr('es la unidad…'), blank = '[ … ]';
+      // Tarjeta de huecos: lo subrayado pasa a ser el hueco
+      const [a, b] = onbL(['El ', ' confirma la IC'], ['Il ', ' conferma l’IC']), blank = '[ … ]';
       ctx.font = `600 19px ${ROUNDED}`; const wa = ctx.measureText(a).width, wb = ctx.measureText(blank).width, wc = ctx.measureText(b).width, x0 = -(wa + wb + wc) / 2;
       this.label(ctx, a, x0, 0, `600 19px ${ROUNDED}`, onbGray(0.2), 'left');
       ctx.fillStyle = 'rgba(255,159,10,.25)'; ctx.beginPath(); ctx.roundRect(x0 + wa - 2, -14, wb + 4, 28, 6); ctx.fill();
       this.label(ctx, blank, x0 + wa, 0, `600 19px ${ROUNDED}`, '#C93400', 'left');
       this.label(ctx, b, x0 + wa + wb, 0, `600 19px ${ROUNDED}`, onbGray(0.2), 'left');
-    } else this.label(ctx, tr('célula'), 0, 0, `700 30px ${ROUNDED}`, '#C93400');
+    } else this.label(ctx, 'NT-proBNP', 0, 0, `700 30px ${ROUNDED}`, '#C93400');
     ctx.restore();
     if (grades > 0) {
       ctx.save(); ctx.globalAlpha = grades;
@@ -19299,11 +19426,12 @@ const OnbDemos = {
     const p = onbCycle(t, 5.2), sum = onbSmooth(onbRamp(p, 0.45, 0.6)) * (1 - onbSmooth(onbRamp(p, 0.92, 1)));
     const yellow = 'rgba(255,204,0,.6)', pink = 'rgba(255,107,154,.5)';
     this.paper(ctx, W, H);
-    const rows = [[0.8, yellow], [0.6, null], [0.7, pink], [0.85, null], [0.55, yellow], [0.75, pink]];
-    rows.forEach(([k, hl], i) => {
-      const y = 22 + i * 36, w = (W - 170) * k, on = onbRamp(p, 0.04 + i * 0.05, 0.12 + i * 0.05);
-      if (hl && on > 0) { ctx.fillStyle = hl; ctx.beginPath(); ctx.roundRect(18, y, w * on, 18, 4); ctx.fill(); }
-      ctx.fillStyle = onbGray(0.6); ctx.beginPath(); ctx.roundRect(18, y + 6, w, 6, 3); ctx.fill();
+    const rows = onbL([['Precarga: volumen', yellow], ['al final de la diástole', null], ['Frank-Starling', pink], ['Más precarga, más gasto', null], ['Poscarga: resistencia', yellow], ['Sale en el MIR', pink]],
+      [['Precarico: volume', yellow], ['a fine diastole', null], ['Frank-Starling', pink], ['Più precarico, più gittata', null], ['Postcarico: resistenza', yellow], ['Esce all’esame', pink]]);
+    rows.forEach(([txt, hl], i) => {
+      const y = 38 + i * 36, on = onbRamp(p, 0.04 + i * 0.05, 0.12 + i * 0.05);
+      if (hl && on > 0) { ctx.fillStyle = hl; ctx.beginPath(); ctx.roundRect(16, y - 15, (this.handWidth(txt, 8, 60 + i) + 10) * on, 20, 4); ctx.fill(); }
+      this.write(ctx, txt, 20, y, 8, ONB_FILM_INK, 1, 60 + i);
     });
     // Leyenda: qué quiere decir cada color
     const legend = [['#FFCC00', 'Definición'], ['#FF6B9A', 'Examen']];
@@ -19318,9 +19446,10 @@ const OnbDemos = {
       ctx.shadowColor = 'rgba(0,0,0,.25)'; ctx.shadowBlur = 12; ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.roundRect(W - 200, 108, 184, 150, 12); ctx.fill(); ctx.shadowColor = 'transparent';
       ctx.fillStyle = '#FFCC00'; ctx.beginPath(); ctx.arc(W - 182, 128, 7, 0, 7); ctx.fill();
       this.label(ctx, tr('Definición'), W - 168, 128, `700 13px ${ROUNDED}`, onbGray(0.2), 'left');
-      [0.9, 0.7].forEach((k, i) => {
-        ctx.fillStyle = yellow; ctx.beginPath(); ctx.roundRect(W - 186, 148 + i * 40, 156 * k, 28, 5); ctx.fill();
-        ctx.fillStyle = onbGray(0.55); ctx.beginPath(); ctx.roundRect(W - 180, 159 + i * 40, 140 * k, 6, 3); ctx.fill();
+      [rows[0][0], rows[4][0]].forEach((txt, i) => {
+        const w = this.handWidth(txt, 6.5, 70 + i);
+        ctx.fillStyle = yellow; ctx.beginPath(); ctx.roundRect(W - 188, 148 + i * 44, Math.min(168, w + 14), 30, 6); ctx.fill();
+        this.write(ctx, txt, W - 181, 168 + i * 44, 6.5, ONB_FILM_INK, 1, 70 + i);
       });
       ctx.restore();
     }
@@ -19328,42 +19457,47 @@ const OnbDemos = {
   tape(ctx, W, H, t) {
     const p = onbCycle(t, 4.6), open = onbSmooth(onbRamp(p, 0.32, 0.44)) * (1 - onbSmooth(onbRamp(p, 0.82, 0.94)));
     this.paper(ctx, W, H);
-    this.label(ctx, tr('¿Capital de Italia?'), 26, 40, `600 20px ${ROUNDED}`, onbGray(0.2), 'left');
-    this.lines(ctx, 26, 140, W - 52, [0.9, 0.7, 0.8], onbGray(0.82), 24);
-    this.label(ctx, 'Roma', 40, 92, `700 30px ${ROUNDED}`, 'rgb(51,77,217)', 'left');
+    this.write(ctx, onbL('¿Antídoto del paracetamol?', 'Antidoto del paracetamolo?'), 26, 46, 10, ONB_FILM_INK, 1, 80);
+    const answer = onbL('N-acetilcisteína', 'N-acetilcisteina'), aw = this.handWidth(answer, 14, 81), ax = 40, ay = 106;
+    this.write(ctx, answer, ax, ay, 14, 'rgb(51,77,217)', 1, 81);
+    onbL(['Tóxico: más de 150 mg/kg', 'Darla en las primeras 8 h'], ['Tossico: oltre 150 mg/kg', 'Darla entro le prime 8 ore'])
+      .forEach((txt, i) => this.write(ctx, txt, 26, 170 + i * 32, 9, ONB_FILM_INK, 1, 82 + i));
     // La cinta: verde, con los bordes en zigzag; al tocarla se levanta
+    const tx = ax + aw / 2, ty = ay - 10;
     if (open < 1) {
-      ctx.save(); ctx.globalAlpha = 1 - open; ctx.translate(W / 2 - 40, 92 - 40 * open); ctx.rotate((-2 - 10 * open) * Math.PI / 180);
-      const w = 260, h = 46;
-      ctx.fillStyle = 'rgba(52,199,89,.92)'; ctx.beginPath(); ctx.moveTo(-w / 2, -h / 2);
+      ctx.save(); ctx.globalAlpha = 1 - open; ctx.translate(tx, ty - 40 * open); ctx.rotate((-2 - 10 * open) * Math.PI / 180);
+      const w = aw + 44, h = 46;
+      ctx.fillStyle = '#34C759'; ctx.beginPath(); ctx.moveTo(-w / 2, -h / 2);
       ctx.lineTo(w / 2, -h / 2); for (let i = 0; i <= 6; i++) ctx.lineTo(w / 2 + (i % 2 ? -6 : 0), -h / 2 + i * h / 6);
       ctx.lineTo(-w / 2, h / 2); for (let i = 6; i >= 0; i--) ctx.lineTo(-w / 2 + (i % 2 ? 6 : 0), -h / 2 + i * h / 6);
       ctx.fill();
       ctx.strokeStyle = 'rgba(255,255,255,.35)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(-w / 2 + 14, -8); ctx.lineTo(w / 2 - 14, -8); ctx.stroke();
       ctx.restore();
     }
-    this.tap(ctx, W / 2 - 40, 92, onbRamp(p, 0.26, 0.4), '#34C759');
-    this.tap(ctx, W / 2 - 40, 92, onbRamp(p, 0.76, 0.9), '#34C759');
+    this.tap(ctx, tx, ty, onbRamp(p, 0.26, 0.4), '#34C759');
+    this.tap(ctx, tx, ty, onbRamp(p, 0.76, 0.9), '#34C759');
   },
   ai(ctx, W, H, t) {
     const p = onbCycle(t, 5.2), fly = onbSmooth(onbRamp(p, 0.15, 0.42)), type = onbRamp(p, 0.42, 0.7), cards = onbSmooth(onbRamp(p, 0.72, 0.84));
     this.paper(ctx, W, H);
-    ctx.strokeStyle = 'rgb(51,77,217)'; ctx.lineWidth = 2.5; ctx.lineCap = ctx.lineJoin = 'round';
-    [0, 1, 2].forEach((i) => this.path(ctx, this.cursive(20, 160 - i * 22, 52 + i * 40, 18, 60), 1));
-    // La IA lee lo escrito y lo pasa a texto
+    // A la izquierda, a mano; a la derecha, lo mismo pasado a texto
+    const lines = onbL(['Insuficiencia', 'cardiaca:', 'FEVI < 40 %'], ['Insufficienza', 'cardiaca:', 'FEVS < 40 %']);
+    lines.forEach((txt, i) => this.write(ctx, txt, 20, 58 + i * 40, 9, 'rgb(51,77,217)', 1, 90 + i));
     const sx = 40 + 170 * fly, sy = 90 - 30 * Math.sin(fly * Math.PI);
     if (fly > 0 && fly < 1) { const sp = onbIcon('sparkles', '#AF52DE', 30, 2); if (sp.complete) ctx.drawImage(sp, sx - 15, sy - 15, 30, 30); }
-    [0.95, 0.75, 0.85].forEach((k, i) => {
-      const w = 150 * k * onbRamp(type, i / 3, (i + 1) / 3);
-      if (w > 0) { ctx.fillStyle = onbGray(0.35); ctx.beginPath(); ctx.roundRect(214, 42 + i * 40, w, 9, 4); ctx.fill(); }
+    lines.forEach((txt, i) => {
+      const n = Math.round(txt.length * onbRamp(type, i / 3, (i + 1) / 3));
+      if (n > 0) this.label(ctx, txt.slice(0, n), 212, 52 + i * 40, `500 15px ${ROUNDED}`, onbGray(0.2), 'left');
     });
-    ctx.strokeStyle = onbGray(0.85); ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(196, 24); ctx.lineTo(196, 160); ctx.stroke();
+    ctx.strokeStyle = onbGray(0.85); ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(196, 28); ctx.lineTo(196, 150); ctx.stroke();
     if (cards > 0) {
-      [0, 1].forEach((i) => {
-        ctx.save(); ctx.translate(120 + i * 150, 210); ctx.rotate((i ? 4 : -4) * Math.PI / 180); ctx.scale(cards, cards);
-        ctx.shadowColor = 'rgba(0,0,0,.2)'; ctx.shadowBlur = 8; ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.roundRect(-62, -34, 124, 68, 10); ctx.fill(); ctx.shadowColor = 'transparent';
-        ctx.fillStyle = '#AF52DE'; ctx.fillRect(-62, -20, 3, 26);
-        ctx.fillStyle = onbGray(0.6); ctx.beginPath(); ctx.roundRect(-48, -10, 90, 7, 3); ctx.fill(); ctx.beginPath(); ctx.roundRect(-48, 4, 64, 7, 3); ctx.fill();
+      const faces = onbL([['¿FEVI en la IC-FEr?', 'Menor del 40 %'], ['¿Síntoma típico?', 'Disnea']], [['FEVS nell’IC-FEr?', 'Sotto il 40 %'], ['Sintomo tipico?', 'Dispnea']]);
+      faces.forEach(([q, a], i) => {
+        ctx.save(); ctx.translate(120 + i * 150, 214); ctx.rotate((i ? 4 : -4) * Math.PI / 180); ctx.scale(cards, cards);
+        ctx.shadowColor = 'rgba(0,0,0,.2)'; ctx.shadowBlur = 8; ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.roundRect(-66, -34, 132, 68, 10); ctx.fill(); ctx.shadowColor = 'transparent';
+        ctx.fillStyle = '#AF52DE'; ctx.fillRect(-66, -20, 3, 26);
+        this.label(ctx, q, -54, -9, `700 12px ${ROUNDED}`, onbGray(0.18), 'left');
+        this.label(ctx, a, -54, 12, `500 12px ${ROUNDED}`, onbGray(0.45), 'left');
         ctx.restore();
       });
     }
@@ -19392,6 +19526,396 @@ const OnbDemos = {
     this.tap(ctx, 22 + 90 + 35, 74 + 48, onbRamp(p, 0.66, 0.8), '#fff');
     this.label(ctx, tr(studied ? '¡Repasada!' : 'Se va olvidando…'), W / 2, H - 28, `600 15px ${ROUNDED}`, 'rgba(255,255,255,.75)');
     ctx.restore();
+  },
+  /** Formas con tiradores: se dibuja un rectángulo temblón, se queda perfecto y sus tiradores lo escalan y lo estiran. */
+  shapes(ctx, W, H, t) {
+    const p = onbCycle(t, 6), draw = onbSmooth(onbRamp(p, 0.04, 0.26)), hold = onbRamp(p, 0.27, 0.38), morph = onbSmooth(onbRamp(p, 0.38, 0.44));
+    const scale = 1 + 0.28 * onbSmooth(onbRamp(p, 0.52, 0.66)), stretch = 1 + 0.4 * onbSmooth(onbRamp(p, 0.74, 0.86)), fade = 1 - onbSmooth(onbRamp(p, 0.94, 1));
+    this.paper(ctx, W, H);
+    const x0 = 92, y0 = 58, w = 150 * scale * stretch, h = 96 * scale;
+    // El contorno: de temblón a perfecto (los puntos van del uno al otro)
+    const corners = [[x0, y0], [x0 + w, y0], [x0 + w, y0 + h], [x0, y0 + h], [x0, y0]];
+    const pts = [];
+    for (let s = 0; s < 4; s++) for (let i = 0; i < 18; i++) {
+      const u = i / 18, a = corners[s], b = corners[s + 1], k = s * 18 + i;
+      const wob = (1 - morph) * (3.2 * Math.sin(k * 0.7 + 1) + 2 * Math.sin(k * 1.9));
+      const nx = s % 2 ? wob : 0, ny = s % 2 ? 0 : wob;
+      pts.push([a[0] + (b[0] - a[0]) * u + nx + (s === 3 && i > 12 ? (i - 12) * 2.4 * (1 - morph) : 0), a[1] + (b[1] - a[1]) * u + ny]);
+    }
+    pts.push(corners[4]);
+    ctx.save(); ctx.globalAlpha = fade;
+    ctx.strokeStyle = 'rgb(51,77,217)'; ctx.lineWidth = 3.5; ctx.lineCap = ctx.lineJoin = 'round';
+    this.path(ctx, pts, morph > 0 ? 1 : draw);
+    if (hold > 0 && morph < 1) {
+      ctx.strokeStyle = '#AF52DE'; ctx.lineWidth = 3;
+      ctx.beginPath(); ctx.arc(x0, y0, 13, -Math.PI / 2, -Math.PI / 2 + hold * Math.PI * 2); ctx.stroke();
+    }
+    // Los tiradores: esquinas = escalar sin deformar, lados = estirar
+    const grab = p > 0.5 && p < 0.68 ? 'se' : p > 0.72 && p < 0.88 ? 'e' : null;
+    if (morph >= 1) {
+      const hs = { nw: [x0, y0], n: [x0 + w / 2, y0], ne: [x0 + w, y0], e: [x0 + w, y0 + h / 2], se: [x0 + w, y0 + h], s: [x0 + w / 2, y0 + h], sw: [x0, y0 + h], w: [x0, y0 + h / 2] };
+      for (const [k, [hx, hy]] of Object.entries(hs)) {
+        ctx.fillStyle = '#007AFF'; ctx.strokeStyle = '#fff'; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.arc(hx, hy, k === grab ? 9 : 7, 0, 7); ctx.fill(); ctx.stroke();
+        if (k === grab) { ctx.fillStyle = 'rgba(0,122,255,.18)'; ctx.beginPath(); ctx.arc(hx, hy, 20, 0, 7); ctx.fill(); }
+      }
+    }
+    ctx.restore();
+    const msg = grab === 'se' ? onbL('Esquina: escala', 'Angolo: scala') : grab === 'e' ? onbL('Lado: estira', 'Lato: allunga')
+      : morph >= 1 ? onbL('Forma perfecta, con tiradores', 'Forma perfetta, con maniglie') : hold > 0 ? tr('Mantén quieto') : tr('Dibuja');
+    this.label(ctx, msg, W / 2, H - 16, `600 16px ${ROUNDED}`, onbGray(0.3));
+  },
+  /** Presentar: la página a pantalla completa con láser (L), tinta que se borra sola (D), foco (F) y telón (T, con ↓). */
+  present(ctx, W, H, t) {
+    const p = onbCycle(t, 9), phase = Math.min(3, Math.floor(p * 4)), q = p * 4 - phase;
+    ctx.save(); ctx.beginPath(); ctx.roundRect(0, 0, W, H, 14); ctx.clip();
+    ctx.fillStyle = '#0B0B10'; ctx.fillRect(0, 0, W, H);
+    // La página, a toda pantalla
+    const px = 64, py = 16, pw = 260, ph = 196;
+    ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.roundRect(px, py, pw, ph, 6); ctx.fill();
+    const rows = onbL([['Insuficiencia cardiaca', 10, '#C8372D'], ['Disnea y ortopnea', 8], ['Edemas en los tobillos', 8], ['Tratamiento: IECA', 8], ['y β-bloqueantes', 8]],
+      [['Insufficienza cardiaca', 10, '#C8372D'], ['Dispnea e ortopnea', 8], ['Edemi alle caviglie', 8], ['Terapia: ACE-inibitori', 8], ['e β-bloccanti', 8]]);
+    const ys = [py + 40, py + 80, py + 110, py + 150, py + 176];
+    rows.forEach(([txt, h, c], i) => this.write(ctx, txt, px + 18, ys[i], h, c || ONB_FILM_INK, 1, 100 + i));
+    if (phase === 0) {
+      // Láser: un punto rojo con su estela, que rodea el título
+      const at = (u) => { const a = u * Math.PI * 2 * 1.2 - 2.4; return [px + 130 + 112 * Math.cos(a), ys[0] - 6 + 20 * Math.sin(a)]; };
+      const u = onbSmooth(onbRamp(q, 0.08, 0.9));
+      ctx.lineCap = ctx.lineJoin = 'round';
+      for (let k = 0; k < 16; k++) {
+        const a = at(Math.max(0, u - k * 0.018)), b = at(Math.max(0, u - (k + 1) * 0.018));
+        ctx.strokeStyle = `rgba(255,59,48,${0.75 * (1 - k / 16)})`; ctx.lineWidth = 6 * (1 - k / 20);
+        ctx.beginPath(); ctx.moveTo(a[0], a[1]); ctx.lineTo(b[0], b[1]); ctx.stroke();
+      }
+      const [lx, ly] = at(u), g = ctx.createRadialGradient(lx, ly, 0, lx, ly, 14);
+      g.addColorStop(0, 'rgba(255,80,60,.9)'); g.addColorStop(1, 'rgba(255,80,60,0)');
+      ctx.fillStyle = g; ctx.beginPath(); ctx.arc(lx, ly, 14, 0, 7); ctx.fill();
+      ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(lx, ly, 3, 0, 7); ctx.fill();
+    } else if (phase === 1) {
+      // Tinta de presentación: se subraya y se borra sola al rato
+      const w = this.handWidth(rows[2][0], 8, 102), d = onbSmooth(onbRamp(q, 0.1, 0.4)), gone = onbRamp(q, 0.7, 0.95);
+      ctx.save(); ctx.globalAlpha = 1 - gone; ctx.strokeStyle = '#FF3B30'; ctx.lineWidth = 3; ctx.lineCap = 'round';
+      const pts = Array.from({ length: 30 }, (_, i) => [px + 14 + (w + 10) * i / 29, ys[2] + 6 + 2 * Math.sin(i / 4)]);
+      this.path(ctx, pts, d); ctx.restore();
+    } else if (phase === 2) {
+      // Foco: todo en penumbra salvo un círculo
+      const fx = px + 92 + 26 * Math.sin(q * 3), fy = ys[3] - 4, r = 48;
+      ctx.fillStyle = 'rgba(0,0,0,.62)'; ctx.beginPath(); ctx.rect(0, 0, W, H); ctx.arc(fx, fy, r, 0, Math.PI * 2, true); ctx.fill();
+      ctx.strokeStyle = 'rgba(255,255,255,.5)'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(fx, fy, r, 0, 7); ctx.stroke();
+    } else {
+      // Telón: tapa la página y ↓ la descubre párrafo a párrafo
+      const steps = [ys[0] + 14, ys[2] + 14, ys[4] + 14, py + ph];
+      const n = q < 0.25 ? 0 : q < 0.5 ? 1 : q < 0.75 ? 2 : 3, prev = steps[Math.max(0, n - 1)], ease = onbSmooth(onbRamp(q, n * 0.25, n * 0.25 + 0.12));
+      const edge = n ? prev + (steps[n] - prev) * ease : steps[0];
+      ctx.fillStyle = '#1C1C24'; ctx.fillRect(px, edge, pw, py + ph - edge);
+      ctx.strokeStyle = '#FFD60A'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(px, edge); ctx.lineTo(px + pw, edge); ctx.stroke();
+    }
+    // Las teclas: la de ahora, encendida
+    const keys = [['L', onbL('Láser', 'Laser')], ['D', onbL('Tinta', 'Inchiostro')], ['F', onbL('Foco', 'Focus')], ['T', onbL('Telón', 'Sipario')]];
+    const extra = phase === 3 ? '↓' : null;
+    keys.forEach(([k], i) => {
+      const x = W / 2 - 112 + i * 44, y = H - 46, on = i === phase;
+      ctx.fillStyle = on ? '#FF9F0A' : 'rgba(255,255,255,.12)'; ctx.beginPath(); ctx.roundRect(x - 17, y - 15, 34, 30, 8); ctx.fill();
+      this.label(ctx, k, x, y + 0.5, `700 15px ${ROUNDED}`, on ? '#1C1C1E' : 'rgba(255,255,255,.75)');
+    });
+    const ex = W / 2 + 76, ey = H - 46, down = extra && [0.25, 0.5, 0.75].some((c) => q > c - 0.02 && q < c + 0.06);
+    ctx.fillStyle = down ? '#fff' : 'rgba(255,255,255,.12)'; ctx.beginPath(); ctx.roundRect(ex - 17, ey - 15 + (down ? 2 : 0), 34, 30, 8); ctx.fill();
+    this.label(ctx, extra || 'Esc', ex, ey + 0.5 + (down ? 2 : 0), `700 ${extra ? 16 : 12}px ${ROUNDED}`, down ? '#1C1C1E' : 'rgba(255,255,255,.75)');
+    this.label(ctx, keys[phase][1], W / 2, H - 14, `600 14px ${ROUNDED}`, 'rgba(255,255,255,.8)');
+    ctx.restore();
+  },
+  /** Índice automático: los títulos de la página (a mano grande, negrita, color «Título», PDF) forman el índice; se busca y se salta. */
+  outline(ctx, W, H, t) {
+    const p = onbCycle(t, 7);
+    this.paper(ctx, W, H);
+    // La página con sus títulos
+    const px = 12, py = 12, pw = 196, ph = H - 24;
+    ctx.fillStyle = '#fff'; ctx.strokeStyle = onbGray(0.88); ctx.lineWidth = 1; ctx.beginPath(); ctx.roundRect(px, py, pw, ph, 8); ctx.fill(); ctx.stroke();
+    const T = onbL({ a: 'Cardiología', b: 'Fisiopatología', c: 'Tratamiento', d: 'Valvulopatías', s1: 'Frank-Starling', s2: 'Sistema SRAA', s3: 'IECA y β-bloq', s4: 'Diuréticos' },
+      { a: 'Cardiologia', b: 'Fisiopatologia', c: 'Terapia', d: 'Valvulopatie', s1: 'Frank-Starling', s2: 'Sistema RAA', s3: 'ACE-i e β-bloc', s4: 'Diuretici' });
+    const flash = onbSmooth(onbRamp(p, 0.7, 0.76)) * (1 - onbSmooth(onbRamp(p, 0.9, 0.98)));
+    if (flash > 0) { ctx.fillStyle = `rgba(175,82,222,${0.22 * flash})`; ctx.beginPath(); ctx.roundRect(px + 8, py + 140, pw - 16, 30, 6); ctx.fill(); }
+    this.write(ctx, T.a, px + 14, py + 36, 12, ONB_FILM_INK, 1, 110);
+    this.label(ctx, T.b, px + 14, py + 70, `700 15px ${ROUNDED}`, onbGray(0.12), 'left');
+    this.write(ctx, T.s1, px + 20, py + 98, 6, ONB_FILM_INK, 1, 111);
+    this.write(ctx, T.s2, px + 20, py + 120, 6, ONB_FILM_INK, 1, 112);
+    this.write(ctx, T.c, px + 14, py + 162, 9, '#E0362C', 1, 113);
+    this.write(ctx, T.s3, px + 20, py + 186, 6, ONB_FILM_INK, 1, 114);
+    this.write(ctx, T.s4, px + 20, py + 206, 6, ONB_FILM_INK, 1, 115);
+    this.label(ctx, T.d, px + 14, py + 236, `700 14px Georgia, "Times New Roman", serif`, onbGray(0.12), 'left');
+    ctx.fillStyle = '#FF3B30'; ctx.beginPath(); ctx.roundRect(px + pw - 36, py + 228, 26, 15, 4); ctx.fill();
+    this.label(ctx, 'PDF', px + pw - 23, py + 236, `800 9px ${ROUNDED}`, '#fff');
+    // El panel «Índice»: las entradas llegan de una en una, se busca y se toca una
+    const qx = 218, qw = W - qx - 12;
+    ctx.fillStyle = '#fff'; ctx.strokeStyle = onbGray(0.88); ctx.beginPath(); ctx.roundRect(qx, py, qw, ph, 10); ctx.fill(); ctx.stroke();
+    this.label(ctx, onbL('Índice', 'Indice'), qx + 12, py + 20, `700 14px ${ROUNDED}`, onbGray(0.15), 'left');
+    const query = onbL('tra', 'ter').slice(0, Math.floor(onbRamp(p, 0.48, 0.58) * 3.99));
+    ctx.fillStyle = onbGray(0.94); ctx.beginPath(); ctx.roundRect(qx + 10, py + 34, qw - 20, 24, 8); ctx.fill();
+    const mg = onbIcon('search', onbGray(0.5), 13, 2); if (mg.complete) ctx.drawImage(mg, qx + 17, py + 40, 13, 13);
+    this.label(ctx, query || tr('Buscar'), qx + 34, py + 46.5, `12px ${ROUNDED}`, query ? onbGray(0.15) : onbGray(0.6), 'left');
+    const entries = [[T.a, 0, ONB_FILM_INK, 'pen'], [T.b, 1, onbGray(0.3), 'text'], [T.c, 1, '#E0362C', 'pen'], [T.d, 0, '#FF3B30', 'pdf']];
+    // Lo que no coincide con la búsqueda se apaga en su sitio y después lo que queda sube a ocupar el hueco
+    const match = (e) => e[0].toLowerCase().startsWith(onbL('tra', 'ter')), slide = onbSmooth(onbRamp(p, 0.58, 0.64));
+    let found = 0;
+    entries.forEach((e, i) => {
+      const k = onbSmooth(onbRamp(p, 0.06 + i * 0.09, 0.14 + i * 0.09)), keep = match(e) ? 1 : 1 - onbSmooth(onbRamp(p, 0.5, 0.58));
+      const slot = match(e) ? i + (found++ - i) * slide : i;
+      if (k <= 0 || keep <= 0.01) return;
+      const y = py + 80 + slot * 30;
+      const hit = e === entries[2] && p > 0.64 && p < 0.92;
+      ctx.save(); ctx.globalAlpha = k * keep; ctx.translate(10 * (1 - k), 0);
+      if (hit) { ctx.fillStyle = 'rgba(175,82,222,.16)'; ctx.beginPath(); ctx.roundRect(qx + 6, y - 12, qw - 12, 24, 7); ctx.fill(); }
+      ctx.fillStyle = e[2]; ctx.beginPath(); ctx.arc(qx + 18 + e[1] * 12, y, 3.5, 0, 7); ctx.fill();
+      this.label(ctx, e[0], qx + 28 + e[1] * 12, y + 0.5, `${e[1] ? 500 : 700} 12.5px ${ROUNDED}`, onbGray(0.15), 'left');
+      ctx.restore();
+    });
+    this.tap(ctx, qx + 70, py + 80, onbRamp(p, 0.64, 0.76), '#AF52DE');
+    // «Insertar página de índice», abajo del panel
+    ctx.fillStyle = onbGray(0.94); ctx.beginPath(); ctx.roundRect(qx + 10, py + ph - 34, qw - 20, 24, 8); ctx.fill();
+    const plus = onbIcon('plus', '#007AFF', 12, 2.4); if (plus.complete) ctx.drawImage(plus, qx + 16, py + ph - 28, 12, 12);
+    this.label(ctx, onbL('Página de índice', 'Pagina indice'), qx + 32, py + ph - 21.5, `600 11px ${ROUNDED}`, '#007AFF', 'left');
+  },
+  /** Mapa de la libreta: se aleja hasta ver todas las páginas, se encienden capas y tocar una página entra en ella. */
+  nbmapThumbs: null,
+  nbmapThumb(i) {
+    this.nbmapThumbs = this.nbmapThumbs || new Map();
+    const key = `${i}|${I18N.lang}`;
+    if (this.nbmapThumbs.has(key)) return this.nbmapThumbs.get(key);
+    const c = document.createElement('canvas'), s = 3, w = 54, h = 72;
+    c.width = w * s; c.height = h * s;
+    const g = c.getContext('2d'); g.scale(s, s);
+    g.fillStyle = '#fff'; g.beginPath(); g.roundRect(0, 0, w, h, 3); g.fill();
+    const titles = onbL(['Corazón', 'Arritmias', 'ECG', 'Válvulas', 'HTA', 'Pulmón', 'Asma', 'EPOC', 'Riñón', 'Diálisis', 'Hígado', 'Repaso'],
+      ['Cuore', 'Aritmie', 'ECG', 'Valvole', 'Ipertensione', 'Polmone', 'Asma', 'BPCO', 'Rene', 'Dialisi', 'Fegato', 'Ripasso']);
+    const words = onbL(['Clínica', 'Pruebas', 'Tratamiento'], ['Clinica', 'Esami', 'Terapia']);
+    const tint = ['#C8372D', '#2F66D0', '#1E8E5A', '#B26A00'][i % 4];
+    const tw = this.handWidth(titles[i], 4.5, 120 + i), sc = Math.min(1, (w - 10) / tw);
+    g.save(); g.translate(5, 13); g.scale(sc, sc); this.write(g, titles[i], 0, 0, 4.5, tint, 1, 120 + i); g.restore();
+    words.forEach((wd, k) => { if ((i + k) % 4 !== 3) this.write(g, wd, 5, 27 + k * 11, 3, ONB_FILM_INK, 1, 140 + k); });
+    if (i % 3 === 1) { g.fillStyle = 'rgba(255,204,0,.55)'; g.fillRect(4, 56, 30, 6); }
+    this.nbmapThumbs.set(key, c);
+    return c;
+  },
+  nbmap(ctx, W, H, t) {
+    const p = onbCycle(t, 8);
+    ctx.save(); ctx.beginPath(); ctx.roundRect(0, 0, W, H, 14); ctx.clip();
+    ctx.fillStyle = onbGray(0.16); ctx.fillRect(0, 0, W, H);
+    const cols = 6, rows = 2, tw = 54, th = 72, gap = 10, gw = cols * tw + (cols - 1) * gap, gx = (W - gw) / 2, gy = 40;
+    const cell = (i) => [gx + (i % cols) * (tw + gap), gy + Math.floor(i / cols) * (th + gap + 8)];
+    // Zoom: de una página a toda la libreta (pellizco) y, al final, de vuelta a la página tocada
+    const out = onbSmooth(onbRamp(p, 0.05, 0.28)), into = onbSmooth(onbRamp(p, 0.74, 0.92)), pick = 8;
+    const focusOf = (i) => { const [x, y] = cell(i); return [x + tw / 2, y + th / 2]; };
+    const zoomStart = 3.4, z = into > 0 ? 1 + (zoomStart - 1) * into : zoomStart + (1 - zoomStart) * out;
+    const [fx, fy] = into > 0 ? focusOf(pick) : focusOf(2), cx = W / 2, cy = H / 2 - 18;
+    const k = into > 0 ? into : 1 - out;
+    ctx.save();
+    ctx.translate(cx, cy); ctx.scale(z, z); ctx.translate(-(cx + (fx - cx) * k), -(cy + (fy - cy) * k));
+    const heat = onbRamp(p, 0.32, 0.38), cards = onbRamp(p, 0.42, 0.48), links = onbSmooth(onbRamp(p, 0.52, 0.62));
+    const heatCol = ['#22A86B', '#C9B21F', '#EE8A2A', '#D9352B'];
+    for (let i = 0; i < cols * rows; i++) {
+      const [x, y] = cell(i);
+      ctx.drawImage(this.nbmapThumb(i), x, y, tw, th);
+      if (heat > 0) { ctx.fillStyle = heatCol[(i * 7 + 3) % 4]; ctx.globalAlpha = 0.26 * heat; ctx.fillRect(x, y, tw, th); ctx.globalAlpha = 1; }
+      if (cards > 0 && i % 3 !== 2) {
+        ctx.globalAlpha = cards; ctx.fillStyle = i % 2 ? '#34C759' : '#FF9F0A';
+        ctx.beginPath(); ctx.arc(x + tw - 6, y + 6, 6, 0, 7); ctx.fill();
+        this.label(ctx, String(1 + (i % 3)), x + tw - 6, y + 6.5, `700 7px ${ROUNDED}`, '#fff'); ctx.globalAlpha = 1;
+      }
+      this.label(ctx, String(i + 1), x + tw / 2, y + th + 7, `600 7px ${ROUNDED}`, 'rgba(255,255,255,.55)');
+    }
+    if (links > 0) {
+      ctx.strokeStyle = 'rgba(100,210,255,.85)'; ctx.lineWidth = 1.6; ctx.setLineDash([4, 3]); ctx.lineDashOffset = -t * 20;
+      for (const [a, b] of [[0, 8], [3, 10], [5, 1]]) {
+        const [ax, ay] = focusOf(a), [bx, by] = focusOf(b), mx = (ax + bx) / 2, my = Math.min(ay, by) - 50;
+        const n = 24, pts = Array.from({ length: n + 1 }, (_, j) => { const u = j / n; return [(1 - u) ** 2 * ax + 2 * u * (1 - u) * mx + u * u * bx, (1 - u) ** 2 * ay + 2 * u * (1 - u) * my + u * u * by]; });
+        this.path(ctx, pts, links);
+      }
+      ctx.setLineDash([]);
+    }
+    ctx.restore();
+    // El pellizco: dos dedos que se juntan
+    const pin = onbRamp(p, 0.04, 0.26);
+    if (pin > 0 && pin < 1) {
+      const d = 70 * (1 - onbSmooth(pin)) + 18;
+      ctx.fillStyle = 'rgba(255,255,255,.55)';
+      [[-1, -1], [1, 1]].forEach(([sx, sy]) => { ctx.beginPath(); ctx.arc(W / 2 + sx * d * 0.8, H / 2 - 18 + sy * d * 0.5, 11, 0, 7); ctx.fill(); });
+    }
+    this.tap(ctx, cx, cy, onbRamp(p, 0.66, 0.78), '#fff');
+    // Las capas, abajo
+    if (into < 0.5) {
+      const chips = [[onbL('Calor de repaso', 'Calore del ripasso'), heat, '#EE8A2A'], [onbL('Tarjetas', 'Flashcard'), cards, '#34C759'], [onbL('Enlaces', 'Collegamenti'), links, '#64D2FF']];
+      ctx.font = `600 11.5px ${ROUNDED}`;
+      const ws = chips.map(([n]) => ctx.measureText(n).width + 24), tot = ws.reduce((a, b) => a + b, 0) + 12;
+      let x = (W - tot) / 2;
+      ctx.globalAlpha = Math.min(1 - into * 2, onbRamp(p, 0.22, 0.3));   // salen al alejarse
+      chips.forEach(([n, on, c], i) => {
+        ctx.fillStyle = on > 0 ? c : 'rgba(255,255,255,.12)'; ctx.beginPath(); ctx.roundRect(x, H - 36, ws[i], 24, 12); ctx.fill();
+        this.label(ctx, n, x + ws[i] / 2, H - 23.5, `600 11.5px ${ROUNDED}`, on > 0 ? '#111' : 'rgba(255,255,255,.8)');
+        x += ws[i] + 6;
+      });
+      ctx.globalAlpha = 1;
+    }
+    ctx.restore();
+  },
+  /** Sincronizar con Google Drive: lo escrito en el iPad llega al Mac pasando por la nube; «Vuelve a conectar»; conflicto = las dos. */
+  sync(ctx, W, H, t) {
+    const p = onbCycle(t, 8);
+    ctx.save(); ctx.beginPath(); ctx.roundRect(0, 0, W, H, 14); ctx.clip();
+    ctx.fillStyle = onbGray(0.12); ctx.fillRect(0, 0, W, H);
+    const cloud = this.cloudPath || (this.cloudPath = new Path2D('M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z'));
+    // Los dos equipos: un iPad a la izquierda y un Mac a la derecha, con la misma libreta abierta
+    const dev = [[24, 112, 132, 96, 'iPad'], [W - 160, 112, 136, 88, 'Mac']];
+    const write = onbSmooth(onbRamp(p, 0.04, 0.16)), arrive = onbRamp(p, 0.36, 0.4) >= 1;
+    dev.forEach(([x, y, w, h, name], i) => {
+      ctx.fillStyle = onbGray(0.24); ctx.beginPath(); ctx.roundRect(x - 6, y - 6, w + 12, h + 12, i ? 6 : 12); ctx.fill();
+      if (i) { ctx.fillStyle = onbGray(0.3); ctx.beginPath(); ctx.roundRect(x - 18, y + h + 6, w + 36, 7, [0, 0, 5, 5]); ctx.fill(); }
+      ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.roundRect(x, y, w, h, 4); ctx.fill();
+      this.write(ctx, onbL('Cardio', 'Cardio'), x + 10, y + 22, 7, '#C8372D', 1, 150);
+      this.write(ctx, 'ECG: FA', x + 10, y + 52, 8, ONB_FILM_INK, i ? (arrive ? 1 : 0) : write, 151);
+      this.label(ctx, name, x + w / 2, y + h + (i ? 26 : 22), `600 12px ${ROUNDED}`, 'rgba(255,255,255,.6)');
+    });
+    // La nube: girando al sincronizar; «!» naranja si pide volver a conectar; verde al acabar
+    const reconnect = p > 0.46 && p < 0.62, syncing = (p > 0.16 && p < 0.4) || (p > 0.62 && p < 0.66);
+    const cx = W / 2, cy = 58;
+    ctx.save(); ctx.translate(cx - 30, cy - 30); ctx.scale(2.5, 2.5);
+    ctx.fillStyle = reconnect ? 'rgba(255,159,10,.22)' : 'rgba(10,132,255,.22)'; ctx.fill(cloud);
+    ctx.strokeStyle = reconnect ? '#FF9F0A' : '#64B5FF'; ctx.lineWidth = 1.4; ctx.lineJoin = 'round'; ctx.stroke(cloud);
+    ctx.restore();
+    if (syncing) {
+      ctx.strokeStyle = '#64B5FF'; ctx.lineWidth = 3; ctx.lineCap = 'round';
+      const a = t * 6; ctx.beginPath(); ctx.arc(cx, cy + 4, 11, a, a + 4.2); ctx.stroke();
+    } else if (reconnect) {
+      this.label(ctx, '!', cx, cy + 5, `800 20px ${ROUNDED}`, '#FF9F0A');
+    } else {
+      ctx.strokeStyle = '#32D74B'; ctx.lineWidth = 3.4; ctx.lineCap = ctx.lineJoin = 'round';
+      ctx.beginPath(); ctx.moveTo(cx - 8, cy + 4); ctx.lineTo(cx - 2, cy + 10); ctx.lineTo(cx + 9, cy - 2); ctx.stroke();
+    }
+    // El paquete que viaja: iPad → nube → Mac
+    const go = onbRamp(p, 0.18, 0.38);
+    if (go > 0 && go < 1) {
+      const a = [24 + 66, 112], b = [cx, cy + 12], c = [W - 160 + 68, 112];
+      const u = onbSmooth(go), [x, y] = u < 0.5 ? [a[0] + (b[0] - a[0]) * u * 2, a[1] + (b[1] - a[1]) * u * 2] : [b[0] + (c[0] - b[0]) * (u * 2 - 1), b[1] + (c[1] - b[1]) * (u * 2 - 1)];
+      ctx.fillStyle = '#C8372D'; ctx.beginPath(); ctx.roundRect(x - 9, y - 12, 18, 24, 3); ctx.fill();
+      ctx.fillStyle = 'rgba(0,0,0,.2)'; ctx.fillRect(x - 9, y - 11, 3, 22);
+    }
+    if (reconnect) {
+      const k = onbSmooth(onbRamp(p, 0.46, 0.5));
+      ctx.save(); ctx.globalAlpha = k;
+      this.pill(ctx, tr('Vuelve a conectar'), cx, cy + 46, p > 0.56, '#FF9F0A');
+      ctx.restore();
+      this.tap(ctx, cx, cy + 46, onbRamp(p, 0.54, 0.64), '#FF9F0A');
+    }
+    // Conflicto: cambió en los dos a la vez → se guardan las dos
+    const both = onbSmooth(onbRamp(p, 0.7, 0.78)) * (1 - onbSmooth(onbRamp(p, 0.95, 1)));
+    if (both > 0) {
+      ctx.save(); ctx.globalAlpha = both; ctx.translate(0, 10 * (1 - both));
+      ctx.fillStyle = 'rgba(20,20,26,.97)'; ctx.beginPath(); ctx.roundRect(10, 92, W - 20, H - 102, 14); ctx.fill();
+      this.label(ctx, onbL('Cambió en los dos: se guardan las dos', 'Cambiato su entrambi: si tengono tutti e due'), cx, 124, `600 12.5px ${ROUNDED}`, '#fff');
+      [[onbL('Cardio', 'Cardio'), ''], [onbL('Cardio', 'Cardio'), onbL('(conflicto, iPad)', '(conflitto, iPad)')]].forEach(([n, s], i) => {
+        const x = cx - 118 + i * 124, y = 148;
+        ctx.fillStyle = '#C8372D'; ctx.beginPath(); ctx.roundRect(x + 38, y, 36, 48, 4); ctx.fill();
+        ctx.fillStyle = 'rgba(0,0,0,.2)'; ctx.fillRect(x + 38, y + 2, 5, 44);
+        this.label(ctx, n, x + 56, y + 62, `600 12px ${ROUNDED}`, '#fff');
+        if (s) this.label(ctx, s, x + 56, y + 78, `11px ${ROUNDED}`, 'rgba(255,255,255,.6)');
+      });
+      ctx.restore();
+    }
+    ctx.restore();
+  },
+  /** Repaso de hoy: unos minutos que mezclan una tarjeta y una zona tapada; Bien/Mal, el aro se llena y la racha sube. */
+  daily(ctx, W, H, t) {
+    const p = onbCycle(t, 7);
+    ctx.save(); ctx.beginPath(); ctx.roundRect(0, 0, W, H, 14); ctx.clip();
+    ctx.fillStyle = onbGray(0.12); ctx.fillRect(0, 0, W, H);
+    const flame = this.flamePath || (this.flamePath = new Path2D('M12 2.5c.6 3.2 4.9 5.6 4.9 10.4a4.9 4.9 0 0 1-9.8 0c0-2.3 1.2-3.7 2.2-4.8.2 1.6.9 2.6 1.8 3.1-.4-3.4.3-6.4.9-8.7z'));
+    const done = p > 0.74, prog = done ? 1 : p > 0.62 ? 2 / 3 : p > 0.32 ? 1 / 3 : 0;
+    // Arriba: el aro de hoy con la llama, el título y la racha
+    const rx = 34, ry = 34;
+    ctx.lineWidth = 5; ctx.strokeStyle = 'rgba(255,159,10,.22)'; ctx.beginPath(); ctx.arc(rx, ry, 18, 0, 7); ctx.stroke();
+    ctx.strokeStyle = '#FF9F0A'; ctx.lineCap = 'round'; ctx.beginPath(); ctx.arc(rx, ry, 18, -Math.PI / 2, -Math.PI / 2 + Math.max(0.001, prog) * Math.PI * 2); ctx.stroke();
+    ctx.save(); ctx.translate(rx - 11, ry - 12); ctx.scale(0.92, 0.92); ctx.fillStyle = '#FF9F0A'; ctx.fill(flame); ctx.restore();
+    this.label(ctx, tr('Repaso de hoy'), 64, 28, `700 15px ${ROUNDED}`, '#fff', 'left');
+    this.label(ctx, done ? onbL('Hecho hoy', 'Fatto oggi') : onbL('10 minutos · todo mezclado', '10 minuti · tutto mescolato'), 64, 46, `12px ${ROUNDED}`, 'rgba(255,255,255,.6)', 'left');
+    const streak = done ? 6 : 5, pop = onbSpring(onbRamp(p, 0.76, 0.9));
+    ctx.save(); ctx.translate(W - 44, 36); if (done) ctx.scale(0.8 + 0.2 * pop, 0.8 + 0.2 * pop);
+    ctx.fillStyle = 'rgba(255,159,10,.18)'; ctx.beginPath(); ctx.roundRect(-30, -15, 60, 30, 15); ctx.fill();
+    ctx.save(); ctx.translate(-24, -10); ctx.scale(0.8, 0.8); ctx.fillStyle = '#FF9F0A'; ctx.fill(flame); ctx.restore();
+    this.label(ctx, String(streak), 8, 0.5, `800 16px ${ROUNDED}`, '#FF9F0A');
+    ctx.restore();
+    // En medio: lo que toca (una tarjeta y luego una zona tapada con cinta)
+    const second = p > 0.36, inK = onbSmooth(onbRamp(p, second ? 0.36 : 0.04, second ? 0.42 : 0.1)), outK = onbSmooth(onbRamp(p, second ? 0.66 : 0.31, second ? 0.72 : 0.36));
+    const shown = second ? p > 0.5 : p > 0.18;
+    if (!done) {
+      ctx.save(); ctx.globalAlpha = inK * (1 - outK); ctx.translate(40 * (1 - inK) - 60 * outK, 0);
+      ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.roundRect(W / 2 - 150, 74, 300, 128, 14); ctx.fill();
+      if (!second) {
+        this.label(ctx, onbL('¿Péptido que confirma la IC?', 'Peptide che conferma l’IC?'), W / 2, 106, `600 16px ${ROUNDED}`, onbGray(0.15));
+        if (shown) this.label(ctx, 'NT-proBNP', W / 2, 152, `800 26px ${ROUNDED}`, '#C93400');
+      } else {
+        this.label(ctx, onbL('¿Lo recuerdas?', 'Te lo ricordi?'), W / 2, 98, `600 14px ${ROUNDED}`, onbGray(0.4));
+        this.write(ctx, onbL('Furosemida', 'Furosemide'), W / 2 - 64, 160, 13, 'rgb(51,77,217)', 1, 160);
+        const lift = onbSmooth(onbRamp(p, 0.48, 0.54));
+        if (lift < 1) {
+          ctx.save(); ctx.globalAlpha = 1 - lift; ctx.translate(W / 2, 150 - 30 * lift); ctx.rotate((-2 - 8 * lift) * Math.PI / 180);
+          ctx.fillStyle = '#34C759'; ctx.beginPath(); ctx.roundRect(-90, -22, 180, 44, 3); ctx.fill(); ctx.restore();
+        }
+      }
+      ctx.restore();
+      if (shown && outK < 1) {
+        const tapAt = second ? 0.6 : 0.27;
+        this.pill(ctx, tr('Mal'), W / 2 - 54, H - 44, false, '#FF3B30');
+        this.pill(ctx, tr('Bien'), W / 2 + 54, H - 44, p > tapAt, '#34C759');
+        this.tap(ctx, W / 2 + 54, H - 44, onbRamp(p, tapAt - 0.02, tapAt + 0.08), '#34C759');
+      }
+    } else {
+      // Hecho: el aro lleno y la racha sube
+      const k = onbSpring(onbRamp(p, 0.74, 0.86));
+      ctx.save(); ctx.translate(W / 2, 140); ctx.scale(k, k);
+      ctx.fillStyle = 'rgba(50,215,75,.18)'; ctx.beginPath(); ctx.arc(0, 0, 44, 0, 7); ctx.fill();
+      ctx.strokeStyle = '#32D74B'; ctx.lineWidth = 7; ctx.lineCap = ctx.lineJoin = 'round';
+      ctx.beginPath(); ctx.moveTo(-18, 0); ctx.lineTo(-5, 13); ctx.lineTo(20, -13); ctx.stroke();
+      ctx.restore();
+      this.label(ctx, onbL('Racha de 6 días', 'Serie di 6 giorni'), W / 2, 210, `700 15px ${ROUNDED}`, '#fff');
+    }
+    // La barra de progreso
+    ctx.fillStyle = 'rgba(255,255,255,.12)'; ctx.beginPath(); ctx.roundRect(24, H - 16, W - 48, 5, 2.5); ctx.fill();
+    ctx.fillStyle = '#FF9F0A'; ctx.beginPath(); ctx.roundRect(24, H - 16, Math.max(5, (W - 48) * prog), 5, 2.5); ctx.fill();
+    ctx.restore();
+  },
+  /** Audio sincronizado: lo escrito aparece al ritmo del audio y, con «Escuchar», tocar una línea salta a ese momento. */
+  audiosync(ctx, W, H, t) {
+    const p = onbCycle(t, 8);
+    this.paper(ctx, W, H);
+    const rows = onbL([['Clase: arritmias', 11, '#C8372D'], ['FA: ritmo irregular', 9], ['Sin ondas P', 9], ['Anticoagular según riesgo', 9]],
+      [['Lezione: aritmie', 11, '#C8372D'], ['FA: ritmo irregolare', 9], ['Senza onde P', 9], ['Anticoagulare secondo il rischio', 9]]);
+    const at = [0.04, 0.3, 0.5, 0.68];   // cuándo se escribió cada línea (fracción de la grabación)
+    // Reproducción: 0–0,58 de principio a fin; luego «Escuchar» y un toque en la 2.ª línea salta a su momento
+    const listen = p > 0.62, jump = p > 0.74;
+    const head = p < 0.58 ? onbRamp(p, 0.02, 0.56) : jump ? at[1] + (p - 0.74) * 0.5 : 1;
+    rows.forEach(([txt, h, c], i) => {
+      const y = 40 + i * 36, k = jump && i > 1 ? 0 : onbRamp(head, at[i], at[i] + 0.16);
+      ctx.save(); ctx.globalAlpha = 0.18; this.write(ctx, txt, 24, y, h, c || ONB_FILM_INK, 1, 170 + i); ctx.restore();
+      this.write(ctx, txt, 24, y, h, c || ONB_FILM_INK, k, 170 + i);
+    });
+    if (listen) {
+      const fl = onbSmooth(onbRamp(p, 0.73, 0.76)) * (1 - onbSmooth(onbRamp(p, 0.84, 0.92)));
+      if (fl > 0) { ctx.fillStyle = `rgba(255,149,0,${0.2 * fl})`; ctx.beginPath(); ctx.roundRect(16, 40 + 36 - 20, this.handWidth(rows[1][0], 9, 171) + 18, 28, 6); ctx.fill(); }
+      this.tap(ctx, 90, 70, onbRamp(p, 0.7, 0.82), '#FF9500');
+    }
+    // La barra de reproducción: play, onda con el cabezal, marca ★ y «Escuchar»
+    const bx = 14, by = H - 62, bw = W - 28;
+    ctx.save(); ctx.shadowColor = 'rgba(0,0,0,.15)'; ctx.shadowBlur = 8; ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.roundRect(bx, by, bw, 50, 14); ctx.fill(); ctx.restore();
+    ctx.fillStyle = '#FF9500'; ctx.beginPath(); ctx.arc(bx + 26, by + 25, 14, 0, 7); ctx.fill();
+    ctx.fillStyle = '#fff'; ctx.fillRect(bx + 21, by + 18, 3.5, 14); ctx.fillRect(bx + 27.5, by + 18, 3.5, 14);
+    const wx = bx + 50, ww = bw - 150, n = 34;
+    for (let i = 0; i < n; i++) {
+      const hh = 6 + 22 * Math.abs(Math.sin(i * 0.9) * Math.cos(i * 0.37));
+      ctx.fillStyle = i / n < head ? '#FF9500' : onbGray(0.82);
+      ctx.beginPath(); ctx.roundRect(wx + i * (ww / n), by + 25 - hh / 2, ww / n - 2, hh, 1.5); ctx.fill();
+    }
+    ctx.fillStyle = '#1C1C1E'; ctx.fillRect(wx + ww * head - 1, by + 8, 2, 34);
+    this.label(ctx, '★', wx + ww * at[3], by + 6, `12px ${ROUNDED}`, '#FFB800');
+    this.pill(ctx, tr('Escuchar'), bx + bw - 46, by + 25, listen, '#FF9500');
   },
 };
 
@@ -20006,6 +20530,36 @@ function onbFilmLine(pts, n = 0) {
     out.push([d[j][0] + (d[j + 1][0] - d[j][0]) * u, d[j][1] + (d[j + 1][1] - d[j][1]) * u, 0.5]);
   }
   return out;
+}
+
+// ---------- El icono de Folia (final de la película, bienvenida del tutorial e iconos de la app) ----------
+/** La «F» del icono, escrita a mano (siempre la misma: semilla fija). */
+let onbLogoF = null;
+const onbLogoGlyph = () => onbLogoF || (onbLogoF = OnbHand.write('F', { x: 0, y: 0, h: 10, color: '#fff', width: 1.7, seed: 4, jitter: 0.3, slant: 0.12 }));
+/** Dibuja el icono centrado en (0, 0) con el lado `size`: cuadrado violeta redondeado y la «F» blanca escrita a mano.
+ *  o: { f: cuánto de la F está escrito (0…1, 1 = entera), shine: dónde va el brillo que lo cruza (0…1; sin él, sin brillo),
+ *  bleed: sin esquinas redondeadas (para iconos que el sistema recorta: iOS y «maskable»), fs: escala de la F (1) }.
+ *  Respeta la sombra que traiga `g` solo para el cuadrado. Los PNG de web/pwa salen de aquí (web/tools/icons-png.mjs). */
+function onbLogo(g, size, o = {}) {
+  const h = size / 2, r = o.bleed ? 0 : size * 0.23, f = o.f ?? 1;
+  const gr = g.createLinearGradient(-h, -h, h, h); gr.addColorStop(0, '#6B5CFF'); gr.addColorStop(1, '#B84DF2');
+  g.fillStyle = gr; g.beginPath(); g.roundRect(-h, -h, size, size, r); g.fill();
+  g.shadowColor = 'transparent';
+  // Brillo que cruza el icono
+  const sh = o.shine;
+  if (sh > 0 && sh < 1) {
+    g.save(); g.beginPath(); g.roundRect(-h, -h, size, size, r); g.clip();
+    const xx = -size + sh * size * 2, lg = g.createLinearGradient(xx - size * 0.3, 0, xx + size * 0.3, 0);
+    lg.addColorStop(0, 'rgba(255,255,255,0)'); lg.addColorStop(0.5, `rgba(255,255,255,${o.shineAlpha ?? 0.55})`); lg.addColorStop(1, 'rgba(255,255,255,0)');
+    g.fillStyle = lg; g.rotate(-0.4); g.fillRect(-size * 2, -size * 2, size * 4, size * 4); g.restore();
+  }
+  // La «F», en blanco
+  if (f > 0) {
+    const F = onbLogoGlyph(), fs = o.fs ?? 1, kf = size * 0.036 * fs, fk = f * F.dur;
+    g.save(); g.translate(-size * 0.2 * fs, size * 0.29 * fs); g.scale(kf, kf);
+    for (const st of F.strokes) OnbFilm.partial(g, st, fk, '#fff');
+    g.restore();
+  }
 }
 
 const OnbFilm = {
@@ -20735,23 +21289,8 @@ const OnbFilm = {
       g.fillStyle = halo; g.fillRect(cx - size * 2.2, cy - size * 2.2, size * 4.4, size * 4.4);
       g.save(); g.translate(cx, cy); g.scale(pop, pop);
       g.shadowColor = 'rgba(107,92,255,.45)'; g.shadowBlur = 50; g.shadowOffsetY = 16;
-      const gr = g.createLinearGradient(-size / 2, -size / 2, size / 2, size / 2); gr.addColorStop(0, '#6B5CFF'); gr.addColorStop(1, '#B84DF2');
-      g.fillStyle = gr; g.beginPath(); g.roundRect(-size / 2, -size / 2, size, size, size * 0.23); g.fill();
-      g.shadowColor = 'transparent';
-      // Brillo que cruza el icono
-      const sh = onbRamp(T, E.tag - 0.3, E.tag + 0.6);
-      if (sh > 0 && sh < 1) {
-        g.save(); g.beginPath(); g.roundRect(-size / 2, -size / 2, size, size, size * 0.23); g.clip();
-        const xx = -size + sh * size * 2, lg = g.createLinearGradient(xx - size * 0.3, 0, xx + size * 0.3, 0);
-        lg.addColorStop(0, 'rgba(255,255,255,0)'); lg.addColorStop(0.5, 'rgba(255,255,255,.55)'); lg.addColorStop(1, 'rgba(255,255,255,0)');
-        g.fillStyle = lg; g.rotate(-0.4); g.fillRect(-size * 2, -size * 2, size * 4, size * 4); g.restore();
-      }
-      // La «F» se escribe dentro, en blanco
-      const F = this.tex.F || (this.tex.F = OnbHand.write('F', { x: 0, y: 0, h: 10, color: '#fff', width: 1.7, seed: 4, jitter: 0.3, slant: 0.12 }));
-      const kf = size * 0.036, fk = onbRamp(T, E.t0 + 0.9, E.t0 + 1.5) * F.dur;
-      g.save(); g.translate(-size * 0.2, size * 0.29); g.scale(kf, kf);
-      for (const st of F.strokes) this.partial(g, st, fk, '#fff', st.t0);
-      g.restore();
+      // El icono (el mismo que el de la app): la «F» se escribe dentro y un brillo lo cruza
+      onbLogo(g, size, { f: onbRamp(T, E.t0 + 0.9, E.t0 + 1.5), shine: onbRamp(T, E.tag - 0.3, E.tag + 0.6) });
       g.restore();
     }
     // «Folia» escrito a mano, con tinta de degradado
@@ -20943,9 +21482,7 @@ const Onboarding = {
     const colors = (c) => `--c1:${c[0]};--c2:${c[1]}`;
     if (stage === 'welcome') {
       return `<div class="onb-center">
-        <div class="onb-logo" aria-hidden="true"><div class="onb-cover"></div>
-          <svg viewBox="0 0 180 200" class="onb-sign"><path d="M40 125 C 52 76, 64 148, 76 88 C 88 50, 100 150, 114 110 C 128 70, 142 140, 158 92" /></svg>
-          <span class="onb-nib">${icon('pen')}</span></div>
+        <div class="onb-logo" aria-hidden="true"><canvas></canvas></div>
         <h1 class="onb-word" aria-label="Folia">${[...'Folia'].map((c, i) => `<span style="--i:${i}">${c}</span>`).join('')}</h1>
         <p class="onb-sub onb-late">Tus apuntes, a mano y a tu manera.</p>
         <div class="onb-langs onb-late" role="group" aria-label="Idioma">${languageButtons('onb-glass')}</div>
@@ -21029,6 +21566,7 @@ const Onboarding = {
   },
   after(stage, st) {
     if (stage === 'welcome') setTimeout(() => st.querySelector('[data-onb="start"]')?.focus({ preventScroll: true }), 2500);
+    if (stage === 'welcome') this.startLogo(st.querySelector('.onb-logo canvas'));
     if (stage === 'name') {
       const input = st.querySelector('#onb-name');
       setTimeout(() => input.focus(), 400);
@@ -21080,23 +21618,36 @@ const Onboarding = {
 
   // ---------- «Muéstramelo»: señala en la app el botón del que habla la lección ----------
   /** El botón del tema en la pantalla de detrás (si está; dentro de «Más» también vale). */
-  target(topic) {
+  target(topic) { return this.targetSpec(topic)?.el || null; },
+  /** { el: el botón, inner: lo que hay que señalar dentro del menú que abre (o null) }. */
+  targetSpec(topic) {
     const view = S.view === 'editor' ? 'editor' : 'library';
     for (const u of topic?.ui || []) {
       const m = u.match(/^(editor|library)(?:@(\w+))?:(.+)$/);
       if (!m || m[1] !== view || (m[2] && m[2] !== S.tool)) continue;
-      const el = document.querySelector(m[3]);
-      if (el && !el.closest('.onb') && (el.closest('.opt-more-pop') || el.getClientRects().length)) return el;
+      const [sel, inner = null] = m[3].split('>>');
+      const el = document.querySelector(sel);
+      if (el && !el.closest('.onb') && (el.closest('.opt-more-pop') || el.getClientRects().length)) return { el, inner };
     }
     return null;
   },
   point(topic) {
-    const el = this.target(topic);
-    if (!el || !this.el) return;
+    const spec = this.targetSpec(topic);
+    if (!spec || !this.el) return;
     this.unpoint?.();
+    let el = spec.el, menu = false;
     // Si el botón se ha ido a «Más» (barra estrecha), se abre «Más» para que se vea.
     const inMore = !!el.closest('.opt-more-pop');
     if (inMore && typeof setOptMore === 'function') setOptMore(true);
+    // Lo que está dentro de un menú (⋯ › Presentar, Estudio › Mapa…): se abre el menú y se señala la entrada.
+    if (spec.inner) {
+      el.click();
+      const item = openPopover?.el.querySelector(spec.inner);
+      if (!item) { closePopover(); if (inMore && typeof setOptMore === 'function') setOptMore(false); return; }
+      openPopover.el.classList.add('onb-lift');
+      item.scrollIntoView({ block: 'nearest' });
+      el = item; menu = true;
+    }
     this.el.classList.add('peek');
     // El aro no recibe el puntero y se coloca una sola vez; solo se recoloca si la ventana cambia de tamaño o se
     // desplaza algo (una vez por fotograma). El pulso va en su ::after, así el aro en sí nunca cambia de caja.
@@ -21107,10 +21658,11 @@ const Onboarding = {
       ring.style.cssText = `left:${Math.round(r.left - 6)}px;top:${Math.round(r.top - 6)}px;width:${Math.round(r.width + 12)}px;height:${Math.round(r.height + 12)}px`;
     };
     // En pantallas estrechas el botón puede quedar fuera de la barra desplazable: se trae a la vista primero.
-    if (!inMore) { const r = el.getBoundingClientRect(); if (r.right > innerWidth || r.left < 0) el.scrollIntoView({ block: 'nearest', inline: 'nearest' }); }
+    if (!inMore && !menu) { const r = el.getBoundingClientRect(); if (r.right > innerWidth || r.left < 0) el.scrollIntoView({ block: 'nearest', inline: 'nearest' }); }
     let raf = 0;
     const later = () => { if (!raf) raf = requestAnimationFrame(() => { raf = 0; place(); }); };
     place();
+    if (menu) el.closest('.popover')?.addEventListener('animationend', later, { once: true });   // el menú entra con un pequeño zoom
     document.body.appendChild(ring);
     addEventListener('resize', later); addEventListener('scroll', later, true);
     const timer = setTimeout(() => this.unpoint?.(), 3600);
@@ -21118,6 +21670,7 @@ const Onboarding = {
       this.unpoint = null;
       clearTimeout(timer); cancelAnimationFrame(raf); ring.remove();
       removeEventListener('resize', later); removeEventListener('scroll', later, true);
+      if (menu) closePopover();
       if (inMore && typeof setOptMore === 'function') setOptMore(false);
       this.el?.classList.remove('peek');
       this.el?.querySelector('[data-onb="show"]')?.focus({ preventScroll: true });
@@ -21227,6 +21780,29 @@ const Onboarding = {
       if (onbReduce()) cancelAnimationFrame(this.raf);
     };
     this.raf = requestAnimationFrame(frame);
+  },
+  /** Bienvenida: el icono de Folia (el de la app) aparece con un rebote, la «F» se escribe y lo cruza un brillo. */
+  startLogo(canvas) {
+    if (!canvas) return;
+    const dpr = Math.min(devicePixelRatio || 1, 2), W = 200, size = 132, ctx = canvas.getContext('2d');
+    canvas.width = canvas.height = W * dpr;
+    const start = performance.now(), calm = onbReduce();
+    const frame = (now) => {
+      if (!document.contains(canvas)) return;
+      const t = calm ? 9 : (now - start) / 1000, pop = onbSpring(onbRamp(t, 0.1, 1));
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, W, W);
+      if (pop > 0) {
+        const halo = ctx.createRadialGradient(W / 2, W / 2, 0, W / 2, W / 2, W / 2);
+        halo.addColorStop(0, `rgba(123,108,255,${0.45 * Math.min(1, pop)})`); halo.addColorStop(1, 'rgba(123,108,255,0)');
+        ctx.fillStyle = halo; ctx.fillRect(0, 0, W, W);
+        ctx.save(); ctx.translate(W / 2, W / 2); ctx.scale(pop, pop);
+        ctx.shadowColor = 'rgba(107,92,255,.6)'; ctx.shadowBlur = 30; ctx.shadowOffsetY = 10;
+        onbLogo(ctx, size, { f: onbEase(onbRamp(t, 0.55, 1.25)), shine: onbRamp(t, 1.35, 2.2) });
+        ctx.restore();
+      }
+      if (t < 2.3) requestAnimationFrame(frame);
+    };
+    requestAnimationFrame(frame);
   },
   startDemo(st, topic) {
     const canvas = st.querySelector('.onb-demo canvas'), ctx = canvas.getContext('2d');
