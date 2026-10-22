@@ -570,6 +570,10 @@ html.pen-mode .ink { touch-action: pan-x pan-y; }
 /* En modo dinámico la cabecera también va en oscuro. */
 .dark-zone { --bar: #0B0C16; --ink: #fff; --fill: rgba(255,255,255,.12); --surface-2: rgba(255,255,255,.1); --muted: rgba(235,235,245,.6); color: #fff; }
 
+/* Sin sitio para el buscador centrado (iPad en vertical): va entre los botones y no tapa «Modo dinámico». */
+@media (max-width: 1200px) {
+  .lib-header .center { position: static; transform: none; width: auto; flex: 1 1 auto; max-width: 380px; }
+}
 @media (max-width: 760px) {
   .sidebar { display: none; }
   .shelf { grid-template-columns: repeat(auto-fill, minmax(128px, 1fr)); gap: 24px 18px; }
@@ -953,6 +957,15 @@ body:not(.kbd-nav) select:focus-visible, body:not(.kbd-nav) .options :focus-visi
 .lib-header .lib-fs svg { width: 15px; height: 15px; }
 .lib-header:has(.lib-fs) .lib-clock { right: 38px; }
 @media (max-width: 520px) { .tabs .clock { display: none; } .tab { min-width: 100px; flex-basis: 160px; } }   /* en el móvil no cabe junto a las pestañas */
+/* Instalada en la pantalla de inicio del iPad/iPhone: el sistema ya muestra la hora y difumina la franja de arriba,
+   así que sin reloj ni botón de pantalla completa (ya lo es) y con todo un poco más abajo. */
+@media (display-mode: standalone) and (pointer: coarse) {
+  #app { box-sizing: border-box; padding-top: max(18px, env(safe-area-inset-top)); }
+  #app:has(.tabs) { background: var(--strip); }   /* la franja de arriba, del color de las pestañas */
+  .lib-clock, .tabs .clock, .fs-btn { display: none; }
+  .lib-header:not(.selecting) { padding-top: 10px; }
+  .lib-header .center { top: 10px; }
+}
 
 /* Menú «Todas las pestañas»: agrupadas por carpeta; se ordenan arrastrando (con el dedo o el lápiz, desde los puntitos). */
 .popover.tabs-menu { width: min(340px, calc(100vw - 16px)); padding: 6px; gap: 2px; }
